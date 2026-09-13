@@ -2463,7 +2463,7 @@ describe('initializeAgent — execute_code capability expansion', () => {
     agent.tools = ['execute_code'];
     agent.stateful_code_sessions = true;
     agent.stateful_code_environment = 'agent-user';
-    process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'https://stateful-code.example.com/v1/';
+    process.env.BAANZON_CODE_BASEURL_STATEFUL = 'https://stateful-code.example.com/v1/';
 
     try {
       const result = await initializeAgent(
@@ -2497,7 +2497,7 @@ describe('initializeAgent — execute_code capability expansion', () => {
         }),
       );
     } finally {
-      delete process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+      delete process.env.BAANZON_CODE_BASEURL_STATEFUL;
     }
   });
 

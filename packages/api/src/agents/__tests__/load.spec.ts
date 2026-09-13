@@ -142,7 +142,7 @@ describe('loadAgent', () => {
         mcpConfig: {
           'body-scoped': {
             type: 'streamable-http' as const,
-            url: 'https://mcp.example.com/{{LIBRECHAT_BODY_CONVERSATIONID}}/mcp',
+            url: 'https://mcp.example.com/{{BAANZON_BODY_CONVERSATIONID}}/mcp',
           },
         },
       } as unknown as AppConfig,

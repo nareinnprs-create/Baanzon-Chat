@@ -957,7 +957,7 @@ describe('MCPManager', () => {
         type: 'sse',
         url: 'https://api.example.com',
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}',
           'Content-Type': 'application/json',
         },
       };
@@ -970,7 +970,7 @@ describe('MCPManager', () => {
       (graphUtils.preProcessGraphTokens as jest.Mock).mockImplementation(
         async (options, graphOptions) => {
           if (
-            options.headers?.Authorization?.includes('{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}') &&
+            options.headers?.Authorization?.includes('{{BAANZON_GRAPH_ACCESS_TOKEN}}') &&
             graphOptions.graphTokenResolver
           ) {
             return {
@@ -1051,7 +1051,7 @@ describe('MCPManager', () => {
     it('should attach a recovery handler without reprocessing resolved config', async () => {
       const rawServerConfig = {
         type: 'sse',
-        url: 'https://api.example.com/{{LIBRECHAT_USER_ID}}',
+        url: 'https://api.example.com/{{BAANZON_USER_ID}}',
         headers: {
           Authorization: 'Bearer {{USER_TOKEN}}',
         },
@@ -1135,7 +1135,7 @@ describe('MCPManager', () => {
         type: 'sse',
         url: 'https://api.example.com',
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}',
         },
         source: 'user',
         dbId: 'user-server-id',
@@ -1163,7 +1163,7 @@ describe('MCPManager', () => {
       expect(graphUtils.preProcessGraphTokens).not.toHaveBeenCalled();
       expect(mockConnection.setRequestHeaders).toHaveBeenCalledWith(
         expect.objectContaining({
-          Authorization: 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}',
         }),
       );
     });
@@ -1244,7 +1244,7 @@ describe('MCPManager', () => {
       // Headers should contain the unresolved placeholder
       expect(mockConnection.setRequestHeaders).toHaveBeenCalledWith(
         expect.objectContaining({
-          Authorization: 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}',
         }),
       );
     });
@@ -1255,14 +1255,14 @@ describe('MCPManager', () => {
         command: 'node',
         args: ['server.js'],
         env: {
-          GRAPH_TOKEN: '{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          GRAPH_TOKEN: '{{BAANZON_GRAPH_ACCESS_TOKEN}}',
           OTHER_VAR: 'static-value',
         },
       };
 
       // Mock resolution for env variables
       (graphUtils.preProcessGraphTokens as jest.Mock).mockImplementation(async (options) => {
-        if (options.env?.GRAPH_TOKEN?.includes('{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}')) {
+        if (options.env?.GRAPH_TOKEN?.includes('{{BAANZON_GRAPH_ACCESS_TOKEN}}')) {
           return {
             ...options,
             env: {
@@ -1304,12 +1304,12 @@ describe('MCPManager', () => {
     it('should resolve graph tokens in URL', async () => {
       const serverConfig: t.SSEOptions = {
         type: 'sse',
-        url: 'https://api.example.com?token={{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+        url: 'https://api.example.com?token={{BAANZON_GRAPH_ACCESS_TOKEN}}',
       };
 
       // Mock resolution for URL
       (graphUtils.preProcessGraphTokens as jest.Mock).mockImplementation(async (options) => {
-        if (options.url?.includes('{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}')) {
+        if (options.url?.includes('{{BAANZON_GRAPH_ACCESS_TOKEN}}')) {
           return {
             ...options,
             url: 'https://api.example.com?token=resolved-graph-token',
@@ -1719,7 +1719,7 @@ describe('MCPManager', () => {
       const connection = createConnection(request);
       const runtimeConfig: t.ParsedServerConfig = {
         type: 'streamable-http',
-        url: 'https://api.example.com/users/{{LIBRECHAT_USER_ID}}/mcp',
+        url: 'https://api.example.com/users/{{BAANZON_USER_ID}}/mcp',
         source: 'yaml',
       };
       (mockRegistryInstance.getServerConfig as jest.Mock).mockResolvedValue(runtimeConfig);
@@ -2140,7 +2140,7 @@ describe('MCPManager', () => {
       const manager = await createManager(connection);
       const ephemeralConfig: t.StreamableHTTPOptions = {
         ...serverConfig,
-        url: 'https://mcp.example.com/{{LIBRECHAT_BODY_CONVERSATIONID}}',
+        url: 'https://mcp.example.com/{{BAANZON_BODY_CONVERSATIONID}}',
       };
       (mockRegistryInstance.getServerConfig as jest.Mock).mockResolvedValue(ephemeralConfig);
       mockProcessMCPEnv.mockReturnValue({
@@ -2578,7 +2578,7 @@ describe('MCPManager', () => {
       };
       const bodyScopedConfig: t.ParsedServerConfig = {
         type: 'streamable-http',
-        url: 'https://mcp.example.com/{{LIBRECHAT_BODY_MESSAGEID}}',
+        url: 'https://mcp.example.com/{{BAANZON_BODY_MESSAGEID}}',
         source: 'yaml',
         requiresOAuth: false,
       };
@@ -2588,7 +2588,7 @@ describe('MCPManager', () => {
       mockProcessMCPEnv.mockImplementation(({ options, body }) => ({
         ...options,
         ...('url' in options && {
-          url: options.url?.replace('{{LIBRECHAT_BODY_MESSAGEID}}', body?.messageId ?? ''),
+          url: options.url?.replace('{{BAANZON_BODY_MESSAGEID}}', body?.messageId ?? ''),
         }),
       }));
       (MCPConnectionFactory.create as jest.Mock).mockResolvedValue(replacementConnection);
@@ -2829,7 +2829,7 @@ describe('MCPManager', () => {
         ...serverConfig,
         source: 'yaml' as const,
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}',
           'X-Service': 'private-mcp',
         },
       };
@@ -3113,7 +3113,7 @@ describe('MCPManager', () => {
       type: 'streamable-http' as const,
       url: 'https://api.example.com/mcp',
       source: 'yaml' as const,
-      headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+      headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
     };
     const user = {
       id: 'direct-user',
@@ -3377,7 +3377,7 @@ describe('MCPManager', () => {
               ...serverConfig,
               headers: {
                 ...serverConfig.headers,
-                'X-Conversation': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+                'X-Conversation': '{{BAANZON_BODY_CONVERSATIONID}}',
               },
             }
           : serverConfig;
@@ -3520,8 +3520,8 @@ describe('MCPManager', () => {
       const scopedConfig = {
         ...serverConfig,
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
-          'X-Conversation': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+          Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}',
+          'X-Conversation': '{{BAANZON_BODY_CONVERSATIONID}}',
         },
       };
       const connection = {
@@ -3871,7 +3871,7 @@ describe('MCPManager', () => {
         url: 'https://api.example.com/mcp',
         source: 'yaml',
         headers: {
-          'X-LibreChat-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+          'X-LibreChat-User-Email': '{{BAANZON_USER_EMAIL}}',
         },
       };
 
@@ -4123,7 +4123,7 @@ describe('MCPManager', () => {
 
       (mockRegistryInstance.getServerConfig as jest.Mock).mockResolvedValue({
         type: 'streamable-http',
-        url: 'https://api.example.com/messages/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://api.example.com/messages/{{BAANZON_BODY_MESSAGEID}}/mcp',
         source: 'yaml',
       });
 
@@ -4332,7 +4332,7 @@ describe('MCPManager', () => {
     it('routes tool-list snapshots from user connections to the user-scoped publisher', async () => {
       const serverConfig: t.ParsedServerConfig = {
         type: 'streamable-http',
-        url: 'https://mcp.example.com/{{LIBRECHAT_BODY_CONVERSATIONID}}',
+        url: 'https://mcp.example.com/{{BAANZON_BODY_CONVERSATIONID}}',
         source: 'yaml',
         requiresOAuth: false,
       };
@@ -4409,8 +4409,8 @@ describe('MCPManager', () => {
         url: 'https://mcp.example.com/mcp',
         source: 'yaml',
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
-          'X-Conversation': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+          Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}',
+          'X-Conversation': '{{BAANZON_BODY_CONVERSATIONID}}',
         },
       };
       const upstreamTokenProvider = jest
@@ -4478,8 +4478,8 @@ describe('MCPManager', () => {
           url: 'https://mcp.example.com',
           source: 'yaml',
           headers: {
-            Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
-            ...(requestScoped && { 'X-Conversation': '{{LIBRECHAT_BODY_CONVERSATIONID}}' }),
+            Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}',
+            ...(requestScoped && { 'X-Conversation': '{{BAANZON_BODY_CONVERSATIONID}}' }),
           },
         };
         const store = { connections: new Map(), pending: new Map() };
@@ -4552,7 +4552,7 @@ describe('MCPManager', () => {
           source: 'yaml',
           headers: {
             Authorization:
-              mode === 'direct' ? 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' : '{{MCP_API_KEY}}',
+              mode === 'direct' ? 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' : '{{MCP_API_KEY}}',
           },
           ...(mode === 'oauth' && { oauth: { client_id: 'test-client' }, requiresOAuth: true }),
         };
@@ -4625,7 +4625,7 @@ describe('MCPManager', () => {
         type: 'streamable-http',
         url: 'https://mcp.example.com/mcp',
         source: 'yaml',
-        headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+        headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
       };
       const upstreamTokenProvider = jest.fn().mockResolvedValue({ access_token: 'stale-token' });
       mockAppConnections({ has: jest.fn().mockResolvedValue(false) });
@@ -4666,7 +4666,7 @@ describe('MCPManager', () => {
         type: 'streamable-http',
         url: 'https://mcp.example.com/mcp',
         source: 'yaml',
-        headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+        headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
       };
       mockAppConnections({ has: jest.fn().mockResolvedValue(false) });
       (mockRegistryInstance.getServerConfig as jest.Mock).mockResolvedValue(directBearerConfig);
@@ -5440,7 +5440,7 @@ describe('MCPManager', () => {
     it('should detect OAuth after resolving trusted runtime URL placeholders', async () => {
       const runtimeUrlConfig: t.ParsedServerConfig = {
         type: 'streamable-http',
-        url: 'https://api.example.com/users/{{LIBRECHAT_USER_ID}}/mcp',
+        url: 'https://api.example.com/users/{{BAANZON_USER_ID}}/mcp',
         source: 'yaml',
       };
       mockAppConnections({
@@ -5450,7 +5450,7 @@ describe('MCPManager', () => {
       mockProcessMCPEnv.mockImplementation(({ options, user }) => ({
         ...options,
         ...('url' in options && {
-          url: options.url?.replace('{{LIBRECHAT_USER_ID}}', user?.id ?? ''),
+          url: options.url?.replace('{{BAANZON_USER_ID}}', user?.id ?? ''),
         }),
       }));
       mockDetectOAuthRequirement.mockResolvedValue({
@@ -5484,7 +5484,7 @@ describe('MCPManager', () => {
     it('should reject disallowed runtime URLs before OAuth detection probes them', async () => {
       const runtimeUrlConfig: t.ParsedServerConfig = {
         type: 'streamable-http',
-        url: 'https://{{LIBRECHAT_BODY_CONVERSATIONID}}.example.com/mcp',
+        url: 'https://{{BAANZON_BODY_CONVERSATIONID}}.example.com/mcp',
         source: 'yaml',
       };
       mockAppConnections({
@@ -5496,7 +5496,7 @@ describe('MCPManager', () => {
         ...options,
         ...('url' in options && {
           url: options.url?.replace(
-            '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+            '{{BAANZON_BODY_CONVERSATIONID}}',
             body?.conversationId ?? '',
           ),
         }),
@@ -5520,7 +5520,7 @@ describe('MCPManager', () => {
     it('should reject resolved runtime URLs that fail MCP domain policy', async () => {
       const runtimeUrlConfig: t.ParsedServerConfig = {
         type: 'streamable-http',
-        url: 'https://{{LIBRECHAT_BODY_CONVERSATIONID}}.example.com/mcp',
+        url: 'https://{{BAANZON_BODY_CONVERSATIONID}}.example.com/mcp',
         source: 'yaml',
         requiresOAuth: false,
       };
@@ -5533,7 +5533,7 @@ describe('MCPManager', () => {
         ...options,
         ...('url' in options && {
           url: options.url?.replace(
-            '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+            '{{BAANZON_BODY_CONVERSATIONID}}',
             body?.conversationId ?? '',
           ),
         }),
@@ -5562,7 +5562,7 @@ describe('MCPManager', () => {
     it('should validate resolved runtime URLs without passing resolved configs to the factory', async () => {
       const runtimeUrlConfig: t.ParsedServerConfig = {
         type: 'streamable-http',
-        url: 'https://{{LIBRECHAT_BODY_CONVERSATIONID}}.example.com/mcp',
+        url: 'https://{{BAANZON_BODY_CONVERSATIONID}}.example.com/mcp',
         source: 'yaml',
         requiresOAuth: false,
       };
@@ -5575,7 +5575,7 @@ describe('MCPManager', () => {
         ...options,
         ...('url' in options && {
           url: options.url?.replace(
-            '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+            '{{BAANZON_BODY_CONVERSATIONID}}',
             body?.conversationId ?? '',
           ),
         }),
@@ -5600,7 +5600,7 @@ describe('MCPManager', () => {
       expect(MCPConnectionFactory.create).toHaveBeenCalledWith(
         expect.objectContaining({
           serverConfig: expect.objectContaining({
-            url: 'https://{{LIBRECHAT_BODY_CONVERSATIONID}}.example.com/mcp',
+            url: 'https://{{BAANZON_BODY_CONVERSATIONID}}.example.com/mcp',
           }),
         }),
         expect.objectContaining({
@@ -5617,7 +5617,7 @@ describe('MCPManager', () => {
         dbId: 'user-server-id',
         requiresOAuth: false,
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}',
         },
       };
       mockAppConnections({
@@ -5638,7 +5638,7 @@ describe('MCPManager', () => {
         expect.objectContaining({
           serverConfig: expect.objectContaining({
             headers: {
-              Authorization: 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+              Authorization: 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}',
             },
           }),
         }),
@@ -5649,7 +5649,7 @@ describe('MCPManager', () => {
     it('should not cache connections when request body placeholders affect the URL', async () => {
       const bodyUrlConfig: t.ParsedServerConfig = {
         type: 'streamable-http',
-        url: 'https://api.example.com/messages/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://api.example.com/messages/{{BAANZON_BODY_MESSAGEID}}/mcp',
         source: 'yaml',
         requiresOAuth: false,
       };
@@ -5669,7 +5669,7 @@ describe('MCPManager', () => {
       mockProcessMCPEnv.mockImplementation(({ options, body }) => ({
         ...options,
         ...('url' in options && {
-          url: options.url?.replace('{{LIBRECHAT_BODY_MESSAGEID}}', body?.messageId ?? ''),
+          url: options.url?.replace('{{BAANZON_BODY_MESSAGEID}}', body?.messageId ?? ''),
         }),
       }));
       (MCPConnectionFactory.create as jest.Mock)
@@ -5696,7 +5696,7 @@ describe('MCPManager', () => {
     it('should reuse BODY-scoped connections within a request-scoped connection store', async () => {
       const bodyUrlConfig: t.ParsedServerConfig = {
         type: 'streamable-http',
-        url: 'https://api.example.com/messages/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://api.example.com/messages/{{BAANZON_BODY_MESSAGEID}}/mcp',
         source: 'yaml',
         requiresOAuth: false,
       };
@@ -5716,7 +5716,7 @@ describe('MCPManager', () => {
       mockProcessMCPEnv.mockImplementation(({ options, body }) => ({
         ...options,
         ...('url' in options && {
-          url: options.url?.replace('{{LIBRECHAT_BODY_MESSAGEID}}', body?.messageId ?? ''),
+          url: options.url?.replace('{{BAANZON_BODY_MESSAGEID}}', body?.messageId ?? ''),
         }),
       }));
       (MCPConnectionFactory.create as jest.Mock).mockResolvedValue(requestScopedConnection);
@@ -5766,7 +5766,7 @@ describe('MCPManager', () => {
           type: 'streamable-http',
           url: 'https://mcp.example.com',
           source: 'yaml',
-          headers: { 'X-Conversation': '{{LIBRECHAT_BODY_CONVERSATIONID}}' },
+          headers: { 'X-Conversation': '{{BAANZON_BODY_CONVERSATIONID}}' },
         },
         requestBody: { conversationId: 'conversation-1' },
         requestScopedConnections: store,
@@ -5782,7 +5782,7 @@ describe('MCPManager', () => {
     it('does not create a connection in a request-scoped store after cleanup starts', async () => {
       const bodyUrlConfig: t.ParsedServerConfig = {
         type: 'streamable-http',
-        url: 'https://api.example.com/messages/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://api.example.com/messages/{{BAANZON_BODY_MESSAGEID}}/mcp',
         source: 'yaml',
         requiresOAuth: false,
       };
@@ -5814,7 +5814,7 @@ describe('MCPManager', () => {
       async (teardown) => {
         const bodyUrlConfig: t.ParsedServerConfig = {
           type: 'streamable-http',
-          url: 'https://api.example.com/messages/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+          url: 'https://api.example.com/messages/{{BAANZON_BODY_MESSAGEID}}/mcp',
           source: 'yaml',
           requiresOAuth: false,
         };
@@ -5840,7 +5840,7 @@ describe('MCPManager', () => {
         mockProcessMCPEnv.mockImplementation(({ options, body }) => ({
           ...options,
           ...('url' in options && {
-            url: options.url?.replace('{{LIBRECHAT_BODY_MESSAGEID}}', body?.messageId ?? ''),
+            url: options.url?.replace('{{BAANZON_BODY_MESSAGEID}}', body?.messageId ?? ''),
           }),
         }));
         (MCPConnectionFactory.create as jest.Mock).mockReturnValue(creation);
@@ -5882,7 +5882,7 @@ describe('MCPManager', () => {
     it('should not clear server cooldowns for ephemeral runtime connections', async () => {
       const bodyUrlConfig: t.ParsedServerConfig = {
         type: 'streamable-http',
-        url: 'https://api.example.com/messages/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://api.example.com/messages/{{BAANZON_BODY_MESSAGEID}}/mcp',
         source: 'yaml',
         requiresOAuth: false,
       };
@@ -5895,7 +5895,7 @@ describe('MCPManager', () => {
       mockProcessMCPEnv.mockImplementation(({ options, body }) => ({
         ...options,
         ...('url' in options && {
-          url: options.url?.replace('{{LIBRECHAT_BODY_MESSAGEID}}', body?.messageId ?? ''),
+          url: options.url?.replace('{{BAANZON_BODY_MESSAGEID}}', body?.messageId ?? ''),
         }),
       }));
       (MCPConnectionFactory.create as jest.Mock).mockResolvedValue(mockConnection);
@@ -5946,7 +5946,7 @@ describe('MCPManager', () => {
     it('should reject BODY-scoped connections without request body context', async () => {
       const bodyUrlConfig: t.ParsedServerConfig = {
         type: 'streamable-http',
-        url: 'https://api.example.com/messages/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://api.example.com/messages/{{BAANZON_BODY_MESSAGEID}}/mcp',
         source: 'yaml',
         requiresOAuth: false,
       };
@@ -5970,7 +5970,7 @@ describe('MCPManager', () => {
     it('should reject BODY-scoped connections when a referenced body field is missing', async () => {
       const bodyUrlConfig: t.ParsedServerConfig = {
         type: 'streamable-http',
-        url: 'https://api.example.com/messages/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://api.example.com/messages/{{BAANZON_BODY_MESSAGEID}}/mcp',
         source: 'yaml',
         requiresOAuth: false,
       };

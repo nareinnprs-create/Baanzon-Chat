@@ -409,7 +409,7 @@ describe('redactServerSecrets', () => {
       type: 'streamable-http',
       url: 'https://infra.internal/mcp',
       source: 'yaml',
-      headers: { 'X-Conversation': '{{LIBRECHAT_BODY_CONVERSATIONID}}' },
+      headers: { 'X-Conversation': '{{BAANZON_BODY_CONVERSATIONID}}' },
     };
 
     const redacted = redactServerSecrets(config);
@@ -430,7 +430,7 @@ describe('redactServerSecrets', () => {
     expect(
       redactServerSecrets({
         type: 'streamable-http',
-        url: 'https://example.com/{{LIBRECHAT_BODY_TENANT}}/mcp',
+        url: 'https://example.com/{{BAANZON_BODY_TENANT}}/mcp',
         source: 'yaml',
       }).requestScoped,
     ).toBeUndefined();
@@ -698,7 +698,7 @@ describe('requiresOAuthMachinery', () => {
         url: 'https://mcp.example.com',
         source: 'yaml',
         oauth: { client_id: 'explicit-client' },
-        headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+        headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
       }),
     ).toBe(true);
   });
@@ -709,7 +709,7 @@ describe('requiresOAuthMachinery', () => {
         url: 'https://mcp.example.com',
         source: 'yaml',
         requiresOAuth: true,
-        headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+        headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
       }),
     ).toBe(false);
   });
@@ -721,7 +721,7 @@ describe('requiresOAuthMachinery', () => {
         url: 'https://mcp.example.com',
         source: 'yaml',
         requiresOAuth: true,
-        headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+        headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
         obo: { scopes: 'api://mcp/.default' },
       }),
     ).toBe(true);
@@ -756,7 +756,7 @@ describe('requiresUserScopedConnection', () => {
       requiresUserScopedConnection({
         source: 'yaml',
         headers: {
-          'X-LibreChat-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+          'X-LibreChat-User-Email': '{{BAANZON_USER_EMAIL}}',
         },
       }),
     ).toBe(true);
@@ -768,7 +768,7 @@ describe('requiresUserScopedConnection', () => {
         source: 'user',
         dbId: 'server-123',
         headers: {
-          'X-LibreChat-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+          'X-LibreChat-User-Email': '{{BAANZON_USER_EMAIL}}',
         },
       }),
     ).toBe(false);
@@ -789,10 +789,10 @@ describe('hasRuntimeContextPlaceholders', () => {
     expect(
       hasRuntimeContextPlaceholders({
         source: 'config',
-        url: 'https://example.com/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://example.com/{{BAANZON_BODY_MESSAGEID}}/mcp',
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}',
-          'X-Graph-Access-Token': '{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_OPENID_ID_TOKEN}}',
+          'X-Graph-Access-Token': '{{BAANZON_GRAPH_ACCESS_TOKEN}}',
         },
       }),
     ).toBe(true);
@@ -804,7 +804,7 @@ describe('hasRuntimeContextPlaceholders', () => {
         source: 'yaml',
         url: 'https://example.com/mcp',
         oauth_headers: {
-          'X-User': '{{LIBRECHAT_USER_ID}}',
+          'X-User': '{{BAANZON_USER_ID}}',
         },
       }),
     ).toBe(true);
@@ -813,7 +813,7 @@ describe('hasRuntimeContextPlaceholders', () => {
   it('detects trusted runtime placeholders introduced by environment expansion', () => {
     const envName = 'MCP_UTILS_RUNTIME_IDENTITY_TEST';
     const previous = process.env[envName];
-    process.env[envName] = '{{LIBRECHAT_USER_ID}}';
+    process.env[envName] = '{{BAANZON_USER_ID}}';
     try {
       expect(
         hasRuntimeContextPlaceholders({
@@ -847,7 +847,7 @@ describe('hasRuntimeContextPlaceholders', () => {
         source: 'user',
         dbId: 'server-123',
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_OPENID_ID_TOKEN}}',
         },
       }),
     ).toBe(false);
@@ -859,7 +859,7 @@ describe('hasRuntimeUrlPlaceholders', () => {
     expect(
       hasRuntimeUrlPlaceholders({
         source: 'yaml',
-        url: 'https://example.com/users/{{LIBRECHAT_USER_USERNAME}}/mcp',
+        url: 'https://example.com/users/{{BAANZON_USER_USERNAME}}/mcp',
       }),
     ).toBe(true);
   });
@@ -869,7 +869,7 @@ describe('hasRuntimeUrlPlaceholders', () => {
       hasRuntimeUrlPlaceholders({
         source: 'user',
         dbId: 'server-123',
-        url: 'https://example.com/users/{{LIBRECHAT_USER_USERNAME}}/mcp',
+        url: 'https://example.com/users/{{BAANZON_USER_USERNAME}}/mcp',
       }),
     ).toBe(false);
   });
@@ -880,7 +880,7 @@ describe('getMCPRequestScope', () => {
     expect(
       getMCPRequestScope({
         source: 'yaml',
-        url: 'https://example.com/conversations/{{LIBRECHAT_BODY_CONVERSATIONID}}/mcp',
+        url: 'https://example.com/conversations/{{BAANZON_BODY_CONVERSATIONID}}/mcp',
       }).requestScoped,
     ).toBe(true);
 
@@ -888,7 +888,7 @@ describe('getMCPRequestScope', () => {
       getMCPRequestScope({
         source: 'config',
         headers: {
-          'X-Message': '{{LIBRECHAT_BODY_MESSAGEID}}',
+          'X-Message': '{{BAANZON_BODY_MESSAGEID}}',
         },
       }).requestScoped,
     ).toBe(true);
@@ -897,7 +897,7 @@ describe('getMCPRequestScope', () => {
   it('tracks BODY placeholders introduced by environment expansion', () => {
     const envName = 'MCP_UTILS_RUNTIME_BODY_TEST';
     const previous = process.env[envName];
-    process.env[envName] = '{{LIBRECHAT_BODY_MESSAGEID}}';
+    process.env[envName] = '{{BAANZON_BODY_MESSAGEID}}';
     try {
       const config = {
         source: 'yaml' as const,
@@ -919,7 +919,7 @@ describe('getMCPRequestScope', () => {
       getMCPRequestScope({
         source: 'user',
         dbId: 'server-123',
-        url: 'https://example.com/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://example.com/{{BAANZON_BODY_MESSAGEID}}/mcp',
       }).requestScoped,
     ).toBe(false);
   });
@@ -927,7 +927,7 @@ describe('getMCPRequestScope', () => {
   it('ignores unsupported BODY placeholder names that the resolver leaves literal', () => {
     const config = {
       source: 'yaml' as const,
-      url: 'https://example.com/{{LIBRECHAT_BODY_TENANT}}/mcp',
+      url: 'https://example.com/{{BAANZON_BODY_TENANT}}/mcp',
     };
 
     expect(hasRuntimeContextPlaceholders(config)).toBe(false);
@@ -942,9 +942,9 @@ describe('getMCPRequestScope', () => {
   it('ignores BODY and USER literals in plugin-sourced configs', () => {
     const config = {
       source: 'plugin' as const,
-      url: 'https://example.com/users/{{LIBRECHAT_USER_ID}}/mcp',
+      url: 'https://example.com/users/{{BAANZON_USER_ID}}/mcp',
       headers: {
-        'X-Conversation': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+        'X-Conversation': '{{BAANZON_BODY_CONVERSATIONID}}',
       },
     };
 
@@ -961,10 +961,10 @@ describe('getMCPRequestScope', () => {
 describe('getMissingRuntimeBodyPlaceholderFields', () => {
   const config = {
     source: 'yaml',
-    url: 'https://example.com/conversations/{{LIBRECHAT_BODY_CONVERSATIONID}}/mcp',
+    url: 'https://example.com/conversations/{{BAANZON_BODY_CONVERSATIONID}}/mcp',
     headers: {
-      'X-Message': '{{LIBRECHAT_BODY_MESSAGEID}}',
-      'X-Parent': '{{LIBRECHAT_BODY_PARENTMESSAGEID}}',
+      'X-Message': '{{BAANZON_BODY_MESSAGEID}}',
+      'X-Parent': '{{BAANZON_BODY_PARENTMESSAGEID}}',
     },
   } as const;
 
@@ -990,7 +990,7 @@ describe('getMissingRuntimeBodyPlaceholderFields', () => {
       getMissingRuntimeBodyPlaceholderFields({
         source: 'user',
         dbId: 'server-123',
-        url: 'https://example.com/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://example.com/{{BAANZON_BODY_MESSAGEID}}/mcp',
       }),
     ).toEqual([]);
   });
@@ -1026,7 +1026,7 @@ describe('requiresEphemeralUserConnection', () => {
         source: 'yaml',
         url: 'https://example.com/mcp',
         oauth_headers: {
-          'X-Message': '{{LIBRECHAT_BODY_MESSAGEID}}',
+          'X-Message': '{{BAANZON_BODY_MESSAGEID}}',
         },
       }),
     ).toBe(true);
@@ -1036,7 +1036,7 @@ describe('requiresEphemeralUserConnection', () => {
     expect(
       requiresEphemeralUserConnection({
         source: 'yaml',
-        url: 'https://example.com/messages/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://example.com/messages/{{BAANZON_BODY_MESSAGEID}}/mcp',
       }),
     ).toBe(true);
   });
@@ -1046,7 +1046,7 @@ describe('requiresEphemeralUserConnection', () => {
       requiresEphemeralUserConnection({
         source: 'config',
         env: {
-          GRAPH_TOKEN: '{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          GRAPH_TOKEN: '{{BAANZON_GRAPH_ACCESS_TOKEN}}',
         },
       }),
     ).toBe(false);
@@ -1056,7 +1056,7 @@ describe('requiresEphemeralUserConnection', () => {
     expect(
       requiresEphemeralUserConnection({
         source: 'yaml',
-        args: ['--id-token={{LIBRECHAT_OPENID_ID_TOKEN}}'],
+        args: ['--id-token={{BAANZON_OPENID_ID_TOKEN}}'],
       }),
     ).toBe(false);
 
@@ -1064,7 +1064,7 @@ describe('requiresEphemeralUserConnection', () => {
       requiresEphemeralUserConnection({
         source: 'yaml',
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}',
         },
       }),
     ).toBe(false);
@@ -1075,7 +1075,7 @@ describe('requiresEphemeralUserConnection', () => {
       requiresEphemeralUserConnection({
         source: 'yaml',
         headers: {
-          'X-Message': '{{LIBRECHAT_BODY_MESSAGEID}}',
+          'X-Message': '{{BAANZON_BODY_MESSAGEID}}',
         },
       }),
     ).toBe(true);

@@ -42,8 +42,8 @@ describe('createLoadConfigModels – user-provided baseURL header guard', () => 
 
   it('does NOT forward configured headers when baseURL is user-provided', async () => {
     const headers = {
-      Authorization: 'Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}',
-      'X-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+      Authorization: 'Bearer {{BAANZON_OPENID_ID_TOKEN}}',
+      'X-User-Email': '{{BAANZON_USER_EMAIL}}',
     };
 
     const loadConfigModels = createLoadConfigModels({
@@ -139,7 +139,7 @@ describe('createLoadConfigModels – user-provided baseURL header guard', () => 
 
   it('DOES forward configured headers when baseURL is admin-trusted (only apiKey is user-provided)', async () => {
     const headers = {
-      Authorization: 'Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}',
+      Authorization: 'Bearer {{BAANZON_OPENID_ID_TOKEN}}',
     };
 
     const loadConfigModels = createLoadConfigModels({
@@ -260,7 +260,7 @@ describe('createLoadConfigModels – in-request fetch coalescing', () => {
   });
 
   it('still coalesces two endpoints that share baseURL+apiKey AND identical headers', async () => {
-    const sharedHeaders = { Authorization: 'Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}' };
+    const sharedHeaders = { Authorization: 'Bearer {{BAANZON_OPENID_ID_TOKEN}}' };
     const loadConfigModels = createLoadConfigModels({
       getAppConfig: jest.fn().mockResolvedValue({
         endpoints: {

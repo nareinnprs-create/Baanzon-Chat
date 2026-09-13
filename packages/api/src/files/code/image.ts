@@ -20,7 +20,7 @@ import { logger } from '@librechat/data-schemas';
 /**
  * Sandbox stdout a single `/exec` response may carry, in bytes — 64KB in
  * the reference deployment. Deployments that changed the runner's cap set
- * `LIBRECHAT_CODE_SANDBOX_OUTPUT_MAX_SIZE` to match; a smaller cap is also
+ * `BAANZON_CODE_SANDBOX_OUTPUT_MAX_SIZE` to match; a smaller cap is also
  * discovered at runtime (see {@link narrowSandboxImageChunkBytes}).
  */
 const DEFAULT_SANDBOX_OUTPUT_MAX_SIZE = 64 * 1024;
@@ -84,7 +84,7 @@ export type SandboxImageReadResult =
  * Raw bytes to pull per `/exec` round-trip. Each window is base64-encoded
  * (~1.33x) into the response's stdout, so the auto-derived size is the
  * largest multiple of 3 whose encoding plus envelope fits the runner's
- * stdout budget. `LIBRECHAT_CODE_IMAGE_CHUNK_BYTES` overrides it outright
+ * stdout budget. `BAANZON_CODE_IMAGE_CHUNK_BYTES` overrides it outright
  * and is used verbatim, multiple of 3 or not.
  */
 export function getSandboxImageChunkBytes(baseUrl?: string): number {
@@ -96,11 +96,11 @@ export function getSandboxImageChunkBytes(baseUrl?: string): number {
 }
 
 function baselineChunkBytes(): number {
-  const override = Number(process.env.LIBRECHAT_CODE_IMAGE_CHUNK_BYTES);
+  const override = Number(process.env.BAANZON_CODE_IMAGE_CHUNK_BYTES);
   if (Number.isFinite(override) && override > 0) {
     return Math.floor(override);
   }
-  const configured = Number(process.env.LIBRECHAT_CODE_SANDBOX_OUTPUT_MAX_SIZE);
+  const configured = Number(process.env.BAANZON_CODE_SANDBOX_OUTPUT_MAX_SIZE);
   return chunkBytesForBudget(
     Number.isFinite(configured) && configured > 0
       ? Math.floor(configured)
@@ -157,7 +157,7 @@ export function narrowSandboxImageChunkBytes(
   }
   logger.warn(
     `[readSandboxImage] Sandbox stdout limit exceeded at ${failedChunkBytes} bytes; retrying with ${narrowed} for ${baseUrl}. ` +
-      "Set LIBRECHAT_CODE_SANDBOX_OUTPUT_MAX_SIZE to this runner's stdout cap to skip the discovery reads.",
+      "Set BAANZON_CODE_SANDBOX_OUTPUT_MAX_SIZE to this runner's stdout cap to skip the discovery reads.",
   );
   return narrowed;
 }

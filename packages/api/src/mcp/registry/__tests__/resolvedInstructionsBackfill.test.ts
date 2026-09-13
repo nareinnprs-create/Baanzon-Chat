@@ -25,7 +25,7 @@ const RUNTIME_IDENTITY_ENV_NAME = 'MCP_BACKFILL_RUNTIME_IDENTITY_TEST';
 const previousRuntimeIdentityEnv = process.env[RUNTIME_IDENTITY_ENV_NAME];
 
 beforeAll(() => {
-  process.env[RUNTIME_IDENTITY_ENV_NAME] = '{{LIBRECHAT_USER_ID}}';
+  process.env[RUNTIME_IDENTITY_ENV_NAME] = '{{BAANZON_USER_ID}}';
 });
 
 afterAll(() => {
@@ -56,7 +56,7 @@ const oauthDeferredYamlEntry: t.ParsedServerConfig = {
 
 const runtimePlaceholderYamlEntry: t.ParsedServerConfig = {
   ...startupDeferredYamlEntry,
-  headers: { 'X-User-Id': '{{LIBRECHAT_USER_ID}}' },
+  headers: { 'X-User-Id': '{{BAANZON_USER_ID}}' },
 };
 
 const runtimeApiKeyPlaceholderYamlEntry: t.ParsedServerConfig = {
@@ -64,7 +64,7 @@ const runtimeApiKeyPlaceholderYamlEntry: t.ParsedServerConfig = {
   apiKey: {
     source: 'admin',
     authorization_type: 'bearer',
-    key: '{{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
+    key: '{{BAANZON_OPENID_ACCESS_TOKEN}}',
   },
 };
 
@@ -184,7 +184,7 @@ describe('MCPServersRegistry.setResolvedInstructions', () => {
       'placeholder-bearing-admin-key',
       {
         ...startupDeferredYamlEntry,
-        apiKey: { source: 'admin', authorization_type: 'bearer', key: '{{LIBRECHAT_USER_ID}}' },
+        apiKey: { source: 'admin', authorization_type: 'bearer', key: '{{BAANZON_USER_ID}}' },
       } as unknown as t.ParsedServerConfig,
     ],
   ])('refuses a %s-deferred server at the shared-registry boundary', async (_reason, config) => {
@@ -454,7 +454,7 @@ describe('UserConnectionManager.backfillResolvedInstructions', () => {
         apiKey: {
           source: 'admin',
           authorization_type: 'bearer',
-          key: '{{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
+          key: '{{BAANZON_OPENID_ACCESS_TOKEN}}',
         },
       } as unknown as t.ParsedServerConfig,
     ],

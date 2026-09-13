@@ -22,7 +22,7 @@ const defaultConfig: ClientImageResizeConfig = {
  * Hook for client-side image resizing functionality
  *
  * Resolution order is admin config, then user setting, then off: when
- * `clientImageResize.enabled` is set in `librechat.yaml` it is reported as
+ * `clientImageResize.enabled` is set in `baanzon.yaml` it is reported as
  * `enforced` and the user's setting is ignored.
  */
 export const useClientResize = () => {

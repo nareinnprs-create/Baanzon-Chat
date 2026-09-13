@@ -1,7 +1,7 @@
 {
   "name": "librechat-data-provider",
   "version": "0.8.522",
-  "description": "data services for librechat apps",
+  "description": "Baanzon Chat data services and types",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "./dist/types/index.d.ts",

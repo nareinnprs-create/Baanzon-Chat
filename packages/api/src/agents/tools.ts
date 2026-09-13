@@ -775,7 +775,7 @@ function attachedFileAuthoringParameters(
       path: {
         type: 'string',
         description: includeSkillFileInstructions
-          ? 'Use "skills/{skillName}/..." for a LibreChat skill file, or "workspace/{relativePath}" for a file in the selected attached environment.'
+          ? 'Use "skills/{skillName}/..." for a Baanzon Chat skill file, or "workspace/{relativePath}" for a file in the selected attached environment.'
           : 'Use "workspace/{relativePath}" for a file in the selected attached environment.',
       },
     },

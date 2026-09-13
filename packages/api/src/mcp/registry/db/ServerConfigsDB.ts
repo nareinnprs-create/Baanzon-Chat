@@ -23,10 +23,10 @@ import { AccessControlService } from '~/acl/accessControlService';
  */
 const DANGEROUS_CREDENTIAL_PATTERNS = [
   /\$\{[^}]+\}/g,
-  /\{\{LIBRECHAT_OPENID_[^}]+\}\}/g,
-  /\{\{LIBRECHAT_USER_[^}]+\}\}/g,
-  /\{\{LIBRECHAT_GRAPH_[^}]+\}\}/g,
-  /\{\{LIBRECHAT_BODY_[^}]+\}\}/g,
+  /\{\{BAANZON_OPENID_[^}]+\}\}/g,
+  /\{\{BAANZON_USER_[^}]+\}\}/g,
+  /\{\{BAANZON_GRAPH_[^}]+\}\}/g,
+  /\{\{BAANZON_BODY_[^}]+\}\}/g,
 ];
 
 const BLOCKED_USER_OAUTH_ENDPOINT_PARAMS = ['audience', 'resource'] as const;

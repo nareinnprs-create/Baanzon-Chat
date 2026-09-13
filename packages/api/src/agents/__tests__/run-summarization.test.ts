@@ -1314,7 +1314,7 @@ describe('custom-endpoint provider resolution', () => {
         name: 'Tenant Gateway',
         baseURL: 'https://gateway.example.com/v1',
         apiKey: 'gateway-key',
-        headers: { 'X-Tenant-ID': '{{LIBRECHAT_USER_TENANT_ID}}' },
+        headers: { 'X-Tenant-ID': '{{BAANZON_USER_TENANT_ID}}' },
       },
     ]);
     const agents = await callAndCapture({

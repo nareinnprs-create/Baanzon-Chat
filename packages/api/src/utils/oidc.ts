@@ -36,7 +36,7 @@ export type OpenIDTokenField = (typeof OPENID_TOKEN_FIELDS)[number];
  * This placeholder is resolved asynchronously via OBO (On-Behalf-Of) flow
  * and requires special handling outside the synchronous processMCPEnv pipeline.
  */
-export const GRAPH_TOKEN_PLACEHOLDER = '{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}';
+export const GRAPH_TOKEN_PLACEHOLDER = '{{BAANZON_GRAPH_ACCESS_TOKEN}}';
 
 /**
  * Default Microsoft Graph API scopes for OBO token exchange.
@@ -257,7 +257,7 @@ export function processOpenIDPlaceholders(
   let processedValue = value;
 
   for (const field of fields) {
-    const placeholder = `{{LIBRECHAT_OPENID_${field}}}`;
+    const placeholder = `{{BAANZON_OPENID_${field}}}`;
     if (!processedValue.includes(placeholder)) {
       continue;
     }
@@ -272,7 +272,7 @@ export function processOpenIDPlaceholders(
         if (!tokenInfo.idToken || !isIdTokenCurrent(tokenInfo)) {
           logger.warn('OpenID ID token is expired or unavailable; re-authentication is required');
           throw new OpenIDReauthRequiredError(
-            'OpenID ID token is expired or unavailable; re-authentication is required to resolve {{LIBRECHAT_OPENID_ID_TOKEN}}',
+            'OpenID ID token is expired or unavailable; re-authentication is required to resolve {{BAANZON_OPENID_ID_TOKEN}}',
           );
         }
         replacementValue = tokenInfo.idToken;
@@ -295,7 +295,7 @@ export function processOpenIDPlaceholders(
     processedValue = processedValue.replace(new RegExp(placeholder, 'g'), replacementValue);
   }
 
-  const genericPlaceholder = '{{LIBRECHAT_OPENID_TOKEN}}';
+  const genericPlaceholder = '{{BAANZON_OPENID_TOKEN}}';
   if (fields.includes('ACCESS_TOKEN') && processedValue.includes(genericPlaceholder)) {
     const replacementValue = tokenInfo.accessToken || '';
     processedValue = processedValue.replace(new RegExp(genericPlaceholder, 'g'), replacementValue);

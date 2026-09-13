@@ -237,7 +237,7 @@ describe('MCPConnectionFactory', () => {
       type: 'streamable-http' as const,
       url: 'https://mcp.example.com',
       source: 'yaml' as const,
-      headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+      headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
     };
     mockProcessMCPEnv.mockImplementation(({ options }) => options);
     let finishConnect: (() => void) | undefined;
@@ -388,7 +388,7 @@ describe('MCPConnectionFactory', () => {
       const graphTokenResolver = jest.fn();
       const serverConfig: t.MCPOptions = {
         type: 'streamable-http',
-        url: 'https://api.example.com/mcp?token={{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+        url: 'https://api.example.com/mcp?token={{BAANZON_GRAPH_ACCESS_TOKEN}}',
       };
       const graphProcessedConfig: t.MCPOptions = {
         ...serverConfig,
@@ -4037,7 +4037,7 @@ describe('MCPConnectionFactory', () => {
         type: 'streamable-http' as const,
         url: 'https://mcp.example.com',
         source: 'yaml' as const,
-        headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+        headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
       } as t.MCPOptions;
       const serverConfig = {
         ...directBearerSourceConfig,
@@ -4088,7 +4088,7 @@ describe('MCPConnectionFactory', () => {
         type: 'streamable-http' as const,
         url: 'https://mcp.example.com',
         source: 'yaml' as const,
-        headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+        headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
       } as t.MCPOptions;
 
       await expect(
@@ -4148,7 +4148,7 @@ describe('MCPConnectionFactory', () => {
         type: 'streamable-http' as const,
         url: 'https://mcp.example.com',
         source: 'yaml' as const,
-        headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+        headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
       } as t.MCPOptions;
 
       const result = await MCPConnectionFactory.discoverTools(
@@ -4196,7 +4196,7 @@ describe('MCPConnectionFactory', () => {
         type: 'streamable-http' as const,
         url: 'https://mcp.example.com',
         source: 'yaml' as const,
-        headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+        headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
       } as t.MCPOptions;
 
       await expect(
@@ -4229,7 +4229,7 @@ describe('MCPConnectionFactory', () => {
         type: 'streamable-http' as const,
         url: 'https://mcp.example.com',
         source: 'yaml' as const,
-        headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+        headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
       } as t.MCPOptions;
 
       const result = await MCPConnectionFactory.discoverTools(

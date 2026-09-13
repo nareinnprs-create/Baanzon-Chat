@@ -1,7 +1,7 @@
 {
   "name": "@librechat/frontend",
   "version": "v0.8.8-rc2",
-  "description": "",
+  "description": "Baanzon Chat frontend (Vite + React)",
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",

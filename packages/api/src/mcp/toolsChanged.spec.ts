@@ -66,7 +66,7 @@ describe('MCP tools-changed dispatch', () => {
   });
 
   it('includes the resolved runtime environment in app publication generations', () => {
-    const variable = 'LIBRECHAT_MCP_CATALOG_ORIGIN_TEST';
+    const variable = 'BAANZON_MCP_CATALOG_ORIGIN_TEST';
     const original = process.env[variable];
     const config: ParsedServerConfig = {
       type: 'streamable-http',

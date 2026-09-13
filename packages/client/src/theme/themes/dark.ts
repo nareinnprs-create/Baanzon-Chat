@@ -1,131 +1,121 @@
 import { IThemeRGB } from '../types';
 
 /**
- * Dark theme
- * RGB values extracted from the existing dark mode CSS variables
+ * Baanzon Deep Ocean — Dark Theme
+ * Never pure black. Deep oceanic depth with luminous aqua accents.
  */
 export const darkTheme: IThemeRGB = {
   // Text colors
-  'rgb-text-primary': '236 236 236', // #ececec (gray-100)
-  'rgb-text-secondary': '205 205 205', // #cdcdcd (gray-300)
-  'rgb-text-secondary-alt': '153 150 150', // #999696 (gray-400)
-  'rgb-text-tertiary': '153 150 150', // #999696 (gray-400)
-  'rgb-text-muted': '179 182 189', // #b3b6bd (Click UI text.muted)
-  'rgb-text-warning': '245 158 11', // #f59e0b (amber-500)
+  'rgb-text-primary': '243 248 246', // #F3F8F6 (Primary Text)
+  'rgb-text-secondary': '169 192 189', // #A9C0BD (Secondary Text)
+  'rgb-text-secondary-alt': '110 137 135', // #6E8987 (Muted Text)
+  'rgb-text-tertiary': '110 137 135', // #6E8987 (Muted Text)
+  'rgb-text-muted': '110 137 135', // #6E8987 (Muted Text)
+  'rgb-text-warning': '252 211 77', // #fcd34d (amber-300)
   'rgb-text-destructive': '248 113 113', // #f87171 (red-400)
-  'rgb-shimmer-base': '255 255 255', // #ffffff, carried at 0.8 alpha
-  'rgb-shimmer-dip': '179 179 179', // #b3b3b3
+  'rgb-shimmer-base': '243 248 246', // #F3F8F6, carried at 0.8 alpha
+  'rgb-shimmer-dip': '110 137 135', // #6E8987
 
   // Link and accent colors
-  'rgb-link': '96 165 250', // #60a5fa (blue-400)
-  'rgb-link-hover': '147 197 253', // #93c5fd (blue-300)
-  'rgb-link-visited': '192 132 252', // #c084fc (purple-400)
-  'rgb-accent-primary': '65 167 157', // #41a79d
-  'rgb-accent-primary-hover': '109 200 185', // #6dc8b9
+  'rgb-link': '70 226 210', // #46E2D2 (Luminous Aqua)
+  'rgb-link-hover': '53 214 199', // #35D6C7 (Luminous Aqua brighter)
+  'rgb-link-visited': '169 152 255', // #A998FF (Orchid)
+  'rgb-accent-primary': '19 166 160', // #13A6A0 (Dark Teal)
+  'rgb-accent-primary-hover': '70 226 210', // #46E2D2 (Luminous Aqua)
 
-  // Ring colors (not defined in dark mode, using default)
-  'rgb-ring-primary': '89 89 89', // #595959 (gray-500)
+  // Ring colors
+  'rgb-ring-primary': '19 166 160', // #13A6A0 (Dark Teal)
 
   // Header colors
-  'rgb-header-primary': '47 47 47', // #2f2f2f (gray-700)
-  'rgb-header-hover': '66 66 66', // #424242 (gray-600)
-  'rgb-header-button-hover': '47 47 47', // #2f2f2f (gray-700)
+  'rgb-header-primary': '10 28 32', // #0A1C20 (Surface)
+  'rgb-header-hover': '16 39 43', // #10272B (Surface Elevated)
+  'rgb-header-button-hover': '10 28 32', // #0A1C20 (Surface)
 
   // Surface colors
-  'rgb-surface-active': '89 89 89', // #595959 (gray-500)
-  'rgb-surface-active-alt': '47 47 47', // #2f2f2f (gray-700)
-  'rgb-surface-hover': '57 57 57', // #393939 (gray-650)
-  'rgb-surface-hover-alt': '66 66 66', // #424242 (gray-600)
-  'rgb-surface-composer-hover': '66 66 66', // #424242 (gray-600)
-  'rgb-surface-primary': '13 13 13', // #0d0d0d (gray-900)
-  'rgb-chart-widget-surface': '40 40 40', // #282828 (Click UI chart widget)
-  'rgb-chart-widget-stroke': '50 50 50', // #323232 (Click UI chart widget)
-  'rgb-surface-primary-alt': '23 23 23', // #171717 (gray-850)
-  'rgb-surface-primary-contrast': '23 23 23', // #171717 (gray-850)
-  'rgb-surface-secondary': '33 33 33', // #212121 (gray-800)
-  'rgb-surface-secondary-alt': '33 33 33', // #212121 (gray-800)
-  'rgb-surface-tertiary': '47 47 47', // #2f2f2f (gray-700)
-  'rgb-surface-tertiary-alt': '47 47 47', // #2f2f2f (gray-700)
-  'rgb-surface-dialog': '18 18 18', // #121212 (legacy dark dialog)
+  'rgb-surface-active': '29 58 61', // #1D3A3D (Border)
+  'rgb-surface-active-alt': '16 39 43', // #10272B (Surface Elevated)
+  'rgb-surface-hover': '16 39 43', // #10272B (Surface Elevated)
+  'rgb-surface-hover-alt': '29 58 61', // #1D3A3D (Border)
+  'rgb-surface-composer-hover': '16 39 43', // #10272B (Surface Elevated)
+  'rgb-surface-primary': '6 19 22', // #061316 (Background)
+  'rgb-chart-widget-surface': '10 28 32', // #0A1C20 (Surface)
+  'rgb-chart-widget-stroke': '29 58 61', // #1D3A3D (Border)
+  'rgb-surface-primary-alt': '10 28 32', // #0A1C20 (Surface)
+  'rgb-surface-primary-contrast': '16 39 43', // #10272B (Surface Elevated)
+  'rgb-surface-secondary': '10 28 32', // #0A1C20 (Surface)
+  'rgb-surface-secondary-alt': '16 39 43', // #10272B (Surface Elevated)
+  'rgb-surface-tertiary': '16 39 43', // #10272B (Surface Elevated)
+  'rgb-surface-tertiary-alt': '16 39 43', // #10272B (Surface Elevated)
+  'rgb-surface-dialog': '10 28 32', // #0A1C20 (Surface)
   'rgb-surface-overlay': '0 0 0', // #000 (black)
-  'rgb-surface-submit': '4 120 87', // #047857 (green-700)
-  'rgb-surface-submit-hover': '6 95 70', // #065f46 (green-800)
+  'rgb-surface-submit': '19 166 160', // #13A6A0 (Dark Teal)
+  'rgb-surface-submit-hover': '70 226 210', // #46E2D2 (Luminous Aqua)
   'rgb-surface-destructive': '153 27 27', // #991b1b (red-800)
   'rgb-surface-destructive-hover': '127 29 29', // #7f1d1d (red-900)
-  'rgb-surface-chat': '47 47 47', // #2f2f2f (gray-700)
-  'rgb-surface-code': '33 33 33', // #212121 (gray-800)
-  'rgb-surface-inverted': '255 255 255', // #fff (white)
-  'rgb-surface-inverted-hover': '236 236 236', // #ececec (gray-100)
-  'rgb-text-inverted': '23 23 23', // #171717 (gray-850)
-  'rgb-surface-fixed': '255 255 255', // #fff (white) — same in light + dark
-  'rgb-surface-fixed-hover': '236 236 236', // #ececec (gray-100) — same in light + dark
-  'rgb-text-fixed': '33 33 33', // #212121 (gray-800) — same in light + dark
+  'rgb-surface-chat': '10 28 32', // #0A1C20 (Surface)
+  'rgb-surface-code': '10 28 32', // #0A1C20 (Surface)
+  'rgb-surface-inverted': '243 248 246', // #F3F8F6 (Primary Text)
+  'rgb-surface-inverted-hover': '169 192 189', // #A9C0BD (Secondary Text)
+  'rgb-text-inverted': '6 19 22', // #061316 (Background)
+  'rgb-surface-fixed': '243 248 246', // #F3F8F6
+  'rgb-surface-fixed-hover': '169 192 189', // #A9C0BD
+  'rgb-text-fixed': '6 19 22', // #061316
 
   // Border colors
-  'rgb-border-light': '47 47 47', // #2f2f2f (gray-700)
-  'rgb-border-medium': '66 66 66', // #424242 (gray-600)
-  'rgb-border-medium-alt': '66 66 66', // #424242 (gray-600)
-  'rgb-border-heavy': '89 89 89', // #595959 (gray-500)
-  'rgb-border-xheavy': '153 150 150', // #999696 (gray-400)
+  'rgb-border-light': '29 58 61', // #1D3A3D (Border)
+  'rgb-border-medium': '29 58 61', // #1D3A3D (Border)
+  'rgb-border-medium-alt': '29 58 61', // #1D3A3D (Border)
+  'rgb-border-heavy': '53 83 87', // #355357 (heavier border)
+  'rgb-border-xheavy': '110 137 135', // #6E8987 (Muted)
   'rgb-border-destructive': '239 68 68', // #ef4444 (red-500)
 
   // Status colors
-  'rgb-status-success': '110 231 183', // #6ee7b7 (green-300)
-  'rgb-status-success-subtle': '2 44 34', // #022c22 (green-950)
-  'rgb-status-success-border': '6 95 70', // #065f46 (green-800)
-  /** Not `green-800` like its border twin: this fill also paints bare marks
-   *  (selection checks, the version timeline rail, prompt chips) that have to
-   *  clear 3:1 against the #212121 panel, and green-800 reached only 2.10:1
-   *  there. Balanced instead, the same way light's `#02855e` is: 4.55:1 under
-   *  the white `text-on-status` label and 3.54:1 against the panel. */
-  'rgb-status-success-strong': '8 135 89', // #088759
-  'rgb-status-info': '147 197 253', // #93c5fd (blue-300)
-  'rgb-status-info-subtle': '23 37 84', // #172554 (blue-950)
-  'rgb-status-info-border': '30 64 175', // #1e40af (blue-800)
-  'rgb-status-info-strong': '66 66 66', // #424242 (gray-600)
+  'rgb-status-success': '70 226 210', // #46E2D2 (Luminous Aqua)
+  'rgb-status-success-subtle': '6 60 69', // #063C45 (Deep Ocean)
+  'rgb-status-success-border': '6 107 111', // #066B6F
+  'rgb-status-success-strong': '19 166 160', // #13A6A0 (Dark Teal)
+  'rgb-status-info': '70 226 210', // #46E2D2 (Luminous Aqua)
+  'rgb-status-info-subtle': '6 60 69', // #063C45 (Deep Ocean)
+  'rgb-status-info-border': '19 166 160', // #13A6A0 (Dark Teal)
+  'rgb-status-info-strong': '19 166 160', // #13A6A0
   'rgb-status-warning': '252 211 77', // #fcd34d (amber-300)
-  'rgb-status-warning-subtle': '69 26 3', // #451a03 (amber-950)
+  'rgb-status-warning-subtle': '42 28 3', // #2A1C03
   'rgb-status-warning-border': '146 64 14', // #92400e (amber-800)
-  'rgb-status-warning-strong': '146 64 14', // #92400e (amber-800)
+  'rgb-status-warning-strong': '146 64 14', // #92400e
   'rgb-status-error': '252 165 165', // #fca5a5 (red-300)
-  'rgb-status-error-subtle': '69 10 10', // #450a0a (red-950)
+  'rgb-status-error-subtle': '42 6 6', // #2A0606
   'rgb-status-error-border': '153 27 27', // #991b1b (red-800)
-  'rgb-status-error-strong': '153 27 27', // #991b1b (red-800)
-  'rgb-status-neutral': '205 205 205', // #cdcdcd (gray-300)
-  'rgb-status-neutral-subtle': '33 33 33', // #212121 (gray-800)
-  'rgb-status-neutral-border': '47 47 47', // #2f2f2f (gray-700)
-  'rgb-text-on-status': '255 255 255', // #fff (white)
+  'rgb-status-error-strong': '153 27 27', // #991b1b
+  'rgb-status-neutral': '169 192 189', // #A9C0BD (Secondary Text)
+  'rgb-status-neutral-subtle': '10 28 32', // #0A1C20 (Surface)
+  'rgb-status-neutral-border': '29 58 61', // #1D3A3D (Border)
+  'rgb-text-on-status': '6 19 22', // #061316 (Background, dark text on light status)
 
   // Brand colors
-  'rgb-brand-purple': '171 104 255', // #ab68ff
+  'rgb-brand-purple': '169 152 255', // #A998FF (Orchid)
 
-  /** Code syntax highlighting, measured against the `surface-code` fill. The
-   *  comment and meta values are the flattened equivalents of the alpha-blended
-   *  whites this palette used before it was tokenized: 50% and 60% white over
-   *  the #212121 code surface. */
-  'rgb-syntax-text': '255 255 255', // #fff (white)
-  'rgb-syntax-comment': '144 144 144', // #909090
-  'rgb-syntax-meta': '166 166 166', // #a6a6a6
-  'rgb-syntax-builtin': '233 149 12', // #e9950c
-  'rgb-syntax-keyword': '46 149 211', // #2e95d3
-  'rgb-syntax-string': '0 166 125', // #00a67d
-  'rgb-syntax-attr': '223 48 121', // #df3079
-  'rgb-syntax-title': '242 44 61', // #f22c3d
+  /** Code syntax highlighting, measured against the `surface-code` fill. */
+  'rgb-syntax-text': '243 248 246', // #F3F8F6
+  'rgb-syntax-comment': '110 137 135', // #6E8987
+  'rgb-syntax-meta': '169 192 189', // #A9C0BD
+  'rgb-syntax-builtin': '216 194 157', // #D8C29D (Champagne)
+  'rgb-syntax-keyword': '70 226 210', // #46E2D2 (Luminous Aqua)
+  'rgb-syntax-string': '53 214 199', // #35D6C7 (Luminous Aqua)
+  'rgb-syntax-attr': '169 152 255', // #A998FF (Orchid)
+  'rgb-syntax-title': '252 165 165', // #fca5a5 (red-300)
 
-  /** Categorical series scale — the same seven hues stepped for the #212121
-   *  surface: worst adjacent CVD ΔE 13.0, normal-vision ΔE 19.0, all ≥ 3:1. */
-  'rgb-series-1': '9 140 238', // #098cee (cerulean)
-  'rgb-series-2': '217 87 35', // #d95723 (orange)
-  'rgb-series-3': '6 158 152', // #069e98 (aqua)
-  'rgb-series-4': '200 133 12', // #c8850c (amber)
-  'rgb-series-5': '213 82 130', // #d55282 (magenta)
-  'rgb-series-6': '171 104 254', // #ab68fe (violet)
-  'rgb-series-7': '80 167 49', // #50a731 (green)
+  /** Categorical series scale — Baanzon Aurora-stepped for dark surface. */
+  'rgb-series-1': '70 226 210', // #46E2D2 (Luminous Aqua)
+  'rgb-series-2': '233 86 13', // #e9560d (orange)
+  'rgb-series-3': '53 214 199', // #35D6C7 (Luminous Aqua)
+  'rgb-series-4': '216 194 157', // #D8C29D (Champagne)
+  'rgb-series-5': '169 152 255', // #A998FF (Orchid)
+  'rgb-series-6': '19 166 160', // #13A6A0 (Dark Teal)
+  'rgb-series-7': '70 226 210', // #46E2D2 (Luminous Aqua)
 
-  /** Unchecked switch track. 3.38:1 against the page and the `surface-primary`
-   *  thumb, 5.74:1 against the checked `surface-inverted` track. */
-  'rgb-switch-unchecked': '102 102 102', // #666666
+  /** Unchecked switch track. 3.38:1 against the page. */
+  'rgb-switch-unchecked': '53 83 87', // #355357
 
   // Presentation
-  'rgb-presentation': '33 33 33', // #212121 (gray-800)
+  'rgb-presentation': '10 28 32', // #0A1C20 (Surface)
 };

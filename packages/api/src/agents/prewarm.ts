@@ -117,7 +117,7 @@ async function sendPrewarmRequest(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'User-Agent': 'LibreChat/1.0',
+      'User-Agent': 'Baanzon/1.0',
       ...authHeaders,
       ...codeExecutionHeaders(context),
     },

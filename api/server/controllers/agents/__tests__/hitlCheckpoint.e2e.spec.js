@@ -55,7 +55,7 @@ const {
   deleteAgentCheckpoint,
   buildHITLRunWiring,
   resolveToolApprovalPolicy,
-  LIBRECHAT_CHECKPOINT_NAMESPACE_KEY,
+  BAANZON_CHECKPOINT_NAMESPACE_KEY,
   __resetCheckpointerForTests,
 } = require('@librechat/api');
 const ResumeAgentController = require('~/server/controllers/agents/resume');
@@ -111,7 +111,7 @@ const runConfig = (conversationId, checkpointNamespace = '') => ({
   configurable: {
     thread_id: conversationId,
     checkpoint_ns: '',
-    [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: checkpointNamespace,
+    [BAANZON_CHECKPOINT_NAMESPACE_KEY]: checkpointNamespace,
     user_id: USER_ID,
   },
   streamMode: 'values',

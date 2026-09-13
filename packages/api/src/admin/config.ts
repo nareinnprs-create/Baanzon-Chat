@@ -36,9 +36,9 @@ const DEFAULT_PRIORITY = 10;
 const BASE_ONLY_OVERRIDE_SECTIONS = new Set<string>(BASE_ONLY_CONFIG_SECTIONS);
 const BASE_PRINCIPAL_OVERRIDE_SECTIONS = new Set<string>(BASE_PRINCIPAL_CONFIG_SECTIONS);
 const PROCESS_MCP_CONFIG_ERROR =
-  'Process-backed MCP servers can only be configured in librechat.yaml';
+  'Process-backed MCP servers can only be configured in baanzon.yaml';
 const LANGFUSE_HEADERS_CONFIG_ERROR =
-  'Langfuse request headers can only be configured in librechat.yaml';
+  'Langfuse request headers can only be configured in baanzon.yaml';
 
 /**
  * Langfuse export headers carry proxy/gateway credentials, but they are a map
@@ -630,7 +630,7 @@ export function createAdminConfigHandlers(deps: AdminConfigDeps): {
         if (section in filteredOverrides) {
           delete (filteredOverrides as Record<string, unknown>)[section];
           logger.warn(
-            `[adminConfig] Stripping base-only config section "${section}" - configure it in librechat.yaml instead`,
+            `[adminConfig] Stripping base-only config section "${section}" - configure it in baanzon.yaml instead`,
           );
         }
       }
@@ -841,7 +841,7 @@ export function createAdminConfigHandlers(deps: AdminConfigDeps): {
         .filter((entry) => {
           if (isBaseOnlyFieldPath(entry.fieldPath)) {
             logger.warn(
-              `[adminConfig] Stripping base-only config field "${entry.fieldPath}" - configure it in librechat.yaml instead`,
+              `[adminConfig] Stripping base-only config field "${entry.fieldPath}" - configure it in baanzon.yaml instead`,
             );
             return false;
           }
@@ -993,7 +993,7 @@ export function createAdminConfigHandlers(deps: AdminConfigDeps): {
 
       if (isBaseOnlyFieldPath(fieldPath)) {
         logger.warn(
-          `[adminConfig] Ignoring tombstone for base-only config field "${fieldPath}" - configure it in librechat.yaml instead`,
+          `[adminConfig] Ignoring tombstone for base-only config field "${fieldPath}" - configure it in baanzon.yaml instead`,
         );
         return res.status(200).json({ message: 'No actionable field path provided' });
       }
@@ -1098,7 +1098,7 @@ export function createAdminConfigHandlers(deps: AdminConfigDeps): {
 
       if (isBaseOnlyFieldPath(fieldPath)) {
         logger.warn(
-          `[adminConfig] Ignoring delete for base-only config field "${fieldPath}" - configure it in librechat.yaml instead`,
+          `[adminConfig] Ignoring delete for base-only config field "${fieldPath}" - configure it in baanzon.yaml instead`,
         );
         return res.status(200).json({ message: 'No actionable field path provided' });
       }

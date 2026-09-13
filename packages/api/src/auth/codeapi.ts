@@ -192,7 +192,7 @@ export function assertCodeApiJwtSigningReady(): void {
   }
   cryptoSign(
     config.alg === 'RS256' ? 'RSA-SHA256' : null,
-    Buffer.from('librechat-codeapi-signing-readiness'),
+    Buffer.from('baanzon-codeapi-signing-readiness'),
     config.key,
   );
 }

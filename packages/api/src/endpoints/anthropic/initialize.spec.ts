@@ -52,7 +52,7 @@ describe('initializeAnthropic – custom headers', () => {
     const { params, restore } = createParams(
       {
         [EModelEndpoint.anthropic]: {
-          headers: { 'X-Conversation-Id': '{{LIBRECHAT_BODY_CONVERSATIONID}}' },
+          headers: { 'X-Conversation-Id': '{{BAANZON_BODY_CONVERSATIONID}}' },
         },
       },
       { ANTHROPIC_API_KEY: 'sk-ant-test', ANTHROPIC_REVERSE_PROXY: 'https://gateway.example.com' },
@@ -62,7 +62,7 @@ describe('initializeAnthropic – custom headers', () => {
       const result = await initializeAnthropic(params);
       const defaultHeaders = getDefaultHeaders(result.llmConfig);
       /** Placeholder kept intact — resolved at request time, not init time */
-      expect(defaultHeaders['X-Conversation-Id']).toBe('{{LIBRECHAT_BODY_CONVERSATIONID}}');
+      expect(defaultHeaders['X-Conversation-Id']).toBe('{{BAANZON_BODY_CONVERSATIONID}}');
       /** Provider-managed beta header preserved alongside the custom header */
       expect(defaultHeaders['anthropic-beta']).toBe(FINE_GRAINED_TOOL_STREAMING_BETA);
       /** Reverse proxy still wired through native Anthropic config */

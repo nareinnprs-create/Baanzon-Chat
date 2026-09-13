@@ -14,7 +14,7 @@ export const SKILL_MANIFEST_FILE = 'SKILL.md';
  * LibreChat's reverse-domain extension namespace. Owns both the `extensions`
  * manifest key and the top-level extension directory of the same name.
  */
-export const LIBRECHAT_EXTENSION_NAMESPACE = 'ai.librechat';
+export const BAANZON_EXTENSION_NAMESPACE = 'ai.librechat';
 export const EXTENSION_HOOKS_FILE = 'hooks/hooks.json';
 
 export const PLUGIN_ROOT_VAR = 'PLUGIN_ROOT';

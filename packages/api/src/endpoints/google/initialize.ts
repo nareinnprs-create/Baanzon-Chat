@@ -97,7 +97,7 @@ export async function initializeGoogle(
    * key out of placeholder/env expansion (a user-provided `${ENV}` key can't leak
    * server env) while still resolving admin headers (env, user, conversationId).
    * The initialization request body lacks the assistant message id, so
-   * `{{LIBRECHAT_BODY_MESSAGEID}}`
+   * `{{BAANZON_BODY_MESSAGEID}}`
    * is the one body placeholder unavailable here.
    */
   const mergedHeaders = mergeHeaders(allConfig?.headers, googleConfig?.headers);

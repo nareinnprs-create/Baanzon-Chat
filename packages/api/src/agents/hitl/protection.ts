@@ -53,7 +53,7 @@ import {
 import { getResumeAgentSnapshot, getResumeContentInspection } from './inspection';
 import { extractStoredMessageContent } from '~/protection/adapters/submissions';
 import { agentHasInlineMemoryTools, getMemoryAgentId } from '../memory';
-import { LIBRECHAT_CHECKPOINT_NAMESPACE_KEY } from '../checkpointer';
+import { BAANZON_CHECKPOINT_NAMESPACE_KEY } from '../checkpointer';
 import { AttachmentObjectNotFoundError } from '~/files/encode/utils';
 import { ASK_USER_QUESTION_TOOL_NAME } from './askUserQuestionTool';
 import { ContentFilterError } from '~/middleware/contentFilter';
@@ -378,7 +378,7 @@ async function getResumeCheckpointMessages(
       thread_id: conversationId,
       checkpoint_ns: '',
       ...(checkpointNamespace !== '' && {
-        [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: checkpointNamespace,
+        [BAANZON_CHECKPOINT_NAMESPACE_KEY]: checkpointNamespace,
       }),
     },
   });

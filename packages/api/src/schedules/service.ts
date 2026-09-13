@@ -633,7 +633,7 @@ export function createSchedulesService(
         return true;
       }
       // BASE config only: DB principal overrides can narrow availability but must never
-      // widen past an operator's global stop, so `schedules: false` in librechat.yaml is
+      // widen past an operator's global stop, so `schedules: false` in baanzon.yaml is
       // genuinely non-overridable rather than emergent from the override filters.
       // isRuntimeDisabled reads BOTH stop shapes (`false` and `{ use: false }`) — the
       // same predicate the override merge preserves base stops with. A shape-blind

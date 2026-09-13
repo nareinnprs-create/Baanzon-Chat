@@ -15,8 +15,8 @@ describe('createCodeWorkerSetupCommand', () => {
         allowWorkspaceCommands: true,
       }),
     ).toBe(
-      "librechat-code pair 'https://code.example.com/v1' 'one-time'\\''code' --worker-id 'worker'\\''one'\n" +
-        "LIBRECHAT_CODE_WORKER_ID='worker'\\''one' librechat-code run --default-workspace --allow-workspace-writes --allow-workspace-commands",
+      "baanzon-code pair 'https://code.example.com/v1' 'one-time'\\''code' --worker-id 'worker'\\''one'\n" +
+        "BAANZON_CODE_WORKER_ID='worker'\\''one' baanzon-code run --default-workspace --allow-workspace-writes --allow-workspace-commands",
     );
   });
 
@@ -27,15 +27,15 @@ describe('createCodeWorkerSetupCommand', () => {
         allowWorkspaceCommands: true,
       }),
     ).toBe(
-      "librechat-code pair 'https://code.example.com/v1' 'one-time''code' --worker-id 'worker''one'\n" +
-        "$env:LIBRECHAT_CODE_WORKER_ID = 'worker''one'\n" +
-        'librechat-code run --default-workspace --allow-workspace-writes --allow-workspace-commands',
+      "baanzon-code pair 'https://code.example.com/v1' 'one-time''code' --worker-id 'worker''one'\n" +
+        "$env:BAANZON_CODE_WORKER_ID = 'worker''one'\n" +
+        'baanzon-code run --default-workspace --allow-workspace-writes --allow-workspace-commands',
     );
   });
 
   it('defaults to a read-only default workspace command', () => {
     expect(createCodeWorkerSetupCommand(pairing, 'posix')).toContain(
-      'librechat-code run --default-workspace',
+      'baanzon-code run --default-workspace',
     );
     expect(createCodeWorkerSetupCommand(pairing, 'posix')).not.toContain(
       '--allow-workspace-writes',

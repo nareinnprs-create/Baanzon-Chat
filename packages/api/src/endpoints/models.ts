@@ -186,7 +186,7 @@ export async function fetchModels({
   // The MODEL_QUERIES cache is keyed by baseURL+apiKey only. That's safe
   // when the response is identical for every caller, but fails when callers
   // forward header templates that resolve to a user-bound value (e.g.
-  // `Authorization: Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}`): one user's
+  // `Authorization: Bearer {{BAANZON_OPENID_ID_TOKEN}}`): one user's
   // filtered list could otherwise be served to the next request that
   // shares the same baseURL+apiKey. Skip the cache whenever both `headers`
   // and `userObject` are supplied, since that's the signal the caller is
@@ -235,7 +235,7 @@ export async function fetchModels({
   }
 
   try {
-    // Resolve template variables (e.g. {{LIBRECHAT_OPENID_ID_TOKEN}}) in the
+    // Resolve template variables (e.g. {{BAANZON_OPENID_ID_TOKEN}}) in the
     // configured headers, mirroring fetchOllamaModels above. Without this,
     // placeholder strings are forwarded literally on the model-fetch path.
     const resolvedHeaders = resolveHeaders({

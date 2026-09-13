@@ -62,7 +62,7 @@ function resolveModuleSpecifier(spec: string, basePath: string): string {
  * crashes startup or blocks the others. Returns the number of hooks successfully registered.
  *
  * SECURITY: each `module` is dynamically imported and executed in-process. This is
- * admin-level config (librechat.yaml); only reference trusted code.
+ * admin-level config (baanzon.yaml); only reference trusted code.
  */
 export async function loadToolApprovalHooks(
   hooks: TToolApprovalHookConfig[] | undefined,

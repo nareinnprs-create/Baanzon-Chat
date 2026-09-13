@@ -192,7 +192,7 @@ export function resolveLangfuseHeaders(
      *
      * Order matters in both directions: expanding first would let a strip or a
      * second expansion reinterpret characters that came out of the secret, so a
-     * token containing `{{LIBRECHAT_USER_ID}}` would have that span deleted and
+     * token containing `{{BAANZON_USER_ID}}` would have that span deleted and
      * one containing `${PATH}` would be rewritten. Gateway credentials are
      * arbitrary strings; none of their bytes are template syntax.
      */

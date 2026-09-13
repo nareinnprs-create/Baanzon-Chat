@@ -999,7 +999,7 @@ Please follow these instructions when using tools from the respective MCP server
    * for user-specific connections upon successful call initiation.
    *
    * @param graphTokenResolver - Optional function to resolve Graph API tokens via OBO flow.
-   *   When provided and the server config contains `{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}` placeholders,
+   *   When provided and the server config contains `{{BAANZON_GRAPH_ACCESS_TOKEN}}` placeholders,
    *   they will be resolved to actual Graph API tokens before the tool call.
    */
   async callTool({

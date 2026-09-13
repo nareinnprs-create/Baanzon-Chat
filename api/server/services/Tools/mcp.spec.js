@@ -401,7 +401,7 @@ describe('reinitMCPServer — customUserVars gating (issue #10969)', () => {
     const tools = [{ name: 'search', inputSchema: { type: 'object', properties: {} } }];
     const serverConfig = {
       type: 'streamable-http',
-      url: 'https://thingy.example.com/messages/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+      url: 'https://thingy.example.com/messages/{{BAANZON_BODY_MESSAGEID}}/mcp',
       source: 'yaml',
     };
     mockGetConnection.mockResolvedValue({
@@ -454,7 +454,7 @@ describe('reinitMCPServer — direct bearer authentication outcomes', () => {
           type: 'streamable-http',
           url: 'https://mcp.example.com',
           source: 'yaml',
-          headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+          headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
         },
       }),
     ).rejects.toBe(rejection);
@@ -468,7 +468,7 @@ describe('reinitMCPServer — runtime BODY placeholder pre-check (issue #14074)'
     type: 'streamable-http',
     url: 'https://thingy.example.com/mcp',
     source: 'yaml',
-    headers: { 'X-Conversation-Id': '{{LIBRECHAT_BODY_CONVERSATIONID}}' },
+    headers: { 'X-Conversation-Id': '{{BAANZON_BODY_CONVERSATIONID}}' },
   };
 
   beforeEach(() => {

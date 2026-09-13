@@ -6,9 +6,9 @@ import {
   deleteAgentEventCheckpointReference,
   forkAgentEventCheckpoint,
   getAgentCheckpointer,
-  LIBRECHAT_CHECKPOINT_NAMESPACE_KEY,
-  LIBRECHAT_CHECKPOINT_OWNER_KEY,
-  LIBRECHAT_LEGACY_CHECKPOINT_KEY,
+  BAANZON_CHECKPOINT_NAMESPACE_KEY,
+  BAANZON_CHECKPOINT_OWNER_KEY,
+  BAANZON_LEGACY_CHECKPOINT_KEY,
 } from '../checkpointer';
 import { checkpointOwnerNamespacePrefix } from '../../stream/checkpoints';
 import { acknowledgeActorPruning, drainActorPruning } from './pruning';
@@ -33,9 +33,9 @@ export function createOwnedActorCheckpoints(user: string, tenantId?: string) {
         thread_id: reference.threadId,
         checkpoint_ns: '',
         checkpoint_id: reference.checkpointId,
-        [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: reference.checkpointNs,
-        [LIBRECHAT_CHECKPOINT_OWNER_KEY]: owner,
-        [LIBRECHAT_LEGACY_CHECKPOINT_KEY]: reference.checkpointId,
+        [BAANZON_CHECKPOINT_NAMESPACE_KEY]: reference.checkpointNs,
+        [BAANZON_CHECKPOINT_OWNER_KEY]: owner,
+        [BAANZON_LEGACY_CHECKPOINT_KEY]: reference.checkpointId,
       },
     });
     return tuple?.checkpoint.id === reference.checkpointId ? reference.checkpointNs : undefined;

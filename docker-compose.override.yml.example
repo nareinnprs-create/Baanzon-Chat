@@ -15,8 +15,8 @@
 #   api:
 #     volumes:
 #     - type: bind
-#       source: ./librechat.yaml
-#       target: /app/librechat.yaml
+#       source: ./baanzon.yaml
+#       target: /app/baanzon.yaml
 #     image: registry.librechat.ai/danny-avila/librechat:latest
 
 # ---------------------------------------------------
@@ -27,8 +27,8 @@
 #   api:
 #     volumes:
 #     - type: bind
-#       source: ./librechat.yaml
-#       target: /app/librechat.yaml
+#       source: ./baanzon.yaml
+#       target: /app/baanzon.yaml
 
 # # LOCAL BUILD
 #   api:

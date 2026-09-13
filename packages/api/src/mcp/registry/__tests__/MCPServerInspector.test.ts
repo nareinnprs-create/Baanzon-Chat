@@ -86,7 +86,7 @@ describe('MCPServerInspector', () => {
         type: 'streamable-http' as const,
         url: 'https://api.example.com/mcp',
         source: 'yaml' as const,
-        headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+        headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
       } as t.MCPOptions;
 
       const result = await MCPServerInspector.inspect('test_server', rawConfig, mockConnection);
@@ -175,7 +175,7 @@ describe('MCPServerInspector', () => {
         type: 'streamable-http',
         url: 'https://mcp-server.example.com/mcp',
         headers: {
-          'X-LibreChat-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+          'X-LibreChat-User-Email': '{{BAANZON_USER_EMAIL}}',
         },
       };
 
@@ -185,7 +185,7 @@ describe('MCPServerInspector', () => {
         type: 'streamable-http',
         url: 'https://mcp-server.example.com/mcp',
         headers: {
-          'X-LibreChat-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+          'X-LibreChat-User-Email': '{{BAANZON_USER_EMAIL}}',
         },
         requiresOAuth: false,
         oauthMetadata: undefined,
@@ -197,14 +197,14 @@ describe('MCPServerInspector', () => {
     it('should skip OAuth detection when trusted URL needs runtime user context', async () => {
       const rawConfig: t.MCPOptions = {
         type: 'streamable-http',
-        url: 'https://mcp-server.example.com/users/{{LIBRECHAT_USER_USERNAME}}/mcp',
+        url: 'https://mcp-server.example.com/users/{{BAANZON_USER_USERNAME}}/mcp',
       };
 
       const result = await MCPServerInspector.inspect('test_server', rawConfig);
 
       expect(result).toEqual({
         type: 'streamable-http',
-        url: 'https://mcp-server.example.com/users/{{LIBRECHAT_USER_USERNAME}}/mcp',
+        url: 'https://mcp-server.example.com/users/{{BAANZON_USER_USERNAME}}/mcp',
         initDuration: expect.any(Number),
       });
       expect(mockDetectOAuthRequirement).not.toHaveBeenCalled();

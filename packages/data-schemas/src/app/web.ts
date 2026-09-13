@@ -80,9 +80,9 @@ export function getWebSearchKeys(): TWebSearchKeys[] {
 export const webSearchKeys: TWebSearchKeys[] = getWebSearchKeys();
 
 export const webSearchSelectionFields = {
-  selectedProvider: 'LIBRECHAT_WEB_SEARCH_PROVIDER',
-  selectedScraper: 'LIBRECHAT_WEB_SEARCH_SCRAPER',
-  selectedReranker: 'LIBRECHAT_WEB_SEARCH_RERANKER',
+  selectedProvider: 'BAANZON_WEB_SEARCH_PROVIDER',
+  selectedScraper: 'BAANZON_WEB_SEARCH_SCRAPER',
+  selectedReranker: 'BAANZON_WEB_SEARCH_RERANKER',
 } as const;
 
 export function loadWebSearchConfig(

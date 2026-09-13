@@ -189,14 +189,14 @@ export function createProvisionService({
     req?: ServerRequest;
   }): Promise<Record<string, string>> {
     return {
-      'User-Agent': 'LibreChat/1.0',
+      'User-Agent': 'Baanzon/1.0',
       ...(apiKey ? { 'X-API-Key': apiKey } : {}),
       ...(await getCodeApiAuthHeaders(req)),
     };
   }
 
-  /** Env var holding the code-execution API key (symmetric with LIBRECHAT_CODE_BASEURL). */
-  const CODE_API_KEY_FIELD = 'LIBRECHAT_CODE_API_KEY';
+  /** Env var holding the code-execution API key (symmetric with BAANZON_CODE_BASEURL). */
+  const CODE_API_KEY_FIELD = 'BAANZON_CODE_API_KEY';
 
   /**
    * Loads the code-execution API key for a user. Call once per request and pass the

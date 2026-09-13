@@ -26,7 +26,7 @@ describe('query devtools HTML bootstrap', () => {
   it('injects a server-to-client flag when the debug header is present', () => {
     const updatedHtml = maybeInjectQueryDevtoolsBootstrap(html, createReq('1'));
 
-    expect(updatedHtml).toContain('window.__LIBRECHAT_CONFIG__');
+    expect(updatedHtml).toContain('window.__BAANZON_CONFIG__');
     expect(updatedHtml).toContain('data-librechat-query-devtools="true"');
     expect(updatedHtml).toContain('"enableQueryDevtools":true');
     expect(updatedHtml.indexOf('enableQueryDevtools')).toBeLessThan(updatedHtml.indexOf('</head>'));

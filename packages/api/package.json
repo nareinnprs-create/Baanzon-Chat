@@ -2,7 +2,7 @@
   "name": "@librechat/api",
   "version": "1.7.47",
   "type": "commonjs",
-  "description": "MCP services for LibreChat",
+  "description": "Baanzon Chat API service",
   "main": "dist/index.cjs",
   "types": "./dist/index.d.cts",
   "exports": {

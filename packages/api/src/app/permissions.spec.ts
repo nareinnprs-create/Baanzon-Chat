@@ -2081,7 +2081,7 @@ describe('updateInterfacePermissions - permissions', () => {
       },
     });
 
-    // Config uses boolean (not object), simulating `agents: true` in librechat.yaml
+    // Config uses boolean (not object), simulating `agents: true` in baanzon.yaml
     const config = {
       interface: {
         agents: true, // Boolean config - should only update USE, not reset SHARE/SHARE_PUBLIC

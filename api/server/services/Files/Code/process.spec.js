@@ -596,7 +596,7 @@ describe('Code Process', () => {
           method: 'get',
           headers: expect.objectContaining({
             Authorization: 'Bearer codeapi-token',
-            'User-Agent': 'LibreChat/1.0',
+            'User-Agent': 'Baanzon/1.0',
           }),
         }),
       );
@@ -1497,7 +1497,7 @@ describe('Code Process', () => {
             method: 'get',
             headers: expect.objectContaining({
               Authorization: 'Bearer freshness-token',
-              'User-Agent': 'LibreChat/1.0',
+              'User-Agent': 'Baanzon/1.0',
             }),
           }),
         );
@@ -2295,7 +2295,7 @@ describe('Code Process', () => {
             method: 'post',
             headers: expect.objectContaining({
               Authorization: 'Bearer sandbox-token',
-              'User-Agent': 'LibreChat/1.0',
+              'User-Agent': 'Baanzon/1.0',
             }),
           }),
         );
@@ -3242,7 +3242,7 @@ describe('Code Process', () => {
    */
   describe('readSandboxImage transport', () => {
     beforeEach(() => {
-      process.env.LIBRECHAT_CODE_BASEURL = 'http://code.test/v1';
+      process.env.BAANZON_CODE_BASEURL = 'http://code.test/v1';
       mockAxios.mockReset();
       mockParseSandboxImageChunk.mockReset();
       mockParseSandboxImageChunk.mockImplementation((response) => response);

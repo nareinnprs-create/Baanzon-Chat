@@ -977,14 +977,14 @@ describe('webSearchSchema', () => {
       keenableSearchOptions: {
         maxResults: 7,
         site: 'example.com',
-        attributionTitle: 'LibreChat',
+        attributionTitle: 'Baanzon Chat',
         timeout: 15000,
       },
     });
 
     expect(result.keenableSearchOptions?.maxResults).toBe(7);
     expect(result.keenableSearchOptions?.site).toBe('example.com');
-    expect(result.keenableSearchOptions?.attributionTitle).toBe('LibreChat');
+    expect(result.keenableSearchOptions?.attributionTitle).toBe('Baanzon Chat');
     expect(result.keenableSearchOptions?.timeout).toBe(15000);
   });
 
@@ -1012,13 +1012,13 @@ describe('webSearchSchema', () => {
       scraperProvider: 'keenable',
       rerankerType: 'none',
       keenableScraperOptions: {
-        attributionTitle: 'LibreChat',
+        attributionTitle: 'Baanzon Chat',
         timeout: 15000,
       },
     });
 
     expect(result.scraperProvider).toBe('keenable');
-    expect(result.keenableScraperOptions?.attributionTitle).toBe('LibreChat');
+    expect(result.keenableScraperOptions?.attributionTitle).toBe('Baanzon Chat');
     expect(result.keenableScraperOptions?.timeout).toBe(15000);
   });
 

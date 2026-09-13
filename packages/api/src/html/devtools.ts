@@ -1,7 +1,7 @@
-export const QUERY_DEVTOOLS_HEADER = 'x-librechat-enable-query-devtools';
+export const QUERY_DEVTOOLS_HEADER = 'x-baanzon-enable-query-devtools';
 
 const QUERY_DEVTOOLS_SENTINEL = 'data-librechat-query-devtools="true"';
-const QUERY_DEVTOOLS_BOOTSTRAP = `<script ${QUERY_DEVTOOLS_SENTINEL}>window.__LIBRECHAT_CONFIG__=Object.assign({},window.__LIBRECHAT_CONFIG__,{"enableQueryDevtools":true});</script>`;
+const QUERY_DEVTOOLS_BOOTSTRAP = `<script ${QUERY_DEVTOOLS_SENTINEL}>window.__BAANZON_CONFIG__=Object.assign({},window.__BAANZON_CONFIG__,{"enableQueryDevtools":true});</script>`;
 
 export interface QueryDevtoolsRequest {
   get(header: string): string | undefined;

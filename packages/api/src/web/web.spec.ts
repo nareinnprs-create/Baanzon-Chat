@@ -910,7 +910,7 @@ describe('web.ts', () => {
         searchProvider: 'keenable' as SearchProviders,
         scraperProvider: 'keenable' as ScraperProviders,
         rerankerType: 'none' as RerankerTypes,
-        keenableScraperOptions: { timeout: 12000, attributionTitle: 'LibreChat' },
+        keenableScraperOptions: { timeout: 12000, attributionTitle: 'Baanzon Chat' },
         safeSearch: SafeSearchTypes.MODERATE,
       } as TWebSearchConfig;
 
@@ -922,7 +922,7 @@ describe('web.ts', () => {
 
       expect(result.authResult.keenableScraperOptions).toEqual({
         timeout: 12000,
-        attributionTitle: 'LibreChat',
+        attributionTitle: 'Baanzon Chat',
       });
       expect(result.authResult.scraperTimeout).toBe(12000);
     });

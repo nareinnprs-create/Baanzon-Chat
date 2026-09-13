@@ -165,7 +165,7 @@ export async function mergeAccessibleCodeEnvironments({
     const defaultIndex = mergedEnvironments.findIndex(
       (environment) =>
         isExecutableCodeEnvironment(environment) &&
-        (environment.owner !== 'principal' || !process.env.LIBRECHAT_CODE_BASEURL_STATEFUL?.trim()),
+        (environment.owner !== 'principal' || !process.env.BAANZON_CODE_BASEURL_STATEFUL?.trim()),
     );
     if (defaultIndex >= 0) {
       mergedEnvironments = mergedEnvironments.map((environment, index) =>

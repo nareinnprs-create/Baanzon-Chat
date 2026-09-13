@@ -53,7 +53,7 @@ class TTSService {
     const ttsSchema = appConfig?.speech?.tts;
     if (!ttsSchema) {
       throw new Error(
-        'No TTS schema is set. Did you configure TTS in the custom config (librechat.yaml)?',
+        'No TTS schema is set. Did you configure TTS in the custom config (baanzon.yaml)?',
       );
     }
     const providers = listConfiguredSpeechProviders(ttsSchema);

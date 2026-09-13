@@ -46,7 +46,7 @@ const buildService = (overrides: Record<string, unknown> = {}) => {
         ? { handleFileUpload: uploadCodeEnvFile }
         : { getDownloadStream }) as never,
     uploadVectors: jest.fn().mockResolvedValue({ embedded: true }),
-    loadAuthValues: jest.fn().mockResolvedValue({ LIBRECHAT_CODE_API_KEY: 'secret-key' }),
+    loadAuthValues: jest.fn().mockResolvedValue({ BAANZON_CODE_API_KEY: 'secret-key' }),
     ...overrides,
   } as never);
   return { service, uploadCodeEnvFile, getDownloadStream };
@@ -66,7 +66,7 @@ describe('createProvisionService', () => {
       await expect(service.loadCodeApiKey('u1')).resolves.toBeUndefined();
       expect(loadAuthValues).toHaveBeenCalledWith({
         userId: 'u1',
-        authFields: ['LIBRECHAT_CODE_API_KEY'],
+        authFields: ['BAANZON_CODE_API_KEY'],
         throwError: false,
       });
     });

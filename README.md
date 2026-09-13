@@ -1,9 +1,9 @@
 <p align="center">
-  <a href="https://librechat.ai">
+  <a href="https://baanzon.chat">
     <img src="client/public/assets/logo.svg" height="256">
   </a>
   <h1 align="center">
-    <a href="https://librechat.ai">LibreChat</a>
+    <a href="https://baanzon.chat">Baanzon Chat</a>
   </h1>
 </p>
 
@@ -82,7 +82,7 @@ Read the [full v0.8.8-rc2 changelog](https://www.librechat.ai/changelog/v0.8.8-r
 
 - 🤖 **AI Model Selection**:  
   - Anthropic (Claude), AWS Bedrock, OpenAI, Azure OpenAI, Google, Vertex AI, OpenAI Responses API (incl. Azure)
-  - [Custom Endpoints](https://www.librechat.ai/docs/quick_start/custom_endpoints): Use any OpenAI-compatible API with LibreChat, no proxy required
+  - [Custom Endpoints](https://www.librechat.ai/docs/quick_start/custom_endpoints): Use any OpenAI-compatible API with Baanzon Chat, no proxy required
   - Compatible with [Local & Remote AI Providers](https://www.librechat.ai/docs/configuration/librechat_yaml/ai_endpoints):
     - Ollama, [AMD Lemonade](https://lemonade-server.ai/), groq, Cohere, Mistral AI, Apple MLX, koboldcpp, together.ai,
     - OpenRouter, Helicone, Perplexity, ShuttleAI, Deepseek, Qwen, and more
@@ -94,7 +94,7 @@ Read the [full v0.8.8-rc2 changelog](https://www.librechat.ai/changelog/v0.8.8-r
   - Open-Source & Self-Hostable: powered by [ClickHouse/code-interpreter](https://github.com/ClickHouse/code-interpreter)
 
 - 🔦 **Agents & Tools Integration**:  
-  - **[LibreChat Agents](https://www.librechat.ai/docs/features/agents)**:
+  - **[Baanzon Chat Agents](https://www.librechat.ai/docs/features/agents)**:
     - No-Code Custom Assistants: Build specialized, AI-driven helpers
     - Agent Marketplace: Discover and deploy community-built agents
     - Collaborative Sharing: Share agents with specific users and groups
@@ -154,7 +154,7 @@ Read the [full v0.8.8-rc2 changelog](https://www.librechat.ai/changelog/v0.8.8-r
   - Supports OpenAI, Azure OpenAI, and Elevenlabs
 
 - 📥 **Import & Export Conversations**:  
-  - Import Conversations from LibreChat, ChatGPT, Chatbot UI  
+  - Import Conversations from Baanzon Chat, ChatGPT, Chatbot UI  
   - Export conversations as screenshots, markdown, text, json
 
 - 🔍 **Search & Discovery**:  
@@ -180,11 +180,11 @@ Read the [full v0.8.8-rc2 changelog](https://www.librechat.ai/changelog/v0.8.8-r
 
 [For a thorough review of our features, see our docs here](https://docs.librechat.ai/) 📚
 
-## 🪶 All-In-One AI Conversations with LibreChat
+## 🪶 All-In-One AI Conversations with Baanzon Chat
 
-LibreChat is a self-hosted AI chat platform that unifies all major AI providers in a single, privacy-focused interface.
+Baanzon Chat is a self-hosted AI chat platform that unifies all major AI providers in a single, privacy-focused interface.
 
-Beyond chat, LibreChat provides AI Agents, Model Context Protocol (MCP) support, Artifacts, Code Interpreter, custom actions, conversation search, and enterprise-ready multi-user authentication.
+Beyond chat, Baanzon Chat provides AI Agents, Model Context Protocol (MCP) support, Artifacts, Code Interpreter, custom actions, conversation search, and enterprise-ready multi-user authentication.
 
 Open source, actively developed, and built for anyone who values control over their AI infrastructure.
 
@@ -242,7 +242,7 @@ Contributions, suggestions, bug reports and fixes are welcome!
 
 For new features, components, or extensions, please open an issue and discuss before sending a PR.
 
-If you'd like to help translate LibreChat into your language, we'd love your contribution! Improving our translations not only makes LibreChat more accessible to users around the world but also enhances the overall user experience. Please check out our [Translation Guide](https://www.librechat.ai/docs/translation).
+If you'd like to help translate Baanzon Chat into your language, we'd love your contribution! Improving our translations not only makes Baanzon Chat more accessible to users around the world but also enhances the overall user experience. Please check out our [Translation Guide](https://www.librechat.ai/docs/translation).
 
 ---
 
@@ -256,7 +256,7 @@ If you'd like to help translate LibreChat into your language, we'd love your con
 
 ## 🎉 Special Thanks
 
-We thank [Locize](https://locize.com) for their translation management tools that support multiple languages in LibreChat.
+We thank [Locize](https://locize.com) for their translation management tools that support multiple languages in Baanzon Chat.
 
 <p align="center">
   <a href="https://locize.com" target="_blank" rel="noopener noreferrer">

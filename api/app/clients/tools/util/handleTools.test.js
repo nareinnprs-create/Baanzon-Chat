@@ -405,7 +405,7 @@ describe('Tool Handlers', () => {
       const jobCreatedAt = 1234;
       const serverConfig = {
         type: 'streamable-http',
-        url: 'https://api.example.com/messages/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://api.example.com/messages/{{BAANZON_BODY_MESSAGEID}}/mcp',
         source: 'yaml',
       };
 
@@ -776,7 +776,7 @@ describe('Tool Handlers', () => {
       const requestBody = { conversationId: 'conv-123', messageId: 'msg-123' };
       const serverConfig = {
         type: 'streamable-http',
-        url: 'https://api.example.com/messages/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://api.example.com/messages/{{BAANZON_BODY_MESSAGEID}}/mcp',
         source: 'yaml',
       };
       const runScopedTools = {
@@ -825,7 +825,7 @@ describe('Tool Handlers', () => {
       const requestBody = { conversationId: 'conv-123', messageId: 'msg-123' };
       const serverConfig = {
         type: 'streamable-http',
-        url: 'https://api.example.com/messages/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://api.example.com/messages/{{BAANZON_BODY_MESSAGEID}}/mcp',
         source: 'yaml',
       };
       const discoveredTools = {

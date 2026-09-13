@@ -15,9 +15,9 @@ module.exports = {
       },
       borderRadius: {
         'theme-control': 'var(--theme-control-radius, 0.75rem)',
-        'theme-control-round': 'var(--theme-round-control-radius, 9999px)',
+        'theme-control-round': 'var(--theme-round-control-radius, 999px)',
         'theme-surface': 'var(--theme-surface-radius, 1rem)',
-        'theme-surface-lg': 'var(--theme-large-surface-radius, 1.5rem)',
+        'theme-surface-lg': 'var(--theme-large-surface-radius, 1.25rem)',
       },
       boxShadow: {
         'theme-surface':

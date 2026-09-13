@@ -72,7 +72,7 @@ function setIdentityAttributes(span: Span, req: ServerRequest): void {
   }
 
   if (tenantId) {
-    attributes['librechat.tenant.id'] = tenantId;
+    attributes['baanzon.tenant.id'] = tenantId;
   }
 
   span.setAttributes(attributes);
@@ -92,7 +92,7 @@ function setCompletionAttributes(
   };
 
   if (aborted) {
-    attributes['librechat.request.aborted'] = true;
+    attributes['baanzon.request.aborted'] = true;
   }
 
   setIdentityAttributes(span, req);

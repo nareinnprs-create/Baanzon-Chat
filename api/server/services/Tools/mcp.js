@@ -205,7 +205,7 @@ async function reinitMCPServer({
       };
     }
 
-    /** `{{LIBRECHAT_BODY_*}}` placeholders only resolve during a chat turn; connecting
+    /** `{{BAANZON_BODY_*}}` placeholders only resolve during a chat turn; connecting
      *  without them would fail, so defer the connection instead of reporting a failure. */
     const missingBodyFields = serverConfig
       ? getMissingRuntimeBodyPlaceholderFields(serverConfig, requestBody)

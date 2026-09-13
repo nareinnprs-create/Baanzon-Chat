@@ -471,7 +471,7 @@ describe('OAuthReconnectionManager', () => {
         url: 'https://example.com/mcp',
         source: 'yaml',
         headers: {
-          'X-Conversation-ID': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+          'X-Conversation-ID': '{{BAANZON_BODY_CONVERSATIONID}}',
         },
       } as unknown as MCPOptions);
 
@@ -493,7 +493,7 @@ describe('OAuthReconnectionManager', () => {
           url: 'https://example.com/mcp',
           source: 'config',
           headers: {
-            'X-Conversation-ID': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+            'X-Conversation-ID': '{{BAANZON_BODY_CONVERSATIONID}}',
           },
         },
       };

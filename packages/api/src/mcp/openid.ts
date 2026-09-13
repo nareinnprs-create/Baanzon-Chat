@@ -6,8 +6,8 @@ import { MCPAuthenticationRefreshError } from './errors';
 import { OpenIDReauthRequiredError } from '~/utils/oidc';
 import { isAbortError } from '~/utils/errors';
 
-const OPENID_ACCESS_TOKEN_PATTERN = /\{\{LIBRECHAT_OPENID_(?:ACCESS_TOKEN|TOKEN)\}\}/;
-const OPENID_ACCESS_TOKEN_REPLACEMENT_PATTERN = /\{\{LIBRECHAT_OPENID_(?:ACCESS_TOKEN|TOKEN)\}\}/g;
+const OPENID_ACCESS_TOKEN_PATTERN = /\{\{BAANZON_OPENID_(?:ACCESS_TOKEN|TOKEN)\}\}/;
+const OPENID_ACCESS_TOKEN_REPLACEMENT_PATTERN = /\{\{BAANZON_OPENID_(?:ACCESS_TOKEN|TOKEN)\}\}/g;
 /** Request-local snapshots carry the opaque token without serializing it as new config metadata. */
 const resolvedAccessTokens = new WeakMap<MCPOptions, string>();
 

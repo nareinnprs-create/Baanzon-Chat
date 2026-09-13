@@ -7,8 +7,8 @@
  *
  * 1. DB-sourced servers resolve `{{MCP_API_KEY}}` via customUserVars.
  * 2. DB-sourced servers do NOT leak `${ENV_VAR}` from process.env.
- * 3. DB-sourced servers do NOT resolve `{{LIBRECHAT_USER_*}}` placeholders.
- * 4. DB-sourced servers do NOT resolve `{{LIBRECHAT_BODY_*}}` placeholders.
+ * 3. DB-sourced servers do NOT resolve `{{BAANZON_USER_*}}` placeholders.
+ * 4. DB-sourced servers do NOT resolve `{{BAANZON_BODY_*}}` placeholders.
  * 5. YAML-sourced servers (dbSourced=false) resolve ALL placeholder types.
  * 6. Mixed headers: some placeholders resolve, others are blocked.
  */
@@ -274,14 +274,14 @@ describe('dbSourced header security – integration', () => {
     expect(captured['x-leaked-key']).not.toBe('internal-key-do-not-leak');
   });
 
-  it('DB-sourced: does NOT resolve {{LIBRECHAT_USER_*}} placeholders', async () => {
+  it('DB-sourced: does NOT resolve {{BAANZON_USER_*}} placeholders', async () => {
     const user = createTestUser({ id: 'user-secret-id', email: 'private@corp.com' });
     const options: MCPOptions = {
       type: 'streamable-http',
       url: server.url,
       headers: {
-        'X-User-Id': '{{LIBRECHAT_USER_ID}}',
-        'X-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+        'X-User-Id': '{{BAANZON_USER_ID}}',
+        'X-User-Email': '{{BAANZON_USER_EMAIL}}',
       },
     };
 
@@ -301,12 +301,12 @@ describe('dbSourced header security – integration', () => {
     await conn.fetchTools();
 
     const captured = server.getLastHeaders();
-    expect(captured['x-user-id']).toBe('{{LIBRECHAT_USER_ID}}');
-    expect(captured['x-user-email']).toBe('{{LIBRECHAT_USER_EMAIL}}');
+    expect(captured['x-user-id']).toBe('{{BAANZON_USER_ID}}');
+    expect(captured['x-user-email']).toBe('{{BAANZON_USER_EMAIL}}');
     expect(captured['x-user-id']).not.toBe('user-secret-id');
   });
 
-  it('DB-sourced: does NOT resolve {{LIBRECHAT_BODY_*}} placeholders', async () => {
+  it('DB-sourced: does NOT resolve {{BAANZON_BODY_*}} placeholders', async () => {
     const body = {
       conversationId: 'conv-secret-123',
       parentMessageId: 'parent-456',
@@ -316,7 +316,7 @@ describe('dbSourced header security – integration', () => {
       type: 'streamable-http',
       url: server.url,
       headers: {
-        'X-Conv-Id': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+        'X-Conv-Id': '{{BAANZON_BODY_CONVERSATIONID}}',
       },
     };
 
@@ -336,7 +336,7 @@ describe('dbSourced header security – integration', () => {
     await conn.fetchTools();
 
     const captured = server.getLastHeaders();
-    expect(captured['x-conv-id']).toBe('{{LIBRECHAT_BODY_CONVERSATIONID}}');
+    expect(captured['x-conv-id']).toBe('{{BAANZON_BODY_CONVERSATIONID}}');
     expect(captured['x-conv-id']).not.toBe('conv-secret-123');
   });
 
@@ -349,8 +349,8 @@ describe('dbSourced header security – integration', () => {
       headers: {
         Authorization: 'Bearer {{MCP_API_KEY}}',
         'X-Env-Leak': '${SECRET_DB_URL}',
-        'X-User-Id': '{{LIBRECHAT_USER_ID}}',
-        'X-Conv-Id': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+        'X-User-Id': '{{BAANZON_USER_ID}}',
+        'X-Conv-Id': '{{BAANZON_BODY_CONVERSATIONID}}',
         'X-Static': 'plain-value',
       },
     };
@@ -382,9 +382,9 @@ describe('dbSourced header security – integration', () => {
     // env var blocked
     expect(captured['x-env-leak']).toBe('${SECRET_DB_URL}');
     // user placeholder blocked
-    expect(captured['x-user-id']).toBe('{{LIBRECHAT_USER_ID}}');
+    expect(captured['x-user-id']).toBe('{{BAANZON_USER_ID}}');
     // body placeholder blocked
-    expect(captured['x-conv-id']).toBe('{{LIBRECHAT_BODY_CONVERSATIONID}}');
+    expect(captured['x-conv-id']).toBe('{{BAANZON_BODY_CONVERSATIONID}}');
     // static value unchanged
     expect(captured['x-static']).toBe('plain-value');
   });
@@ -398,8 +398,8 @@ describe('dbSourced header security – integration', () => {
       headers: {
         Authorization: 'Bearer {{MY_CUSTOM_KEY}}',
         'X-Env': '${INTERNAL_API_KEY}',
-        'X-User-Id': '{{LIBRECHAT_USER_ID}}',
-        'X-Conv-Id': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+        'X-User-Id': '{{BAANZON_USER_ID}}',
+        'X-Conv-Id': '{{BAANZON_BODY_CONVERSATIONID}}',
       },
     };
 

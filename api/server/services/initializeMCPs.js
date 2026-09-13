@@ -64,7 +64,7 @@ async function refreshChangedServerTools({
 
 /**
  * Merges Agent Plugins MCP servers under the configured servers. A plugin never
- * displaces a server the operator declared in `librechat.yaml`.
+ * displaces a server the operator declared in `baanzon.yaml`.
  */
 function withPluginServers(configured) {
   const pluginServers = getDeploymentPluginMcpServers();

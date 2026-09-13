@@ -12,7 +12,7 @@ const directBearerConfig = (
   type: 'streamable-http',
   url: 'https://mcp.example.com',
   source,
-  headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+  headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
 });
 
 describe('direct OpenID bearer recovery', () => {
@@ -42,7 +42,7 @@ describe('direct OpenID bearer recovery', () => {
     async (authorization_type) => {
       const config = {
         ...directBearerConfig('yaml'),
-        headers: { authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+        headers: { authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
         apiKey: {
           source: 'admin' as const,
           key: 'operator-key',
@@ -82,12 +82,12 @@ describe('direct OpenID bearer recovery', () => {
     async (forceRefresh) => {
       const config = {
         ...directBearerConfig('yaml'),
-        url: 'https://mcp.example.com/{{LIBRECHAT_OPENID_TOKEN}}/{{LIBRECHAT_BODY_CONVERSATIONID}}',
+        url: 'https://mcp.example.com/{{BAANZON_OPENID_TOKEN}}/{{BAANZON_BODY_CONVERSATIONID}}',
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
-          'X-Access-Token': '{{LIBRECHAT_OPENID_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}',
+          'X-Access-Token': '{{BAANZON_OPENID_TOKEN}}',
         },
-        oauth_headers: { 'X-Access-Token': '{{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+        oauth_headers: { 'X-Access-Token': '{{BAANZON_OPENID_ACCESS_TOKEN}}' },
       };
       const upstreamTokenProvider = jest.fn().mockResolvedValue({ access_token: 'fresh-token' });
       const resolved = await resolveDirectOpenIDBearerConfig({
@@ -98,7 +98,7 @@ describe('direct OpenID bearer recovery', () => {
       const reused = await resolveDirectOpenIDBearerConfig({
         config: {
           ...config,
-          url: config.url.replace('/{{LIBRECHAT_BODY_CONVERSATIONID}}', '/new-request'),
+          url: config.url.replace('/{{BAANZON_BODY_CONVERSATIONID}}', '/new-request'),
         },
         resolvedConfig: resolved,
         upstreamTokenProvider,
@@ -128,8 +128,8 @@ describe('direct OpenID bearer recovery', () => {
   });
 
   it('resolves a bearer placeholder supplied through an operator environment variable', async () => {
-    const variableName = 'LIBRECHAT_TEST_DIRECT_BEARER_HEADER';
-    process.env[variableName] = 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}';
+    const variableName = 'BAANZON_TEST_DIRECT_BEARER_HEADER';
+    process.env[variableName] = 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}';
     const config = {
       ...directBearerConfig('yaml'),
       headers: { Authorization: `\${${variableName}}` },
@@ -229,7 +229,7 @@ describe('direct OpenID bearer recovery', () => {
       ...directBearerConfig('yaml'),
       obo: { scopes: 'api://mcp/.default' },
       headers: {
-        Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
+        Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}',
         'X-Service': 'private-mcp',
       },
     };

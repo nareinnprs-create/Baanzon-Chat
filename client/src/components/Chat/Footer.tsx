@@ -39,9 +39,9 @@ function Footer({ className, startupConfig }: FooterProps) {
   const mainContentParts = (
     typeof config?.customFooter === 'string'
       ? config.customFooter
-      : '[LibreChat ' +
+      : '[Baanzon Chat ' +
         Constants.VERSION +
-        '](https://librechat.ai) - ' +
+        '](https://baanzon.chat) - ' +
         localize('com_ui_latest_footer')
   ).split('|');
 

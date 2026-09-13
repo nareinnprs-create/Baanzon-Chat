@@ -6,7 +6,7 @@ const packageConfig = require('../../tailwind.config.js');
 const packageJson = require('../../package.json');
 const { defaultAppearance, themeAppearanceProperties } = require('./registry');
 
-describe('LibreChat Tailwind preset', () => {
+describe('Baanzon Chat Tailwind preset', () => {
   it('publishes the appearance roles without removing Tailwind defaults', () => {
     const resolved = resolveConfig(packageConfig);
 

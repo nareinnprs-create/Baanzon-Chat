@@ -561,7 +561,7 @@ describe('tests for the new helper functions used by the MCP connection status e
         {
           ...mockConfig,
           source: 'yaml',
-          headers: { 'X-Parent-Message': '{{LIBRECHAT_BODY_PARENTMESSAGEID}}' },
+          headers: { 'X-Parent-Message': '{{BAANZON_BODY_PARENTMESSAGEID}}' },
         },
         new Map(),
         new Map(),
@@ -580,7 +580,7 @@ describe('tests for the new helper functions used by the MCP connection status e
       const config = {
         ...mockConfig,
         source: 'yaml',
-        headers: { 'X-Conversation': '{{LIBRECHAT_BODY_CONVERSATIONID}}' },
+        headers: { 'X-Conversation': '{{BAANZON_BODY_CONVERSATIONID}}' },
         customUserVars: { API_KEY: { title: 'API key' } },
       };
       const connectionArgs = [new Map(), new Map(), new Set()];
@@ -829,7 +829,7 @@ describe('tests for the new helper functions used by the MCP connection status e
       const config = {
         ...mockConfig,
         source: 'yaml',
-        url: 'https://mcp.example.com/users/{{LIBRECHAT_USER_ID}}/mcp',
+        url: 'https://mcp.example.com/users/{{BAANZON_USER_ID}}/mcp',
       };
       mockGetOAuthReconnectionManager.mockReturnValue({ isReconnecting: jest.fn(() => false) });
       mockGetFlowStateManager.mockReturnValue({ getFlowState: jest.fn(() => null) });
@@ -887,7 +887,7 @@ describe('tests for the new helper functions used by the MCP connection status e
         {
           ...mockConfig,
           source: 'yaml',
-          url: 'https://mcp.example.com/{{LIBRECHAT_USER_ID}}/mcp',
+          url: 'https://mcp.example.com/{{BAANZON_USER_ID}}/mcp',
         },
         appConnections,
         userConnections,
@@ -909,7 +909,7 @@ describe('tests for the new helper functions used by the MCP connection status e
       const config = {
         ...mockConfig,
         source: 'yaml',
-        url: 'https://mcp.example.com/{{LIBRECHAT_BODY_CONVERSATIONID}}/mcp',
+        url: 'https://mcp.example.com/{{BAANZON_BODY_CONVERSATIONID}}/mcp',
       };
       mockGetOAuthReconnectionManager.mockReturnValue({ isReconnecting: jest.fn(() => false) });
       mockGetFlowStateManager.mockReturnValue({
@@ -954,7 +954,7 @@ describe('tests for the new helper functions used by the MCP connection status e
         {
           ...mockConfig,
           source: 'yaml',
-          url: 'https://mcp.example.com/{{LIBRECHAT_USER_ID}}/mcp',
+          url: 'https://mcp.example.com/{{BAANZON_USER_ID}}/mcp',
           requiresOAuth: false,
         },
         appConnections,
@@ -1023,7 +1023,7 @@ describe('tests for the new helper functions used by the MCP connection status e
       const config = {
         ...mockConfig,
         source: 'yaml',
-        url: 'https://mcp.example.com/users/{{LIBRECHAT_USER_ID}}/mcp',
+        url: 'https://mcp.example.com/users/{{BAANZON_USER_ID}}/mcp',
       };
       mockGetOAuthReconnectionManager.mockReturnValue({ isReconnecting: jest.fn(() => false) });
       mockGetFlowStateManager.mockReturnValue({ getFlowState: jest.fn(() => null) });
@@ -1071,7 +1071,7 @@ describe('tests for the new helper functions used by the MCP connection status e
       const config = {
         ...mockConfig,
         source: 'yaml',
-        url: 'https://mcp.example.com/{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}/mcp',
+        url: 'https://mcp.example.com/{{BAANZON_GRAPH_ACCESS_TOKEN}}/mcp',
       };
       const user = {
         id: mockUserId,
@@ -1844,7 +1844,7 @@ describe('User parameter passing tests', () => {
         },
       });
       const reauthError = new OpenIDReauthRequiredError(
-        'OpenID token is expired or unavailable; re-authentication is required to resolve {{LIBRECHAT_OPENID_ACCESS_TOKEN}}.',
+        'OpenID token is expired or unavailable; re-authentication is required to resolve {{BAANZON_OPENID_ACCESS_TOKEN}}.',
       );
       mockGetMCPManager.mockReturnValue({
         callTool: jest.fn().mockRejectedValue(reauthError),
@@ -2579,7 +2579,7 @@ describe('User parameter passing tests', () => {
           type: 'streamable-http',
           url: 'https://direct.example.com',
           source: 'yaml',
-          headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+          headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
         },
         availableTools: {
           [`test-tool${D}direct-server`]: {
@@ -2879,7 +2879,7 @@ describe('User parameter passing tests', () => {
 
       mockRegistryInstance.getServerConfig.mockResolvedValue({
         type: 'streamable-http',
-        url: 'https://{{LIBRECHAT_BODY_CONVERSATIONID}}.example.com/sse',
+        url: 'https://{{BAANZON_BODY_CONVERSATIONID}}.example.com/sse',
         source: 'yaml',
       });
 
@@ -3209,7 +3209,7 @@ describe('User parameter passing tests', () => {
 
       mockRegistryInstance.getServerConfig.mockResolvedValue({
         type: 'streamable-http',
-        url: 'https://api.example.com/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://api.example.com/{{BAANZON_BODY_MESSAGEID}}/mcp',
         source: 'yaml',
       });
 

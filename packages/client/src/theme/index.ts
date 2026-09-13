@@ -26,7 +26,7 @@ export {
   defaultBrands,
   fromLegacyTheme,
   highContrastTheme,
-  libreChatTheme,
+  baanzonTheme,
   resolveTheme,
   themeAppearanceProperties,
   themeBrandTokens,

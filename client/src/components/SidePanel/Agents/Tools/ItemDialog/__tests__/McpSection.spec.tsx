@@ -469,7 +469,7 @@ describe('McpSection', () => {
   });
 
   test('deferred connect attaches the whole server via the mcp_all wildcard', async () => {
-    // Request-scoped servers (runtime {{LIBRECHAT_BODY_*}} placeholders) defer
+    // Request-scoped servers (runtime {{BAANZON_BODY_*}} placeholders) defer
     // their connection to the next chat turn, so no tool list arrives here —
     // Connect should attach the server-wide wildcard instead of waiting.
     mockInitializeServer.mockResolvedValue({ success: true, connectionDeferred: true });

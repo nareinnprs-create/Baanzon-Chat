@@ -184,9 +184,9 @@ export interface PluginHookPlan {
  */
 const UNAVAILABLE_SESSION_SOURCES: Readonly<Record<string, string>> = Object.freeze({
   compact:
-    'SessionStart source "compact" is unavailable because LibreChat PostCompact hook output cannot inject session context',
+    'SessionStart source "compact" is unavailable because Baanzon Chat PostCompact hook output cannot inject session context',
   clear:
-    'SessionStart source "clear" is unavailable because LibreChat has no clear-conversation lifecycle path',
+    'SessionStart source "clear" is unavailable because Baanzon Chat has no clear-conversation lifecycle path',
 });
 
 function normalizeMatcher(matcher: string | undefined): string | undefined {
@@ -239,14 +239,14 @@ function getMatcherValidationIssue(
     return {
       code: 'unsupported_matcher',
       severity: 'error',
-      message: `${targetEvent} does not expose a matcher query in the LibreChat hook runtime`,
+      message: `${targetEvent} does not expose a matcher query in the Baanzon Chat hook runtime`,
     };
   }
   if (matcher.length > MAX_PATTERN_LENGTH || hasNestedQuantifier(matcher)) {
     return {
       code: 'invalid_matcher',
       severity: 'error',
-      message: 'Matcher exceeds the safe regex limits enforced by the LibreChat hook runtime',
+      message: 'Matcher exceeds the safe regex limits enforced by the Baanzon Chat hook runtime',
     };
   }
   try {
@@ -271,7 +271,7 @@ function getEventIssues(
       {
         code: 'unsupported_event',
         severity: 'error',
-        message: `${sourceEvent} has no equivalent LibreChat lifecycle event`,
+        message: `${sourceEvent} has no equivalent Baanzon Chat lifecycle event`,
       },
     ];
   }
@@ -281,7 +281,7 @@ function getEventIssues(
         code: 'unsupported_event_payload',
         severity: 'error',
         message:
-          'SubagentStop is unavailable because the LibreChat hook input does not expose stop-hook state',
+          'SubagentStop is unavailable because the Baanzon Chat hook input does not expose stop-hook state',
       },
     ];
   }
@@ -291,7 +291,7 @@ function getEventIssues(
         code: 'unsupported_event_output',
         severity: 'error',
         message:
-          'PermissionDenied is unavailable because the LibreChat hook output cannot request a retry',
+          'PermissionDenied is unavailable because the Baanzon Chat hook output cannot request a retry',
       },
     ];
   }
@@ -405,7 +405,7 @@ function planMatcher(
             code: 'unsupported_session_source',
             severity: 'warning',
             message:
-              'Wildcard SessionStart compatibility covers startup and resume; compact and clear never occur in LibreChat',
+              'Wildcard SessionStart compatibility covers startup and resume; compact and clear never occur in Baanzon Chat',
           },
         ],
       };
@@ -473,7 +473,7 @@ function planMatcher(
         {
           code: 'unmapped_matcher',
           severity: 'error',
-          message: 'Plugin matcher namespaces require an explicit LibreChat query translation',
+          message: 'Plugin matcher namespaces require an explicit Baanzon Chat query translation',
         },
       ],
     };
@@ -521,7 +521,7 @@ function planMatcher(
     issues.push({
       code: 'matcher_translated',
       severity: 'warning',
-      message: `Plugin matcher "${sourceMatcher}" maps to LibreChat matcher "${matcher}"`,
+      message: `Plugin matcher "${sourceMatcher}" maps to Baanzon Chat matcher "${matcher}"`,
     });
   }
   if (

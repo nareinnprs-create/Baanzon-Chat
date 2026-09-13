@@ -50,9 +50,9 @@ export const themeAppearanceProperties: Readonly<
 
 export const defaultAppearance: IThemeAppearance = Object.freeze({
   controlRadius: '0.75rem',
-  roundControlRadius: '9999px',
+  roundControlRadius: '999px',
   surfaceRadius: '1rem',
-  largeSurfaceRadius: '1.5rem',
+  largeSurfaceRadius: '1.25rem',
   controlHeight: '2.25rem',
   spaceCompact: '0.375rem',
   spaceNormal: '0.75rem',
@@ -82,9 +82,9 @@ export const defaultBrands: IThemeBrands = Object.freeze({
   'provider-foreground': '#ffffff',
 });
 
-export const libreChatTheme: ThemeDefinition = Object.freeze({
+export const baanzonTheme: ThemeDefinition = Object.freeze({
   version: THEME_VERSION,
-  name: 'librechat',
+  name: 'baanzon',
   modes: {
     light: { colors: defaultTheme },
     dark: { colors: darkTheme },

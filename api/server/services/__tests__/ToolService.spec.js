@@ -35,7 +35,7 @@ const mockResolveCodeExecutionContext = jest.fn(
   ({ statefulSessions, environment, userId, agentId, conversationId }) => {
     if (!statefulSessions) {
       return {
-        baseUrl: (process.env.LIBRECHAT_CODE_BASEURL ?? 'https://api.librechat.ai').replace(
+        baseUrl: (process.env.BAANZON_CODE_BASEURL ?? 'https://api.librechat.ai').replace(
           /\/$/,
           '',
         ),
@@ -44,9 +44,9 @@ const mockResolveCodeExecutionContext = jest.fn(
         statefulSessions: false,
       };
     }
-    const baseUrl = process.env.LIBRECHAT_CODE_BASEURL_STATEFUL?.replace(/\/$/, '');
+    const baseUrl = process.env.BAANZON_CODE_BASEURL_STATEFUL?.replace(/\/$/, '');
     if (!baseUrl) {
-      throw new Error('LIBRECHAT_CODE_BASEURL_STATEFUL is not configured');
+      throw new Error('BAANZON_CODE_BASEURL_STATEFUL is not configured');
     }
     const fingerprint = (...parts) =>
       createHash('sha256').update(JSON.stringify(parts)).digest('hex').slice(0, 32);
@@ -2088,7 +2088,7 @@ describe('ToolService - Action Capability Gating', () => {
       mockGetEndpointsConfig.mockResolvedValue(createEndpointsConfig(capabilities));
       mockGetServerConfig.mockResolvedValue({
         type: 'streamable-http',
-        url: 'https://demo.librechat.ai/messages/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://demo.librechat.ai/messages/{{BAANZON_BODY_MESSAGEID}}/mcp',
         source: 'yaml',
       });
       mockGetMCPServerTools.mockResolvedValue(null);
@@ -2119,7 +2119,7 @@ describe('ToolService - Action Capability Gating', () => {
         req.user.id,
         serverName,
         expect.objectContaining({
-          url: expect.stringContaining('LIBRECHAT_BODY_MESSAGEID'),
+          url: expect.stringContaining('BAANZON_BODY_MESSAGEID'),
         }),
       );
     });
@@ -2193,7 +2193,7 @@ describe('ToolService - Action Capability Gating', () => {
       mockGetEndpointsConfig.mockResolvedValue(createEndpointsConfig(capabilities));
       mockGetServerConfig.mockResolvedValue({
         type: 'streamable-http',
-        url: 'https://mcp.example.com/{{LIBRECHAT_BODY_MESSAGEID}}/mcp',
+        url: 'https://mcp.example.com/{{BAANZON_BODY_MESSAGEID}}/mcp',
         source: 'yaml',
       });
       mockGetMCPServerTools.mockResolvedValue(null);
@@ -2220,7 +2220,7 @@ describe('ToolService - Action Capability Gating', () => {
         req.user.id,
         serverName,
         expect.objectContaining({
-          url: expect.stringContaining('LIBRECHAT_BODY_MESSAGEID'),
+          url: expect.stringContaining('BAANZON_BODY_MESSAGEID'),
         }),
       );
     });
@@ -2533,8 +2533,8 @@ describe('ToolService - Action Capability Gating', () => {
       const req = createMockReq(capabilities);
       req.body = { conversationId: 'conversation-1' };
       mockGetEndpointsConfig.mockResolvedValue(createEndpointsConfig(capabilities));
-      process.env.LIBRECHAT_CODE_BASEURL = 'http://code-default.test/v1';
-      process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
+      process.env.BAANZON_CODE_BASEURL = 'http://code-default.test/v1';
+      process.env.BAANZON_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
 
       try {
         const stateless = await loadToolsForExecution({
@@ -2569,8 +2569,8 @@ describe('ToolService - Action Capability Gating', () => {
           statefulSessions: true,
         });
       } finally {
-        delete process.env.LIBRECHAT_CODE_BASEURL;
-        delete process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+        delete process.env.BAANZON_CODE_BASEURL;
+        delete process.env.BAANZON_CODE_BASEURL_STATEFUL;
       }
     });
 
@@ -2585,7 +2585,7 @@ describe('ToolService - Action Capability Gating', () => {
         const req = createMockReq(capabilities);
         req.body = {};
         mockGetEndpointsConfig.mockResolvedValue(createEndpointsConfig(capabilities));
-        process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
+        process.env.BAANZON_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
 
         try {
           const result = await loadToolsForExecution({
@@ -2610,7 +2610,7 @@ describe('ToolService - Action Capability Gating', () => {
             }),
           );
         } finally {
-          delete process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+          delete process.env.BAANZON_CODE_BASEURL_STATEFUL;
         }
       },
     );
@@ -2673,7 +2673,7 @@ describe('ToolService - Action Capability Gating', () => {
       ];
       const req = createMockReq(capabilities);
       mockGetEndpointsConfig.mockResolvedValue(createEndpointsConfig(capabilities));
-      process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
+      process.env.BAANZON_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
 
       try {
         const result = await loadToolsForExecution({
@@ -2694,7 +2694,7 @@ describe('ToolService - Action Capability Gating', () => {
           expect.objectContaining({ statefulSessions: true, environment: 'agent-user' }),
         );
       } finally {
-        delete process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+        delete process.env.BAANZON_CODE_BASEURL_STATEFUL;
       }
     });
 
@@ -2706,7 +2706,7 @@ describe('ToolService - Action Capability Gating', () => {
       ];
       const req = createMockReq(capabilities);
       mockGetEndpointsConfig.mockResolvedValue(createEndpointsConfig(capabilities));
-      process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
+      process.env.BAANZON_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
 
       try {
         const result = await loadToolsForExecution({
@@ -2727,7 +2727,7 @@ describe('ToolService - Action Capability Gating', () => {
           expect.objectContaining({ statefulSessions: true, environment: 'agent-user' }),
         );
       } finally {
-        delete process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+        delete process.env.BAANZON_CODE_BASEURL_STATEFUL;
       }
     });
 
@@ -2790,7 +2790,7 @@ describe('ToolService - Action Capability Gating', () => {
       ];
       const req = createMockReq(capabilities);
       mockGetEndpointsConfig.mockResolvedValue(createEndpointsConfig(capabilities));
-      process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
+      process.env.BAANZON_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
 
       try {
         const result = await loadToolsForExecution({
@@ -2811,7 +2811,7 @@ describe('ToolService - Action Capability Gating', () => {
           expect.objectContaining({ statefulSessions: true, environment: 'agent-user' }),
         );
       } finally {
-        delete process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+        delete process.env.BAANZON_CODE_BASEURL_STATEFUL;
       }
     });
 

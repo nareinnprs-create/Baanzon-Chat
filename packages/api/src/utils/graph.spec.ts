@@ -19,7 +19,7 @@ jest.mock('@librechat/data-schemas', () => ({
 
 // Mock the oidc module
 jest.mock('./oidc', () => ({
-  GRAPH_TOKEN_PLACEHOLDER: '{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+  GRAPH_TOKEN_PLACEHOLDER: '{{BAANZON_GRAPH_ACCESS_TOKEN}}',
   DEFAULT_GRAPH_SCOPES: 'https://graph.microsoft.com/.default',
   extractOpenIDTokenInfo: jest.fn(),
   isOpenIDTokenValid: jest.fn(),
@@ -37,7 +37,7 @@ describe('Graph Token Utilities', () => {
 
   describe('containsGraphTokenPlaceholder', () => {
     it('should return true when string contains the placeholder', () => {
-      const value = 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}';
+      const value = 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}';
       expect(containsGraphTokenPlaceholder(value)).toBe(true);
     });
 
@@ -57,7 +57,7 @@ describe('Graph Token Utilities', () => {
     });
 
     it('should detect placeholder in the middle of a string', () => {
-      const value = 'prefix-{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}-suffix';
+      const value = 'prefix-{{BAANZON_GRAPH_ACCESS_TOKEN}}-suffix';
       expect(containsGraphTokenPlaceholder(value)).toBe(true);
     });
   });
@@ -65,7 +65,7 @@ describe('Graph Token Utilities', () => {
   describe('recordContainsGraphTokenPlaceholder', () => {
     it('should return true when any value contains the placeholder', () => {
       const record = {
-        Authorization: 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+        Authorization: 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}',
         'Content-Type': 'application/json',
       };
       expect(recordContainsGraphTokenPlaceholder(record)).toBe(true);
@@ -103,7 +103,7 @@ describe('Graph Token Utilities', () => {
   describe('mcpOptionsContainGraphTokenPlaceholder', () => {
     it('should return true when url contains the placeholder', () => {
       const options = {
-        url: 'https://api.example.com?token={{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+        url: 'https://api.example.com?token={{BAANZON_GRAPH_ACCESS_TOKEN}}',
       };
       expect(mcpOptionsContainGraphTokenPlaceholder(options)).toBe(true);
     });
@@ -111,7 +111,7 @@ describe('Graph Token Utilities', () => {
     it('should return true when headers contain the placeholder', () => {
       const options = {
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}',
         },
       };
       expect(mcpOptionsContainGraphTokenPlaceholder(options)).toBe(true);
@@ -120,7 +120,7 @@ describe('Graph Token Utilities', () => {
     it('should return true when env contains the placeholder', () => {
       const options = {
         env: {
-          GRAPH_TOKEN: '{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          GRAPH_TOKEN: '{{BAANZON_GRAPH_ACCESS_TOKEN}}',
         },
       };
       expect(mcpOptionsContainGraphTokenPlaceholder(options)).toBe(true);
@@ -164,7 +164,7 @@ describe('Graph Token Utilities', () => {
     });
 
     it('should return original value when user is not provided', async () => {
-      const value = 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}';
+      const value = 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}';
       const result = await resolveGraphTokenPlaceholder(value, {
         graphTokenResolver: mockGraphTokenResolver,
       });
@@ -172,7 +172,7 @@ describe('Graph Token Utilities', () => {
     });
 
     it('should return original value when graphTokenResolver is not provided', async () => {
-      const value = 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}';
+      const value = 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}';
       const result = await resolveGraphTokenPlaceholder(value, {
         user: mockUser as Partial<IUser> as IUser,
       });
@@ -182,7 +182,7 @@ describe('Graph Token Utilities', () => {
     it('should return original value when token info is invalid', async () => {
       mockExtractOpenIDTokenInfo.mockReturnValue(null);
 
-      const value = 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}';
+      const value = 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}';
       const result = await resolveGraphTokenPlaceholder(value, {
         user: mockUser as Partial<IUser> as IUser,
         graphTokenResolver: mockGraphTokenResolver,
@@ -194,7 +194,7 @@ describe('Graph Token Utilities', () => {
       mockExtractOpenIDTokenInfo.mockReturnValue({ accessToken: 'access-token' });
       mockIsOpenIDTokenValid.mockReturnValue(false);
 
-      const value = 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}';
+      const value = 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}';
       const result = await resolveGraphTokenPlaceholder(value, {
         user: mockUser as Partial<IUser> as IUser,
         graphTokenResolver: mockGraphTokenResolver,
@@ -206,7 +206,7 @@ describe('Graph Token Utilities', () => {
       mockExtractOpenIDTokenInfo.mockReturnValue({ userId: 'user-123' });
       mockIsOpenIDTokenValid.mockReturnValue(true);
 
-      const value = 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}';
+      const value = 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}';
       const result = await resolveGraphTokenPlaceholder(value, {
         user: mockUser as Partial<IUser> as IUser,
         graphTokenResolver: mockGraphTokenResolver,
@@ -218,7 +218,7 @@ describe('Graph Token Utilities', () => {
       mockExtractOpenIDTokenInfo.mockReturnValue({ accessToken: 'access-token' });
       mockIsOpenIDTokenValid.mockReturnValue(true);
 
-      const value = 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}';
+      const value = 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}';
       const result = await resolveGraphTokenPlaceholder(value, {
         user: mockUser as Partial<IUser> as IUser,
         graphTokenResolver: mockGraphTokenResolver,
@@ -231,7 +231,7 @@ describe('Graph Token Utilities', () => {
       mockIsOpenIDTokenValid.mockReturnValue(true);
 
       const value =
-        'Primary: {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}, Secondary: {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}';
+        'Primary: {{BAANZON_GRAPH_ACCESS_TOKEN}}, Secondary: {{BAANZON_GRAPH_ACCESS_TOKEN}}';
       const result = await resolveGraphTokenPlaceholder(value, {
         user: mockUser as Partial<IUser> as IUser,
         graphTokenResolver: mockGraphTokenResolver,
@@ -246,7 +246,7 @@ describe('Graph Token Utilities', () => {
         .fn()
         .mockRejectedValue(new Error('Exchange failed'));
 
-      const value = 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}';
+      const value = 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}';
       const result = await resolveGraphTokenPlaceholder(value, {
         user: mockUser as Partial<IUser> as IUser,
         graphTokenResolver: failingResolver,
@@ -259,7 +259,7 @@ describe('Graph Token Utilities', () => {
       mockIsOpenIDTokenValid.mockReturnValue(true);
       const emptyResolver: GraphTokenResolver = jest.fn().mockResolvedValue({});
 
-      const value = 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}';
+      const value = 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}';
       const result = await resolveGraphTokenPlaceholder(value, {
         user: mockUser as Partial<IUser> as IUser,
         graphTokenResolver: emptyResolver,
@@ -271,7 +271,7 @@ describe('Graph Token Utilities', () => {
       mockExtractOpenIDTokenInfo.mockReturnValue({ accessToken: 'access-token' });
       mockIsOpenIDTokenValid.mockReturnValue(true);
 
-      const value = 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}';
+      const value = 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}';
       await resolveGraphTokenPlaceholder(value, {
         user: mockUser as Partial<IUser> as IUser,
         graphTokenResolver: mockGraphTokenResolver,
@@ -326,7 +326,7 @@ describe('Graph Token Utilities', () => {
 
     it('should resolve placeholders in record values', async () => {
       const record = {
-        Authorization: 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+        Authorization: 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}',
         'Content-Type': 'application/json',
       };
       const result = await resolveGraphTokensInRecord(record, options);
@@ -338,7 +338,7 @@ describe('Graph Token Utilities', () => {
 
     it('should handle non-string values gracefully', async () => {
       const record = {
-        Authorization: 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+        Authorization: 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}',
         numericValue: 123 as unknown as string,
       };
       const result = await resolveGraphTokensInRecord(record, options);
@@ -384,7 +384,7 @@ describe('Graph Token Utilities', () => {
 
     it('should resolve placeholder in url', async () => {
       const options = {
-        url: 'https://api.example.com?token={{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+        url: 'https://api.example.com?token={{BAANZON_GRAPH_ACCESS_TOKEN}}',
       };
       const result = await preProcessGraphTokens(options, graphOptions);
       expect(result.url).toBe('https://api.example.com?token=resolved-graph-token');
@@ -393,7 +393,7 @@ describe('Graph Token Utilities', () => {
     it('should resolve placeholder in headers', async () => {
       const options = {
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}',
           'Content-Type': 'application/json',
         },
       };
@@ -407,7 +407,7 @@ describe('Graph Token Utilities', () => {
     it('should resolve placeholder in env', async () => {
       const options = {
         env: {
-          GRAPH_TOKEN: '{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          GRAPH_TOKEN: '{{BAANZON_GRAPH_ACCESS_TOKEN}}',
           OTHER_VAR: 'static-value',
         },
       };
@@ -420,12 +420,12 @@ describe('Graph Token Utilities', () => {
 
     it('should resolve placeholders in all fields simultaneously', async () => {
       const options = {
-        url: 'https://api.example.com?token={{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+        url: 'https://api.example.com?token={{BAANZON_GRAPH_ACCESS_TOKEN}}',
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}',
         },
         env: {
-          GRAPH_TOKEN: '{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          GRAPH_TOKEN: '{{BAANZON_GRAPH_ACCESS_TOKEN}}',
         },
       };
       const result = await preProcessGraphTokens(options, graphOptions);
@@ -440,9 +440,9 @@ describe('Graph Token Utilities', () => {
 
     it('should not mutate the original options object', async () => {
       const options = {
-        url: 'https://api.example.com?token={{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+        url: 'https://api.example.com?token={{BAANZON_GRAPH_ACCESS_TOKEN}}',
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_GRAPH_ACCESS_TOKEN}}',
         },
       };
       const originalUrl = options.url;
@@ -456,7 +456,7 @@ describe('Graph Token Utilities', () => {
 
     it('should preserve additional properties in generic type', async () => {
       const options = {
-        url: 'https://api.example.com?token={{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+        url: 'https://api.example.com?token={{BAANZON_GRAPH_ACCESS_TOKEN}}',
         customProperty: 'custom-value',
         anotherProperty: 42,
       };

@@ -697,7 +697,7 @@ function resolveBuiltInClientOverrides(
  * overrides required to talk to that endpoint.
  *
  * Without this step, a `summarization.provider: "Ollama"` entry in
- * `librechat.yaml` flows verbatim to the agents SDK, which only knows a fixed
+ * `baanzon.yaml` flows verbatim to the agents SDK, which only knows a fixed
  * set of provider names and throws "Unsupported LLM provider: Ollama".
  */
 function resolveSummarizationProvider(
@@ -758,7 +758,7 @@ function resolveSummarizationProvider(
     }
     /**
      * Resolve templated header values (e.g. `${PORTKEY_API_KEY}`,
-     * `{{LIBRECHAT_BODY_PARENTMESSAGEID}}`) before handing them to
+     * `{{BAANZON_BODY_PARENTMESSAGEID}}`) before handing them to
      * `getOpenAIConfig`, matching the agent main flow where `resolveHeaders`
      * runs on `llmConfig.configuration.defaultHeaders`.
      */
@@ -2401,7 +2401,7 @@ export async function createRun({
     // live, so gating both on the same capability keeps them in lockstep.
     ...(steering?.preemption != null &&
       isSteerPreemptSupported() && { preemption: steering.preemption }),
-    // Stream circuit breakers (librechat.yaml endpoints.agents.maxToolCallArgBytes /
+    // Stream circuit breakers (baanzon.yaml endpoints.agents.maxToolCallArgBytes /
     // maxDeltaEventsPerTurn). Omitted when unset so the SDK defaults apply: a runaway
     // streamed tool-call argument aborts the run at 64 KiB, the per-turn delta event
     // cap stays off. Requires @librechat/agents with streamLimits support (agents#381);

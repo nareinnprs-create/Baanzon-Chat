@@ -3,7 +3,7 @@ import {
   defaultAppearance,
   defaultBrands,
   fromLegacyTheme,
-  libreChatTheme,
+  baanzonTheme,
   resolveTheme,
   themeColorTokens,
   validateThemeDefinition,
@@ -88,10 +88,10 @@ describe('theme registry', () => {
   });
 
   it('keeps the bundled code surfaces unchanged for the default appearances', () => {
-    expect(resolveTheme(libreChatTheme, 'light').colors['rgb-surface-code']).toBe(
+    expect(resolveTheme(baanzonTheme, 'light').colors['rgb-surface-code']).toBe(
       defaultTheme['rgb-surface-code'],
     );
-    expect(resolveTheme(libreChatTheme, 'dark').colors['rgb-surface-code']).toBe(
+    expect(resolveTheme(baanzonTheme, 'dark').colors['rgb-surface-code']).toBe(
       darkTheme['rgb-surface-code'],
     );
   });
@@ -212,7 +212,7 @@ describe('theme registry', () => {
   });
 
   it('resolves provider brand tokens and lets a theme override them', () => {
-    const defaults = resolveTheme(libreChatTheme, 'light');
+    const defaults = resolveTheme(baanzonTheme, 'light');
     expect(defaults.brands['provider-anthropic']).toBe('#d09a74');
     expect(defaults.brands['provider-openai']).toBe(defaultBrands['provider-openai']);
 

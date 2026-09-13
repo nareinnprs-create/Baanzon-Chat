@@ -279,7 +279,7 @@ describe('MCPServersRegistry', () => {
           type: 'streamable-http',
           url: 'https://api.example.com/mcp',
           headers: {
-            'X-LibreChat-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+            'X-LibreChat-User-Email': '{{BAANZON_USER_EMAIL}}',
           },
         },
         'DB',
@@ -291,7 +291,7 @@ describe('MCPServersRegistry', () => {
         expect.objectContaining({
           source: 'user',
           headers: {
-            'X-LibreChat-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+            'X-LibreChat-User-Email': '{{BAANZON_USER_EMAIL}}',
           },
         }),
         undefined,
@@ -328,7 +328,7 @@ describe('MCPServersRegistry', () => {
 
   /**
    * Agent Plugins servers reach the registry through the same startup path as
-   * librechat.yaml servers. Deriving `source` from the storage tier alone used to
+   * baanzon.yaml servers. Deriving `source` from the storage tier alone used to
    * retag them `'yaml'`, which dropped the marker `processMCPEnv` needs to keep
    * plugin-authored placeholders literal and let a plugin exfiltrate `process.env`
    * secrets through its own headers.

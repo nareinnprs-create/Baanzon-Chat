@@ -3868,7 +3868,7 @@ async function handleAttachedWorkspaceEditFileCall({
         if (signal?.aborted === true && isAbortError(error)) throw error;
         if (error instanceof WorkspaceToolHttpError && error.upstreamStatus === 400) {
           error.message +=
-            '. This attached environment must update its LibreChat Code worker before protected files can be edited.';
+            '. This attached environment must update its Baanzon Chat Code worker before protected files can be edited.';
         }
         throw error;
       }

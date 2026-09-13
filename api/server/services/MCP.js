@@ -1428,7 +1428,7 @@ async function getMCPSetupData(userId, options = {}) {
   try {
     // Use getLoaded() instead of getAll() to avoid forcing connection creation.
     // getAll() creates connections for all servers, which is problematic for servers
-    // that require user context (e.g., those with {{LIBRECHAT_USER_ID}} placeholders).
+    // that require user context (e.g., those with {{BAANZON_USER_ID}} placeholders).
     appConnections = (await mcpManager.appConnections?.getLoaded()) || new Map();
   } catch (error) {
     logger.error(`[MCP][User: ${userId}] Error getting app connections:`, error);

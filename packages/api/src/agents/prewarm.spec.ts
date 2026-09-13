@@ -39,8 +39,8 @@ describe('maybePrewarmCodeSandbox', () => {
 
   beforeEach(async () => {
     await resetSandboxStateForTests();
-    process.env.LIBRECHAT_CODE_BASEURL = 'http://code.test/v1';
-    process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
+    process.env.BAANZON_CODE_BASEURL = 'http://code.test/v1';
+    process.env.BAANZON_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
     delete process.env.CODE_SANDBOX_PREWARM;
     delete process.env.CODE_SANDBOX_COLD_AFTER_MS;
     delete process.env.CODEAPI_JWT_ENABLED;
@@ -53,8 +53,8 @@ describe('maybePrewarmCodeSandbox', () => {
   afterEach(() => {
     fetchMock.mockRestore();
     jest.useRealTimers();
-    delete process.env.LIBRECHAT_CODE_BASEURL;
-    delete process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+    delete process.env.BAANZON_CODE_BASEURL;
+    delete process.env.BAANZON_CODE_BASEURL_STATEFUL;
   });
 
   it('does nothing when no reachable agent has stateful sessions', async () => {
@@ -351,14 +351,14 @@ describe('maybePrewarmCodeSandbox', () => {
 describe('shouldSignalSandboxStart / markSandboxReady', () => {
   beforeEach(async () => {
     await resetSandboxStateForTests();
-    process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
+    process.env.BAANZON_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
     delete process.env.CODE_SANDBOX_PREWARM;
     delete process.env.CODE_SANDBOX_COLD_AFTER_MS;
   });
 
   afterEach(() => {
     jest.useRealTimers();
-    delete process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+    delete process.env.BAANZON_CODE_BASEURL_STATEFUL;
   });
 
   it('never signals for untracked conversations (stateless deployments)', async () => {

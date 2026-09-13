@@ -80,7 +80,7 @@ const createDefinition = (
   return { ...base, ...overrides } as SettingDefinition;
 };
 
-export const librechat = {
+export const baanzon = {
   modelLabel: {
     key: 'modelLabel',
     label: 'com_endpoint_custom_name',
@@ -165,10 +165,10 @@ export const librechat = {
 
 const openAIParams: Record<string, SettingDefinition> = {
   chatGptLabel: {
-    ...librechat.modelLabel,
+    ...baanzon.modelLabel,
     key: 'chatGptLabel',
   },
-  promptPrefix: librechat.promptPrefix,
+  promptPrefix: baanzon.promptPrefix,
   temperature: createDefinition(baseDefinitions.temperature, {
     default: openAISettings.temperature.default,
     range: {
@@ -696,7 +696,7 @@ const google: Record<string, SettingDefinition> = {
   /** Bounds the hand-rolled editor enforced through InputNumber, and they stay
    *  scoped to this endpoint: the shared definition is rendered by every other
    *  endpoint, whose own context windows may fall outside them. */
-  maxContextTokens: createDefinition(librechat.maxContextTokens, {
+  maxContextTokens: createDefinition(baanzon.maxContextTokens, {
     range: {
       min: googleSettings.maxContextTokens.min,
       max: googleSettings.maxContextTokens.max,
@@ -841,26 +841,26 @@ const google: Record<string, SettingDefinition> = {
 };
 
 const googleConfig: SettingsConfiguration = [
-  librechat.modelLabel,
-  librechat.promptPrefix,
+  baanzon.modelLabel,
+  baanzon.promptPrefix,
   google.maxContextTokens,
   google.maxOutputTokens,
   google.temperature,
   google.topP,
   google.topK,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   google.thinking,
   google.thinkingBudget,
   google.thinkingLevel,
   google.web_search,
   google.url_context,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const googleCol1: SettingsConfiguration = [
   baseDefinitions.model as SettingDefinition,
-  librechat.modelLabel,
-  librechat.promptPrefix,
+  baanzon.modelLabel,
+  baanzon.promptPrefix,
 ];
 
 const googleCol2: SettingsConfiguration = [
@@ -869,27 +869,27 @@ const googleCol2: SettingsConfiguration = [
   google.temperature,
   google.topP,
   google.topK,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   google.thinking,
   google.thinkingBudget,
   google.thinkingLevel,
   google.web_search,
   google.url_context,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const openAI: SettingsConfiguration = [
-  librechat.modelLabel,
-  librechat.promptPrefix,
-  librechat.maxContextTokens,
+  baanzon.modelLabel,
+  baanzon.promptPrefix,
+  baanzon.maxContextTokens,
   openAIParams.max_tokens,
   openAIParams.temperature,
   openAIParams.top_p,
   openAIParams.frequency_penalty,
   openAIParams.presence_penalty,
   baseDefinitions.stop,
-  librechat.resendFiles,
-  librechat.imageDetail,
+  baanzon.resendFiles,
+  baanzon.imageDetail,
   openAIParams.web_search,
   openAIParams.reasoning_effort,
   openAIParams.useResponsesApi,
@@ -898,7 +898,7 @@ const openAI: SettingsConfiguration = [
   openAIParams.reasoning_context,
   openAIParams.verbosity,
   openAIParams.disableStreaming,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const openRouter: SettingsConfiguration = [
@@ -909,20 +909,20 @@ const openRouter: SettingsConfiguration = [
 
 const openAICol1: SettingsConfiguration = [
   baseDefinitions.model as SettingDefinition,
-  librechat.modelLabel,
-  librechat.promptPrefix,
+  baanzon.modelLabel,
+  baanzon.promptPrefix,
 ];
 
 const openAICol2: SettingsConfiguration = [
-  librechat.maxContextTokens,
+  baanzon.maxContextTokens,
   openAIParams.max_tokens,
   openAIParams.temperature,
   openAIParams.top_p,
   openAIParams.frequency_penalty,
   openAIParams.presence_penalty,
   baseDefinitions.stop,
-  librechat.resendFiles,
-  librechat.imageDetail,
+  baanzon.resendFiles,
+  baanzon.imageDetail,
   openAIParams.reasoning_effort,
   openAIParams.reasoning_summary,
   openAIParams.reasoning_mode,
@@ -931,18 +931,18 @@ const openAICol2: SettingsConfiguration = [
   openAIParams.useResponsesApi,
   openAIParams.web_search,
   openAIParams.disableStreaming,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const anthropicConfig: SettingsConfiguration = [
-  librechat.modelLabel,
-  librechat.promptPrefix,
-  librechat.maxContextTokens,
+  baanzon.modelLabel,
+  baanzon.promptPrefix,
+  baanzon.maxContextTokens,
   anthropic.maxOutputTokens,
   anthropic.temperature,
   anthropic.topP,
   anthropic.topK,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   anthropic.promptCache,
   anthropic.promptCacheTtl,
   anthropic.thinking,
@@ -950,22 +950,22 @@ const anthropicConfig: SettingsConfiguration = [
   anthropic.effort,
   anthropic.thinkingDisplay,
   anthropic.web_search,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const anthropicCol1: SettingsConfiguration = [
   baseDefinitions.model as SettingDefinition,
-  librechat.modelLabel,
-  librechat.promptPrefix,
+  baanzon.modelLabel,
+  baanzon.promptPrefix,
 ];
 
 const anthropicCol2: SettingsConfiguration = [
-  librechat.maxContextTokens,
+  baanzon.maxContextTokens,
   anthropic.maxOutputTokens,
   anthropic.temperature,
   anthropic.topP,
   anthropic.topK,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   anthropic.promptCache,
   anthropic.promptCacheTtl,
   anthropic.thinking,
@@ -973,19 +973,19 @@ const anthropicCol2: SettingsConfiguration = [
   anthropic.effort,
   anthropic.thinkingDisplay,
   anthropic.web_search,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const bedrockAnthropic: SettingsConfiguration = [
-  librechat.modelLabel,
+  baanzon.modelLabel,
   bedrock.system,
-  librechat.maxContextTokens,
+  baanzon.maxContextTokens,
   bedrock.maxTokens,
   bedrock.temperature,
   bedrock.topP,
   bedrock.topK,
   baseDefinitions.stop,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   bedrock.region,
   bedrock.promptCache,
   bedrock.promptCacheTtl,
@@ -993,60 +993,60 @@ const bedrockAnthropic: SettingsConfiguration = [
   anthropic.thinkingBudget,
   anthropic.effort,
   anthropic.thinkingDisplay,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const bedrockMistral: SettingsConfiguration = [
-  librechat.modelLabel,
-  librechat.promptPrefix,
-  librechat.maxContextTokens,
+  baanzon.modelLabel,
+  baanzon.promptPrefix,
+  baanzon.maxContextTokens,
   bedrock.maxTokens,
   mistral.temperature,
   mistral.topP,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   bedrock.region,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const bedrockCohere: SettingsConfiguration = [
-  librechat.modelLabel,
-  librechat.promptPrefix,
-  librechat.maxContextTokens,
+  baanzon.modelLabel,
+  baanzon.promptPrefix,
+  baanzon.maxContextTokens,
   bedrock.maxTokens,
   cohere.temperature,
   cohere.topP,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   bedrock.region,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const bedrockGeneral: SettingsConfiguration = [
-  librechat.modelLabel,
-  librechat.promptPrefix,
-  librechat.maxContextTokens,
+  baanzon.modelLabel,
+  baanzon.promptPrefix,
+  baanzon.maxContextTokens,
   meta.temperature,
   meta.topP,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   bedrock.region,
   bedrock.promptCache,
   bedrock.promptCacheTtl,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const bedrockAnthropicCol1: SettingsConfiguration = [
   baseDefinitions.model as SettingDefinition,
-  librechat.modelLabel,
+  baanzon.modelLabel,
   bedrock.system,
   baseDefinitions.stop,
 ];
 
 const bedrockAnthropicCol2: SettingsConfiguration = [
-  librechat.maxContextTokens,
+  baanzon.maxContextTokens,
   bedrock.maxTokens,
   bedrock.temperature,
   bedrock.topP,
   bedrock.topK,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   bedrock.region,
   bedrock.promptCache,
   bedrock.promptCacheTtl,
@@ -1054,120 +1054,120 @@ const bedrockAnthropicCol2: SettingsConfiguration = [
   anthropic.thinkingBudget,
   anthropic.effort,
   anthropic.thinkingDisplay,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const bedrockMistralCol1: SettingsConfiguration = [
   baseDefinitions.model as SettingDefinition,
-  librechat.modelLabel,
-  librechat.promptPrefix,
+  baanzon.modelLabel,
+  baanzon.promptPrefix,
 ];
 
 const bedrockMistralCol2: SettingsConfiguration = [
-  librechat.maxContextTokens,
+  baanzon.maxContextTokens,
   bedrock.maxTokens,
   mistral.temperature,
   mistral.topP,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   bedrock.region,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const bedrockCohereCol1: SettingsConfiguration = [
   baseDefinitions.model as SettingDefinition,
-  librechat.modelLabel,
-  librechat.promptPrefix,
+  baanzon.modelLabel,
+  baanzon.promptPrefix,
 ];
 
 const bedrockCohereCol2: SettingsConfiguration = [
-  librechat.maxContextTokens,
+  baanzon.maxContextTokens,
   bedrock.maxTokens,
   cohere.temperature,
   cohere.topP,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   bedrock.region,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const bedrockGeneralCol1: SettingsConfiguration = [
   baseDefinitions.model as SettingDefinition,
-  librechat.modelLabel,
-  librechat.promptPrefix,
+  baanzon.modelLabel,
+  baanzon.promptPrefix,
 ];
 
 const bedrockGeneralCol2: SettingsConfiguration = [
-  librechat.maxContextTokens,
+  baanzon.maxContextTokens,
   meta.temperature,
   meta.topP,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   bedrock.region,
   bedrock.promptCache,
   bedrock.promptCacheTtl,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const bedrockZAI: SettingsConfiguration = [
-  librechat.modelLabel,
-  librechat.promptPrefix,
-  librechat.maxContextTokens,
+  baanzon.modelLabel,
+  baanzon.promptPrefix,
+  baanzon.maxContextTokens,
   meta.temperature,
   meta.topP,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   bedrock.region,
   bedrock.reasoning_effort,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const bedrockZAICol1: SettingsConfiguration = [
   baseDefinitions.model as SettingDefinition,
-  librechat.modelLabel,
-  librechat.promptPrefix,
+  baanzon.modelLabel,
+  baanzon.promptPrefix,
 ];
 
 const bedrockZAICol2: SettingsConfiguration = [
-  librechat.maxContextTokens,
+  baanzon.maxContextTokens,
   meta.temperature,
   meta.topP,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   bedrock.region,
   bedrock.reasoning_effort,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const bedrockMoonshot: SettingsConfiguration = [
-  librechat.modelLabel,
+  baanzon.modelLabel,
   bedrock.system,
-  librechat.maxContextTokens,
+  baanzon.maxContextTokens,
   createDefinition(bedrock.maxTokens, {
     default: 16384,
   }),
   bedrock.temperature,
   bedrock.topP,
   baseDefinitions.stop,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   bedrock.region,
   bedrock.reasoning_effort,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 const bedrockMoonshotCol1: SettingsConfiguration = [
   baseDefinitions.model as SettingDefinition,
-  librechat.modelLabel,
+  baanzon.modelLabel,
   bedrock.system,
   baseDefinitions.stop,
 ];
 
 const bedrockMoonshotCol2: SettingsConfiguration = [
-  librechat.maxContextTokens,
+  baanzon.maxContextTokens,
   createDefinition(bedrock.maxTokens, {
     default: 16384,
   }),
   bedrock.temperature,
   bedrock.topP,
-  librechat.resendFiles,
+  baanzon.resendFiles,
   bedrock.region,
   bedrock.reasoning_effort,
-  librechat.fileTokenLimit,
+  baanzon.fileTokenLimit,
 ];
 
 export const paramSettings: Record<string, SettingsConfiguration | undefined> = {

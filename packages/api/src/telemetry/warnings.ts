@@ -1,4 +1,4 @@
-const WARNING_CODE = 'LIBRECHAT_OTEL';
+const WARNING_CODE = 'BAANZON_OTEL';
 
 export function emitTelemetryWarning(message: string): void {
   process.emitWarning(message, { code: WARNING_CODE });

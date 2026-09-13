@@ -1,7 +1,7 @@
 import fs from 'fs';
 import type { PluginDiagnostic, PluginHookContribution } from './types';
 import type { PluginHookCapabilities } from '~/agents/hooks';
-import { EXTENSION_HOOKS_FILE, LIBRECHAT_EXTENSION_NAMESPACE } from './constants';
+import { EXTENSION_HOOKS_FILE, BAANZON_EXTENSION_NAMESPACE } from './constants';
 import { parsePluginHooks, planPluginHooks } from '~/agents/hooks';
 import { resolveWithinRoot } from './paths';
 
@@ -16,7 +16,7 @@ export interface PluginHooksResult {
  * Silently ignoring the document would leave an operator believing it runs.
  */
 export async function reportUnexecutedHooks(realRoot: string): Promise<PluginDiagnostic[]> {
-  const location = `${LIBRECHAT_EXTENSION_NAMESPACE}/${EXTENSION_HOOKS_FILE}`;
+  const location = `${BAANZON_EXTENSION_NAMESPACE}/${EXTENSION_HOOKS_FILE}`;
   const hooksPath = await resolveWithinRoot(realRoot, location);
   if (hooksPath === null) {
     return [];
@@ -46,7 +46,7 @@ export async function loadPluginHooks(
   realRoot: string,
   capabilities: PluginHookCapabilities,
 ): Promise<PluginHooksResult> {
-  const location = `${LIBRECHAT_EXTENSION_NAMESPACE}/${EXTENSION_HOOKS_FILE}`;
+  const location = `${BAANZON_EXTENSION_NAMESPACE}/${EXTENSION_HOOKS_FILE}`;
   const hooksPath = await resolveWithinRoot(realRoot, location);
   if (hooksPath === null) {
     return {

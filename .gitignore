@@ -77,7 +77,7 @@ api/tsconfig.json
 .flooignore
 
 #config file
-librechat.yaml
+baanzon.yaml
 librechat.yml
 
 # Environment
@@ -190,6 +190,6 @@ CLAUDE.md
 codedb.snapshot
 scripts/activity-labels/results/
 
-!e2e/lighthouse/librechat.yaml
+!e2e/lighthouse/baanzon.yaml
 /.lighthouse/
 /e2e/lighthouse/.test-results/

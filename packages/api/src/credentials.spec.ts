@@ -30,7 +30,7 @@ describe('credentials', () => {
     tempFile = path.join(tempDirectory, '.env.temp');
     process.env = {
       ...originalEnv,
-      LIBRECHAT_TEMP_CREDENTIALS_PATH: tempFile,
+      BAANZON_TEMP_CREDENTIALS_PATH: tempFile,
     };
     for (const name of credentialNames) {
       delete process.env[name];
@@ -129,7 +129,7 @@ describe('credentials', () => {
     process.env[name] = value;
 
     expect(() => bootstrapCredentials()).toThrow(
-      `[credentials] ${name} uses a retired default value. Configure a unique replacement before starting LibreChat.`,
+      `[credentials] ${name} uses a retired default value. Configure a unique replacement before starting Baanzon Chat.`,
     );
   });
 
@@ -140,7 +140,7 @@ describe('credentials', () => {
     fs.writeFileSync(tempFile, `${name}=${value}\n`);
 
     expect(() => bootstrapCredentials()).toThrow(
-      `[credentials] ${name} uses a retired default value. Configure a unique replacement before starting LibreChat.`,
+      `[credentials] ${name} uses a retired default value. Configure a unique replacement before starting Baanzon Chat.`,
     );
   });
 
@@ -158,13 +158,13 @@ describe('credentials', () => {
     );
 
     expect(() => bootstrapCredentials()).toThrow(
-      '[credentials] JWT_SECRET uses a retired default value. Configure a unique replacement before starting LibreChat.',
+      '[credentials] JWT_SECRET uses a retired default value. Configure a unique replacement before starting Baanzon Chat.',
     );
   });
 
   it('does not overwrite an explicitly selected environment file', () => {
     const environmentFile = path.join(tempDirectory, '.env');
-    process.env.LIBRECHAT_TEMP_CREDENTIALS_PATH = environmentFile;
+    process.env.BAANZON_TEMP_CREDENTIALS_PATH = environmentFile;
 
     const state = bootstrapCredentials();
 

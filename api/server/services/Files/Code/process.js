@@ -235,7 +235,7 @@ const downloadCodeOutputBuffer = async ({
       url: `${baseURL}/download/${session_id}/${id}${downloadQuery}`,
       responseType: 'arraybuffer',
       headers: {
-        'User-Agent': 'LibreChat/1.0',
+        'User-Agent': 'Baanzon/1.0',
         ...authHeaders,
         ...codeExecutionHeaders({ executionProfile, bridgeWorkerId }),
       },
@@ -1162,7 +1162,7 @@ async function getSessionInfo(ref, req, route = {}) {
       method: 'get',
       url: `${baseURL}/sessions/${ref.storage_session_id}/objects/${ref.file_id}${query}`,
       headers: {
-        'User-Agent': 'LibreChat/1.0',
+        'User-Agent': 'Baanzon/1.0',
         ...authHeaders,
         ...(route.executionProfile
           ? codeExecutionHeaders({
@@ -1641,7 +1641,7 @@ async function readSandboxFile({
       data: postData,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'LibreChat/1.0',
+        'User-Agent': 'Baanzon/1.0',
         ...authHeaders,
         ...(executionProfile ? codeExecutionHeaders({ executionProfile, bridgeWorkerId }) : {}),
       },
@@ -2038,7 +2038,7 @@ async function execSandboxImageChunk({
           data: postData,
           headers: {
             'Content-Type': 'application/json',
-            'User-Agent': 'LibreChat/1.0',
+            'User-Agent': 'Baanzon/1.0',
             ...authHeaders,
             ...(executionProfile ? codeExecutionHeaders({ executionProfile, bridgeWorkerId }) : {}),
           },
@@ -2131,7 +2131,7 @@ async function writeSandboxFile({
       data: postData,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'LibreChat/1.0',
+        'User-Agent': 'Baanzon/1.0',
         ...authHeaders,
         ...(executionProfile ? codeExecutionHeaders({ executionProfile, bridgeWorkerId }) : {}),
       },

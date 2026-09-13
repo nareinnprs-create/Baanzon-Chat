@@ -24,13 +24,13 @@ export type TestRunHook = (run: Run<IState>, context: TestRunHookContext) => voi
 
 /**
  * Env-gated extension point used only by the e2e harness. When
- * `LIBRECHAT_TEST_RUN_HOOK` points at a module, it is loaded and invoked with
+ * `BAANZON_TEST_RUN_HOOK` points at a module, it is loaded and invoked with
  * the freshly created run so a test can swap in a fake model via
  * `run.Graph.overrideTestModel(...)` instead of reaching a live provider. A
  * no-op (returns immediately) in normal operation since the env var is unset.
  */
 export function applyTestRunHook(run: Run<IState>, context: TestRunHookContext): void {
-  const hookPath = process.env.LIBRECHAT_TEST_RUN_HOOK;
+  const hookPath = process.env.BAANZON_TEST_RUN_HOOK;
   if (!hookPath) {
     return;
   }

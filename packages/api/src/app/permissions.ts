@@ -126,7 +126,7 @@ export async function updateInterfacePermissions({
   const defaults = getConfigDefaults().interface;
 
   // Permission precedence order:
-  // 1. Explicit user configuration (from librechat.yaml)
+  // 1. Explicit user configuration (from baanzon.yaml)
   // 2. Role-specific defaults (from roleDefaults)
   // 3. Interface schema defaults (from interfaceSchema.default())
   for (const roleName of [SystemRoles.USER, SystemRoles.ADMIN]) {
@@ -713,7 +713,7 @@ export async function updateInterfacePermissions({
      * One-time migration: correct MCP_SERVERS.CREATE for USER role.
      * Before the explicit roleDefaults fix, Zod schema defaults resolved CREATE to true
      * for all roles. ADMIN should keep CREATE: true, but USER should have CREATE: false
-     * unless explicitly configured otherwise in librechat.yaml.
+     * unless explicitly configured otherwise in baanzon.yaml.
      */
     if (roleName === SystemRoles.USER) {
       const existingMcpPerms = existingPermissions?.[PermissionTypes.MCP_SERVERS];

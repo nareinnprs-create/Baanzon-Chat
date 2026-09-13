@@ -127,7 +127,7 @@ export function createSafeUser(
   }
 
   // Fall back to `_id` when the mongoose virtual `id` is absent (e.g. lean/plain
-  // user objects), so `{{LIBRECHAT_USER_ID}}` placeholders still resolve.
+  // user objects), so `{{BAANZON_USER_ID}}` placeholders still resolve.
   if (!safeUser.id && '_id' in user) {
     const _id = (user as unknown as { _id: { toString?: () => string } | string })._id;
     safeUser.id = typeof _id === 'string' ? _id : _id?.toString?.();
@@ -146,19 +146,19 @@ export function createSafeUser(
  */
 export const ALLOWED_BODY_FIELDS = ['conversationId', 'parentMessageId', 'messageId'] as const;
 
-const OPENID_PLACEHOLDER_NAMES = `LIBRECHAT_OPENID_(?:${OPENID_TOKEN_FIELDS.join('|')}|TOKEN)`;
+const OPENID_PLACEHOLDER_NAMES = `BAANZON_OPENID_(?:${OPENID_TOKEN_FIELDS.join('|')}|TOKEN)`;
 
 /**
  * Matches every placeholder this module knows how to resolve: the enumerated
- * `{{LIBRECHAT_USER_*}}`, `{{LIBRECHAT_BODY_*}}`, and `{{LIBRECHAT_OPENID_*}}`
+ * `{{BAANZON_USER_*}}`, `{{BAANZON_BODY_*}}`, and `{{BAANZON_OPENID_*}}`
  * names. Deliberately excludes unknown names (a typo'd placeholder staying
- * literal is diagnosable) and `{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}`, which is
+ * literal is diagnosable) and `{{BAANZON_GRAPH_ACCESS_TOKEN}}`, which is
  * resolved asynchronously via the OBO flow outside this pipeline.
  */
 const RESOLVABLE_PLACEHOLDER_PATTERN = new RegExp(
   [
-    `LIBRECHAT_USER_(?:${ALLOWED_USER_FIELDS.map((field) => field.toUpperCase()).join('|')})`,
-    `LIBRECHAT_BODY_(?:${ALLOWED_BODY_FIELDS.map((field) => field.toUpperCase()).join('|')})`,
+    `BAANZON_USER_(?:${ALLOWED_USER_FIELDS.map((field) => field.toUpperCase()).join('|')})`,
+    `BAANZON_BODY_(?:${ALLOWED_BODY_FIELDS.map((field) => field.toUpperCase()).join('|')})`,
     OPENID_PLACEHOLDER_NAMES,
   ]
     .map((names) => `\\{\\{(?:${names})\\}\\}`)
@@ -175,7 +175,7 @@ const RESOLVABLE_PLACEHOLDER_PATTERN = new RegExp(
  * unknown names are excluded so a typo stays literal and diagnosable.
  */
 const OPENID_CREDENTIAL_PLACEHOLDER_PATTERN =
-  /\{\{LIBRECHAT_OPENID_(?:ACCESS_TOKEN|ID_TOKEN|TOKEN)\}\}/;
+  /\{\{BAANZON_OPENID_(?:ACCESS_TOKEN|ID_TOKEN|TOKEN)\}\}/;
 
 /**
  * The credential placeholders that specifically need a usable *access* token, which is all
@@ -184,13 +184,13 @@ const OPENID_CREDENTIAL_PLACEHOLDER_PATTERN =
  * token is stored. Non-global so `exec` stays stateless.
  */
 const OPENID_ACCESS_CREDENTIAL_PLACEHOLDER_PATTERN =
-  /\{\{LIBRECHAT_OPENID_(?:ACCESS_TOKEN|TOKEN)\}\}/;
+  /\{\{BAANZON_OPENID_(?:ACCESS_TOKEN|TOKEN)\}\}/;
 
 /**
  * Replaces resolvable-but-unresolved placeholders with an empty string so
  * LibreChat's internal template syntax is never sent upstream as if it were
  * real user data (e.g. a gateway trusting a literal
- * `{{LIBRECHAT_USER_OPENIDID}}` as an account identity would pool unrelated
+ * `{{BAANZON_USER_OPENIDID}}` as an account identity would pool unrelated
  * users under that one string). Only for final resolution passes — staged
  * flows that resolve again later with more context must not strip.
  */
@@ -217,7 +217,7 @@ function processUserPlaceholders(
   }
 
   for (const field of ALLOWED_USER_FIELDS) {
-    const placeholder = `{{LIBRECHAT_USER_${field.toUpperCase()}}}`;
+    const placeholder = `{{BAANZON_USER_${field.toUpperCase()}}}`;
 
     if (typeof value !== 'string' || !value.includes(placeholder)) {
       continue;
@@ -255,7 +255,7 @@ function processUserPlaceholders(
 
 /**
  * Replaces request body field placeholders within a string.
- * Recognized placeholders: `{{LIBRECHAT_BODY_<FIELD>}}` where `<FIELD>` ∈ ALLOWED_BODY_FIELDS.
+ * Recognized placeholders: `{{BAANZON_BODY_<FIELD>}}` where `<FIELD>` ∈ ALLOWED_BODY_FIELDS.
  * If a body field is absent or null/undefined, it is replaced with an empty string.
  *
  * @param value - The string value to process
@@ -269,7 +269,7 @@ function processBodyPlaceholders(value: string, body: RequestBody): string {
   }
 
   for (const field of ALLOWED_BODY_FIELDS) {
-    const placeholder = `{{LIBRECHAT_BODY_${field.toUpperCase()}}}`;
+    const placeholder = `{{BAANZON_BODY_${field.toUpperCase()}}}`;
     if (!value.includes(placeholder)) {
       continue;
     }

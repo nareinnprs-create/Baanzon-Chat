@@ -717,7 +717,7 @@
   "com_ui_adding_details": "A adicionar detalhes",
   "com_ui_additional_details": "Detalhes adicionais",
   "com_ui_admin": "Admin",
-  "com_ui_admin_access_warning": "Desativar o acesso de Administrador a esta funcionalidade pode causar problemas inesperados na interface, exigindo uma atualização da página. Depois de guardado, a única forma de reverter é através da definição de interface no ficheiro de configuração librechat.yaml, que afeta todas as funções.",
+  "com_ui_admin_access_warning": "Desativar o acesso de Administrador a esta funcionalidade pode causar problemas inesperados na interface, exigindo uma atualização da página. Depois de guardado, a única forma de reverter é através da definição de interface no ficheiro de configuração baanzon.yaml, que afeta todas as funções.",
   "com_ui_admin_settings": "Definições de Administração",
   "com_ui_advanced": "Avançado",
   "com_ui_advanced_settings": "Definições Avançadas",

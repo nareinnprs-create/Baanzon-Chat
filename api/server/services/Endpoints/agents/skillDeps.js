@@ -398,7 +398,7 @@ const skillToolDeps = {
    * and for `{firstSegment}/...` paths whose first segment isn't a known
    * skill name. The handler routes through this when the agent has code
    * execution enabled; the codeapi base URL comes from
-   * `LIBRECHAT_CODE_BASEURL` and the sandbox session id is forwarded by
+   * `BAANZON_CODE_BASEURL` and the sandbox session id is forwarded by
    * the agents-side `ToolNode` via `tc.codeSessionContext`.
    */
   readSandboxFile,

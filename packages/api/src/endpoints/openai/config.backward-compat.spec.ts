@@ -67,7 +67,7 @@ describe('getOpenAIConfig - Backward Compatibility', () => {
         },
         reverseProxyUrl: 'https://gateway.ai.cloudflare.com/v1/account-id/gateway-id/openrouter',
         headers: {
-          'x-librechat-thread-id': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+          'x-librechat-thread-id': '{{BAANZON_BODY_CONVERSATIONID}}',
           'x-test-key': '{{TESTING_USER_VAR}}',
         },
         proxy: '',
@@ -87,11 +87,11 @@ describe('getOpenAIConfig - Backward Compatibility', () => {
         configOptions: {
           baseURL: 'https://gateway.ai.cloudflare.com/v1/account-id/gateway-id/openrouter',
           defaultHeaders: {
-            'HTTP-Referer': 'https://librechat.ai',
-            'X-Title': 'LibreChat',
-            'X-OpenRouter-Title': 'LibreChat',
+            'HTTP-Referer': 'https://baanzon.chat',
+            'X-Title': 'Baanzon Chat',
+            'X-OpenRouter-Title': 'Baanzon Chat',
             'X-OpenRouter-Categories': 'general-chat,personal-agent',
-            'x-librechat-thread-id': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+            'x-librechat-thread-id': '{{BAANZON_BODY_CONVERSATIONID}}',
             'x-test-key': '{{TESTING_USER_VAR}}',
           },
         },
@@ -402,7 +402,7 @@ describe('getOpenAIConfig - Backward Compatibility', () => {
           'https://gateway.ai.cloudflare.com/v1/${CF_ACCOUNT_ID}/${CF_GATEWAY_ID}/workers-ai/v1',
         proxy: '',
         headers: {
-          'x-librechat-thread-id': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+          'x-librechat-thread-id': '{{BAANZON_BODY_CONVERSATIONID}}',
           'x-test-key': '{{TESTING_USER_VAR}}',
         },
         addParams: {
@@ -429,7 +429,7 @@ describe('getOpenAIConfig - Backward Compatibility', () => {
           baseURL:
             'https://gateway.ai.cloudflare.com/v1/${CF_ACCOUNT_ID}/${CF_GATEWAY_ID}/workers-ai/v1',
           defaultHeaders: {
-            'x-librechat-thread-id': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+            'x-librechat-thread-id': '{{BAANZON_BODY_CONVERSATIONID}}',
             'x-test-key': '{{TESTING_USER_VAR}}',
           },
         },

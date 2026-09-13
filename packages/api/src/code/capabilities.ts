@@ -30,7 +30,7 @@ function codeWorkspaceSelectionErrorMessage(reason: CodeWorkspaceSelectionErrorR
     case 'worker_unavailable':
       return 'The attached code environment is unavailable. Reconnect the machine and try again.';
     case 'unsupported':
-      return 'The attached code environment does not advertise selectable workspaces. Update the LibreChat Code worker and try again.';
+      return 'The attached code environment does not advertise selectable workspaces. Update the Baanzon Chat Code worker and try again.';
     case 'missing':
       return 'The selected workspace is no longer registered on this machine. Choose another workspace explicitly or restore the previous registration.';
   }

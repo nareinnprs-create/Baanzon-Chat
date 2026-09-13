@@ -66,7 +66,7 @@ describe('createGitHubRepoAdapter', () => {
             Accept: 'application/vnd.github+json',
             Authorization: 'Bearer github_pat_secret',
             'X-GitHub-Api-Version': '2022-11-28',
-            'User-Agent': 'LibreChat-Skill-Sync',
+            'User-Agent': 'Baanzon-Skill-Sync',
           }),
         },
       );

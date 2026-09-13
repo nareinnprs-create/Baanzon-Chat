@@ -215,7 +215,7 @@ describe('Code CRUD', () => {
           url: 'https://code-api.example.com/files/session-1/file-1?kind=agent&id=agent-abc',
           headers: expect.objectContaining({
             Authorization: 'Bearer codeapi-token',
-            'User-Agent': 'LibreChat/1.0',
+            'User-Agent': 'Baanzon/1.0',
           }),
           httpAgent: codeServerHttpAgent,
           httpsAgent: codeServerHttpsAgent,
@@ -304,7 +304,7 @@ describe('Code CRUD', () => {
 
     it('skips legacy stateful cleanup after its endpoint is retired', async () => {
       getCodeExecutionBaseUrl.mockImplementationOnce(() => {
-        throw new Error('LIBRECHAT_CODE_BASEURL_STATEFUL is not configured');
+        throw new Error('BAANZON_CODE_BASEURL_STATEFUL is not configured');
       });
       const legacyStatefulFile = {
         metadata: {

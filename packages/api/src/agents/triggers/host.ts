@@ -22,7 +22,7 @@ const MAX_RESPONSE_BODY_BYTES = 64 * 1024;
 const GENERATION_PROTOCOL_HEADER = 'x-librechat-generation-protocol';
 const TRIGGER_USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ' +
-  '(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 LibreChat-Agent-Trigger/1';
+  '(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Baanzon-Agent-Trigger/1';
 
 const PRE_CONNECT_ERROR_CODES = new Set([
   'ECONNREFUSED',

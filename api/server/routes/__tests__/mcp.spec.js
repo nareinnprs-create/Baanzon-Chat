@@ -944,7 +944,7 @@ describe('MCP Routes', () => {
           state: 'test-user-id:test-server',
           serverName: 'test-server',
           userId: 'test-user-id',
-          serverUrl: 'https://override.example.com/{{LIBRECHAT_BODY_CONVERSATIONID}}/mcp',
+          serverUrl: 'https://override.example.com/{{BAANZON_BODY_CONVERSATIONID}}/mcp',
           metadata: {},
           clientInfo: {},
           codeVerifier: 'test-verifier',
@@ -958,7 +958,7 @@ describe('MCP Routes', () => {
         });
         MCPTokenStorage.storeTokens.mockResolvedValue();
         mockRegistryInstance.getServerConfig.mockResolvedValue({
-          url: 'https://override.example.com/{{LIBRECHAT_BODY_CONVERSATIONID}}/mcp',
+          url: 'https://override.example.com/{{BAANZON_BODY_CONVERSATIONID}}/mcp',
         });
 
         const mockMcpManager = createLeasedMcpManager({
@@ -993,14 +993,14 @@ describe('MCP Routes', () => {
           state: 'test-user-id:test-server',
           serverName: 'test-server',
           userId: 'test-user-id',
-          serverUrl: 'https://override.example.com/{{LIBRECHAT_BODY_CONVERSATIONID}}/mcp',
+          serverUrl: 'https://override.example.com/{{BAANZON_BODY_CONVERSATIONID}}/mcp',
           metadata: {},
           clientInfo: {},
           codeVerifier: 'test-verifier',
         };
         const mergedServerConfig = {
           type: 'streamable-http',
-          url: 'https://override.example.com/{{LIBRECHAT_BODY_CONVERSATIONID}}/mcp',
+          url: 'https://override.example.com/{{BAANZON_BODY_CONVERSATIONID}}/mcp',
           source: 'config',
         };
         getLogStores.mockReturnValue({});
@@ -1270,7 +1270,7 @@ describe('MCP Routes', () => {
       const flowId = 'test-user-id:test-server';
       const rawConfig = {
         type: 'streamable-http',
-        url: 'https://runtime.example.com/{{LIBRECHAT_USER_ID}}',
+        url: 'https://runtime.example.com/{{BAANZON_USER_ID}}',
       };
       const mockFlowManager = {
         getFlowState: jest.fn().mockResolvedValue({ status: 'PENDING', createdAt: Date.now() }),
@@ -1816,7 +1816,7 @@ describe('MCP Routes', () => {
           url: 'https://mcp.example.com/mcp',
           source: 'yaml',
           headers: {
-            'X-Conversation-ID': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+            'X-Conversation-ID': '{{BAANZON_BODY_CONVERSATIONID}}',
           },
           requiresOAuth: true,
         },
@@ -2807,7 +2807,7 @@ describe('MCP Routes', () => {
       currentUser = { id: 'test-user-id', email: 'user@example.com' };
       const mcpConfig = {
         server1: {
-          url: 'https://mcp.example.com/{{LIBRECHAT_USER_ID}}',
+          url: 'https://mcp.example.com/{{BAANZON_USER_ID}}',
           customUserVars: { API_KEY: { title: 'API key' } },
         },
       };
@@ -2915,7 +2915,7 @@ describe('MCP Routes', () => {
         mcpConfig: {
           server1: {
             source: 'config',
-            headers: { 'X-Message': '{{LIBRECHAT_BODY_MESSAGEID}}' },
+            headers: { 'X-Message': '{{BAANZON_BODY_MESSAGEID}}' },
             customUserVars: { API_KEY: { title: 'API key' } },
           },
         },

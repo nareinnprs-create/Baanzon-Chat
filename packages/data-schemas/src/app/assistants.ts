@@ -22,7 +22,7 @@ export function azureAssistantsDefaults(): {
 }
 
 /**
- * Sets up the Assistants configuration from the config (`librechat.yaml`) file.
+ * Sets up the Assistants configuration from the config (`baanzon.yaml`) file.
  * @param config - The loaded custom configuration.
  * @param assistantsEndpoint - The Assistants endpoint name.
  * - The previously loaded assistants configuration from Azure OpenAI Assistants option.

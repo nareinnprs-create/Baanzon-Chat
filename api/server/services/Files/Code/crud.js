@@ -45,7 +45,7 @@ async function getCodeOutputDownloadStream(fileIdentifier, identity, req, route 
       url: `${baseURL}/download/${fileIdentifier}${query}`,
       responseType: 'stream',
       headers: {
-        'User-Agent': 'LibreChat/1.0',
+        'User-Agent': 'Baanzon/1.0',
         ...authHeaders,
         ...(route.executionProfile
           ? codeExecutionHeaders({
@@ -135,7 +135,7 @@ async function deleteCodeEnvFile(req, file) {
         method: 'delete',
         url: `${baseURL}/files/${ref.storage_session_id}/${ref.file_id}${query}`,
         headers: {
-          'User-Agent': 'LibreChat/1.0',
+          'User-Agent': 'Baanzon/1.0',
           ...authHeaders,
           ...codeExecutionHeaders({
             executionProfile,
@@ -211,7 +211,7 @@ async function uploadCodeEnvFile({
       headers: {
         ...form.getHeaders(),
         'Content-Type': 'multipart/form-data',
-        'User-Agent': 'LibreChat/1.0',
+        'User-Agent': 'Baanzon/1.0',
         'User-Id': req.user.id,
         ...authHeaders,
         ...(executionProfile ? codeExecutionHeaders({ executionProfile, bridgeWorkerId }) : {}),
@@ -298,7 +298,7 @@ async function batchUploadCodeEnvFiles({
     headers: {
       ...form.getHeaders(),
       'Content-Type': 'multipart/form-data',
-      'User-Agent': 'LibreChat/1.0',
+      'User-Agent': 'Baanzon/1.0',
       'User-Id': req.user.id,
       ...authHeaders,
       ...(executionProfile ? codeExecutionHeaders({ executionProfile, bridgeWorkerId }) : {}),

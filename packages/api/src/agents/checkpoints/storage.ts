@@ -6,7 +6,7 @@ import { checkpointOwnerNamespacePrefix } from '../../stream/checkpoints';
 import { resolveCheckpointerConfig } from './config';
 
 export const CHECKPOINT_STORAGE_COLLECTION = 'agent_checkpoint_stores';
-export const LIBRECHAT_CHECKPOINT_STORAGE_OWNER_KEY = '__librechat_checkpoint_storage_owner';
+export const BAANZON_CHECKPOINT_STORAGE_OWNER_KEY = '__librechat_checkpoint_storage_owner';
 export type CheckpointStorage = Omit<ResolvedCheckpointerConfig, 'ttlSeconds'>;
 export interface CheckpointStorageRecord {
   _id: string;

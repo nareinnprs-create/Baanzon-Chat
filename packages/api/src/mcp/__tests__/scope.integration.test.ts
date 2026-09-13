@@ -165,8 +165,8 @@ function createServerConfig(url: string): ParsedServerConfig {
     requiresOAuth: false,
     initTimeout: 500,
     headers: {
-      'X-Run-Id': '{{LIBRECHAT_BODY_MESSAGEID}}',
-      'X-Parent-Message': '{{LIBRECHAT_BODY_PARENTMESSAGEID}}',
+      'X-Run-Id': '{{BAANZON_BODY_MESSAGEID}}',
+      'X-Parent-Message': '{{BAANZON_BODY_PARENTMESSAGEID}}',
     },
   };
 }

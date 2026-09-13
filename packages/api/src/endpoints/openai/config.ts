@@ -232,9 +232,9 @@ export function getOpenAIConfig(
   if (useOpenRouter || isVercel) {
     configOptions.defaultHeaders = Object.assign(
       {
-        'HTTP-Referer': 'https://librechat.ai',
-        'X-Title': 'LibreChat',
-        'X-OpenRouter-Title': 'LibreChat',
+        'HTTP-Referer': 'https://baanzon.chat',
+        'X-Title': 'Baanzon Chat',
+        'X-OpenRouter-Title': 'Baanzon Chat',
         'X-OpenRouter-Categories': 'general-chat,personal-agent',
       },
       headers,

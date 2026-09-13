@@ -77,7 +77,7 @@ export interface StreamLimitsConfig {
 const CREATE_FILE_MAX_TOOL_CALL_ARG_BYTES = 131_072;
 
 /**
- * Maps the librechat.yaml stream circuit-breaker fields
+ * Maps the baanzon.yaml stream circuit-breaker fields
  * (`endpoints.agents.maxToolCallArgBytes` / `maxToolCallArgBytesByTool` /
  * `maxDeltaEventsPerTurn`) to the SDK's `RunConfig.streamLimits`. Unset
  * global fields keep the SDK defaults (64 KiB per streamed tool call's

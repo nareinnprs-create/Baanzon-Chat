@@ -14,7 +14,7 @@ const REQUIRED_CF_COOKIES = [
   'CloudFront-Key-Pair-Id',
 ] as const;
 
-export const CLOUDFRONT_SCOPE_COOKIE = 'LibreChat-CloudFront-Scope';
+export const CLOUDFRONT_SCOPE_COOKIE = 'Baanzon-CloudFront-Scope';
 const unsafePolicySegmentPattern = /[?*[\]\s]/;
 
 export interface CloudFrontCookieScope {

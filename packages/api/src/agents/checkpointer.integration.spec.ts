@@ -14,8 +14,8 @@ import {
   captureAgentEventCheckpoint,
   LazyMongoSaver,
   CheckpointTooLargeError,
-  LIBRECHAT_CHECKPOINT_NAMESPACE_KEY,
-  LIBRECHAT_EVENT_ACTOR_INVOCATION_KEY,
+  BAANZON_CHECKPOINT_NAMESPACE_KEY,
+  BAANZON_EVENT_ACTOR_INVOCATION_KEY,
   setupCheckpointIndexes,
   __resetCheckpointerForTests,
 } from './checkpointer';
@@ -183,8 +183,8 @@ describe('checkpointer (mongodb-memory-server integration)', () => {
       configurable: {
         thread_id: threadId,
         checkpoint_ns: '',
-        [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: 'event-actor/base',
-        [LIBRECHAT_EVENT_ACTOR_INVOCATION_KEY]: 'event-1',
+        [BAANZON_CHECKPOINT_NAMESPACE_KEY]: 'event-actor/base',
+        [BAANZON_EVENT_ACTOR_INVOCATION_KEY]: 'event-1',
       },
     };
     await saver!.put(config, checkpoint, {
@@ -235,8 +235,8 @@ describe('checkpointer (mongodb-memory-server integration)', () => {
       configurable: {
         thread_id: threadId,
         checkpoint_ns: '',
-        [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: 'event-actor/base',
-        [LIBRECHAT_EVENT_ACTOR_INVOCATION_KEY]: 'event-1',
+        [BAANZON_CHECKPOINT_NAMESPACE_KEY]: 'event-actor/base',
+        [BAANZON_EVENT_ACTOR_INVOCATION_KEY]: 'event-1',
       },
     };
     await saver!.put(sourceConfig, checkpoint, {
@@ -267,8 +267,8 @@ describe('checkpointer (mongodb-memory-server integration)', () => {
         thread_id: threadId,
         checkpoint_ns: '',
         checkpoint_id: checkpoint.id,
-        [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: 'event-actor/fork',
-        [LIBRECHAT_EVENT_ACTOR_INVOCATION_KEY]: 'event-2',
+        [BAANZON_CHECKPOINT_NAMESPACE_KEY]: 'event-actor/fork',
+        [BAANZON_EVENT_ACTOR_INVOCATION_KEY]: 'event-2',
       },
     });
     expect(
@@ -304,8 +304,8 @@ describe('checkpointer (mongodb-memory-server integration)', () => {
       configurable: {
         thread_id: threadId,
         checkpoint_ns: '',
-        [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: checkpointNamespace,
-        [LIBRECHAT_EVENT_ACTOR_INVOCATION_KEY]: invocationId,
+        [BAANZON_CHECKPOINT_NAMESPACE_KEY]: checkpointNamespace,
+        [BAANZON_EVENT_ACTOR_INVOCATION_KEY]: invocationId,
         ...(checkpointId == null ? {} : { checkpoint_id: checkpointId }),
       },
       durability: 'exit' as const,
@@ -332,7 +332,7 @@ describe('checkpointer (mongodb-memory-server integration)', () => {
         thread_id: threadId,
         checkpoint_ns: '',
         checkpoint_id: base!.checkpointId,
-        [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: 'event-actor/base',
+        [BAANZON_CHECKPOINT_NAMESPACE_KEY]: 'event-actor/base',
       },
     });
     expect(committedBase?.checkpoint.channel_values.events).toEqual(['event-1', 'seen:event-1']);
@@ -359,8 +359,8 @@ describe('checkpointer (mongodb-memory-server integration)', () => {
       configurable: {
         thread_id: threadId,
         checkpoint_ns: '',
-        [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: checkpointNamespace,
-        [LIBRECHAT_EVENT_ACTOR_INVOCATION_KEY]: invocationId,
+        [BAANZON_CHECKPOINT_NAMESPACE_KEY]: checkpointNamespace,
+        [BAANZON_EVENT_ACTOR_INVOCATION_KEY]: invocationId,
         ...(checkpointId == null ? {} : { checkpoint_id: checkpointId }),
       },
       durability: 'exit' as const,
@@ -620,7 +620,7 @@ describe('checkpointer (mongodb-memory-server integration)', () => {
       configurable: {
         thread_id: threadId,
         checkpoint_ns: graphNamespace,
-        [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: generation,
+        [BAANZON_CHECKPOINT_NAMESPACE_KEY]: generation,
       },
       durability: 'exit' as const,
     });
@@ -656,7 +656,7 @@ describe('checkpointer (mongodb-memory-server integration)', () => {
       listedReplacementCheckpoints.every(
         (tuple) =>
           tuple.config.configurable?.checkpoint_ns === '' &&
-          tuple.config.configurable?.[LIBRECHAT_CHECKPOINT_NAMESPACE_KEY] === 'generation-b',
+          tuple.config.configurable?.[BAANZON_CHECKPOINT_NAMESPACE_KEY] === 'generation-b',
       ),
     ).toBe(true);
     const replacementResult = await graph.invoke(

@@ -1,7 +1,7 @@
 const { getRumProxyClientUrl, isEnabled, isRumProxyEnabled } = require('@librechat/api');
 const { logger } = require('@librechat/data-schemas');
 
-const DEFAULT_RUM_SERVICE_NAME = 'librechat-web';
+const DEFAULT_RUM_SERVICE_NAME = 'baanzon-web';
 
 function parseBooleanEnv(value, defaultValue = false) {
   if (value == null || value === '') {

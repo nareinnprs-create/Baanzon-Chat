@@ -665,8 +665,8 @@ export const baseEndpointSchema = z.object({
   /**
    * Custom request headers forwarded to the provider on every request. Values
    * support the same placeholder resolution as custom endpoints — env vars
-   * (`${VAR}`), user fields (`{{LIBRECHAT_USER_*}}`), and request-body fields
-   * (`{{LIBRECHAT_BODY_CONVERSATIONID}}`). Primarily for routing built-in
+   * (`${VAR}`), user fields (`{{BAANZON_USER_*}}`), and request-body fields
+   * (`{{BAANZON_BODY_CONVERSATIONID}}`). Primarily for routing built-in
    * providers through an AI gateway / reverse proxy that consumes metadata
    * headers (provider-native request shaping is preserved).
    */
@@ -1203,7 +1203,7 @@ export const agentsEndpointSchema = baseEndpointSchema
             })
             .optional(),
           /** Operator-managed execution environments. Attached entries route to a
-           * Code API deployment backed by an outbound librechat-code worker. */
+           * Code API deployment backed by an outbound baanzon-code worker. */
           environments: z
             .array(
               z.object({
@@ -2012,7 +2012,7 @@ export const interfaceSchema = z
     },
     // `schedules` is deliberately ABSENT from this default. It is experimental and
     // default-off in v1, and zod applies this whole object when `interface` is omitted
-    // from librechat.yaml — including it would silently enable the feature (and permit
+    // from baanzon.yaml — including it would silently enable the feature (and permit
     // billable scheduled runs) on every deployment that never opted in. The PERMISSION
     // defaults live in updateInterfacePermissions, which is a separate concern.
   });
@@ -2746,7 +2746,7 @@ export const getConfigDefaults = () => getSchemaDefaults(configSchema);
 export type TCustomConfig = DeepPartial<z.infer<typeof configSchema>>;
 
 /**
- * Shape of the `webSearch` block as written in `librechat.yaml`, where
+ * Shape of the `webSearch` block as written in `baanzon.yaml`, where
  * `searxngSearchOptions.engines` may still be the YAML list or untrimmed string an
  * operator wrote. `loadCustomConfig` returns the raw YAML object rather than the
  * parsed result, so the runtime loader receives this shape, not the parsed one.
@@ -3580,7 +3580,7 @@ export enum TTSProviders {
 /** Enum for app-wide constants */
 export enum Constants {
   /**
-   * Key for the app's version. The placeholder `__LIBRECHAT_VERSION__` is
+   * Key for the app's version. The placeholder `__BAANZON_VERSION__` is
    * swapped in by `@rollup/plugin-replace` during `npm run build:data-provider`
    * using the value of the root `package.json`'s `version` field. Consumers
    * always import this via the built dist bundle (see `main` field in
@@ -3588,8 +3588,8 @@ export enum Constants {
    * substituted value. Only tests that import the TypeScript source directly
    * would observe the raw placeholder.
    */
-  VERSION = '__LIBRECHAT_VERSION__',
-  /** Key for the Custom Config's version (librechat.yaml). */
+  VERSION = '__BAANZON_VERSION__',
+  /** Key for the Custom Config's version (baanzon.yaml). */
   CONFIG_VERSION = '1.3.15',
   /** Standard value for the first message's `parentMessageId` value, to indicate no parent exists. */
   NO_PARENT = '00000000-0000-0000-0000-000000000000',

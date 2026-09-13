@@ -248,12 +248,12 @@ export function getCodeExecutionBaseUrl(
   if (environment) {
     return environment.baseURL.trim().replace(/\/+$/, '');
   }
-  const baseUrl = process.env.LIBRECHAT_CODE_BASEURL_STATEFUL?.trim().replace(/\/+$/, '');
+  const baseUrl = process.env.BAANZON_CODE_BASEURL_STATEFUL?.trim().replace(/\/+$/, '');
   if (baseUrl) {
     return baseUrl;
   }
   throw new Error(
-    'Stateful code execution is enabled for this agent, but LIBRECHAT_CODE_BASEURL_STATEFUL is not configured.',
+    'Stateful code execution is enabled for this agent, but BAANZON_CODE_BASEURL_STATEFUL is not configured.',
   );
 }
 

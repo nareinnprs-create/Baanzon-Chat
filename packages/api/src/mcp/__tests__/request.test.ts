@@ -147,7 +147,7 @@ describe('MCP runtime request body', () => {
       getMissingRuntimeBodyPlaceholderFields(
         {
           source: 'yaml',
-          headers: { 'X-Parent': '{{LIBRECHAT_BODY_PARENTMESSAGEID}}' },
+          headers: { 'X-Parent': '{{BAANZON_BODY_PARENTMESSAGEID}}' },
         },
         requestBody,
       ),

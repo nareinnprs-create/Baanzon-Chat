@@ -3483,7 +3483,7 @@ describe('AgentClient - titleConvo', () => {
           config: {
             endpoints: {
               [EModelEndpoint.anthropic]: {
-                headers: { 'X-Conversation-Id': '{{LIBRECHAT_BODY_CONVERSATIONID}}' },
+                headers: { 'X-Conversation-Id': '{{BAANZON_BODY_CONVERSATIONID}}' },
               },
             },
           },

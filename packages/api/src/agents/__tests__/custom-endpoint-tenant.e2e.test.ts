@@ -117,7 +117,7 @@ function makeAgent(id: string, baseURL: string) {
       apiKey: 'test-key',
       clientOptions: {
         baseURL,
-        defaultHeaders: { 'X-Tenant-ID': '{{LIBRECHAT_USER_TENANT_ID}}' },
+        defaultHeaders: { 'X-Tenant-ID': '{{BAANZON_USER_TENANT_ID}}' },
       },
     },
   };

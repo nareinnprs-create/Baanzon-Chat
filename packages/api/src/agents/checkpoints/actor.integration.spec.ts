@@ -7,10 +7,10 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import {
   getAgentCheckpointer,
   deleteOwnedAgentCheckpoints,
-  LIBRECHAT_CHECKPOINT_NAMESPACE_KEY,
-  LIBRECHAT_CHECKPOINT_OWNER_KEY,
-  LIBRECHAT_LEGACY_CHECKPOINT_KEY,
-  LIBRECHAT_EVENT_ACTOR_INVOCATION_KEY,
+  BAANZON_CHECKPOINT_NAMESPACE_KEY,
+  BAANZON_CHECKPOINT_OWNER_KEY,
+  BAANZON_LEGACY_CHECKPOINT_KEY,
+  BAANZON_EVENT_ACTOR_INVOCATION_KEY,
   __resetCheckpointerForTests,
 } from '../checkpointer';
 import { checkpointOwnerNamespacePrefix } from '../../stream/checkpoints';
@@ -43,11 +43,11 @@ function config(
     configurable: {
       thread_id: 'actor-thread',
       checkpoint_ns: graphNamespace,
-      [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: namespace,
-      [LIBRECHAT_EVENT_ACTOR_INVOCATION_KEY]: 'invocation',
+      [BAANZON_CHECKPOINT_NAMESPACE_KEY]: namespace,
+      [BAANZON_EVENT_ACTOR_INVOCATION_KEY]: 'invocation',
       ...(owner == null
         ? {}
-        : { [LIBRECHAT_CHECKPOINT_OWNER_KEY]: checkpointOwnerNamespacePrefix(owner) }),
+        : { [BAANZON_CHECKPOINT_OWNER_KEY]: checkpointOwnerNamespacePrefix(owner) }),
       ...(checkpointId == null ? {} : { checkpoint_id: checkpointId }),
     },
   };
@@ -144,12 +144,12 @@ test.each([undefined, 'owner'])(
       parents: {},
     });
     const input = config(namespace, 'owner', child.id);
-    input.configurable![LIBRECHAT_LEGACY_CHECKPOINT_KEY] = child.id;
+    input.configurable![BAANZON_LEGACY_CHECKPOINT_KEY] = child.id;
     const tuple = await saver.getTuple(input);
     expect(tuple?.parentConfig?.configurable).toMatchObject({
       thread_id: 'actor-thread',
       checkpoint_id: parent.id,
-      [LIBRECHAT_LEGACY_CHECKPOINT_KEY]: parent.id,
+      [BAANZON_LEGACY_CHECKPOINT_KEY]: parent.id,
     });
     expect((await saver.getTuple(tuple!.parentConfig!))?.checkpoint.id).toBe(parent.id);
     await mongoose.connection
@@ -213,7 +213,7 @@ test('legacy pending writes preserve overwrite and insert-or-ignore behavior on 
   const legacy = config('event-actor/legacy', undefined, id);
   await saver.putWrites(legacy, [['messages', 'original']], 'regular');
   const resumed = config('event-actor/legacy', 'owner', id);
-  resumed.configurable![LIBRECHAT_LEGACY_CHECKPOINT_KEY] = id;
+  resumed.configurable![BAANZON_LEGACY_CHECKPOINT_KEY] = id;
   await saver.putWrites(resumed, [[INTERRUPT, { id: 'updated' }]], 'task');
   await saver.putWrites(resumed, [['messages', 'replacement']], 'regular');
   const tuple = await saver.getTuple(resumed);
@@ -349,7 +349,7 @@ test('a legacy pause can re-pause and resume on upgraded replicas', async () => 
   await graph.invoke({ answers: [] }, { ...oldReplica, durability: 'exit' });
   const first = (await saver.getTuple(oldReplica))!;
   const resumed = config(namespace, 'owner', first.checkpoint.id);
-  resumed.configurable![LIBRECHAT_LEGACY_CHECKPOINT_KEY] = first.checkpoint.id;
+  resumed.configurable![BAANZON_LEGACY_CHECKPOINT_KEY] = first.checkpoint.id;
   await graph.invoke(new Command({ resume: 'one' }), { ...resumed, durability: 'exit' });
   const captured = await createOwnedActorCheckpoints('owner').capture(
     'actor-thread',

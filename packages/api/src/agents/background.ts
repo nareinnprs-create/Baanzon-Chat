@@ -15,7 +15,7 @@
  * abort-resistant tool remains indeterminate and pollable. Terminal results
  * can also be persisted onto the invoking response so another run or replica
  * can consume them, but process death during execution does not recreate the
- * live tool. Ephemeral request-scoped MCP tools (runtime `{{LIBRECHAT_BODY_*}}`
+ * live tool. Ephemeral request-scoped MCP tools (runtime `{{BAANZON_BODY_*}}`
  * placeholders) are never backgrounded — their connection is torn down at
  * request end, so the executor runs them in the foreground instead. Detached
  * subagents use the separate host task store; Redis-backed hosts may route

@@ -2,7 +2,7 @@
 const {
   createTailwindColors,
 } = require('../packages/client/src/theme/utils/createTailwindColors.js');
-const libreChatTailwindPreset = require('../packages/client/tailwind.preset.cjs');
+const baanzonTailwindPreset = require('../packages/client/tailwind.preset.cjs');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -13,11 +13,11 @@ module.exports = {
   ],
   // darkMode: 'class',
   darkMode: ['class'],
-  presets: [libreChatTailwindPreset],
+  presets: [baanzonTailwindPreset],
   theme: {
     fontFamily: {
       sans: ['Inter', 'sans-serif'],
-      mono: ['Roboto Mono', 'monospace'],
+      mono: ['JetBrains Mono', 'monospace'],
     },
     // fontFamily: {
     //   sans: ['Söhne', 'sans-serif'],

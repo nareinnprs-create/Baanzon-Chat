@@ -733,7 +733,7 @@
   "com_ui_adding_details": "Bæti við smáatriðum...",
   "com_ui_additional_details": "Frekari upplýsingar",
   "com_ui_admin": "Stjórnandi",
-  "com_ui_admin_access_warning": "Ef þú slekkur á aðgangi stjórnenda gæti viðmótið brotnað (krefst endurhleðslu). Eina leiðin til að afturkalla þetta er í librechat.yaml sem hefur áhrif á alla.",
+  "com_ui_admin_access_warning": "Ef þú slekkur á aðgangi stjórnenda gæti viðmótið brotnað (krefst endurhleðslu). Eina leiðin til að afturkalla þetta er í baanzon.yaml sem hefur áhrif á alla.",
   "com_ui_admin_panel": "Stjórnborð",
   "com_ui_admin_settings": "Stillingar stjórnanda",
   "com_ui_admin_settings_section": "Stillingar stjórnanda - {{section}}",

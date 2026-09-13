@@ -161,7 +161,7 @@ describe('resolveHeaders', () => {
   it('should process user ID placeholder when user has id', () => {
     const user = { id: 'test-user-123' };
     const headers = {
-      'User-Id': '{{LIBRECHAT_USER_ID}}',
+      'User-Id': '{{BAANZON_USER_ID}}',
       'Content-Type': 'application/json',
     };
 
@@ -175,14 +175,14 @@ describe('resolveHeaders', () => {
 
   it('should not process user ID placeholder when user is undefined', () => {
     const headers = {
-      'User-Id': '{{LIBRECHAT_USER_ID}}',
+      'User-Id': '{{BAANZON_USER_ID}}',
       'Content-Type': 'application/json',
     };
 
     const result = resolveHeaders({ headers });
 
     expect(result).toEqual({
-      'User-Id': '{{LIBRECHAT_USER_ID}}',
+      'User-Id': '{{BAANZON_USER_ID}}',
       'Content-Type': 'application/json',
     });
   });
@@ -190,14 +190,14 @@ describe('resolveHeaders', () => {
   it('should not process user ID placeholder when user has no id', () => {
     const user = { id: '' };
     const headers = {
-      'User-Id': '{{LIBRECHAT_USER_ID}}',
+      'User-Id': '{{BAANZON_USER_ID}}',
       'Content-Type': 'application/json',
     };
 
     const result = resolveHeaders({ headers, user });
 
     expect(result).toEqual({
-      'User-Id': '{{LIBRECHAT_USER_ID}}',
+      'User-Id': '{{BAANZON_USER_ID}}',
       'Content-Type': 'application/json',
     });
   });
@@ -212,11 +212,11 @@ describe('resolveHeaders', () => {
     });
 
     const headers = {
-      'User-Email': '{{LIBRECHAT_USER_EMAIL}}',
-      'User-Name': '{{LIBRECHAT_USER_NAME}}',
-      'User-Username': '{{LIBRECHAT_USER_USERNAME}}',
-      'User-Role': '{{LIBRECHAT_USER_ROLE}}',
-      'User-Id': '{{LIBRECHAT_USER_ID}}',
+      'User-Email': '{{BAANZON_USER_EMAIL}}',
+      'User-Name': '{{BAANZON_USER_NAME}}',
+      'User-Username': '{{BAANZON_USER_USERNAME}}',
+      'User-Role': '{{BAANZON_USER_ROLE}}',
+      'User-Id': '{{BAANZON_USER_ID}}',
       'Content-Type': 'application/json',
     };
 
@@ -240,9 +240,9 @@ describe('resolveHeaders', () => {
     });
 
     const headers = {
-      'User-Email': '{{LIBRECHAT_USER_EMAIL}}',
-      'User-Username': '{{LIBRECHAT_USER_USERNAME}}',
-      'Non-Existent': '{{LIBRECHAT_USER_NONEXISTENT}}',
+      'User-Email': '{{BAANZON_USER_EMAIL}}',
+      'User-Username': '{{BAANZON_USER_USERNAME}}',
+      'Non-Existent': '{{BAANZON_USER_NONEXISTENT}}',
     };
 
     const result = resolveHeaders({ headers, user });
@@ -250,7 +250,7 @@ describe('resolveHeaders', () => {
     expect(result).toEqual({
       'User-Email': 'test@example.com',
       'User-Username': '',
-      'Non-Existent': '{{LIBRECHAT_USER_NONEXISTENT}}',
+      'Non-Existent': '{{BAANZON_USER_NONEXISTENT}}',
     });
   });
 
@@ -265,7 +265,7 @@ describe('resolveHeaders', () => {
       Authorization: 'Bearer {{CUSTOM_TOKEN}}',
       'X-Region': '{{REGION}}',
       'X-System-Key': '${TEST_API_KEY}',
-      'X-User-Id': '{{LIBRECHAT_USER_ID}}',
+      'X-User-Id': '{{BAANZON_USER_ID}}',
     };
 
     const result = resolveHeaders({ headers, user, customUserVars });
@@ -284,11 +284,11 @@ describe('resolveHeaders', () => {
       email: 'user-email@example.com',
     });
     const customUserVars = {
-      LIBRECHAT_USER_EMAIL: 'custom-email@example.com',
+      BAANZON_USER_EMAIL: 'custom-email@example.com',
     };
 
     const headers = {
-      'Test-Email': '{{LIBRECHAT_USER_EMAIL}}',
+      'Test-Email': '{{BAANZON_USER_EMAIL}}',
     };
 
     const result = resolveHeaders({ headers, user, customUserVars });
@@ -306,8 +306,8 @@ describe('resolveHeaders', () => {
     });
 
     const headers = {
-      'User-Role': '{{LIBRECHAT_USER_ROLE}}',
-      'User-Id': '{{LIBRECHAT_USER_ID}}',
+      'User-Role': '{{BAANZON_USER_ROLE}}',
+      'User-Id': '{{BAANZON_USER_ID}}',
     };
 
     const result = resolveHeaders({ headers, user });
@@ -325,9 +325,9 @@ describe('resolveHeaders', () => {
     });
 
     const headers = {
-      'Primary-Email': '{{LIBRECHAT_USER_EMAIL}}',
-      'Secondary-Email': '{{LIBRECHAT_USER_EMAIL}}',
-      'Backup-Email': '{{LIBRECHAT_USER_EMAIL}}',
+      'Primary-Email': '{{BAANZON_USER_EMAIL}}',
+      'Secondary-Email': '{{BAANZON_USER_EMAIL}}',
+      'Backup-Email': '{{BAANZON_USER_EMAIL}}',
     };
 
     const result = resolveHeaders({ headers, user });
@@ -350,9 +350,9 @@ describe('resolveHeaders', () => {
 
     const headers = {
       Authorization: 'Bearer {{CUSTOM_TOKEN}}',
-      'X-User-Id': '{{LIBRECHAT_USER_ID}}',
+      'X-User-Id': '{{BAANZON_USER_ID}}',
       'X-System-Key': '${TEST_API_KEY}',
-      'X-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+      'X-User-Email': '{{BAANZON_USER_EMAIL}}',
       'Content-Type': 'application/json',
     };
 
@@ -370,7 +370,7 @@ describe('resolveHeaders', () => {
   it('should not modify the original headers object', () => {
     const originalHeaders = {
       Authorization: '${TEST_API_KEY}',
-      'User-Id': '{{LIBRECHAT_USER_ID}}',
+      'User-Id': '{{BAANZON_USER_ID}}',
     };
     const user = { id: 'user-123' };
 
@@ -383,7 +383,7 @@ describe('resolveHeaders', () => {
 
     expect(originalHeaders).toEqual({
       Authorization: '${TEST_API_KEY}',
-      'User-Id': '{{LIBRECHAT_USER_ID}}',
+      'User-Id': '{{BAANZON_USER_ID}}',
     });
   });
 
@@ -432,23 +432,23 @@ describe('resolveHeaders', () => {
     };
 
     const headers = {
-      'X-User-ID': '{{LIBRECHAT_USER_ID}}',
-      'X-User-Name': '{{LIBRECHAT_USER_NAME}}',
-      'X-User-Username': '{{LIBRECHAT_USER_USERNAME}}',
-      'X-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
-      'X-User-Provider': '{{LIBRECHAT_USER_PROVIDER}}',
-      'X-User-Role': '{{LIBRECHAT_USER_ROLE}}',
-      'X-User-GoogleId': '{{LIBRECHAT_USER_GOOGLEID}}',
-      'X-User-FacebookId': '{{LIBRECHAT_USER_FACEBOOKID}}',
-      'X-User-OpenIdId': '{{LIBRECHAT_USER_OPENIDID}}',
-      'X-User-SamlId': '{{LIBRECHAT_USER_SAMLID}}',
-      'X-User-LdapId': '{{LIBRECHAT_USER_LDAPID}}',
-      'X-User-GithubId': '{{LIBRECHAT_USER_GITHUBID}}',
-      'X-User-DiscordId': '{{LIBRECHAT_USER_DISCORDID}}',
-      'X-User-AppleId': '{{LIBRECHAT_USER_APPLEID}}',
-      'X-User-EmailVerified': '{{LIBRECHAT_USER_EMAILVERIFIED}}',
-      'X-User-TwoFactorEnabled': '{{LIBRECHAT_USER_TWOFACTORENABLED}}',
-      'X-User-TermsAccepted': '{{LIBRECHAT_USER_TERMSACCEPTED}}',
+      'X-User-ID': '{{BAANZON_USER_ID}}',
+      'X-User-Name': '{{BAANZON_USER_NAME}}',
+      'X-User-Username': '{{BAANZON_USER_USERNAME}}',
+      'X-User-Email': '{{BAANZON_USER_EMAIL}}',
+      'X-User-Provider': '{{BAANZON_USER_PROVIDER}}',
+      'X-User-Role': '{{BAANZON_USER_ROLE}}',
+      'X-User-GoogleId': '{{BAANZON_USER_GOOGLEID}}',
+      'X-User-FacebookId': '{{BAANZON_USER_FACEBOOKID}}',
+      'X-User-OpenIdId': '{{BAANZON_USER_OPENIDID}}',
+      'X-User-SamlId': '{{BAANZON_USER_SAMLID}}',
+      'X-User-LdapId': '{{BAANZON_USER_LDAPID}}',
+      'X-User-GithubId': '{{BAANZON_USER_GITHUBID}}',
+      'X-User-DiscordId': '{{BAANZON_USER_DISCORDID}}',
+      'X-User-AppleId': '{{BAANZON_USER_APPLEID}}',
+      'X-User-EmailVerified': '{{BAANZON_USER_EMAILVERIFIED}}',
+      'X-User-TwoFactorEnabled': '{{BAANZON_USER_TWOFACTORENABLED}}',
+      'X-User-TermsAccepted': '{{BAANZON_USER_TERMSACCEPTED}}',
     };
 
     const result = resolveHeaders({ headers, user });
@@ -479,24 +479,24 @@ describe('resolveHeaders', () => {
     });
     const safeUser = createSafeUser(user);
     const headers = {
-      'X-Tenant': '{{LIBRECHAT_USER_TENANTID}}',
-      'X-Issuer': '{{LIBRECHAT_USER_OPENIDISSUER}}',
+      'X-Tenant': '{{BAANZON_USER_TENANTID}}',
+      'X-Issuer': '{{BAANZON_USER_OPENIDISSUER}}',
     };
 
     expect(safeUser).not.toHaveProperty('tenantId');
     expect(safeUser).not.toHaveProperty('openidIssuer');
     expect(resolveHeaders({ headers, user: safeUser })['X-Tenant']).toBe(
-      '{{LIBRECHAT_USER_TENANTID}}',
+      '{{BAANZON_USER_TENANTID}}',
     );
     expect(resolveHeaders({ headers, user: safeUser })['X-Issuer']).toBe(
-      '{{LIBRECHAT_USER_OPENIDISSUER}}',
+      '{{BAANZON_USER_OPENIDISSUER}}',
     );
   });
 
   it('should handle multiple placeholders in one value', () => {
     const user = { id: 'abc', email: 'me@example.com' };
     const headers = {
-      'X-Multi': 'User: {{LIBRECHAT_USER_ID}}, Env: ${TEST_API_KEY}, Custom: {{MY_CUSTOM}}',
+      'X-Multi': 'User: {{BAANZON_USER_ID}}, Env: ${TEST_API_KEY}, Custom: {{MY_CUSTOM}}',
     };
     const customVars = { MY_CUSTOM: 'custom-value' };
     const result = resolveHeaders({ headers, user, customUserVars: customVars });
@@ -507,7 +507,7 @@ describe('resolveHeaders', () => {
     const user = { id: 'abc' };
     const headers = {
       'X-Unknown': '{{SOMETHING_NOT_RECOGNIZED}}',
-      'X-Known': '{{LIBRECHAT_USER_ID}}',
+      'X-Known': '{{BAANZON_USER_ID}}',
     };
     const result = resolveHeaders({ headers, user });
     expect(result['X-Unknown']).toBe('{{SOMETHING_NOT_RECOGNIZED}}');
@@ -522,13 +522,13 @@ describe('resolveHeaders', () => {
       twoFactorEnabled: false,
     };
     const headers = {
-      'X-User': '{{LIBRECHAT_USER_ID}}',
+      'X-User': '{{BAANZON_USER_ID}}',
       'X-Env': '${TEST_API_KEY}',
       'X-Custom': '{{MY_CUSTOM}}',
-      'X-Multi': 'ID: {{LIBRECHAT_USER_ID}}, ENV: ${TEST_API_KEY}, CUSTOM: {{MY_CUSTOM}}',
+      'X-Multi': 'ID: {{BAANZON_USER_ID}}, ENV: ${TEST_API_KEY}, CUSTOM: {{MY_CUSTOM}}',
       'X-Unknown': '{{NOT_A_REAL_PLACEHOLDER}}',
       'X-Empty': '',
-      'X-Boolean': '{{LIBRECHAT_USER_EMAILVERIFIED}}',
+      'X-Boolean': '{{BAANZON_USER_EMAILVERIFIED}}',
     };
     const customVars = { MY_CUSTOM: 'custom-value' };
     const result = resolveHeaders({ headers, user, customUserVars: customVars });
@@ -542,27 +542,27 @@ describe('resolveHeaders', () => {
     expect(result['X-Boolean']).toBe('true');
   });
 
-  it('should process LIBRECHAT_BODY placeholders', () => {
+  it('should process BAANZON_BODY placeholders', () => {
     const body = {
       conversationId: 'conv-123',
       parentMessageId: 'parent-456',
       messageId: 'msg-789',
     };
-    const headers = { 'X-Conversation': '{{LIBRECHAT_BODY_CONVERSATIONID}}' };
+    const headers = { 'X-Conversation': '{{BAANZON_BODY_CONVERSATIONID}}' };
     const result = resolveHeaders({ headers, body });
     expect(result['X-Conversation']).toBe('conv-123');
   });
 
-  it('should not resolve env vars introduced via LIBRECHAT_BODY placeholders', () => {
+  it('should not resolve env vars introduced via BAANZON_BODY placeholders', () => {
     const body = {
       conversationId: '${TEST_API_KEY}',
       parentMessageId: '${TEST_API_KEY}',
       messageId: '${TEST_API_KEY}',
     };
     const headers = {
-      'X-Conv': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
-      'X-Parent': '{{LIBRECHAT_BODY_PARENTMESSAGEID}}',
-      'X-Msg': '{{LIBRECHAT_BODY_MESSAGEID}}',
+      'X-Conv': '{{BAANZON_BODY_CONVERSATIONID}}',
+      'X-Parent': '{{BAANZON_BODY_PARENTMESSAGEID}}',
+      'X-Msg': '{{BAANZON_BODY_MESSAGEID}}',
     };
     const result = resolveHeaders({ headers, body });
 
@@ -571,9 +571,9 @@ describe('resolveHeaders', () => {
     expect(result['X-Msg']).toBe('${TEST_API_KEY}');
   });
 
-  it('should not resolve env vars introduced via LIBRECHAT_USER placeholders', () => {
+  it('should not resolve env vars introduced via BAANZON_USER placeholders', () => {
     const user = createTestUser({ name: '${TEST_API_KEY}' });
-    const headers = { 'X-Name': '{{LIBRECHAT_USER_NAME}}' };
+    const headers = { 'X-Name': '{{BAANZON_USER_NAME}}' };
     const result = resolveHeaders({ headers, user });
 
     expect(result['X-Name']).toBe('${TEST_API_KEY}');
@@ -626,7 +626,7 @@ describe('resolveHeaders', () => {
       const user = { id: 'user-123' };
       const headers = {
         'X-Number': 42 as unknown as string,
-        'X-String-With-Placeholder': '{{LIBRECHAT_USER_ID}}',
+        'X-String-With-Placeholder': '{{BAANZON_USER_ID}}',
       };
       const result = resolveHeaders({ headers, user });
       expect(result['X-Number']).toBe('42');
@@ -673,7 +673,7 @@ describe('resolveHeaders', () => {
       };
       const headers = {
         'X-Number': 999 as unknown as string,
-        'X-Conv': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+        'X-Conv': '{{BAANZON_BODY_CONVERSATIONID}}',
       };
       const result = resolveHeaders({ headers, body });
       expect(result['X-Number']).toBe('999');
@@ -686,7 +686,7 @@ describe('resolveHeaders', () => {
       const headers = {
         'X-Number': 42 as unknown as string,
         'X-Boolean': true as unknown as string,
-        'X-User-Id': '{{LIBRECHAT_USER_ID}}',
+        'X-User-Id': '{{BAANZON_USER_ID}}',
         'X-Custom': '{{CUSTOM_TOKEN}}',
         'X-String': 'normal',
       };
@@ -705,7 +705,7 @@ describe('resolveHeaders', () => {
         messageId: 'msg-789',
       };
       const headers = {
-        'X-Conv-Id': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+        'X-Conv-Id': '{{BAANZON_BODY_CONVERSATIONID}}',
         'X-Number': 999 as unknown as string,
       };
       expect(() => resolveHeaders({ headers, body })).not.toThrow();
@@ -756,7 +756,7 @@ describe('resolveNestedObject', () => {
       thinking: {
         type: 'enabled',
         budget_tokens: 2000,
-        user_context: '{{LIBRECHAT_USER_ID}}',
+        user_context: '{{BAANZON_USER_ID}}',
       },
       anthropic_beta: ['output-128k-2025-02-19'],
       api_key: '${TEST_API_KEY}',
@@ -780,9 +780,9 @@ describe('resolveNestedObject', () => {
   it('should process strings in arrays', () => {
     const user = { id: 'user-123' };
     const obj = {
-      headers: ['Authorization: Bearer ${TEST_API_KEY}', 'X-User-Id: {{LIBRECHAT_USER_ID}}'],
+      headers: ['Authorization: Bearer ${TEST_API_KEY}', 'X-User-Id: {{BAANZON_USER_ID}}'],
       values: [1, 2, 3],
-      mixed: ['string', 42, true, '{{LIBRECHAT_USER_ID}}'],
+      mixed: ['string', 42, true, '{{BAANZON_USER_ID}}'],
     };
 
     const result = resolveNestedObject({ obj, user });
@@ -800,7 +800,7 @@ describe('resolveNestedObject', () => {
       level1: {
         level2: {
           level3: {
-            user_id: '{{LIBRECHAT_USER_ID}}',
+            user_id: '{{BAANZON_USER_ID}}',
             settings: {
               api_key: '${TEST_API_KEY}',
               enabled: true,
@@ -865,8 +865,8 @@ describe('resolveNestedObject', () => {
     };
     const obj = {
       metadata: {
-        conversation: '{{LIBRECHAT_BODY_CONVERSATIONID}}',
-        parent: '{{LIBRECHAT_BODY_PARENTMESSAGEID}}',
+        conversation: '{{BAANZON_BODY_CONVERSATIONID}}',
+        parent: '{{BAANZON_BODY_PARENTMESSAGEID}}',
         count: 5,
       },
     };
@@ -913,12 +913,12 @@ describe('resolveNestedObject', () => {
 
     const obj = {
       config: {
-        user_id: '{{LIBRECHAT_USER_ID}}',
+        user_id: '{{BAANZON_USER_ID}}',
         custom: '{{CUSTOM_VAR}}',
         api_key: '${TEST_API_KEY}',
-        conversation: '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+        conversation: '{{BAANZON_BODY_CONVERSATIONID}}',
         nested: {
-          email: '{{LIBRECHAT_USER_EMAIL}}',
+          email: '{{BAANZON_USER_EMAIL}}',
           port: 8080,
         },
       },
@@ -978,8 +978,8 @@ describe('resolveNestedObject', () => {
     const user = { id: 'user-123' };
     const obj = {
       items: [
-        { name: 'item1', user: '{{LIBRECHAT_USER_ID}}', count: 1 },
-        { name: 'item2', user: '{{LIBRECHAT_USER_ID}}', count: 2 },
+        { name: 'item1', user: '{{BAANZON_USER_ID}}', count: 1 },
+        { name: 'item2', user: '{{BAANZON_USER_ID}}', count: 2 },
       ],
     };
 
@@ -999,14 +999,14 @@ describe('resolveNestedObject', () => {
       thinking: {
         type: 'enabled',
         budget_tokens: 2000,
-        user_id: '{{LIBRECHAT_USER_ID}}',
+        user_id: '{{BAANZON_USER_ID}}',
       },
     };
 
     const result = resolveNestedObject({ obj: originalObj, user });
 
     expect(result.thinking.user_id).toBe('user-123');
-    expect(originalObj.thinking.user_id).toBe('{{LIBRECHAT_USER_ID}}');
+    expect(originalObj.thinking.user_id).toBe('{{BAANZON_USER_ID}}');
   });
 });
 
@@ -1097,7 +1097,7 @@ describe('processMCPEnv', () => {
       type: 'sse',
       url: '${MCP_SERVER_URL}/sse',
       proxy:
-        'http://proxy.example.com/{{CUSTOM_PROXY_PATH}}/{{LIBRECHAT_USER_ID}}/{{LIBRECHAT_BODY_MESSAGEID}}',
+        'http://proxy.example.com/{{CUSTOM_PROXY_PATH}}/{{BAANZON_USER_ID}}/{{BAANZON_BODY_MESSAGEID}}',
     };
 
     const result = processMCPEnv({
@@ -1111,7 +1111,7 @@ describe('processMCPEnv', () => {
       type: 'sse',
       url: 'https://mcp.example.com/sse',
       proxy:
-        'http://proxy.example.com/{{CUSTOM_PROXY_PATH}}/{{LIBRECHAT_USER_ID}}/{{LIBRECHAT_BODY_MESSAGEID}}',
+        'http://proxy.example.com/{{CUSTOM_PROXY_PATH}}/{{BAANZON_USER_ID}}/{{BAANZON_BODY_MESSAGEID}}',
     });
   });
 
@@ -1159,7 +1159,7 @@ describe('processMCPEnv', () => {
       type: 'streamable-http',
       url: 'https://mcp.example.com/api',
       oauth_headers: {
-        'X-User-Id': '{{LIBRECHAT_USER_ID}}',
+        'X-User-Id': '{{BAANZON_USER_ID}}',
         'X-Static': 'static-value',
       },
     };
@@ -1178,14 +1178,14 @@ describe('processMCPEnv', () => {
       type: 'streamable-http',
       url: 'https://mcp.example.com/api',
       oauth_headers: {
-        'X-User-Id': '{{LIBRECHAT_USER_ID}}',
+        'X-User-Id': '{{BAANZON_USER_ID}}',
       },
     };
 
     const result = processMCPEnv({ options, user, dbSourced: true });
 
     expect('oauth_headers' in result! && result.oauth_headers).toEqual({
-      'X-User-Id': '{{LIBRECHAT_USER_ID}}',
+      'X-User-Id': '{{BAANZON_USER_ID}}',
     });
   });
 
@@ -1201,11 +1201,11 @@ describe('processMCPEnv', () => {
       type: 'stdio',
       command: 'mcp-server',
       env: {
-        USER_ID: '{{LIBRECHAT_USER_ID}}',
-        USER_EMAIL: '{{LIBRECHAT_USER_EMAIL}}',
-        USER_ROLE: '{{LIBRECHAT_USER_ROLE}}',
+        USER_ID: '{{BAANZON_USER_ID}}',
+        USER_EMAIL: '{{BAANZON_USER_EMAIL}}',
+        USER_ROLE: '{{BAANZON_USER_ROLE}}',
       },
-      args: ['--user', '{{LIBRECHAT_USER_USERNAME}}', '--id', '{{LIBRECHAT_USER_ID}}'],
+      args: ['--user', '{{BAANZON_USER_USERNAME}}', '--id', '{{BAANZON_USER_ID}}'],
     };
 
     const result = processMCPEnv({ options, user });
@@ -1258,10 +1258,10 @@ describe('processMCPEnv', () => {
 
     const options: MCPOptions = {
       type: 'streamable-http',
-      url: 'https://api.example.com/conversations/{{LIBRECHAT_BODY_CONVERSATIONID}}',
+      url: 'https://api.example.com/conversations/{{BAANZON_BODY_CONVERSATIONID}}',
       headers: {
-        'X-Parent-Message': '{{LIBRECHAT_BODY_PARENTMESSAGEID}}',
-        'X-Message-Id': '{{LIBRECHAT_BODY_MESSAGEID}}',
+        'X-Parent-Message': '{{BAANZON_BODY_PARENTMESSAGEID}}',
+        'X-Message-Id': '{{BAANZON_BODY_MESSAGEID}}',
       },
     };
 
@@ -1288,8 +1288,8 @@ describe('processMCPEnv', () => {
       type: 'streamable-http',
       url: 'https://api.example.com',
       headers: {
-        'X-Conv': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
-        'X-Parent': '{{LIBRECHAT_BODY_PARENTMESSAGEID}}',
+        'X-Conv': '{{BAANZON_BODY_CONVERSATIONID}}',
+        'X-Parent': '{{BAANZON_BODY_PARENTMESSAGEID}}',
       },
     };
 
@@ -1340,8 +1340,8 @@ describe('processMCPEnv', () => {
         token_url: 'https://auth.example.com/{{TENANT_ID}}/token',
         client_id: '${OAUTH_CLIENT_ID}',
         client_secret: '${OAUTH_CLIENT_SECRET}',
-        scope: 'user:{{LIBRECHAT_USER_ID}} conversation:{{LIBRECHAT_BODY_CONVERSATIONID}}',
-        redirect_uri: 'http://localhost:3000/user/{{LIBRECHAT_USER_EMAIL}}/callback',
+        scope: 'user:{{BAANZON_USER_ID}} conversation:{{BAANZON_BODY_CONVERSATIONID}}',
+        redirect_uri: 'http://localhost:3000/user/{{BAANZON_USER_EMAIL}}/callback',
       },
     };
 
@@ -1445,7 +1445,7 @@ describe('processMCPEnv', () => {
       args: [],
       env: {
         COMPLEX_VALUE:
-          'User: {{LIBRECHAT_USER_ID}}, Custom: {{CUSTOM_VAR}}, Body: {{LIBRECHAT_BODY_CONVERSATIONID}}, Env: ${TEST_API_KEY}',
+          'User: {{BAANZON_USER_ID}}, Custom: {{CUSTOM_VAR}}, Body: {{BAANZON_BODY_CONVERSATIONID}}, Env: ${TEST_API_KEY}',
       },
     };
 
@@ -1577,7 +1577,7 @@ describe('processMCPEnv', () => {
         args: [],
         env: {
           PORT: 8080 as unknown as string,
-          USER_ID: '{{LIBRECHAT_USER_ID}}',
+          USER_ID: '{{BAANZON_USER_ID}}',
           API_KEY: '${TEST_API_KEY}',
         },
       };
@@ -1623,7 +1623,7 @@ describe('processMCPEnv', () => {
         command: 'mcp-server',
         args: [],
         env: {
-          CONV_ID: '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+          CONV_ID: '{{BAANZON_BODY_CONVERSATIONID}}',
           PORT: 8080 as unknown as string,
         },
       };
@@ -1843,28 +1843,28 @@ describe('processMCPEnv', () => {
       }
     });
 
-    it('should NOT resolve {{LIBRECHAT_USER_*}} when dbSourced is true', () => {
+    it('should NOT resolve {{BAANZON_USER_*}} when dbSourced is true', () => {
       const user = createTestUser({ id: 'user-123', email: 'test@example.com' });
       const options: MCPOptions = {
         type: 'streamable-http',
         url: 'https://api.example.com',
         headers: {
-          'X-User-Id': '{{LIBRECHAT_USER_ID}}',
-          'X-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+          'X-User-Id': '{{BAANZON_USER_ID}}',
+          'X-User-Email': '{{BAANZON_USER_EMAIL}}',
         },
       };
 
       const result = processMCPEnv({ options, user, dbSourced: true });
 
       if (isStreamableHTTPOptions(result)) {
-        expect(result.headers?.['X-User-Id']).toBe('{{LIBRECHAT_USER_ID}}');
-        expect(result.headers?.['X-User-Email']).toBe('{{LIBRECHAT_USER_EMAIL}}');
+        expect(result.headers?.['X-User-Id']).toBe('{{BAANZON_USER_ID}}');
+        expect(result.headers?.['X-User-Email']).toBe('{{BAANZON_USER_EMAIL}}');
       } else {
         throw new Error('Expected streamable-http options');
       }
     });
 
-    it('should NOT resolve {{LIBRECHAT_OPENID_*}} when dbSourced is true', () => {
+    it('should NOT resolve {{BAANZON_OPENID_*}} when dbSourced is true', () => {
       const user = {
         ...createTestUser({ id: 'user-123', provider: 'openid' }),
         federatedTokens: {
@@ -1879,20 +1879,20 @@ describe('processMCPEnv', () => {
         type: 'streamable-http',
         url: 'https://api.example.com',
         headers: {
-          Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
+          Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}',
         },
       };
 
       const result = processMCPEnv({ options, user, dbSourced: true });
 
       if (isStreamableHTTPOptions(result)) {
-        expect(result.headers?.Authorization).toBe('Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}');
+        expect(result.headers?.Authorization).toBe('Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}');
       } else {
         throw new Error('Expected streamable-http options');
       }
     });
 
-    it('should NOT resolve {{LIBRECHAT_BODY_*}} when dbSourced is true', () => {
+    it('should NOT resolve {{BAANZON_BODY_*}} when dbSourced is true', () => {
       const body = {
         conversationId: 'conv-123',
         parentMessageId: 'parent-456',
@@ -1902,14 +1902,14 @@ describe('processMCPEnv', () => {
         type: 'streamable-http',
         url: 'https://api.example.com',
         headers: {
-          'X-Conversation': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+          'X-Conversation': '{{BAANZON_BODY_CONVERSATIONID}}',
         },
       };
 
       const result = processMCPEnv({ options, body, dbSourced: true });
 
       if (isStreamableHTTPOptions(result)) {
-        expect(result.headers?.['X-Conversation']).toBe('{{LIBRECHAT_BODY_CONVERSATIONID}}');
+        expect(result.headers?.['X-Conversation']).toBe('{{BAANZON_BODY_CONVERSATIONID}}');
       } else {
         throw new Error('Expected streamable-http options');
       }
@@ -1924,8 +1924,8 @@ describe('processMCPEnv', () => {
         headers: {
           Authorization: 'Bearer {{MCP_API_KEY}}',
           'X-Env-Leak': '${TEST_API_KEY}',
-          'X-User-Id': '{{LIBRECHAT_USER_ID}}',
-          'X-Body': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+          'X-User-Id': '{{BAANZON_USER_ID}}',
+          'X-Body': '{{BAANZON_BODY_CONVERSATIONID}}',
         },
       };
 
@@ -1940,8 +1940,8 @@ describe('processMCPEnv', () => {
       if (isStreamableHTTPOptions(result)) {
         expect(result.headers?.Authorization).toBe('Bearer user-key-value');
         expect(result.headers?.['X-Env-Leak']).toBe('${TEST_API_KEY}');
-        expect(result.headers?.['X-User-Id']).toBe('{{LIBRECHAT_USER_ID}}');
-        expect(result.headers?.['X-Body']).toBe('{{LIBRECHAT_BODY_CONVERSATIONID}}');
+        expect(result.headers?.['X-User-Id']).toBe('{{BAANZON_USER_ID}}');
+        expect(result.headers?.['X-Body']).toBe('{{BAANZON_BODY_CONVERSATIONID}}');
         expect(result.url).toBe('${DATABASE_URL}');
       } else {
         throw new Error('Expected streamable-http options');
@@ -1956,7 +1956,7 @@ describe('processMCPEnv', () => {
         headers: {
           Authorization: 'Bearer {{MCP_API_KEY}}',
           'X-Env': '${TEST_API_KEY}',
-          'X-User-Id': '{{LIBRECHAT_USER_ID}}',
+          'X-User-Id': '{{BAANZON_USER_ID}}',
         },
       };
 
@@ -2136,7 +2136,7 @@ describe('processMCPEnv', () => {
         url: 'https://api.example.com',
         headers: {
           'X-Env': '${TEST_API_KEY}',
-          'X-User': '{{LIBRECHAT_USER_ID}}',
+          'X-User': '{{BAANZON_USER_ID}}',
         },
       };
 
@@ -2213,8 +2213,8 @@ describe('createSafeUser', () => {
 
 describe('resolveHeaders stripUnresolved', () => {
   const templateHeaders = {
-    'X-OpenID-Id': '{{LIBRECHAT_USER_OPENIDID}}',
-    'X-User-Id': '{{LIBRECHAT_USER_ID}}',
+    'X-OpenID-Id': '{{BAANZON_USER_OPENIDID}}',
+    'X-User-Id': '{{BAANZON_USER_ID}}',
     'Content-Type': 'application/json',
   };
 
@@ -2246,7 +2246,7 @@ describe('resolveHeaders stripUnresolved', () => {
     const localUser = createSafeUser({ id: 'user-123', email: 'me@example.com' } as IUser);
 
     const result = resolveHeaders({
-      headers: { ...templateHeaders, 'X-Email': '{{LIBRECHAT_USER_EMAIL}}' },
+      headers: { ...templateHeaders, 'X-Email': '{{BAANZON_USER_EMAIL}}' },
       user: localUser,
       stripUnresolved: true,
     });
@@ -2261,7 +2261,7 @@ describe('resolveHeaders stripUnresolved', () => {
 
   it('strips only the placeholder within a composite header value', () => {
     const result = resolveHeaders({
-      headers: { Authorization: 'Bearer {{LIBRECHAT_USER_OPENIDID}}' },
+      headers: { Authorization: 'Bearer {{BAANZON_USER_OPENIDID}}' },
       stripUnresolved: true,
     });
 
@@ -2270,7 +2270,7 @@ describe('resolveHeaders stripUnresolved', () => {
 
   it('strips body placeholders when no body context is available', () => {
     const result = resolveHeaders({
-      headers: { 'X-Convo': '{{LIBRECHAT_BODY_CONVERSATIONID}}' },
+      headers: { 'X-Convo': '{{BAANZON_BODY_CONVERSATIONID}}' },
       user: { id: 'user-123' },
       stripUnresolved: true,
     });
@@ -2281,8 +2281,8 @@ describe('resolveHeaders stripUnresolved', () => {
   it('omits OpenID credential headers when no valid token is available', () => {
     const result = resolveHeaders({
       headers: {
-        'X-Access': '{{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
-        'X-Token': '{{LIBRECHAT_OPENID_TOKEN}}',
+        'X-Access': '{{BAANZON_OPENID_ACCESS_TOKEN}}',
+        'X-Token': '{{BAANZON_OPENID_TOKEN}}',
       },
       user: { id: 'user-123' },
       stripUnresolved: true,
@@ -2295,8 +2295,8 @@ describe('resolveHeaders stripUnresolved', () => {
   it('omits the credential header but strips identity placeholders to empty', () => {
     const result = resolveHeaders({
       headers: {
-        Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
-        'X-Org': '{{LIBRECHAT_OPENID_USER_ID}}',
+        Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}',
+        'X-Org': '{{BAANZON_OPENID_USER_ID}}',
       },
       user: createTestUser({ id: 'user-123' }),
       stripUnresolved: true,
@@ -2309,36 +2309,36 @@ describe('resolveHeaders stripUnresolved', () => {
   it('preserves credential placeholders literally when stripUnresolved is false', () => {
     const result = resolveHeaders({
       headers: {
-        Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
-        'X-Org': '{{LIBRECHAT_OPENID_USER_ID}}',
+        Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}',
+        'X-Org': '{{BAANZON_OPENID_USER_ID}}',
       },
       user: createTestUser({ id: 'user-123' }),
     });
 
-    expect(result.Authorization).toBe('Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}');
-    expect(result['X-Org']).toBe('{{LIBRECHAT_OPENID_USER_ID}}');
+    expect(result.Authorization).toBe('Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}');
+    expect(result['X-Org']).toBe('{{BAANZON_OPENID_USER_ID}}');
   });
 
   it('leaves unknown and non-resolvable placeholders untouched', () => {
     const result = resolveHeaders({
       headers: {
-        'X-Typo': '{{LIBRECHAT_USER_NONEXISTENT}}',
-        'X-Graph': '{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}',
+        'X-Typo': '{{BAANZON_USER_NONEXISTENT}}',
+        'X-Graph': '{{BAANZON_GRAPH_ACCESS_TOKEN}}',
         'X-Custom': '{{MY_CUSTOM_VAR}}',
       },
       stripUnresolved: true,
     });
 
-    expect(result['X-Typo']).toBe('{{LIBRECHAT_USER_NONEXISTENT}}');
-    expect(result['X-Graph']).toBe('{{LIBRECHAT_GRAPH_ACCESS_TOKEN}}');
+    expect(result['X-Typo']).toBe('{{BAANZON_USER_NONEXISTENT}}');
+    expect(result['X-Graph']).toBe('{{BAANZON_GRAPH_ACCESS_TOKEN}}');
     expect(result['X-Custom']).toBe('{{MY_CUSTOM_VAR}}');
   });
 
   it('preserves unresolved placeholders by default (staged flows resolve later)', () => {
     const result = resolveHeaders({ headers: { ...templateHeaders } });
 
-    expect(result['X-OpenID-Id']).toBe('{{LIBRECHAT_USER_OPENIDID}}');
-    expect(result['X-User-Id']).toBe('{{LIBRECHAT_USER_ID}}');
+    expect(result['X-OpenID-Id']).toBe('{{BAANZON_USER_OPENIDID}}');
+    expect(result['X-User-Id']).toBe('{{BAANZON_USER_ID}}');
   });
 });
 
@@ -2371,12 +2371,12 @@ describe('processMCPEnv OpenID re-authentication signalling', () => {
       type: 'streamable-http',
       url: 'https://api.example.com',
       headers: {
-        Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
+        Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}',
       },
     };
 
     expect(() => processMCPEnv({ options, user: createOpenIDUser(expiredSeconds) })).toThrow(
-      'OpenID token is expired or unavailable; re-authentication is required to resolve {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
+      'OpenID token is expired or unavailable; re-authentication is required to resolve {{BAANZON_OPENID_ACCESS_TOKEN}}',
     );
   });
 
@@ -2385,7 +2385,7 @@ describe('processMCPEnv OpenID re-authentication signalling', () => {
       type: 'streamable-http',
       url: 'https://api.example.com',
       headers: {
-        'X-User-Id': '{{LIBRECHAT_USER_ID}}',
+        'X-User-Id': '{{BAANZON_USER_ID}}',
       },
     };
 
@@ -2403,14 +2403,14 @@ describe('processMCPEnv OpenID re-authentication signalling', () => {
       type: 'streamable-http',
       url: 'https://api.example.com',
       headers: {
-        Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCES_TOKEN}}',
+        Authorization: 'Bearer {{BAANZON_OPENID_ACCES_TOKEN}}',
       },
     };
 
     const result = processMCPEnv({ options, user: createOpenIDUser(expiredSeconds) });
 
     if (isStreamableHTTPOptions(result)) {
-      expect(result.headers?.Authorization).toBe('Bearer {{LIBRECHAT_OPENID_ACCES_TOKEN}}');
+      expect(result.headers?.Authorization).toBe('Bearer {{BAANZON_OPENID_ACCES_TOKEN}}');
     } else {
       throw new Error('Expected streamable-http options');
     }
@@ -2421,14 +2421,14 @@ describe('processMCPEnv OpenID re-authentication signalling', () => {
       type: 'streamable-http',
       url: 'https://api.example.com',
       headers: {
-        Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
+        Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}',
       },
     };
 
     const result = processMCPEnv({ options, user: createTestUser({ id: 'user-123' }) });
 
     if (isStreamableHTTPOptions(result)) {
-      expect(result.headers?.Authorization).toBe('Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}');
+      expect(result.headers?.Authorization).toBe('Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}');
     } else {
       throw new Error('Expected streamable-http options');
     }
@@ -2439,7 +2439,7 @@ describe('processMCPEnv OpenID re-authentication signalling', () => {
       type: 'streamable-http',
       url: 'https://api.example.com',
       headers: {
-        Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
+        Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}',
       },
     };
 
@@ -2455,12 +2455,12 @@ describe('processMCPEnv OpenID re-authentication signalling', () => {
   it('should raise re-auth from resolveHeaders when the ID token is expired', () => {
     expect(() =>
       resolveHeaders({
-        headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}' },
+        headers: { Authorization: 'Bearer {{BAANZON_OPENID_ID_TOKEN}}' },
         user: createOpenIDUser(expiredSeconds),
         stripUnresolved: true,
       }),
     ).toThrow(
-      'OpenID ID token is expired or unavailable; re-authentication is required to resolve {{LIBRECHAT_OPENID_ID_TOKEN}}',
+      'OpenID ID token is expired or unavailable; re-authentication is required to resolve {{BAANZON_OPENID_ID_TOKEN}}',
     );
   });
 
@@ -2481,7 +2481,7 @@ describe('processMCPEnv OpenID re-authentication signalling', () => {
     const { user, idToken } = accessTokenlessOpenIDUser(validSeconds);
 
     const resolved = resolveHeaders({
-      headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}' },
+      headers: { Authorization: 'Bearer {{BAANZON_OPENID_ID_TOKEN}}' },
       user,
       stripUnresolved: true,
     });
@@ -2493,11 +2493,11 @@ describe('processMCPEnv OpenID re-authentication signalling', () => {
     const { user } = accessTokenlessOpenIDUser(validSeconds);
 
     const resolved = resolveHeaders({
-      headers: { 'X-User-Id': '{{LIBRECHAT_OPENID_USER_ID}}' },
+      headers: { 'X-User-Id': '{{BAANZON_OPENID_USER_ID}}' },
       user,
     });
 
-    expect(resolved['X-User-Id']).toBe('{{LIBRECHAT_OPENID_USER_ID}}');
+    expect(resolved['X-User-Id']).toBe('{{BAANZON_OPENID_USER_ID}}');
   });
 
   it('should still raise re-auth for an access token placeholder while no access token is stored', () => {
@@ -2505,10 +2505,10 @@ describe('processMCPEnv OpenID re-authentication signalling', () => {
 
     expect(() =>
       resolveHeaders({
-        headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+        headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
         user,
       }),
-    ).toThrow('re-authentication is required to resolve {{LIBRECHAT_OPENID_ACCESS_TOKEN}}');
+    ).toThrow('re-authentication is required to resolve {{BAANZON_OPENID_ACCESS_TOKEN}}');
   });
 
   it('should leave identity metadata placeholders literal for an OpenID user with no stored tokens', () => {
@@ -2516,21 +2516,21 @@ describe('processMCPEnv OpenID re-authentication signalling', () => {
       type: 'streamable-http',
       url: 'https://api.example.com',
       headers: {
-        'X-User-Id': '{{LIBRECHAT_OPENID_USER_ID}}',
+        'X-User-Id': '{{BAANZON_OPENID_USER_ID}}',
       },
     };
 
     const result = processMCPEnv({ options, user: tokenlessOpenIDUser() });
 
     if (isStreamableHTTPOptions(result)) {
-      expect(result.headers?.['X-User-Id']).toBe('{{LIBRECHAT_OPENID_USER_ID}}');
+      expect(result.headers?.['X-User-Id']).toBe('{{BAANZON_OPENID_USER_ID}}');
     } else {
       throw new Error('Expected streamable-http options');
     }
 
     expect(
       resolveHeaders({
-        headers: { 'X-User-Id': '{{LIBRECHAT_OPENID_USER_ID}}' },
+        headers: { 'X-User-Id': '{{BAANZON_OPENID_USER_ID}}' },
         user: tokenlessOpenIDUser(),
         stripUnresolved: true,
       })['X-User-Id'],
@@ -2542,12 +2542,12 @@ describe('processMCPEnv OpenID re-authentication signalling', () => {
       type: 'streamable-http',
       url: 'https://api.example.com',
       headers: {
-        Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
+        Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}',
       },
     };
 
     expect(() => processMCPEnv({ options, user: tokenlessOpenIDUser() })).toThrow(
-      'OpenID token is expired or unavailable; re-authentication is required to resolve {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
+      'OpenID token is expired or unavailable; re-authentication is required to resolve {{BAANZON_OPENID_ACCESS_TOKEN}}',
     );
   });
 
@@ -2556,18 +2556,18 @@ describe('processMCPEnv OpenID re-authentication signalling', () => {
       type: 'streamable-http',
       url: 'https://api.example.com',
       headers: {
-        'X-User-Id': '{{LIBRECHAT_OPENID_USER_ID}}',
-        'X-User-Email': '{{LIBRECHAT_OPENID_USER_EMAIL}}',
-        'X-User-Name': '{{LIBRECHAT_OPENID_USER_NAME}}',
-        'X-Expires': '{{LIBRECHAT_OPENID_EXPIRES_AT}}',
+        'X-User-Id': '{{BAANZON_OPENID_USER_ID}}',
+        'X-User-Email': '{{BAANZON_OPENID_USER_EMAIL}}',
+        'X-User-Name': '{{BAANZON_OPENID_USER_NAME}}',
+        'X-Expires': '{{BAANZON_OPENID_EXPIRES_AT}}',
       },
     };
 
     const result = processMCPEnv({ options, user: createOpenIDUser(expiredSeconds) });
 
     if (isStreamableHTTPOptions(result)) {
-      expect(result.headers?.['X-User-Id']).toBe('{{LIBRECHAT_OPENID_USER_ID}}');
-      expect(result.headers?.['X-Expires']).toBe('{{LIBRECHAT_OPENID_EXPIRES_AT}}');
+      expect(result.headers?.['X-User-Id']).toBe('{{BAANZON_OPENID_USER_ID}}');
+      expect(result.headers?.['X-Expires']).toBe('{{BAANZON_OPENID_EXPIRES_AT}}');
     } else {
       throw new Error('Expected streamable-http options');
     }

@@ -27,7 +27,7 @@ function tenantScope(tenantId?: string): string {
 
 function tombstoneId(environmentId: string, tenantId?: string): string {
   return createHash('sha256')
-    .update(`librechat-code-environment-tombstone\0${tenantScope(tenantId)}\0${environmentId}`)
+    .update(`baanzon-code-environment-tombstone\0${tenantScope(tenantId)}\0${environmentId}`)
     .digest('hex');
 }
 
@@ -41,7 +41,7 @@ function tombstones(mongoose: typeof import('mongoose')) {
 
 function ownerSlotId(ownerId: Types.ObjectId, slot: number): Types.ObjectId {
   const hex = createHash('sha256')
-    .update(`librechat-code-environment-slot\0${ownerId.toHexString()}\0${slot}`)
+    .update(`baanzon-code-environment-slot\0${ownerId.toHexString()}\0${slot}`)
     .digest('hex')
     .slice(0, 24);
   return new Types.ObjectId(hex);

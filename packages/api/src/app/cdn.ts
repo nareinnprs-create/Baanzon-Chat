@@ -19,7 +19,7 @@ function initializeStrategy(strategy: FileSources, appConfig: AppConfig): void {
     const cloudfrontConfig = appConfig.cloudfront;
     if (!cloudfrontConfig) {
       logger.error(
-        '[initializeFileStorage] CloudFront strategy requires cloudfront config in librechat.yaml',
+        '[initializeFileStorage] CloudFront strategy requires cloudfront config in baanzon.yaml',
       );
       return;
     }

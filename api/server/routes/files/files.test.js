@@ -50,7 +50,7 @@ jest.mock('@librechat/api', () => ({
       return environment.baseURL;
     }
     if (profile === 'stateful') {
-      return process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+      return process.env.BAANZON_CODE_BASEURL_STATEFUL;
     }
     return 'https://code-default.example.com/v1';
   }),
@@ -1385,7 +1385,7 @@ describe('File Routes - Delete with Agent Access', () => {
         data: Readable.from(['stateful output']),
       });
       getStrategyFunctions.mockReturnValue({ getDownloadStream });
-      process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'https://code-stateful.example.com/v1';
+      process.env.BAANZON_CODE_BASEURL_STATEFUL = 'https://code-stateful.example.com/v1';
 
       try {
         const sessionId = 's'.repeat(21);
@@ -1408,7 +1408,7 @@ describe('File Routes - Delete with Agent Access', () => {
           { baseUrl: 'https://code-stateful.example.com/v1', executionProfile: 'stateful' },
         );
       } finally {
-        delete process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+        delete process.env.BAANZON_CODE_BASEURL_STATEFUL;
       }
     });
 

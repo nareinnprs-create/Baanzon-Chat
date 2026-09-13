@@ -191,7 +191,7 @@ describe('initializeCustom – OpenAI-compatible header forwarding', () => {
     },
     {
       headerType: 'user-placeholder',
-      headers: { 'X-User-Email': '{{LIBRECHAT_USER_EMAIL}}' },
+      headers: { 'X-User-Email': '{{BAANZON_USER_EMAIL}}' },
     },
   ];
 
@@ -203,7 +203,7 @@ describe('initializeCustom – OpenAI-compatible header forwarding', () => {
     const headers = {
       Authorization: 'Bearer static-gateway-token',
       'X-Env-Secret': '${GATEWAY_SECRET}',
-      'X-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+      'X-User-Email': '{{BAANZON_USER_EMAIL}}',
     };
     const params = createParams({
       apiKey: 'sk-system-key',
@@ -370,8 +370,8 @@ describe('initializeCustom – token-config fetch header forwarding', () => {
 
   it('forwards configured headers and user object to fetchModels for admin-trusted base URL', async () => {
     const headers = {
-      Authorization: 'Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}',
-      'X-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+      Authorization: 'Bearer {{BAANZON_OPENID_ID_TOKEN}}',
+      'X-User-Email': '{{BAANZON_USER_EMAIL}}',
     };
     const params = createTokenConfigParams({
       apiKey: 'sk-test-key',
@@ -393,7 +393,7 @@ describe('initializeCustom – token-config fetch header forwarding', () => {
 
   it('drops headers when base URL is user-provided (token leak guard)', async () => {
     const headers = {
-      Authorization: 'Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}',
+      Authorization: 'Bearer {{BAANZON_OPENID_ID_TOKEN}}',
     };
     const params = createTokenConfigParams({
       apiKey: 'sk-test-key',
@@ -451,7 +451,7 @@ describe('initializeCustom – token-config fetch header forwarding', () => {
     const params = createTokenConfigParams({
       apiKey: 'sk-test-key',
       baseURL: 'https://openrouter.ai/api/v1',
-      headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}' },
+      headers: { Authorization: 'Bearer {{BAANZON_OPENID_ID_TOKEN}}' },
     });
 
     await initializeCustom(params);
@@ -468,7 +468,7 @@ describe('initializeCustom – token-config fetch header forwarding', () => {
       apiKey: 'sk-test-key',
       baseURL: AuthType.USER_PROVIDED,
       userBaseURL: 'https://user-controlled.example.com/v1',
-      headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}' },
+      headers: { Authorization: 'Bearer {{BAANZON_OPENID_ID_TOKEN}}' },
     });
 
     await initializeCustom(params);
@@ -546,7 +546,7 @@ describe('getTokenConfigKey – tenant fallback', () => {
   it('keeps legacy user-scoped keys when tenant context is unavailable or empty', () => {
     const userScopedConfig = {
       ...endpointConfig,
-      headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}' },
+      headers: { Authorization: 'Bearer {{BAANZON_OPENID_ID_TOKEN}}' },
     };
     const tenantIds = [undefined, null, '', '   '] as Array<string | null | undefined>;
 
@@ -629,7 +629,7 @@ describe('initializeCustom – native Anthropic provider', () => {
       baseURL: AuthType.USER_PROVIDED,
       headers: {
         Authorization: 'Bearer ${GATEWAY_SECRET}',
-        'X-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+        'X-User-Email': '{{BAANZON_USER_EMAIL}}',
       },
       models: { default: ['claude-sonnet-4-5'] },
     });

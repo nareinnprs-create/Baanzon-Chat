@@ -220,7 +220,7 @@ describe('Langfuse config secrets', () => {
       },
     });
 
-    /** These reach `GET /api/admin/config/base` from librechat.yaml, where no
+    /** These reach `GET /api/admin/config/base` from baanzon.yaml, where no
      *  scalar secret registration covers them — unmasked, any delegated admin
      *  with Langfuse read access receives the raw gateway credential. */
     expect(redacted.langfuse).toEqual({

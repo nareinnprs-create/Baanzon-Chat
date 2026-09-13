@@ -226,7 +226,7 @@ export function createLoadConfigModels(deps: LoadConfigModelsDeps) {
                 userObject: req.user,
                 // Do not forward header overrides when the base URL is
                 // user-supplied: configured templates such as
-                // {{LIBRECHAT_OPENID_ID_TOKEN}} would otherwise resolve and be
+                // {{BAANZON_OPENID_ID_TOKEN}} would otherwise resolve and be
                 // sent to a destination the user controls, leaking the user's
                 // identity token. Header overrides are only safe for endpoints
                 // whose base URL is admin-trusted.

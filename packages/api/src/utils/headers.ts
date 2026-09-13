@@ -4,8 +4,8 @@ import type { RequestBody, RunLLMConfig } from '~/types';
 import { resolveHeaders } from './env';
 
 const TENANT_ID_HEADER_PLACEHOLDERS = [
-  '{{LIBRECHAT_USER_TENANTID}}',
-  '{{LIBRECHAT_USER_TENANT_ID}}',
+  '{{BAANZON_USER_TENANTID}}',
+  '{{BAANZON_USER_TENANT_ID}}',
 ] as const;
 
 /**
@@ -152,7 +152,7 @@ const resolvedHeaderMaps = new WeakSet<object>();
  * passes through environment or user-template expansion.
  *
  * Resolution runs at request time so request-body placeholders (e.g.
- * `{{LIBRECHAT_BODY_CONVERSATIONID}}`) resolve against the live request. It is a
+ * `{{BAANZON_BODY_CONVERSATIONID}}`) resolve against the live request. It is a
  * no-op for header values without placeholders, and idempotent under config reuse.
  *
  * This is the last resolution pass before the outbound provider request, so any

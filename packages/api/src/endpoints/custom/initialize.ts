@@ -167,7 +167,7 @@ function buildAnthropicCustomConfig({
 
 /**
  * Initializes a custom endpoint client configuration.
- * This function handles custom endpoints defined in librechat.yaml, including
+ * This function handles custom endpoints defined in baanzon.yaml, including
  * user-provided API keys and URLs.
  *
  * @param params - Configuration parameters
@@ -288,7 +288,7 @@ export async function initializeCustom(
       userObject: user,
       // Mirror the security guard in `loadConfigModels`: never forward
       // header overrides when the base URL is user-supplied — configured
-      // templates like {{LIBRECHAT_OPENID_ID_TOKEN}} would otherwise resolve
+      // templates like {{BAANZON_OPENID_ID_TOKEN}} would otherwise resolve
       // and leak the user's identity token to a destination the user controls.
       headers: userProvidesURL ? undefined : endpointConfig.headers,
       // Note: when both `headers` and `userObject` are supplied below, the

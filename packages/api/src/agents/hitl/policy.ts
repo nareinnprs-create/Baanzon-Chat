@@ -22,7 +22,7 @@ const DEFAULT_REVIEW_DECISIONS: Agents.ToolApprovalDecisionType[] = ['approve', 
  */
 export interface ToolApprovalPolicyLayers {
   /**
-   * App/endpoint policy — `endpoints.agents.toolApproval` from librechat.yaml.
+   * App/endpoint policy — `endpoints.agents.toolApproval` from baanzon.yaml.
    * The baseline, and the sole owner of the `enabled` kill switch.
    */
   endpoint?: TToolApprovalPolicy;

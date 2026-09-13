@@ -143,7 +143,7 @@ describe('OpenID Token Utilities', () => {
 
       expect(result?.expiresAt).toBe(nowSeconds + 3600);
       expect(isOpenIDTokenValid(result)).toBe(true);
-      expect(processOpenIDPlaceholders('Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}', result)).toBe(
+      expect(processOpenIDPlaceholders('Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}', result)).toBe(
         'Bearer fresh-access-token',
       );
     });
@@ -190,10 +190,10 @@ describe('OpenID Token Utilities', () => {
       expect(result?.expiresAt).toBeUndefined();
       expect(result?.idTokenExpiresAt).toBe(nowSeconds - 3600);
       expect(isOpenIDTokenValid(result)).toBe(true);
-      expect(processOpenIDPlaceholders('{{LIBRECHAT_OPENID_ACCESS_TOKEN}}', result)).toBe(
+      expect(processOpenIDPlaceholders('{{BAANZON_OPENID_ACCESS_TOKEN}}', result)).toBe(
         'opaque-access-token',
       );
-      expect(() => processOpenIDPlaceholders('{{LIBRECHAT_OPENID_ID_TOKEN}}', result)).toThrow(
+      expect(() => processOpenIDPlaceholders('{{BAANZON_OPENID_ID_TOKEN}}', result)).toThrow(
         OpenIDReauthRequiredError,
       );
     });
@@ -217,7 +217,7 @@ describe('OpenID Token Utilities', () => {
       expect(result?.idTokenExpiresAt).toBe(0);
       expect(result?.expiresAt).toBeUndefined();
       expect(isOpenIDTokenValid(result)).toBe(true);
-      expect(() => processOpenIDPlaceholders('{{LIBRECHAT_OPENID_ID_TOKEN}}', result)).toThrow(
+      expect(() => processOpenIDPlaceholders('{{BAANZON_OPENID_ID_TOKEN}}', result)).toThrow(
         /re-authentication is required/,
       );
     });
@@ -240,7 +240,7 @@ describe('OpenID Token Utilities', () => {
 
       expect(result?.idTokenExpiresAt).toBeUndefined();
       expect(result?.expiresAt).toBeUndefined();
-      expect(() => processOpenIDPlaceholders('{{LIBRECHAT_OPENID_ID_TOKEN}}', result)).toThrow(
+      expect(() => processOpenIDPlaceholders('{{BAANZON_OPENID_ID_TOKEN}}', result)).toThrow(
         /re-authentication is required/,
       );
     });
@@ -397,7 +397,7 @@ describe('OpenID Token Utilities', () => {
         idTokenExpiresAt: nowSeconds - 3600,
       };
 
-      expect(() => processOpenIDPlaceholders('{{LIBRECHAT_OPENID_ID_TOKEN}}', tokenInfo)).toThrow(
+      expect(() => processOpenIDPlaceholders('{{BAANZON_OPENID_ID_TOKEN}}', tokenInfo)).toThrow(
         /re-authentication is required/,
       );
     });
@@ -411,79 +411,79 @@ describe('OpenID Token Utilities', () => {
         idTokenExpiresAt: nowSeconds + 1800,
       };
 
-      const result = processOpenIDPlaceholders('{{LIBRECHAT_OPENID_ID_TOKEN}}', tokenInfo);
+      const result = processOpenIDPlaceholders('{{BAANZON_OPENID_ID_TOKEN}}', tokenInfo);
 
       expect(result).toBe('current-id-token-value');
     });
 
-    it('should replace LIBRECHAT_OPENID_TOKEN with access token', () => {
+    it('should replace BAANZON_OPENID_TOKEN with access token', () => {
       const tokenInfo = {
         accessToken: 'access-token-value',
         idToken: 'id-token-value',
         userId: 'oidc-sub-456',
       };
 
-      const input = 'Authorization: Bearer {{LIBRECHAT_OPENID_TOKEN}}';
+      const input = 'Authorization: Bearer {{BAANZON_OPENID_TOKEN}}';
       const result = processOpenIDPlaceholders(input, tokenInfo);
 
       expect(result).toBe('Authorization: Bearer access-token-value');
     });
 
-    it('should replace LIBRECHAT_OPENID_ACCESS_TOKEN with access token', () => {
+    it('should replace BAANZON_OPENID_ACCESS_TOKEN with access token', () => {
       const tokenInfo = {
         accessToken: 'access-token-value',
         userId: 'oidc-sub-456',
       };
 
-      const input = 'Token: {{LIBRECHAT_OPENID_ACCESS_TOKEN}}';
+      const input = 'Token: {{BAANZON_OPENID_ACCESS_TOKEN}}';
       const result = processOpenIDPlaceholders(input, tokenInfo);
 
       expect(result).toBe('Token: access-token-value');
     });
 
-    it('should replace LIBRECHAT_OPENID_ID_TOKEN with id token', () => {
+    it('should replace BAANZON_OPENID_ID_TOKEN with id token', () => {
       const tokenInfo = {
         idTokenExpiresAt: Math.floor(Date.now() / 1000) + 3600,
         idToken: 'id-token-value',
         userId: 'oidc-sub-456',
       };
 
-      const input = 'ID Token: {{LIBRECHAT_OPENID_ID_TOKEN}}';
+      const input = 'ID Token: {{BAANZON_OPENID_ID_TOKEN}}';
       const result = processOpenIDPlaceholders(input, tokenInfo);
 
       expect(result).toBe('ID Token: id-token-value');
     });
 
-    it('should replace LIBRECHAT_OPENID_USER_ID with user id', () => {
+    it('should replace BAANZON_OPENID_USER_ID with user id', () => {
       const tokenInfo = {
         userId: 'oidc-sub-456',
       };
 
-      const input = 'User: {{LIBRECHAT_OPENID_USER_ID}}';
+      const input = 'User: {{BAANZON_OPENID_USER_ID}}';
       const result = processOpenIDPlaceholders(input, tokenInfo);
 
       expect(result).toBe('User: oidc-sub-456');
     });
 
-    it('should replace LIBRECHAT_OPENID_USER_EMAIL with user email', () => {
+    it('should replace BAANZON_OPENID_USER_EMAIL with user email', () => {
       const tokenInfo = {
         userEmail: 'test@example.com',
         userId: 'oidc-sub-456',
       };
 
-      const input = 'Email: {{LIBRECHAT_OPENID_USER_EMAIL}}';
+      const input = 'Email: {{BAANZON_OPENID_USER_EMAIL}}';
       const result = processOpenIDPlaceholders(input, tokenInfo);
 
       expect(result).toBe('Email: test@example.com');
     });
 
-    it('should replace LIBRECHAT_OPENID_USER_NAME with user name', () => {
+    it('should replace BAANZON_OPENID_USER_NAME with user name', () => {
       const tokenInfo = {
         userName: 'Test User',
         userId: 'oidc-sub-456',
       };
 
-      const input = 'Name: {{LIBRECHAT_OPENID_USER_NAME}}';
+      const input = 'Name: {{BAANZON_OPENID_USER_NAME}}';
       const result = processOpenIDPlaceholders(input, tokenInfo);
 
       expect(result).toBe('Name: Test User');
@@ -499,7 +499,7 @@ describe('OpenID Token Utilities', () => {
       };
 
       const input =
-        'Authorization: Bearer {{LIBRECHAT_OPENID_TOKEN}}, ID: {{LIBRECHAT_OPENID_ID_TOKEN}}, User: {{LIBRECHAT_OPENID_USER_ID}}';
+        'Authorization: Bearer {{BAANZON_OPENID_TOKEN}}, ID: {{BAANZON_OPENID_ID_TOKEN}}, User: {{BAANZON_OPENID_USER_ID}}';
       const result = processOpenIDPlaceholders(input, tokenInfo);
 
       expect(result).toBe(
@@ -513,7 +513,7 @@ describe('OpenID Token Utilities', () => {
         userId: 'oidc-sub-456',
       };
 
-      const input = 'Access: {{LIBRECHAT_OPENID_TOKEN}}, User: {{LIBRECHAT_OPENID_USER_ID}}';
+      const input = 'Access: {{BAANZON_OPENID_TOKEN}}, User: {{BAANZON_OPENID_USER_ID}}';
       const result = processOpenIDPlaceholders(input, tokenInfo);
 
       expect(result).toBe('Access: , User: oidc-sub-456');
@@ -525,7 +525,7 @@ describe('OpenID Token Utilities', () => {
         userId: 'oidc-sub-456',
       };
 
-      expect(() => processOpenIDPlaceholders('{{LIBRECHAT_OPENID_ID_TOKEN}}', tokenInfo)).toThrow(
+      expect(() => processOpenIDPlaceholders('{{BAANZON_OPENID_ID_TOKEN}}', tokenInfo)).toThrow(
         /re-authentication is required/,
       );
     });
@@ -537,7 +537,7 @@ describe('OpenID Token Utilities', () => {
         userId: 'oidc-sub-456',
       };
 
-      expect(() => processOpenIDPlaceholders('{{LIBRECHAT_OPENID_ID_TOKEN}}', tokenInfo)).toThrow(
+      expect(() => processOpenIDPlaceholders('{{BAANZON_OPENID_ID_TOKEN}}', tokenInfo)).toThrow(
         /re-authentication is required/,
       );
     });
@@ -554,13 +554,13 @@ describe('OpenID Token Utilities', () => {
       };
 
       const input = `
-        Authorization: Bearer {{LIBRECHAT_OPENID_TOKEN}}
-        ID Token: {{LIBRECHAT_OPENID_ID_TOKEN}}
-        Access Token (alt): {{LIBRECHAT_OPENID_ACCESS_TOKEN}}
-        User ID: {{LIBRECHAT_OPENID_USER_ID}}
-        User Email: {{LIBRECHAT_OPENID_USER_EMAIL}}
-        User Name: {{LIBRECHAT_OPENID_USER_NAME}}
-        Expires: {{LIBRECHAT_OPENID_EXPIRES_AT}}
+        Authorization: Bearer {{BAANZON_OPENID_TOKEN}}
+        ID Token: {{BAANZON_OPENID_ID_TOKEN}}
+        Access Token (alt): {{BAANZON_OPENID_ACCESS_TOKEN}}
+        User ID: {{BAANZON_OPENID_USER_ID}}
+        User Email: {{BAANZON_OPENID_USER_EMAIL}}
+        User Name: {{BAANZON_OPENID_USER_NAME}}
+        Expires: {{BAANZON_OPENID_EXPIRES_AT}}
       `;
 
       const result = processOpenIDPlaceholders(input, tokenInfo);
@@ -606,7 +606,7 @@ describe('OpenID Token Utilities', () => {
       };
 
       const input =
-        'Primary: {{LIBRECHAT_OPENID_TOKEN}}, Secondary: {{LIBRECHAT_OPENID_TOKEN}}, Backup: {{LIBRECHAT_OPENID_TOKEN}}';
+        'Primary: {{BAANZON_OPENID_TOKEN}}, Secondary: {{BAANZON_OPENID_TOKEN}}, Backup: {{BAANZON_OPENID_TOKEN}}';
       const result = processOpenIDPlaceholders(input, tokenInfo);
 
       expect(result).toBe(
@@ -623,17 +623,17 @@ describe('OpenID Token Utilities', () => {
         userName: undefined,
       };
 
-      const input = 'Access: {{LIBRECHAT_OPENID_TOKEN}}, User: {{LIBRECHAT_OPENID_USER_ID}}';
+      const input = 'Access: {{BAANZON_OPENID_TOKEN}}, User: {{BAANZON_OPENID_USER_ID}}';
       const result = processOpenIDPlaceholders(input, tokenInfo);
 
       expect(result).toBe('Access: , User: oidc-sub-456');
     });
 
     it('should return original value when tokenInfo is null', () => {
-      const input = 'Authorization: Bearer {{LIBRECHAT_OPENID_TOKEN}}';
+      const input = 'Authorization: Bearer {{BAANZON_OPENID_TOKEN}}';
       const result = processOpenIDPlaceholders(input, null);
 
-      expect(result).toBe('Authorization: Bearer {{LIBRECHAT_OPENID_TOKEN}}');
+      expect(result).toBe('Authorization: Bearer {{BAANZON_OPENID_TOKEN}}');
     });
 
     it('should return original value when value is not a string', () => {
@@ -674,13 +674,13 @@ describe('OpenID Token Utilities', () => {
 
       // Step 3: Process placeholders
       const input =
-        'Authorization: Bearer {{LIBRECHAT_OPENID_TOKEN}}, User: {{LIBRECHAT_OPENID_USER_ID}}';
+        'Authorization: Bearer {{BAANZON_OPENID_TOKEN}}, User: {{BAANZON_OPENID_USER_ID}}';
       const result = processOpenIDPlaceholders(input, tokenInfo!);
       expect(result).toContain('Authorization: Bearer access-token-value');
       expect(result).toContain('User:');
     });
 
-    it('should resolve LIBRECHAT_OPENID_ID_TOKEN and LIBRECHAT_OPENID_ACCESS_TOKEN to different values', () => {
+    it('should resolve BAANZON_OPENID_ID_TOKEN and BAANZON_OPENID_ACCESS_TOKEN to different values', () => {
       const nowSeconds = Math.floor(Date.now() / 1000);
       const idTokenPayload = Buffer.from(
         JSON.stringify({ sub: 'oidc-sub-456', exp: nowSeconds + 3600 }),
@@ -706,7 +706,7 @@ describe('OpenID Token Utilities', () => {
       expect(tokenInfo!.idToken).toBe(myIdToken);
       expect(tokenInfo!.accessToken).not.toBe(tokenInfo!.idToken);
 
-      const input = 'ACCESS={{LIBRECHAT_OPENID_ACCESS_TOKEN}}, ID={{LIBRECHAT_OPENID_ID_TOKEN}}';
+      const input = 'ACCESS={{BAANZON_OPENID_ACCESS_TOKEN}}, ID={{BAANZON_OPENID_ID_TOKEN}}';
       const result = processOpenIDPlaceholders(input, tokenInfo!);
 
       expect(result).toBe(`ACCESS=my-access-token, ID=${myIdToken}`);
@@ -733,7 +733,7 @@ describe('OpenID Token Utilities', () => {
 
       // Even if expired, processOpenIDPlaceholders should still work
       // (validation is checked separately by the caller)
-      const input = 'Authorization: Bearer {{LIBRECHAT_OPENID_TOKEN}}';
+      const input = 'Authorization: Bearer {{BAANZON_OPENID_TOKEN}}';
       const result = processOpenIDPlaceholders(input, tokenInfo!);
       expect(result).toBe('Authorization: Bearer access-token-value');
     });

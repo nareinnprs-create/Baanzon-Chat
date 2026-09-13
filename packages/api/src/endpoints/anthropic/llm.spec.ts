@@ -2152,7 +2152,7 @@ describe('getLLMConfig', () => {
         modelOptions: { model: 'claude-sonnet-4-5' },
         reverseProxyUrl: 'https://gateway.example.com',
         headers: {
-          'cf-aig-metadata': '{"user_email":"{{LIBRECHAT_USER_EMAIL}}","app":"librechat"}',
+          'cf-aig-metadata': '{"user_email":"{{BAANZON_USER_EMAIL}}","app":"librechat"}',
         },
       });
 
@@ -2163,7 +2163,7 @@ describe('getLLMConfig', () => {
       );
       /** Custom header is attached, placeholders kept intact for request-time resolution */
       expect((clientOptions?.defaultHeaders as Record<string, string>)['cf-aig-metadata']).toBe(
-        '{"user_email":"{{LIBRECHAT_USER_EMAIL}}","app":"librechat"}',
+        '{"user_email":"{{BAANZON_USER_EMAIL}}","app":"librechat"}',
       );
       /** Native request shaping is untouched */
       expect(result.llmConfig).toHaveProperty('model', 'claude-sonnet-4-5');

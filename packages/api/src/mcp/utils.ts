@@ -183,16 +183,16 @@ export function normalizeAgentToolKeys(params: {
   };
 }
 
-const RUNTIME_CONTEXT_PLACEHOLDER_PATTERN = /\{\{LIBRECHAT_(?:USER|OPENID|GRAPH)_[^}]+\}\}/;
+const RUNTIME_CONTEXT_PLACEHOLDER_PATTERN = /\{\{BAANZON_(?:USER|OPENID|GRAPH)_[^}]+\}\}/;
 const BODY_PLACEHOLDER_FIELDS = Object.fromEntries(
   ALLOWED_BODY_FIELDS.map((field) => [field.toUpperCase(), field]),
 ) as Record<string, keyof RequestBody>;
 const RUNTIME_BODY_FIELD_NAMES = Object.keys(BODY_PLACEHOLDER_FIELDS).join('|');
 const RUNTIME_BODY_PLACEHOLDER_PATTERN = new RegExp(
-  `\\{\\{LIBRECHAT_BODY_(?:${RUNTIME_BODY_FIELD_NAMES})\\}\\}`,
+  `\\{\\{BAANZON_BODY_(?:${RUNTIME_BODY_FIELD_NAMES})\\}\\}`,
 );
 const RUNTIME_BODY_PLACEHOLDER_CAPTURE_PATTERN = new RegExp(
-  `\\{\\{LIBRECHAT_BODY_(${RUNTIME_BODY_FIELD_NAMES})\\}\\}`,
+  `\\{\\{BAANZON_BODY_(${RUNTIME_BODY_FIELD_NAMES})\\}\\}`,
   'g',
 );
 

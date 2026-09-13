@@ -19,7 +19,7 @@ import { traceIdForMessage } from './trace';
 
 type LangfuseRunConfig = NonNullable<RunConfig['langfuse']>;
 type LangfuseRunConfigWithTraceAttributes = LangfuseRunConfig & {
-  librechatTraceAttributes?: Record<string, string | number | boolean | null | undefined>;
+  baanzonTraceAttributes?: Record<string, string | number | boolean | null | undefined>;
   mediaUploadEnabled?: boolean;
   additionalHeaders?: Record<string, string>;
 };
@@ -42,12 +42,12 @@ type LangfuseExportPlan =
       publicKey: string;
       secretKey: string;
     };
-const TENANT_EXPORT_ATTRIBUTE = 'librechat.langfuse.tenant_export.enabled';
-const TENANT_DESTINATION_ATTRIBUTE = 'librechat.langfuse.destination';
-const CENTRAL_EXPORT_ATTRIBUTE = 'librechat.langfuse.central_export.enabled';
-const EXPORT_PLAN_ATTRIBUTE = 'librechat.langfuse.export_plan';
-const EXPORT_REASON_ATTRIBUTE = 'librechat.langfuse.export_reason';
-const TENANT_ID_ATTRIBUTE = 'librechat.tenant.id';
+const TENANT_EXPORT_ATTRIBUTE = 'baanzon.langfuse.tenant_export.enabled';
+const TENANT_DESTINATION_ATTRIBUTE = 'baanzon.langfuse.destination';
+const CENTRAL_EXPORT_ATTRIBUTE = 'baanzon.langfuse.central_export.enabled';
+const EXPORT_PLAN_ATTRIBUTE = 'baanzon.langfuse.export_plan';
+const EXPORT_REASON_ATTRIBUTE = 'baanzon.langfuse.export_reason';
+const TENANT_ID_ATTRIBUTE = 'baanzon.tenant.id';
 const CENTRAL_MEDIA_DISABLED_SEGMENT = 'central-media-disabled';
 const DEFAULT_BASE_URL = 'https://cloud.langfuse.com';
 
@@ -66,7 +66,7 @@ function mergeTraceMetadata(
   }
   return {
     ...(base ?? {}),
-    'librechat.tenant.id': tenantId,
+    'baanzon.tenant.id': tenantId,
   };
 }
 
@@ -114,8 +114,8 @@ function applyCustomHeaders(
 }
 
 function disableCentralExport(langfuse: LangfuseRunConfigWithTraceAttributes): void {
-  langfuse.librechatTraceAttributes = {
-    ...(langfuse.librechatTraceAttributes ?? {}),
+  langfuse.baanzonTraceAttributes = {
+    ...(langfuse.baanzonTraceAttributes ?? {}),
     [CENTRAL_EXPORT_ATTRIBUTE]: 'false',
   };
 }
@@ -159,8 +159,8 @@ function applyExportPlanTelemetry(
   }
   const exportReason = exportPlan.type === 'tenantFanout' ? 'configured' : exportPlan.reason;
 
-  langfuse.librechatTraceAttributes = {
-    ...(langfuse.librechatTraceAttributes ?? {}),
+  langfuse.baanzonTraceAttributes = {
+    ...(langfuse.baanzonTraceAttributes ?? {}),
     ...(tenantId ? { [TENANT_ID_ATTRIBUTE]: tenantId } : {}),
     [EXPORT_PLAN_ATTRIBUTE]: exportPlanName,
     [EXPORT_REASON_ATTRIBUTE]: exportReason,
@@ -359,8 +359,8 @@ export function buildLangfuseConfig({
       // multiple tenant Langfuse exports for one run by header would need the
       // collector to demultiplex them — the URL remains the app-to-gateway
       // routing contract until that is required.
-      langfuse.librechatTraceAttributes = {
-        ...(langfuse.librechatTraceAttributes ?? {}),
+      langfuse.baanzonTraceAttributes = {
+        ...(langfuse.baanzonTraceAttributes ?? {}),
         [TENANT_EXPORT_ATTRIBUTE]: 'true',
         [TENANT_DESTINATION_ATTRIBUTE]: exportPlan.destination.key,
       };

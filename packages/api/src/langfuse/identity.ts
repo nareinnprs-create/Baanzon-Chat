@@ -56,15 +56,15 @@ function warnOnce(field: string, message: string): void {
   userIdFieldWarnings.add(field);
   logger.warn(`[langfuse] trace.userIdField "${field}" ${message} Reported once per field.`);
 }
-const USER_METADATA_PREFIX = 'librechat.user.';
+const USER_METADATA_PREFIX = 'baanzon.user.';
 const CONVERSATION_METADATA_KEYS: Record<LangfuseTraceConversationMetadataField, string> = {
-  conversationId: 'librechat.conversation.id',
-  endpoint: 'librechat.endpoint',
-  endpointType: 'librechat.endpoint.type',
-  provider: 'librechat.provider',
-  model: 'librechat.model',
-  modelLabel: 'librechat.model.label',
-  spec: 'librechat.spec',
+  conversationId: 'baanzon.conversation.id',
+  endpoint: 'baanzon.endpoint',
+  endpointType: 'baanzon.endpoint.type',
+  provider: 'baanzon.provider',
+  model: 'baanzon.model',
+  modelLabel: 'baanzon.model.label',
+  spec: 'baanzon.spec',
 };
 
 /**

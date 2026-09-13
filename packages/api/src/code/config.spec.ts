@@ -356,11 +356,11 @@ describe('mergeAccessibleCodeEnvironments', () => {
     ['preserves the configured stateful deployment', 'https://stateful.example/v1', undefined],
     ['uses the principal environment without a stateful deployment', undefined, true],
   ])('%s after a pairing-only control plane', async (_name, statefulURL, expectedDefault) => {
-    const originalStatefulURL = process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+    const originalStatefulURL = process.env.BAANZON_CODE_BASEURL_STATEFUL;
     if (statefulURL == null) {
-      delete process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+      delete process.env.BAANZON_CODE_BASEURL_STATEFUL;
     } else {
-      process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = statefulURL;
+      process.env.BAANZON_CODE_BASEURL_STATEFUL = statefulURL;
     }
     const pairingOnly = {
       id: 'self-service',
@@ -412,9 +412,9 @@ describe('mergeAccessibleCodeEnvironments', () => {
       );
     } finally {
       if (originalStatefulURL == null) {
-        delete process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+        delete process.env.BAANZON_CODE_BASEURL_STATEFUL;
       } else {
-        process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = originalStatefulURL;
+        process.env.BAANZON_CODE_BASEURL_STATEFUL = originalStatefulURL;
       }
     }
   });

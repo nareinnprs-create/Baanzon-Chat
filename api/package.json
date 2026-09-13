@@ -1,7 +1,7 @@
 {
   "name": "@librechat/backend",
   "version": "v0.8.8-rc2",
-  "description": "",
+  "description": "Baanzon Chat backend (Express server)",
   "scripts": {
     "start": "echo 'please run this from the root directory'",
     "server-dev": "echo 'please run this from the root directory'",

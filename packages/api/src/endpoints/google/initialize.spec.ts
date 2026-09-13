@@ -162,8 +162,8 @@ describe('initializeGoogle', () => {
           [EModelEndpoint.google]: {
             headers: {
               'X-Override': 'google',
-              'X-Conversation-Id': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
-              'X-User-Id': '{{LIBRECHAT_USER_ID}}',
+              'X-Conversation-Id': '{{BAANZON_BODY_CONVERSATIONID}}',
+              'X-User-Id': '{{BAANZON_USER_ID}}',
             },
           },
         },

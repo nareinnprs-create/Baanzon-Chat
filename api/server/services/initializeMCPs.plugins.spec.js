@@ -2,7 +2,7 @@
  * Tests for merging Agent Plugins MCP servers into the configured servers.
  *
  * Plugin packages are third-party data, so a plugin must never displace a server
- * the operator declared in librechat.yaml, and a plugin-controlled server name
+ * the operator declared in baanzon.yaml, and a plugin-controlled server name
  * must never reach a prototype setter.
  */
 
@@ -124,7 +124,7 @@ describe('initializeMCPs plugin server merge', () => {
     expect(managerConfig()).toBe(mcpConfig);
   });
 
-  it('never displaces a server declared in librechat.yaml', async () => {
+  it('never displaces a server declared in baanzon.yaml', async () => {
     const configured = { type: 'stdio', command: 'operator-owned' };
     mockGetAppConfig.mockResolvedValue({ mcpConfig: { shared: configured } });
     mockGetDeploymentPluginMcpServers.mockReturnValue({ shared: pluginServer });

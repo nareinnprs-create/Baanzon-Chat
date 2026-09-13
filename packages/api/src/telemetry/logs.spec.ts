@@ -37,7 +37,7 @@ describe('logs transport lifecycle', () => {
     expect(getLogsTransport()?.level).toBe('info');
     expect(emitWarningSpy).toHaveBeenCalledWith(
       expect.stringContaining('Ignoring unknown OTEL_LOGS_LEVEL "loud"; using "info"'),
-      { code: 'LIBRECHAT_OTEL' },
+      { code: 'BAANZON_OTEL' },
     );
   });
 

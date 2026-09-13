@@ -35,7 +35,7 @@ const connect = require('./connect');
   const appConfig = await getAppConfig();
   const balanceConfig = getBalanceConfig(appConfig);
   if (!balanceConfig?.enabled) {
-    console.red('Error: Balance is not enabled. Use librechat.yaml to enable it');
+    console.red('Error: Balance is not enabled. Use baanzon.yaml to enable it');
     silentExit(1);
   }
 

@@ -1,4 +1,4 @@
-import { ProviderId } from 'librechat-data-provider';
+﻿import { ProviderId } from 'librechat-data-provider';
 import { providerHosts, resolveEndpointProviderId } from './providers';
 
 describe('resolveEndpointProviderId', () => {
@@ -40,7 +40,7 @@ describe('resolveEndpointProviderId', () => {
     ).toBe(ProviderId.groq);
   });
 
-  it('resolves the Helicone gateway host documented in librechat.example.yaml', () => {
+  it('resolves the Helicone gateway host documented in baanzon.example.yaml', () => {
     expect(
       resolveEndpointProviderId({
         name: 'Team Gateway',

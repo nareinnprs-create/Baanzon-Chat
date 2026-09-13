@@ -711,7 +711,7 @@
   "com_ui_adding_details": "Detaylar ekleniyor",
   "com_ui_additional_details": "Ek Detaylar",
   "com_ui_admin": "Yönetici",
-  "com_ui_admin_access_warning": "Bu özelliğe Yönetici erişimini devre dışı bırakmak, yenileme gerektiren beklenmedik kullanıcı arayüzü sorunlarına neden olabilir. Kaydedilirse, geri almanın tek yolu tüm rolleri etkileyen librechat.yaml yapılandırmasındaki arayüz ayarı aracılığıyladır.",
+  "com_ui_admin_access_warning": "Bu özelliğe Yönetici erişimini devre dışı bırakmak, yenileme gerektiren beklenmedik kullanıcı arayüzü sorunlarına neden olabilir. Kaydedilirse, geri almanın tek yolu tüm rolleri etkileyen baanzon.yaml yapılandırmasındaki arayüz ayarı aracılığıyladır.",
   "com_ui_admin_panel": "Yönetici Paneli",
   "com_ui_admin_settings": "Yönetici Ayarları",
   "com_ui_admin_settings_section": "Yönetici Ayarları - {{section}}",

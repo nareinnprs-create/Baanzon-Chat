@@ -76,8 +76,8 @@ describe('buildLangfuseTraceMetadata', () => {
         context: { ...context, text: 'prompt' } as never,
       }),
     ).toEqual({
-      'librechat.user.email': 'alice@example.com',
-      'librechat.spec': 'support-bot',
+      'baanzon.user.email': 'alice@example.com',
+      'baanzon.spec': 'support-bot',
     });
   });
 
@@ -93,7 +93,7 @@ describe('buildLangfuseTraceMetadata', () => {
     ).toBeUndefined();
   });
 
-  it('exports only the allowlisted user fields under librechat.user', () => {
+  it('exports only the allowlisted user fields under baanzon.user', () => {
     expect(
       buildLangfuseTraceMetadata({
         trace: { userMetadataFields: ['email', 'role', 'email'] },
@@ -101,8 +101,8 @@ describe('buildLangfuseTraceMetadata', () => {
         context,
       }),
     ).toEqual({
-      'librechat.user.email': 'alice@example.com',
-      'librechat.user.role': 'ADMIN',
+      'baanzon.user.email': 'alice@example.com',
+      'baanzon.user.role': 'ADMIN',
     });
   });
 
@@ -124,11 +124,11 @@ describe('buildLangfuseTraceMetadata', () => {
         context,
       }),
     ).toEqual({
-      'librechat.conversation.id': 'convo-1',
-      'librechat.endpoint': 'agents',
-      'librechat.provider': 'openAI',
-      'librechat.model': 'gpt-5',
-      'librechat.spec': 'support-bot',
+      'baanzon.conversation.id': 'convo-1',
+      'baanzon.endpoint': 'agents',
+      'baanzon.provider': 'openAI',
+      'baanzon.model': 'gpt-5',
+      'baanzon.spec': 'support-bot',
     });
   });
 

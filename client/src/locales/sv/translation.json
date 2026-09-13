@@ -618,7 +618,7 @@
   "com_ui_add_multi_conversation": "Lägg till multikonversation",
   "com_ui_adding_details": "Lägger till detaljer",
   "com_ui_admin": "Administratör",
-  "com_ui_admin_access_warning": "Att inaktivera Admin-åtkomst till den här funktionen kan orsaka oväntade UI-problem som kräver uppdatering. Om funktionen sparas är det enda sättet att återgå via gränssnittsinställningen i librechat.yaml config, vilket påverkar alla roller.",
+  "com_ui_admin_access_warning": "Att inaktivera Admin-åtkomst till den här funktionen kan orsaka oväntade UI-problem som kräver uppdatering. Om funktionen sparas är det enda sättet att återgå via gränssnittsinställningen i baanzon.yaml config, vilket påverkar alla roller.",
   "com_ui_admin_settings": "Admin-inställningar",
   "com_ui_advanced": "Avancerad",
   "com_ui_advanced_settings": "Avancerade inställningar",

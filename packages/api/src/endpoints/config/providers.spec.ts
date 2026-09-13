@@ -40,7 +40,7 @@ describe('getProviderConfig', () => {
 
   it('falls back case-insensitively when only a CamelCase match exists', () => {
     // Agent runtime resolved provider to lowercase `"openrouter"`, but the
-    // user's `librechat.yaml` declared `name: "OpenRouter"`.
+    // user's `baanzon.yaml` declared `name: "OpenRouter"`.
     const appConfig = buildAppConfig([
       { name: 'OpenRouter', baseURL: 'https://openrouter.ai/api/v1', apiKey: 'sk-test' },
     ]);

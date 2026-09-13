@@ -227,7 +227,7 @@ describe('initializeOpenAI – custom headers', () => {
     (params.req.config as { endpoints: Record<string, unknown> }).endpoints = {
       all: { headers: { 'X-Common': 'all', 'X-Override': 'all' } },
       [EModelEndpoint.openAI]: {
-        headers: { 'X-Override': 'openai', 'cf-aig-metadata': '{{LIBRECHAT_BODY_CONVERSATIONID}}' },
+        headers: { 'X-Override': 'openai', 'cf-aig-metadata': '{{BAANZON_BODY_CONVERSATIONID}}' },
       },
     };
 
@@ -241,7 +241,7 @@ describe('initializeOpenAI – custom headers', () => {
     expect(options.headers).toEqual({
       'X-Common': 'all',
       'X-Override': 'openai',
-      'cf-aig-metadata': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+      'cf-aig-metadata': '{{BAANZON_BODY_CONVERSATIONID}}',
     });
   });
 
@@ -282,7 +282,7 @@ describe('initializeOpenAI – custom headers', () => {
     const params = createParams({ AZURE_API_KEY: 'az-key' });
     params.endpoint = EModelEndpoint.azureOpenAI;
     (params.req.config as { endpoints: Record<string, unknown> }).endpoints = {
-      all: { headers: { 'X-Global': '{{LIBRECHAT_USER_ID}}' } },
+      all: { headers: { 'X-Global': '{{BAANZON_USER_ID}}' } },
     };
 
     try {
@@ -293,6 +293,6 @@ describe('initializeOpenAI – custom headers', () => {
 
     const options = mockGetOpenAIConfig.mock.calls[0][1] as { headers?: Record<string, string> };
     // Left unresolved here; request-time resolveConfigHeaders resolves it once
-    expect(options.headers).toEqual({ 'X-Global': '{{LIBRECHAT_USER_ID}}' });
+    expect(options.headers).toEqual({ 'X-Global': '{{BAANZON_USER_ID}}' });
   });
 });

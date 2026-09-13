@@ -17,7 +17,7 @@ const LazyReactQueryDevtools = lazy(() =>
 
 export const shouldEnableQueryDevtools = ({
   isDevelopment = import.meta.env.DEV,
-  config = typeof window === 'undefined' ? undefined : window.__LIBRECHAT_CONFIG__,
+  config = typeof window === 'undefined' ? undefined : window.__BAANZON_CONFIG__,
 }: QueryDevtoolsGateProps = {}) => isDevelopment || config?.enableQueryDevtools === true;
 
 export default function QueryDevtoolsGate({ isDevelopment, config }: QueryDevtoolsGateProps = {}) {

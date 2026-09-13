@@ -6,8 +6,8 @@ import type { Collection } from 'mongodb';
 import {
   getAgentCheckpointer,
   __resetCheckpointerForTests,
-  LIBRECHAT_CHECKPOINT_OWNER_KEY,
-  LIBRECHAT_CHECKPOINT_STORAGE_OWNER_KEY,
+  BAANZON_CHECKPOINT_OWNER_KEY,
+  BAANZON_CHECKPOINT_STORAGE_OWNER_KEY,
 } from '../checkpointer';
 import {
   createCheckpointNamespace,
@@ -141,7 +141,7 @@ test('upgraded legacy writes record storage without changing the legacy physical
     configurable: {
       thread_id: 'legacy',
       checkpoint_ns: '',
-      [LIBRECHAT_CHECKPOINT_STORAGE_OWNER_KEY]: checkpointOwnerNamespacePrefix('owner', 'tenant'),
+      [BAANZON_CHECKPOINT_STORAGE_OWNER_KEY]: checkpointOwnerNamespacePrefix('owner', 'tenant'),
     },
   });
   expect(
@@ -165,7 +165,7 @@ test.each([false, true])(
       configurable: {
         thread_id: 'thread',
         checkpoint_ns: namespace,
-        ...(actor ? { [LIBRECHAT_CHECKPOINT_OWNER_KEY]: owner } : {}),
+        ...(actor ? { [BAANZON_CHECKPOINT_OWNER_KEY]: owner } : {}),
       },
     });
     await mongoose.connection
@@ -295,7 +295,7 @@ test.each([false, true])(
         thread_id: 'orphan',
         checkpoint_ns: actor ? 'event-actor/orphan' : createCheckpointNamespace('owner', 'tenant'),
         ...(actor
-          ? { [LIBRECHAT_CHECKPOINT_OWNER_KEY]: checkpointOwnerNamespacePrefix('owner', 'tenant') }
+          ? { [BAANZON_CHECKPOINT_OWNER_KEY]: checkpointOwnerNamespacePrefix('owner', 'tenant') }
           : {}),
       },
     });

@@ -688,7 +688,7 @@ describe('collectCodeExecutionProfileRoutes', () => {
   });
 
   it('derives and includes the trusted profile for a lazy subagent descriptor', () => {
-    process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'https://stateful.example.com/v1';
+    process.env.BAANZON_CODE_BASEURL_STATEFUL = 'https://stateful.example.com/v1';
     const routes = collectCodeExecutionProfileRoutes(
       [
         {
@@ -717,6 +717,6 @@ describe('collectCodeExecutionProfileRoutes', () => {
     expect(routes[0].codeSessionKeys).toEqual([
       expect.stringMatching(/^execute_code:stateful:v2:agent-user:/),
     ]);
-    delete process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+    delete process.env.BAANZON_CODE_BASEURL_STATEFUL;
   });
 });

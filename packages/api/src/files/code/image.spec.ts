@@ -47,7 +47,7 @@ function serveFile(
 }
 
 describe('sandbox image window sizing', () => {
-  const envKeys = ['LIBRECHAT_CODE_IMAGE_CHUNK_BYTES', 'LIBRECHAT_CODE_SANDBOX_OUTPUT_MAX_SIZE'];
+  const envKeys = ['BAANZON_CODE_IMAGE_CHUNK_BYTES', 'BAANZON_CODE_SANDBOX_OUTPUT_MAX_SIZE'];
   const saved: Record<string, string | undefined> = {};
 
   beforeEach(() => {
@@ -79,13 +79,13 @@ describe('sandbox image window sizing', () => {
     /* An 8KB cap used to floor at an 8KB window, whose base64 alone is
      * ~10.9KB — every read overflowed, and narrowing was pinned to the
      * same floor, so no retry could ever succeed. */
-    process.env.LIBRECHAT_CODE_SANDBOX_OUTPUT_MAX_SIZE = String(8 * 1024);
+    process.env.BAANZON_CODE_SANDBOX_OUTPUT_MAX_SIZE = String(8 * 1024);
     const window = getSandboxImageChunkBytes('https://small.example.com');
     expect(Math.ceil(window / 3) * 4).toBeLessThan(8 * 1024);
   });
 
   it('uses an explicit chunk override verbatim', () => {
-    process.env.LIBRECHAT_CODE_IMAGE_CHUNK_BYTES = '1024';
+    process.env.BAANZON_CODE_IMAGE_CHUNK_BYTES = '1024';
     expect(getSandboxImageChunkBytes('https://override.example.com')).toBe(1024);
   });
 
@@ -99,7 +99,7 @@ describe('sandbox image window sizing', () => {
     expect(getSandboxImageChunkBytes(url)).toBe(narrowed);
     expect(getSandboxImageChunkBytes('https://untouched.example.com')).toBe(before);
 
-    process.env.LIBRECHAT_CODE_IMAGE_CHUNK_BYTES = '512';
+    process.env.BAANZON_CODE_IMAGE_CHUNK_BYTES = '512';
     expect(getSandboxImageChunkBytes(url)).toBe(512);
   });
 

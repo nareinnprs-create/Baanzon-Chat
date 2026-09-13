@@ -192,7 +192,7 @@ describe('setCloudFrontCookies', () => {
     });
 
     expect(result).toBe(true);
-    const [, value, options] = cookieArgs.find(([name]) => name === 'LibreChat-CloudFront-Scope')!;
+    const [, value, options] = cookieArgs.find(([name]) => name === 'Baanzon-CloudFront-Scope')!;
     expect(options).toMatchObject({ httpOnly: false, path: '/' });
     expect(parseCloudFrontCookieScope(value)).toEqual({
       userId: 'user123',
@@ -344,7 +344,7 @@ describe('setCloudFrontCookies', () => {
     setCloudFrontCookies(mockRes as Response, { userId: 'user123', tenantId: 'tenantA' });
 
     const [name, value, options] = cookieArgs[cookieArgs.length - 1];
-    expect(name).toBe('LibreChat-CloudFront-Scope');
+    expect(name).toBe('Baanzon-CloudFront-Scope');
     expect(options).toMatchObject({ domain: '.example.com', path: '/' });
     expect(parseCloudFrontCookieScope(value)).toEqual(
       expect.objectContaining({ userId: 'user123', tenantId: 'tenantA' }),
@@ -762,7 +762,7 @@ describe('maybeRefreshCloudFrontAuthCookies', () => {
     const result = maybeRefreshCloudFrontAuthCookies(
       {
         cookies: {
-          'LibreChat-CloudFront-Scope': encodeScope({
+          'Baanzon-CloudFront-Scope': encodeScope({
             userId: 'user123',
             expiresAt: 1_700_000_250,
           }),
@@ -779,7 +779,7 @@ describe('maybeRefreshCloudFrontAuthCookies', () => {
     const userMismatch = maybeRefreshCloudFrontAuthCookies(
       {
         cookies: {
-          'LibreChat-CloudFront-Scope': encodeScope({
+          'Baanzon-CloudFront-Scope': encodeScope({
             userId: 'old-user',
             tenantId: 'tenantA',
             expiresAt: 1_700_001_000,
@@ -793,7 +793,7 @@ describe('maybeRefreshCloudFrontAuthCookies', () => {
     const tenantMismatch = maybeRefreshCloudFrontAuthCookies(
       {
         cookies: {
-          'LibreChat-CloudFront-Scope': encodeScope({
+          'Baanzon-CloudFront-Scope': encodeScope({
             userId: 'user123',
             tenantId: 'old-tenant',
             expiresAt: 1_700_001_000,
@@ -812,7 +812,7 @@ describe('maybeRefreshCloudFrontAuthCookies', () => {
     const result = maybeRefreshCloudFrontAuthCookies(
       {
         cookies: {
-          'LibreChat-CloudFront-Scope': encodeScope({
+          'Baanzon-CloudFront-Scope': encodeScope({
             userId: 'user123',
             expiresAt: 1_700_001_000,
           }),
@@ -867,7 +867,7 @@ describe('maybeRefreshCloudFrontAuthCookies', () => {
     const result = forceRefreshCloudFrontAuthCookies(
       {
         cookies: {
-          'LibreChat-CloudFront-Scope': encodeScope({
+          'Baanzon-CloudFront-Scope': encodeScope({
             userId: 'user123',
             expiresAt: 1_700_001_000,
           }),
@@ -965,7 +965,7 @@ describe('clearCloudFrontCookies', () => {
     expect(clearedCookies).toContainEqual(['CloudFront-Policy', rootPathOptions]);
     expect(clearedCookies).toContainEqual(['CloudFront-Signature', rootPathOptions]);
     expect(clearedCookies).toContainEqual(['CloudFront-Key-Pair-Id', rootPathOptions]);
-    expect(clearedCookies).toContainEqual(['LibreChat-CloudFront-Scope', scopePathOptions]);
+    expect(clearedCookies).toContainEqual(['Baanzon-CloudFront-Scope', scopePathOptions]);
     expect(clearedCookies).toContainEqual([
       'CloudFront-Policy',
       expect.objectContaining({ path: '/r' }),
@@ -1013,7 +1013,7 @@ describe('clearCloudFrontCookies', () => {
       expect.objectContaining({ path: '/t/tenantA/avatars' }),
     ]);
     expect(clearedCookies).toContainEqual([
-      'LibreChat-CloudFront-Scope',
+      'Baanzon-CloudFront-Scope',
       {
         domain: '.example.com',
         path: '/',
@@ -1054,7 +1054,7 @@ describe('clearCloudFrontCookies', () => {
       expect.objectContaining({ path: '/a' }),
     ]);
     expect(clearedCookies).toContainEqual([
-      'LibreChat-CloudFront-Scope',
+      'Baanzon-CloudFront-Scope',
       expect.objectContaining({ path: '/' }),
     ]);
   });

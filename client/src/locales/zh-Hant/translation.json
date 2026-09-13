@@ -727,7 +727,7 @@
   "com_ui_adding_details": "正在新增詳細資料",
   "com_ui_additional_details": "更多詳細資料",
   "com_ui_admin": "管理員",
-  "com_ui_admin_access_warning": "停用管理員對此功能的存取權限可能會導致意外的介面問題，需要重新整理頁面。若儲存此設定，唯一的還原方式是透過 librechat.yaml 設定檔中的介面設定，這會影響所有角色。",
+  "com_ui_admin_access_warning": "停用管理員對此功能的存取權限可能會導致意外的介面問題，需要重新整理頁面。若儲存此設定，唯一的還原方式是透過 baanzon.yaml 設定檔中的介面設定，這會影響所有角色。",
   "com_ui_admin_panel": "管理面板",
   "com_ui_admin_settings": "管理員設定",
   "com_ui_admin_settings_section": "管理員設定 — {{section}}",

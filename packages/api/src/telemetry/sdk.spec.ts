@@ -516,7 +516,7 @@ describe('telemetry SDK lifecycle', () => {
     expect(controller.status).toBe('failed');
     expect(emitWarningSpy).toHaveBeenCalledWith(
       'OpenTelemetry initialization failed: async start failed',
-      { code: 'LIBRECHAT_OTEL' },
+      { code: 'BAANZON_OTEL' },
     );
   });
 
@@ -531,7 +531,7 @@ describe('telemetry SDK lifecycle', () => {
     expect(controller.status).toBe('failed');
     expect(emitWarningSpy).toHaveBeenCalledWith(
       'OpenTelemetry initialization failed: start failed',
-      { code: 'LIBRECHAT_OTEL' },
+      { code: 'BAANZON_OTEL' },
     );
   });
 
@@ -594,7 +594,7 @@ describe('telemetry SDK lifecycle', () => {
     await taskFn?.();
 
     expect(emitWarningSpy).toHaveBeenCalledWith('OpenTelemetry shutdown failed: flush failed', {
-      code: 'LIBRECHAT_OTEL',
+      code: 'BAANZON_OTEL',
     });
   });
 });

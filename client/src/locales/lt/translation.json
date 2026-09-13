@@ -711,7 +711,7 @@
   "com_ui_adding_details": "Papildomos detalės pridedamos",
   "com_ui_additional_details": "Papildomos detalės",
   "com_ui_admin": "Administratorius",
-  "com_ui_admin_access_warning": "Išjungus administratoriaus prieigą prie šios funkcijos gali atsirasti netikėtų UI problemų, reikalaujančių puslapio perkrovimo. Jei įrašyta, vienintelis būdas grįžti atgal – naudoti sąsajos nustatymą librechat.yaml konfigūracijos faile, kuris veikia visas roles.",
+  "com_ui_admin_access_warning": "Išjungus administratoriaus prieigą prie šios funkcijos gali atsirasti netikėtų UI problemų, reikalaujančių puslapio perkrovimo. Jei įrašyta, vienintelis būdas grįžti atgal – naudoti sąsajos nustatymą baanzon.yaml konfigūracijos faile, kuris veikia visas roles.",
   "com_ui_admin_panel": "Administratoriaus skydelis",
   "com_ui_admin_settings": "Administratoriaus nustatymai",
   "com_ui_admin_settings_section": "Administratoriaus nustatymai – {{section}}",

@@ -93,8 +93,8 @@ describe('resolveConfigHeaders', () => {
     const llmConfig = {
       configuration: {
         defaultHeaders: {
-          'X-Conversation-Id': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
-          'X-User-Id': '{{LIBRECHAT_USER_ID}}',
+          'X-Conversation-Id': '{{BAANZON_BODY_CONVERSATIONID}}',
+          'X-User-Id': '{{BAANZON_USER_ID}}',
         },
       },
     } as unknown as RunLLMConfig;
@@ -112,7 +112,7 @@ describe('resolveConfigHeaders', () => {
       clientOptions: {
         defaultHeaders: {
           'anthropic-beta': 'fine-grained-tool-streaming-2025-05-14',
-          'cf-aig-metadata': '{"conversation_id":"{{LIBRECHAT_BODY_CONVERSATIONID}}"}',
+          'cf-aig-metadata': '{"conversation_id":"{{BAANZON_BODY_CONVERSATIONID}}"}',
         },
       },
     } as unknown as RunLLMConfig;
@@ -131,8 +131,8 @@ describe('resolveConfigHeaders', () => {
   it('resolves only tenant placeholders in Google customHeaders', () => {
     const llmConfig = {
       customHeaders: {
-        'X-Conversation-Id': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
-        'X-Tenant-Id': '{{LIBRECHAT_USER_TENANT_ID}}',
+        'X-Conversation-Id': '{{BAANZON_BODY_CONVERSATIONID}}',
+        'X-Tenant-Id': '{{BAANZON_USER_TENANT_ID}}',
         Authorization: 'Bearer ${SOME_KEY}',
       },
     } as unknown as RunLLMConfig;
@@ -144,7 +144,7 @@ describe('resolveConfigHeaders', () => {
     expect(
       (llmConfig as unknown as { customHeaders: Record<string, string> }).customHeaders,
     ).toEqual({
-      'X-Conversation-Id': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+      'X-Conversation-Id': '{{BAANZON_BODY_CONVERSATIONID}}',
       'X-Tenant-Id': 'request-tenant',
       Authorization: 'Bearer ${SOME_KEY}',
     });
@@ -154,7 +154,7 @@ describe('resolveConfigHeaders', () => {
     process.env.HEADERS_SPEC_IDEMPOTENT = 'env-value';
     const reusedUser = { id: 'u', name: '${HEADERS_SPEC_IDEMPOTENT}' };
     const llmConfig = {
-      configuration: { defaultHeaders: { 'X-Name': '{{LIBRECHAT_USER_NAME}}' } },
+      configuration: { defaultHeaders: { 'X-Name': '{{BAANZON_USER_NAME}}' } },
     } as unknown as RunLLMConfig;
 
     resolveConfigHeaders({ llmConfig, user: reusedUser, body });
@@ -185,8 +185,8 @@ describe('resolveConfigHeaders', () => {
     const llmConfig = {
       configuration: {
         defaultHeaders: {
-          'X-Tenant-ID': '{{LIBRECHAT_USER_TENANT_ID}}',
-          'X-Canonical-Tenant-ID': '{{LIBRECHAT_USER_TENANTID}}',
+          'X-Tenant-ID': '{{BAANZON_USER_TENANT_ID}}',
+          'X-Canonical-Tenant-ID': '{{BAANZON_USER_TENANTID}}',
         },
       },
     } as unknown as RunLLMConfig;
@@ -202,7 +202,7 @@ describe('resolveConfigHeaders', () => {
   it('blanks model tenant placeholders when the run has no tenant', () => {
     const llmConfig = {
       configuration: {
-        defaultHeaders: { 'X-Tenant-ID': '{{LIBRECHAT_USER_TENANT_ID}}' },
+        defaultHeaders: { 'X-Tenant-ID': '{{BAANZON_USER_TENANT_ID}}' },
       },
     } as unknown as RunLLMConfig;
 
@@ -221,8 +221,8 @@ describe('resolveConfigHeaders', () => {
     const llmConfig = {
       configuration: {
         defaultHeaders: {
-          'X-LibreChat-User': '{{LIBRECHAT_USER_OPENIDID}}',
-          'X-Conversation-Id': '{{LIBRECHAT_BODY_CONVERSATIONID}}',
+          'X-LibreChat-User': '{{BAANZON_USER_OPENIDID}}',
+          'X-Conversation-Id': '{{BAANZON_BODY_CONVERSATIONID}}',
         },
       },
     } as unknown as RunLLMConfig;
@@ -240,7 +240,7 @@ describe('resolveConfigHeaders', () => {
   it('strips placeholders for fields the resolved user lacks', () => {
     const llmConfig = {
       configuration: {
-        defaultHeaders: { 'X-LibreChat-User': '{{LIBRECHAT_USER_OPENIDID}}' },
+        defaultHeaders: { 'X-LibreChat-User': '{{BAANZON_USER_OPENIDID}}' },
       },
     } as unknown as RunLLMConfig;
 

@@ -15,12 +15,12 @@ import type { Filter } from 'mongodb';
 import type { CheckpointStorageRecord } from './storage';
 import {
   CHECKPOINT_STORAGE_COLLECTION,
-  LIBRECHAT_CHECKPOINT_STORAGE_OWNER_KEY,
+  BAANZON_CHECKPOINT_STORAGE_OWNER_KEY,
   checkpointStorageKey,
 } from './storage';
 
-export const LIBRECHAT_CHECKPOINT_OWNER_KEY = '__librechat_checkpoint_owner';
-export const LIBRECHAT_LEGACY_CHECKPOINT_KEY = '__librechat_legacy_checkpoint_id';
+export const BAANZON_CHECKPOINT_OWNER_KEY = '__librechat_checkpoint_owner';
+export const BAANZON_LEGACY_CHECKPOINT_KEY = '__librechat_legacy_checkpoint_id';
 
 interface CheckpointRow {
   thread_id: string;
@@ -47,7 +47,7 @@ interface WriteRow {
 }
 
 function ownerOf(config: RunnableConfig): string | undefined {
-  const owner = config.configurable?.[LIBRECHAT_CHECKPOINT_OWNER_KEY];
+  const owner = config.configurable?.[BAANZON_CHECKPOINT_OWNER_KEY];
   return typeof owner === 'string' && owner.length > 0 ? owner : undefined;
 }
 
@@ -76,7 +76,7 @@ export class OwnedMongoSaver extends MongoDBSaver {
     const candidate =
       ownerOf(config) ??
       (typeof namespace === 'string' ? namespace.match(/^lcg:v2:[0-9a-f]{64}:/)?.[0] : undefined) ??
-      config.configurable?.[LIBRECHAT_CHECKPOINT_STORAGE_OWNER_KEY];
+      config.configurable?.[BAANZON_CHECKPOINT_STORAGE_OWNER_KEY];
     if (typeof candidate !== 'string' || !/^lcg:v2:[0-9a-f]{64}:$/.test(candidate)) return;
     const storage = {
       type: 'mongo' as const,
@@ -138,8 +138,8 @@ export class OwnedMongoSaver extends MongoDBSaver {
       config: {
         configurable: {
           ...key,
-          [LIBRECHAT_CHECKPOINT_OWNER_KEY]: owner,
-          ...(legacy ? { [LIBRECHAT_LEGACY_CHECKPOINT_KEY]: doc.checkpoint_id } : {}),
+          [BAANZON_CHECKPOINT_OWNER_KEY]: owner,
+          ...(legacy ? { [BAANZON_LEGACY_CHECKPOINT_KEY]: doc.checkpoint_id } : {}),
         },
       },
       checkpoint: (await this.serde.loadsTyped(doc.type, doc.checkpoint.value())) as Checkpoint,
@@ -152,8 +152,8 @@ export class OwnedMongoSaver extends MongoDBSaver {
               configurable: {
                 ...key,
                 checkpoint_id: doc.parent_checkpoint_id,
-                [LIBRECHAT_CHECKPOINT_OWNER_KEY]: owner,
-                [LIBRECHAT_LEGACY_CHECKPOINT_KEY]: doc.parent_checkpoint_id,
+                [BAANZON_CHECKPOINT_OWNER_KEY]: owner,
+                [BAANZON_LEGACY_CHECKPOINT_KEY]: doc.parent_checkpoint_id,
               },
             },
           }),
@@ -178,7 +178,7 @@ export class OwnedMongoSaver extends MongoDBSaver {
     if (
       doc == null &&
       key.checkpoint_id != null &&
-      key.checkpoint_id === config.configurable?.[LIBRECHAT_LEGACY_CHECKPOINT_KEY]
+      key.checkpoint_id === config.configurable?.[BAANZON_LEGACY_CHECKPOINT_KEY]
     ) {
       doc = await checkpoints.findOne({ ...key, lc_owner: { $exists: false } });
     }
@@ -188,7 +188,7 @@ export class OwnedMongoSaver extends MongoDBSaver {
           doc,
           owner,
           key.checkpoint_id != null &&
-            key.checkpoint_id === config.configurable?.[LIBRECHAT_LEGACY_CHECKPOINT_KEY],
+            key.checkpoint_id === config.configurable?.[BAANZON_LEGACY_CHECKPOINT_KEY],
         );
   }
 
@@ -263,7 +263,7 @@ export class OwnedMongoSaver extends MongoDBSaver {
       },
       { upsert: true },
     );
-    return { configurable: { ...stored, [LIBRECHAT_CHECKPOINT_OWNER_KEY]: owner } };
+    return { configurable: { ...stored, [BAANZON_CHECKPOINT_OWNER_KEY]: owner } };
   }
 
   override async putWrites(
@@ -277,7 +277,7 @@ export class OwnedMongoSaver extends MongoDBSaver {
     const key = identity(config);
     if (key.checkpoint_id == null) throw new Error('Owned writes require a checkpoint id');
     const allSpecial = writes.every(([channel]) => channel in WRITES_IDX_MAP);
-    const legacy = key.checkpoint_id === config.configurable?.[LIBRECHAT_LEGACY_CHECKPOINT_KEY];
+    const legacy = key.checkpoint_id === config.configurable?.[BAANZON_LEGACY_CHECKPOINT_KEY];
     const existing =
       !allSpecial && legacy
         ? await this.db

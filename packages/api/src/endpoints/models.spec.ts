@@ -177,8 +177,8 @@ describe('fetchModels', () => {
 
   it('should resolve template variables in custom headers on the OpenAI-compatible path', async () => {
     const customHeaders = {
-      Authorization: 'Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}',
-      'X-User-Email': '{{LIBRECHAT_USER_EMAIL}}',
+      Authorization: 'Bearer {{BAANZON_OPENID_ID_TOKEN}}',
+      'X-User-Email': '{{BAANZON_USER_EMAIL}}',
     };
     const userObject = { id: 'user123', email: 'user@example.com' };
 

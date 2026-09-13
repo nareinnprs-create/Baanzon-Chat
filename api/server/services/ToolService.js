@@ -1246,7 +1246,7 @@ async function loadToolDefinitionsWrapper({
       if (!isDomainAllowed) {
         logger.warn(
           `[Actions] Domain "${action.metadata.domain}" not in allowedDomains. ` +
-            `Add it to librechat.yaml actions.allowedDomains to enable this action.`,
+            `Add it to baanzon.yaml actions.allowedDomains to enable this action.`,
         );
         continue;
       }
@@ -2437,7 +2437,7 @@ async function loadActionToolsForExecution({
     if (!isDomainAllowed) {
       logger.warn(
         `[Actions] Domain "${action.metadata.domain}" not in allowedDomains. ` +
-          `Add it to librechat.yaml actions.allowedDomains to enable this action.`,
+          `Add it to baanzon.yaml actions.allowedDomains to enable this action.`,
       );
       continue;
     }

@@ -59,7 +59,7 @@ describe('processMCPEnv with plugin-sourced configuration', () => {
       source: MCP_PLUGIN_SOURCE,
       type: 'streamable-http',
       url: 'https://plugin.example.com/mcp',
-      headers: { 'X-User': '{{LIBRECHAT_USER_EMAIL}}', 'X-Var': '{{MY_KEY}}' },
+      headers: { 'X-User': '{{BAANZON_USER_EMAIL}}', 'X-Var': '{{MY_KEY}}' },
     } as unknown as MCPOptions;
 
     const processed = processMCPEnv({
@@ -68,7 +68,7 @@ describe('processMCPEnv with plugin-sourced configuration', () => {
       customUserVars: { MY_KEY: 'user-supplied' },
     }) as { headers: Record<string, string> };
 
-    expect(processed.headers['X-User']).toBe('{{LIBRECHAT_USER_EMAIL}}');
+    expect(processed.headers['X-User']).toBe('{{BAANZON_USER_EMAIL}}');
     expect(processed.headers['X-Var']).toBe('{{MY_KEY}}');
   });
 

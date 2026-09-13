@@ -157,7 +157,7 @@ describe('Content Security Policy', () => {
   });
 
   it('stamps scripts injected after the shell is read', async () => {
-    const response = await request(app).get('/').set('x-librechat-enable-query-devtools', '1');
+    const response = await request(app).get('/').set('x-baanzon-enable-query-devtools', '1');
     const nonce = response.headers['content-security-policy']?.match(
       /script-src 'nonce-([^']+)'/,
     )?.[1];

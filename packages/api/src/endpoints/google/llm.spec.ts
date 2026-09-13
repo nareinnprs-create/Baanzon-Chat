@@ -2021,12 +2021,12 @@ describe('knownGoogleParams', () => {
       const result = getGoogleConfig(credentials, {
         modelOptions: { model: 'gemini-1.5-flash' },
         headers: {
-          'cf-aig-metadata': '{"user_email":"{{LIBRECHAT_USER_EMAIL}}"}',
+          'cf-aig-metadata': '{"user_email":"{{BAANZON_USER_EMAIL}}"}',
         },
       });
 
       expect((result.llmConfig as GoogleClientOptions).customHeaders).toEqual({
-        'cf-aig-metadata': '{"user_email":"{{LIBRECHAT_USER_EMAIL}}"}',
+        'cf-aig-metadata': '{"user_email":"{{BAANZON_USER_EMAIL}}"}',
       });
     });
 

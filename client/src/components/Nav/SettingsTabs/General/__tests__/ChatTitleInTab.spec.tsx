@@ -50,7 +50,7 @@ function renderToggle({
 describe('ChatTitleInTab', () => {
   beforeEach(() => {
     localStorage.clear();
-    localStorage.setItem(LocalStorageKeys.APP_TITLE, 'LibreChat');
+    localStorage.setItem(LocalStorageKeys.APP_TITLE, 'Baanzon Chat');
     localStorage.setItem(CHAT_TITLE_IN_TAB_KEY, JSON.stringify(false));
     document.title = '';
   });
@@ -105,8 +105,8 @@ describe('ChatTitleInTab', () => {
   });
 
   it('keeps the app title when enabling titles for a new chat', () => {
-    localStorage.setItem(LocalStorageKeys.APP_TITLE, 'Custom LibreChat');
-    document.title = 'Custom LibreChat';
+    localStorage.setItem(LocalStorageKeys.APP_TITLE, 'Custom Baanzon Chat');
+    document.title = 'Custom Baanzon Chat';
     renderToggle({
       route: '/c/new',
       recoilConversation: createConversation('new', 'New Chat'),
@@ -119,12 +119,12 @@ describe('ChatTitleInTab', () => {
 
     expect(toggle).toBeChecked();
     expect(localStorage.getItem(CHAT_TITLE_IN_TAB_KEY)).toBe('true');
-    expect(document.title).toBe('Custom LibreChat');
+    expect(document.title).toBe('Custom Baanzon Chat');
   });
 
   it('preserves page-specific titles outside chat routes', () => {
     localStorage.setItem(CHAT_TITLE_IN_TAB_KEY, JSON.stringify(true));
-    document.title = 'Agent Marketplace | LibreChat';
+    document.title = 'Agent Marketplace | Baanzon Chat';
     renderToggle({
       route: '/agents',
       recoilConversation: createConversation('conversation-1', 'Previous chat'),
@@ -137,6 +137,6 @@ describe('ChatTitleInTab', () => {
 
     expect(toggle).not.toBeChecked();
     expect(localStorage.getItem(CHAT_TITLE_IN_TAB_KEY)).toBe('false');
-    expect(document.title).toBe('Agent Marketplace | LibreChat');
+    expect(document.title).toBe('Agent Marketplace | Baanzon Chat');
   });
 });

@@ -969,7 +969,7 @@ export async function listAgentModels(
       id: agent.id,
       object: 'model',
       created: Math.floor(Date.now() / 1000),
-      owned_by: 'librechat',
+      owned_by: 'baanzon',
       permission: [],
       root: agent.id,
       parent: null,

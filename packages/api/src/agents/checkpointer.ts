@@ -16,22 +16,22 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import type { ResolvedCheckpointerConfig } from './checkpoints/config';
 import {
   OwnedMongoSaver,
-  LIBRECHAT_CHECKPOINT_OWNER_KEY,
-  LIBRECHAT_LEGACY_CHECKPOINT_KEY,
+  BAANZON_CHECKPOINT_OWNER_KEY,
+  BAANZON_LEGACY_CHECKPOINT_KEY,
 } from './checkpoints/saver';
 import { checkpointOwnerNamespacePrefix } from '../stream/checkpoints';
 import { resolveCheckpointerConfig } from './checkpoints/config';
 
 export {
-  LIBRECHAT_CHECKPOINT_OWNER_KEY,
-  LIBRECHAT_LEGACY_CHECKPOINT_KEY,
+  BAANZON_CHECKPOINT_OWNER_KEY,
+  BAANZON_LEGACY_CHECKPOINT_KEY,
 } from './checkpoints/saver';
 export { checkpointOwnerNamespacePrefix } from '../stream/checkpoints';
 
 export { resolveCheckpointerConfig } from './checkpoints/config';
 export {
   checkpointStorageConfigs,
-  LIBRECHAT_CHECKPOINT_STORAGE_OWNER_KEY,
+  BAANZON_CHECKPOINT_STORAGE_OWNER_KEY,
 } from './checkpoints/storage';
 export type { ResolvedCheckpointerConfig } from './checkpoints/config';
 export { DEFAULT_CHECKPOINT_TTL_SECONDS } from '../stream/checkpoints';
@@ -43,20 +43,20 @@ export { DEFAULT_CHECKPOINT_TTL_SECONDS } from '../stream/checkpoints';
  * adapter below maps it into Mongo's storage namespace without changing the
  * graph-visible conversation `thread_id`.
  */
-export const LIBRECHAT_CHECKPOINT_NAMESPACE_KEY = '__librechat_checkpoint_ns';
+export const BAANZON_CHECKPOINT_NAMESPACE_KEY = '__librechat_checkpoint_ns';
 /** Marks a checkpoint write as belonging to an isolated event-actor attempt.
  * Unlike ordinary clean chat exits, these exits are durable candidate heads. */
-export const LIBRECHAT_EVENT_ACTOR_INVOCATION_KEY = '__librechat_event_actor_invocation_id';
+export const BAANZON_EVENT_ACTOR_INVOCATION_KEY = '__librechat_event_actor_invocation_id';
 
 const CHECKPOINT_NAMESPACE_SEPARATOR = '|';
 
 function generationCheckpointNamespace(config: RunnableConfig): string | undefined {
-  const value = config.configurable?.[LIBRECHAT_CHECKPOINT_NAMESPACE_KEY];
+  const value = config.configurable?.[BAANZON_CHECKPOINT_NAMESPACE_KEY];
   return typeof value === 'string' && value.length > 0 ? value : undefined;
 }
 
 function isEventActorInvocation(config: RunnableConfig): boolean {
-  const value = config.configurable?.[LIBRECHAT_EVENT_ACTOR_INVOCATION_KEY];
+  const value = config.configurable?.[BAANZON_EVENT_ACTOR_INVOCATION_KEY];
   return typeof value === 'string' && value.length > 0;
 }
 
@@ -97,18 +97,18 @@ function fromStorageCheckpointConfig(
     ...storedConfig,
     configurable: {
       ...storedConfig.configurable,
-      ...(requestedConfig.configurable?.[LIBRECHAT_CHECKPOINT_OWNER_KEY] && {
-        [LIBRECHAT_CHECKPOINT_OWNER_KEY]:
-          requestedConfig.configurable[LIBRECHAT_CHECKPOINT_OWNER_KEY],
+      ...(requestedConfig.configurable?.[BAANZON_CHECKPOINT_OWNER_KEY] && {
+        [BAANZON_CHECKPOINT_OWNER_KEY]:
+          requestedConfig.configurable[BAANZON_CHECKPOINT_OWNER_KEY],
       }),
-      ...(requestedConfig.configurable?.[LIBRECHAT_LEGACY_CHECKPOINT_KEY] && {
-        [LIBRECHAT_LEGACY_CHECKPOINT_KEY]:
-          storedConfig.configurable?.[LIBRECHAT_LEGACY_CHECKPOINT_KEY] ??
-          requestedConfig.configurable[LIBRECHAT_LEGACY_CHECKPOINT_KEY],
+      ...(requestedConfig.configurable?.[BAANZON_LEGACY_CHECKPOINT_KEY] && {
+        [BAANZON_LEGACY_CHECKPOINT_KEY]:
+          storedConfig.configurable?.[BAANZON_LEGACY_CHECKPOINT_KEY] ??
+          requestedConfig.configurable[BAANZON_LEGACY_CHECKPOINT_KEY],
       }),
       thread_id: requestedConfig.configurable?.thread_id ?? storedConfig.configurable?.thread_id,
       checkpoint_ns: graphNamespace,
-      [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: generationNamespace,
+      [BAANZON_CHECKPOINT_NAMESPACE_KEY]: generationNamespace,
     },
   };
 }
@@ -628,7 +628,7 @@ export async function hasDurableAgentInterruptCheckpoint(
       checkpoint_ns: options.checkpointNs ?? '',
       checkpoint_id: options.checkpointId,
       ...(checkpointNamespace !== '' && {
-        [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: checkpointNamespace,
+        [BAANZON_CHECKPOINT_NAMESPACE_KEY]: checkpointNamespace,
       }),
     },
   });
@@ -748,13 +748,13 @@ function eventActorRunnableConfig(
     configurable: {
       thread_id: reference.threadId,
       checkpoint_ns: '',
-      [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: reference.checkpointNs,
-      [LIBRECHAT_EVENT_ACTOR_INVOCATION_KEY]: invocationId,
+      [BAANZON_CHECKPOINT_NAMESPACE_KEY]: reference.checkpointNs,
+      [BAANZON_EVENT_ACTOR_INVOCATION_KEY]: invocationId,
       ...(owner == null
         ? {}
         : {
-            [LIBRECHAT_CHECKPOINT_OWNER_KEY]: owner,
-            ...(checkpointId == null ? {} : { [LIBRECHAT_LEGACY_CHECKPOINT_KEY]: checkpointId }),
+            [BAANZON_CHECKPOINT_OWNER_KEY]: owner,
+            ...(checkpointId == null ? {} : { [BAANZON_LEGACY_CHECKPOINT_KEY]: checkpointId }),
           }),
       ...(checkpointId == null ? {} : { checkpoint_id: checkpointId }),
     },

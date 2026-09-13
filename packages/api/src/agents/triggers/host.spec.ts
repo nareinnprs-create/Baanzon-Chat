@@ -155,7 +155,7 @@ describe('createAgentTriggerExecutionHost fire adapter', () => {
     expect(headers.get('x-lc-agent-trigger')).toBe('1');
     expect(headers.get('x-request-id')).toBe(idempotencyKey);
     expect(headers.get('x-librechat-generation-protocol')).toBe('2');
-    expect(headers.get('user-agent')).toContain('LibreChat-Agent-Trigger/1');
+    expect(headers.get('user-agent')).toContain('Baanzon-Agent-Trigger/1');
     expect(JSON.parse(String(init?.body))).toEqual({
       text: envelope.input,
       endpoint: EModelEndpoint.agents,

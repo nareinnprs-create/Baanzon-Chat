@@ -431,7 +431,7 @@ describe('createAdminConfigHandlers', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        error: 'Process-backed MCP servers can only be configured in librechat.yaml',
+        error: 'Process-backed MCP servers can only be configured in baanzon.yaml',
       });
       expect(deps.upsertConfig).not.toHaveBeenCalled();
     });
@@ -452,7 +452,7 @@ describe('createAdminConfigHandlers', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        error: 'Langfuse request headers can only be configured in librechat.yaml',
+        error: 'Langfuse request headers can only be configured in baanzon.yaml',
       });
       expect(deps.upsertConfig).not.toHaveBeenCalled();
     });
@@ -475,7 +475,7 @@ describe('createAdminConfigHandlers', () => {
        *  credential would come back in plaintext on the next read. */
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        error: 'Langfuse request headers can only be configured in librechat.yaml',
+        error: 'Langfuse request headers can only be configured in baanzon.yaml',
       });
       expect(deps.upsertConfig).not.toHaveBeenCalled();
     });
@@ -1152,7 +1152,7 @@ describe('createAdminConfigHandlers', () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body).toEqual({
-        error: 'Process-backed MCP servers can only be configured in librechat.yaml',
+        error: 'Process-backed MCP servers can only be configured in baanzon.yaml',
       });
       expect(deps.patchConfigFields).not.toHaveBeenCalled();
     });
@@ -1172,7 +1172,7 @@ describe('createAdminConfigHandlers', () => {
 
         expect(res.statusCode).toBe(400);
         expect(res.body).toEqual({
-          error: 'Langfuse request headers can only be configured in librechat.yaml',
+          error: 'Langfuse request headers can only be configured in baanzon.yaml',
         });
       }
       expect(deps.patchConfigFields).not.toHaveBeenCalled();

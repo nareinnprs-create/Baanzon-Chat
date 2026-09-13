@@ -470,7 +470,7 @@ const userUrlSchema = (protocolCheck: (val: string) => boolean, message: string)
  *
  * SECURITY: Stdio transport is intentionally excluded from user input.
  * Stdio allows arbitrary command execution and should only be configured
- * by administrators via the YAML config file (librechat.yaml).
+ * by administrators via the YAML config file (baanzon.yaml).
  * Only remote transports (SSE, HTTP, WebSocket) are allowed via the API.
  *
  * SECURITY: URL fields use userUrlSchema instead of the admin schemas'

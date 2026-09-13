@@ -169,7 +169,7 @@ export type FormattedToolResponse = FormattedContentResult;
 
 /**
  * Origin of an MCP server definition.
- * - `'yaml'`   — operator-defined in librechat.yaml, full trust, boot-time init
+ * - `'yaml'`   — operator-defined in baanzon.yaml, full trust, boot-time init
  * - `'config'` — admin-defined via Config override, full trust, lazy init
  * - `'user'`   — user-provided via UI, sandboxed (restricted placeholder resolution)
  * - `'plugin'` — contributed by an Agent Plugins package, no placeholder resolution

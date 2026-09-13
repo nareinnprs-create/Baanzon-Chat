@@ -7,7 +7,7 @@ import { createMCPToolCacheService } from './tools';
 
 const requestScopedConfig: ParsedServerConfig = {
   type: 'streamable-http',
-  url: 'https://mcp.example.com/{{LIBRECHAT_BODY_CONVERSATIONID}}/mcp',
+  url: 'https://mcp.example.com/{{BAANZON_BODY_CONVERSATIONID}}/mcp',
   source: 'yaml',
 };
 

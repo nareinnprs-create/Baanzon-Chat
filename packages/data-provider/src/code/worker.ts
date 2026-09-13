@@ -27,17 +27,17 @@ export function createCodeWorkerSetupCommand(
   options: CodeWorkerRunOptions = {},
 ): string {
   const quote = shell === 'powershell' ? quotePowerShell : quotePosix;
-  const pair = `librechat-code pair ${quote(pairing.endpoint)} ${quote(pairing.code)} --worker-id ${quote(pairing.workerId)}`;
+  const pair = `baanzon-code pair ${quote(pairing.endpoint)} ${quote(pairing.code)} --worker-id ${quote(pairing.workerId)}`;
   const runArgs = [
     options.defaultWorkspace === false ? null : '--default-workspace',
     options.allowWorkspaceWrites === true ? '--allow-workspace-writes' : null,
     options.allowWorkspaceCommands === true ? '--allow-workspace-commands' : null,
   ].filter((value): value is string => value != null);
-  const run = ['librechat-code run', ...runArgs].join(' ');
+  const run = ['baanzon-code run', ...runArgs].join(' ');
 
   if (shell === 'powershell') {
-    return `${pair}\n$env:LIBRECHAT_CODE_WORKER_ID = ${quote(pairing.workerId)}\n${run}`;
+    return `${pair}\n$env:BAANZON_CODE_WORKER_ID = ${quote(pairing.workerId)}\n${run}`;
   }
 
-  return `${pair}\nLIBRECHAT_CODE_WORKER_ID=${quote(pairing.workerId)} ${run}`;
+  return `${pair}\nBAANZON_CODE_WORKER_ID=${quote(pairing.workerId)} ${run}`;
 }

@@ -5,7 +5,7 @@ import type winston from 'winston';
 /**
  * Determine the log directory in a cross-compatible way.
  * Priority:
- * 1. LIBRECHAT_LOG_DIR environment variable
+ * 1. BAANZON_LOG_DIR environment variable
  * 2. If running within LibreChat monorepo (when cwd ends with /api), use api/logs
  * 3. If api/logs exists relative to cwd, use that (for running from project root)
  * 4. Otherwise, use logs directory relative to process.cwd()
@@ -13,8 +13,8 @@ import type winston from 'winston';
  * This avoids using __dirname which is not available in ESM modules
  */
 export const getLogDirectory = (): string => {
-  if (process.env.LIBRECHAT_LOG_DIR) {
-    return process.env.LIBRECHAT_LOG_DIR;
+  if (process.env.BAANZON_LOG_DIR) {
+    return process.env.BAANZON_LOG_DIR;
   }
 
   const cwd = process.cwd();
@@ -29,8 +29,8 @@ export const getLogDirectory = (): string => {
   const apiLogsPath = path.join(cwd, 'api', 'logs');
 
   // For LibreChat project structure, use api/logs
-  // For external consumers, they should set LIBRECHAT_LOG_DIR
-  if (cwd.includes('LibreChat')) {
+  // For external consumers, they should set BAANZON_LOG_DIR
+  if (cwd.includes('Baanzon')) {
     return apiLogsPath;
   }
 

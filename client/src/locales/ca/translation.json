@@ -668,7 +668,7 @@
   "com_ui_adding_details": "Afegint detalls",
   "com_ui_additional_details": "Detalls addicionals",
   "com_ui_admin": "Administrador",
-  "com_ui_admin_access_warning": "Desactivar l'accés d'administrador a aquesta funció pot causar problemes inesperats en la interfície que requeriran una actualització. Si es desa, només es pot revertir des de la configuració de la interfície a librechat.yaml, que afecta tots els rols.",
+  "com_ui_admin_access_warning": "Desactivar l'accés d'administrador a aquesta funció pot causar problemes inesperats en la interfície que requeriran una actualització. Si es desa, només es pot revertir des de la configuració de la interfície a baanzon.yaml, que afecta tots els rols.",
   "com_ui_admin_settings": "Configuració d'administrador",
   "com_ui_admin_settings_section": "Configuració d'administració - {{section}}",
   "com_ui_advanced": "Avançat",

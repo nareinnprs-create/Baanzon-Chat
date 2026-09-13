@@ -17,14 +17,14 @@ jest.mock('@librechat/agents', () => ({
 }));
 
 describe('resolveCodeExecutionContext', () => {
-  const originalStatefulUrl = process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+  const originalStatefulUrl = process.env.BAANZON_CODE_BASEURL_STATEFUL;
 
   afterEach(() => {
     if (originalStatefulUrl == null) {
-      delete process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+      delete process.env.BAANZON_CODE_BASEURL_STATEFUL;
       return;
     }
-    process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = originalStatefulUrl;
+    process.env.BAANZON_CODE_BASEURL_STATEFUL = originalStatefulUrl;
   });
 
   it('uses the AWS-free default profile when stateful sessions are off', () => {
@@ -37,15 +37,15 @@ describe('resolveCodeExecutionContext', () => {
   });
 
   it('fails closed when a stateful agent has no stateful endpoint', () => {
-    delete process.env.LIBRECHAT_CODE_BASEURL_STATEFUL;
+    delete process.env.BAANZON_CODE_BASEURL_STATEFUL;
 
     expect(() => resolveCodeExecutionContext({ statefulSessions: true, userId: 'user-1' })).toThrow(
-      'LIBRECHAT_CODE_BASEURL_STATEFUL is not configured',
+      'BAANZON_CODE_BASEURL_STATEFUL is not configured',
     );
   });
 
   it('fails closed when a stateful agent has no authenticated user', () => {
-    process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1/';
+    process.env.BAANZON_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1/';
 
     expect(() => resolveCodeExecutionContext({ statefulSessions: true })).toThrow(
       'authenticated user ID',
@@ -53,7 +53,7 @@ describe('resolveCodeExecutionContext', () => {
   });
 
   it('defaults stateful agents to one environment per authenticated user', () => {
-    process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1///';
+    process.env.BAANZON_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1///';
 
     expect(resolveCodeExecutionContext({ statefulSessions: true, userId: 'user-1' })).toEqual({
       baseUrl: 'http://code-stateful.test/v1',
@@ -65,7 +65,7 @@ describe('resolveCodeExecutionContext', () => {
   });
 
   it('supports agent-user and conversation isolation', () => {
-    process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
+    process.env.BAANZON_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
 
     expect(
       resolveCodeExecutionContext({
@@ -96,7 +96,7 @@ describe('resolveCodeExecutionContext', () => {
   });
 
   it('partitions every stateful environment by authenticated user', () => {
-    process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
+    process.env.BAANZON_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
 
     const first = resolveCodeExecutionContext({ statefulSessions: true, userId: 'user-1' });
     const second = resolveCodeExecutionContext({ statefulSessions: true, userId: 'user-2' });
@@ -173,7 +173,7 @@ describe('resolveCodeExecutionContext', () => {
   });
 
   it('does not execute a pairing-only control plane', () => {
-    process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
+    process.env.BAANZON_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
     const environments = [
       {
         id: 'self-service',
@@ -314,7 +314,7 @@ describe('resolveCodeExecutionContext', () => {
   });
 
   it('uses the stateful deployment when configured environments have no default', () => {
-    process.env.LIBRECHAT_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
+    process.env.BAANZON_CODE_BASEURL_STATEFUL = 'http://code-stateful.test/v1';
     const context = resolveCodeExecutionContext({
       statefulSessions: true,
       environments: [

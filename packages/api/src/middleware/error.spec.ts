@@ -228,7 +228,7 @@ describe('ErrorController', () => {
   describe('OpenIDReauthRequiredError handling', () => {
     it('should map a re-auth error to a 401 carrying the actionable message', () => {
       const error = new OpenIDReauthRequiredError(
-        'OpenID token is expired or unavailable; re-authentication is required to resolve {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
+        'OpenID token is expired or unavailable; re-authentication is required to resolve {{BAANZON_OPENID_ACCESS_TOKEN}}',
       );
 
       ErrorController(error, mockReq, mockRes, mockNext);
@@ -237,7 +237,7 @@ describe('ErrorController', () => {
       expect(mockRes.send).toHaveBeenCalledWith({
         error: 'invalid_token',
         message:
-          'OpenID token is expired or unavailable; re-authentication is required to resolve {{LIBRECHAT_OPENID_ACCESS_TOKEN}}',
+          'OpenID token is expired or unavailable; re-authentication is required to resolve {{BAANZON_OPENID_ACCESS_TOKEN}}',
       });
     });
 

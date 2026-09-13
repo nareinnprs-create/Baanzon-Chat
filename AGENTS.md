@@ -64,7 +64,7 @@ across `packages/api`, so stop widening it rather than rewriting what exists; th
 of it and must stay that way.
 
 New levers ship configurable: a limit, timeout, toggle or capability introduced in code earns a field
-on `configSchema` (`packages/data-provider/src/config.ts`) so it can be set in `librechat.yaml`, with
+on `configSchema` (`packages/data-provider/src/config.ts`) so it can be set in `baanzon.yaml`, with
 a default that reproduces today's behavior. Hard-coded constants and env-only switches need a reason.
 Modules take their dependencies rather than reaching for them: code in `packages/api` receives its
 config, database methods and clients from the caller, the way `createModels(mongoose)` receives the

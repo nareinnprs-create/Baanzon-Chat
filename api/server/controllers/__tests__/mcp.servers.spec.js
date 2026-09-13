@@ -195,7 +195,7 @@ describe('getMCPServersList', () => {
     mockResolveAllMcpConfigs.mockResolvedValue({
       runtimeServer: {
         ...yamlConfig,
-        headers: { 'X-Conversation': '{{LIBRECHAT_BODY_CONVERSATIONID}}' },
+        headers: { 'X-Conversation': '{{BAANZON_BODY_CONVERSATIONID}}' },
       },
     });
 

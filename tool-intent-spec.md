@@ -1,4 +1,4 @@
-# Feature Spec: Tool Intent & Outcome Labels
+﻿# Feature Spec: Tool Intent & Outcome Labels
 
 **Status:** proposal, ready for implementation by someone with no prior context
 **Repos:** `danny-avila/agents` (published as `@librechat/agents`, local path `~/agentus`), `danny-avila/LibreChat`
@@ -62,7 +62,7 @@ Read these before writing any code. The new capability is a structural sibling o
 
 `packages/api/src/agents/background.ts` is the reference implementation. It is roughly 200 lines containing exactly the machinery this feature needs: a frozen property constant, non-mutating injection, an injectability guard, registry parity, self-spawn stripping, and ephemeral/model-spec synthesis. **Read it first and follow its structure function for function.** The new host module should be recognizable as its sibling at a glance.
 
-Not per-tool capabilities, so out of scope for the family: `stateful_code_sessions`, `skills`, `subagents`, HITL approval, tool output references, eager event execution, activity labels (run-scoped, config-gated per endpoint via `librechat.yaml`, not per-tool). Those are agent- or run-scoped.
+Not per-tool capabilities, so out of scope for the family: `stateful_code_sessions`, `skills`, `subagents`, HITL approval, tool output references, eager event execution, activity labels (run-scoped, config-gated per endpoint via `baanzon.yaml`, not per-tool). Those are agent- or run-scoped.
 
 ---
 
@@ -367,7 +367,7 @@ Each reads `enabledCapabilities.has(AgentCapabilities.tool_intents)` and passes 
 - `toolOptionsSchema` and `agentToolOptionsSchema` in `packages/api/src/agents/validation.ts`: add `describe_intent: z.boolean().optional()`. These have fully written-out Zod type annotations, so update the annotation and the runtime object together.
 - `AgentToolOptions` in `packages/data-provider/src/types/assistants.ts`
 - `AgentCapabilities` enum in `packages/data-provider/src/config.ts` (`tool_intents = 'tool_intents'`, alongside `deferred_tools`, `programmatic_tools`, `run_in_background`)
-- `librechat.example.yaml` capability list plus a comment
+- `baanzon.example.yaml` capability list plus a comment
 - `packages/data-schemas/src/schema/agent.ts` and `types/agent.ts` doc comments (`tool_options` is `Mixed`, so no migration)
 
 ---
@@ -536,7 +536,7 @@ Positive side: a follow-up can label each `tool<i>turn<n>` key with its intent, 
 
 Not a capability, but the most consequential composition in the feature, so it gets the same decision treatment.
 
-- **Layering, restated as the rule:** intents are per-call, model-authored, free, and live; activity labels are per-block, fast-model-authored, paid, and settled. The §5.2 three-phase header is the entire UI contract between them. Neither system replaces the other, and neither is configured by the other: activity labels stay per-endpoint `librechat.yaml` config (`activityLabel`, `activityModel`, …), intents stay a per-tool capability.
+- **Layering, restated as the rule:** intents are per-call, model-authored, free, and live; activity labels are per-block, fast-model-authored, paid, and settled. The §5.2 three-phase header is the entire UI contract between them. Neither system replaces the other, and neither is configured by the other: activity labels stay per-endpoint `baanzon.yaml` config (`activityLabel`, `activityModel`, …), intents stay a per-tool capability.
 - **Intents make activity labels better and cheaper.** `ActivityLabelToolEntry.toolInput` carries the call args, and #14391's header prompt explicitly forbids restating tool names, counts, and argument echoes — it wants exactly the human-readable material intents provide. With intents present, the labeling model reads `"Searching for OAuth handling in the callback router"` instead of raw JSON. Per §8.2, the handler strip must not remove intent from the batch entries; add a test pinning that the entry serialization keeps it.
 - **No shared plumbing to build.** Intents ride `tool_call.args`; activity labels ride an `ACTIVITY_LABEL` content part with its own `on_activity_label` SSE event, epoch-scoped fills, and index-space reconciliation. Do not couple the transports. In particular, intents must not add content parts — that immunity to #14391's index-space hazards (§5.4) is a feature, not an accident.
 - **Auto-collapse:** #14391 auto-collapses labeled single-tool groups. Keep that keyed on the activity label only. An intent-labeled but activity-unlabeled group stays expanded per current behavior.
@@ -688,4 +688,4 @@ Six PRs, each independently reviewable and shippable. Dependencies are explicit 
 5. **Builder toggles** (LibreChat, **after #14407** so the switches extend its shared component rather than forking it). Including encoded-domain aliasing and the bulk toggle.
 6. **Anchors, traces, and activity-label integration** (both repos, **after #14391 merges**). Langfuse span annotation per §11.3, batch-entry enrichment per §10.10, ledger derivation, compaction survival, HITL payload threading, named checkpoints.
 
-**Documentation** in `librechat.ai`: a single **"Tool capability conventions"** page documenting `defer_loading`, `allowed_callers`, `run_in_background`, and `describe_intent` as one family, with the shared shape spelled out (per-tool `tool_options` key, admin capability gate, injection or metadata mechanism, self-spawn stripping obligation, token cost). Plus a `librechat.example.yaml` entry, and a cross-reference from the activity-labels docs explaining the two-layer labeling model (§11.2) so admins understand they compose rather than compete. This page is the deliverable that turns four features into a convention, so it is not optional.
+**Documentation** in `librechat.ai`: a single **"Tool capability conventions"** page documenting `defer_loading`, `allowed_callers`, `run_in_background`, and `describe_intent` as one family, with the shared shape spelled out (per-tool `tool_options` key, admin capability gate, injection or metadata mechanism, self-spawn stripping obligation, token cost). Plus a `baanzon.example.yaml` entry, and a cross-reference from the activity-labels docs explaining the two-layer labeling model (§11.2) so admins understand they compose rather than compete. This page is the deliverable that turns four features into a convention, so it is not optional.

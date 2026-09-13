@@ -151,11 +151,11 @@ export default defineConfig(({ command }) => ({
       },
       includeAssets: [],
       manifest: {
-        name: 'LibreChat',
-        short_name: 'LibreChat',
+        name: 'Baanzon Chat',
+        short_name: 'Baanzon',
         display: 'standalone',
-        background_color: '#000000',
-        theme_color: '#009688',
+        background_color: '#F7FAF8',
+        theme_color: '#087F83',
         icons: [
           {
             src: 'assets/favicon-32x32.png',

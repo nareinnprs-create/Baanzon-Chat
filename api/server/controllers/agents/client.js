@@ -67,11 +67,11 @@ const {
   isContentFilterError,
   isStepLimitError,
   deleteAgentCheckpoint,
-  LIBRECHAT_CHECKPOINT_NAMESPACE_KEY,
-  LIBRECHAT_EVENT_ACTOR_INVOCATION_KEY,
-  LIBRECHAT_CHECKPOINT_OWNER_KEY,
-  LIBRECHAT_CHECKPOINT_STORAGE_OWNER_KEY,
-  LIBRECHAT_LEGACY_CHECKPOINT_KEY,
+  BAANZON_CHECKPOINT_NAMESPACE_KEY,
+  BAANZON_EVENT_ACTOR_INVOCATION_KEY,
+  BAANZON_CHECKPOINT_OWNER_KEY,
+  BAANZON_CHECKPOINT_STORAGE_OWNER_KEY,
+  BAANZON_LEGACY_CHECKPOINT_KEY,
   checkpointOwnerNamespacePrefix,
   isAskUserQuestionAdminDisabled,
   attachAskUserQuestionArgs,
@@ -1643,7 +1643,7 @@ class AgentClient extends BaseClient {
     if (!streamId) {
       return undefined;
     }
-    /** Per-endpoint opt-in via `activityLabel: true` in librechat.yaml,
+    /** Per-endpoint opt-in via `activityLabel: true` in baanzon.yaml,
      *  resolved the same way the title options are (endpoints.all > named
      *  endpoint > custom endpoint config). Custom endpoints live in the
      *  `endpoints.custom` ARRAY, so their settings are only visible through
@@ -4462,8 +4462,8 @@ class AgentClient extends BaseClient {
           // invocation. The saver maps this private immutable generation key
           // into its physical namespace while tools keep the conversation id.
           checkpoint_ns: '',
-          [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: this.checkpointNamespace,
-          [LIBRECHAT_CHECKPOINT_STORAGE_OWNER_KEY]:
+          [BAANZON_CHECKPOINT_NAMESPACE_KEY]: this.checkpointNamespace,
+          [BAANZON_CHECKPOINT_STORAGE_OWNER_KEY]:
             (this.user ?? this.options.req.user?.id)
               ? checkpointOwnerNamespacePrefix(
                   this.user ?? this.options.req.user?.id,
@@ -4476,14 +4476,14 @@ class AgentClient extends BaseClient {
           ...(this.eventActorInvocationId == null
             ? {}
             : {
-                [LIBRECHAT_EVENT_ACTOR_INVOCATION_KEY]: this.eventActorInvocationId,
-                [LIBRECHAT_CHECKPOINT_OWNER_KEY]: checkpointOwnerNamespacePrefix(
+                [BAANZON_EVENT_ACTOR_INVOCATION_KEY]: this.eventActorInvocationId,
+                [BAANZON_CHECKPOINT_OWNER_KEY]: checkpointOwnerNamespacePrefix(
                   this.options.req.user.id,
                   this.options.req._agentEventBindingTenantId,
                 ),
                 ...(this.eventActorCheckpointId == null
                   ? {}
-                  : { [LIBRECHAT_LEGACY_CHECKPOINT_KEY]: this.eventActorCheckpointId }),
+                  : { [BAANZON_LEGACY_CHECKPOINT_KEY]: this.eventActorCheckpointId }),
                 event_actor_invocation_id: this.eventActorInvocationId,
                 event_actor_depth: 1,
               }),
@@ -5254,8 +5254,8 @@ class AgentClient extends BaseClient {
           thread_id: this.conversationId,
           ...buildToolApprovalExecutionConfig(this.responseMessageId, this.jobCreatedAt),
           checkpoint_ns: '',
-          [LIBRECHAT_CHECKPOINT_NAMESPACE_KEY]: this.checkpointNamespace,
-          [LIBRECHAT_CHECKPOINT_STORAGE_OWNER_KEY]:
+          [BAANZON_CHECKPOINT_NAMESPACE_KEY]: this.checkpointNamespace,
+          [BAANZON_CHECKPOINT_STORAGE_OWNER_KEY]:
             (this.user ?? this.options.req.user?.id)
               ? checkpointOwnerNamespacePrefix(
                   this.user ?? this.options.req.user?.id,

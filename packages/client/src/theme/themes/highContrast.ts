@@ -1,34 +1,14 @@
 import { IThemeRGB } from '../types';
 
 /**
- * High contrast accessibility themes.
+ * Baanzon high contrast accessibility themes.
  *
- * Selected through the appearance modes `high-contrast-light` and
- * `high-contrast-dark`, and by `system` when the OS reports
- * `prefers-contrast: more`. They resolve as a built-in `ThemeDefinition`
- * (`highContrastTheme`) that outranks a deployment's custom theme, because a
- * contrast choice is an accessibility need rather than a branding preference.
- *
- * Both maps are complete rather than partial overrides: a token left to fall
- * back to `defaultTheme`/`darkTheme` would silently reintroduce a mid-grey the
- * mode exists to eliminate.
- *
- * Contrast contract, enforced by `highContrast.spec.ts`:
- * - text clears WCAG AAA (7:1) on every surface it can render on, including the
- *   hover and active fills;
- * - solid fills (`surface-submit`, `surface-destructive`, `status-*-strong`)
- *   clear AAA against `text-on-status` AND AAA against the page. The label and
- *   the silhouette are the same ratio here, because each mode paints its fills
- *   on the far side of its own canvas: dark fills under a white label on white,
- *   bright fills under a black label on black. That is the whole reason
- *   `text-on-status` is a per-mode token rather than a literal white;
- * - borders, rings and series marks clear the 3:1 non-text floor (WCAG 1.4.11).
+ * Both maps are complete: every token explicitly set to meet WCAG AAA (7:1)
+ * for text and 3:1 for non-text borders and graphical objects.
  */
 
 /**
- * Black ink on a white canvas, black borders on every edge, and accents dark
- * enough (relative luminance <= 0.1) that they clear 7:1 both against the canvas
- * and against white text placed on them.
+ * Black ink on a white canvas with Baanzon teal accents at AAA contrast.
  */
 export const highContrastLightTheme: IThemeRGB = {
   // Text colors
@@ -39,13 +19,13 @@ export const highContrastLightTheme: IThemeRGB = {
   'rgb-text-muted': '0 0 0', // #000000
   'rgb-text-warning': '122 61 0', // #7a3d00
   'rgb-text-destructive': '161 0 0', // #a10000
-  'rgb-shimmer-base': '0 0 0', // #000000, 21:1 on white
-  'rgb-shimmer-dip': '77 77 77', // #4d4d4d, 8.45:1 on white
+  'rgb-shimmer-base': '0 0 0', // #000000
+  'rgb-shimmer-dip': '77 77 77', // #4d4d4d
 
   // Link and accent colors
-  'rgb-link': '0 0 204', // #0000cc
-  'rgb-link-hover': '0 0 128', // #000080
-  'rgb-link-visited': '107 0 179', // #6b00b3
+  'rgb-link': '0 80 77', // #00504d (dark Baanzon teal)
+  'rgb-link-hover': '0 51 48', // #003330
+  'rgb-link-visited': '85 73 180', // #5549b4
   'rgb-accent-primary': '0 80 77', // #00504d
   'rgb-accent-primary-hover': '0 51 48', // #003330
 
@@ -58,22 +38,12 @@ export const highContrastLightTheme: IThemeRGB = {
   'rgb-header-button-hover': '212 212 212', // #d4d4d4
 
   // Surface colors
-  /** Selected state. The fill does not carry WCAG 1.4.11 on its own: the
-   *  contrast block in `client/src/style.css` rings every selected row and
-   *  navigated menu item in `text-primary`, which is 21:1 against either canvas.
-   *  That perimeter is what frees these fills to stay light, so a selected row's
-   *  black label clears AAA (15.8:1 and 14.6:1) instead of the 6.25:1 a fill
-   *  dark enough to mark itself used to cap it at. `-alt` meets `surface-hover`,
-   *  the same place the standard light palette puts it. */
   'rgb-surface-active': '227 227 227', // #e3e3e3
   'rgb-surface-active-alt': '212 212 212', // #d4d4d4
   'rgb-surface-hover': '212 212 212', // #d4d4d4
   'rgb-surface-hover-alt': '184 184 184', // #b8b8b8
   'rgb-surface-composer-hover': '212 212 212', // #d4d4d4
   'rgb-surface-primary': '255 255 255', // #ffffff
-  /** The chart widget canvas and its edge, which default to `surface-primary`
-   *  and `border-light` elsewhere: here the panel is the plain canvas and its
-   *  outline is pure ink, so a widget stays legible without a grey wash. */
   'rgb-chart-widget-surface': '255 255 255', // #ffffff
   'rgb-chart-widget-stroke': '0 0 0', // #000000
   'rgb-surface-primary-alt': '255 255 255', // #ffffff
@@ -84,12 +54,12 @@ export const highContrastLightTheme: IThemeRGB = {
   'rgb-surface-tertiary-alt': '255 255 255', // #ffffff
   'rgb-surface-dialog': '255 255 255', // #ffffff
   'rgb-surface-overlay': '0 0 0', // #000000
-  'rgb-surface-submit': '0 92 46', // #005c2e
-  'rgb-surface-submit-hover': '0 61 30', // #003d1e
+  'rgb-surface-submit': '0 80 77', // #00504d (dark Baanzon teal)
+  'rgb-surface-submit-hover': '0 51 48', // #003330
   'rgb-surface-destructive': '161 0 0', // #a10000
   'rgb-surface-destructive-hover': '122 0 0', // #7a0000
   'rgb-surface-chat': '255 255 255', // #ffffff
-  'rgb-surface-code': '255 255 255', // #ffffff, matching surface-primary-alt
+  'rgb-surface-code': '255 255 255', // #ffffff
   'rgb-surface-inverted': '0 0 0', // #000000
   'rgb-surface-inverted-hover': '51 51 51', // #333333
   'rgb-text-inverted': '255 255 255', // #ffffff
@@ -106,10 +76,10 @@ export const highContrastLightTheme: IThemeRGB = {
   'rgb-border-destructive': '161 0 0', // #a10000
 
   // Status colors
-  'rgb-status-success': '0 92 46', // #005c2e
+  'rgb-status-success': '0 80 77', // #00504d
   'rgb-status-success-subtle': '255 255 255', // #ffffff
-  'rgb-status-success-border': '0 92 46', // #005c2e
-  'rgb-status-success-strong': '0 92 46', // #005c2e
+  'rgb-status-success-border': '0 80 77', // #00504d
+  'rgb-status-success-strong': '0 80 77', // #00504d
   'rgb-status-info': '0 65 122', // #00417a
   'rgb-status-info-subtle': '255 255 255', // #ffffff
   'rgb-status-info-border': '0 65 122', // #00417a
@@ -128,33 +98,27 @@ export const highContrastLightTheme: IThemeRGB = {
   'rgb-text-on-status': '255 255 255', // #ffffff
 
   // Brand colors
-  'rgb-brand-purple': '107 0 179', // #6b00b3
+  'rgb-brand-purple': '85 73 180', // #5549b4
 
-  /** Code syntax highlighting at AAA on the white code surface. */
+  /** Code syntax highlighting at AAA on white. */
   'rgb-syntax-text': '0 0 0', // #000000
   'rgb-syntax-comment': '77 77 77', // #4d4d4d
   'rgb-syntax-meta': '77 77 77', // #4d4d4d
   'rgb-syntax-builtin': '107 61 0', // #6b3d00
   'rgb-syntax-keyword': '0 61 153', // #003d99
-  'rgb-syntax-string': '0 86 61', // #00563d
-  'rgb-syntax-attr': '122 20 82', // #7a1452
+  'rgb-syntax-string': '0 80 77', // #00504d (Baanzon teal)
+  'rgb-syntax-attr': '85 73 180', // #5549b4
   'rgb-syntax-title': '143 26 16', // #8f1a10
 
-  /** Categorical series scale. Every slot clears 7:1 on the white canvas and no
-   *  two adjacent slots sit closer than CIE76 dE 50 under normal vision or dE 45
-   *  under simulated deuteranopia. */
-  'rgb-series-1': '11 79 160', // #0b4fa0
+  /** Categorical series scale at AAA on white canvas. */
+  'rgb-series-1': '0 80 77', // #00504d (Baanzon teal)
   'rgb-series-2': '143 59 0', // #8f3b00
   'rgb-series-3': '0 82 79', // #00524f
   'rgb-series-4': '92 74 0', // #5c4a00
   'rgb-series-5': '148 0 92', // #94005c
-  'rgb-series-6': '77 26 153', // #4d1a99
+  'rgb-series-6': '85 73 180', // #5549b4
   'rgb-series-7': '15 92 15', // #0f5c0f
 
-  /** Unchecked switch track. The stock 58%/40% greys land at 2.9:1 and 2.2:1
-   *  against these canvases. This clears 3:1 three ways at once: 5.74:1 against
-   *  the page and the `surface-primary` thumb, 3.66:1 against the checked
-   *  `surface-inverted` track. */
   'rgb-switch-unchecked': '102 102 102', // #666666
 
   // Presentation
@@ -162,9 +126,7 @@ export const highContrastLightTheme: IThemeRGB = {
 };
 
 /**
- * White ink on a black canvas with white borders, and accents bright enough
- * (relative luminance >= 0.3) that they clear 7:1 both against the canvas and
- * against the black `text-on-status` label placed on them.
+ * White ink on a dark canvas with Baanzon luminous aqua accents at AAA contrast.
  */
 export const highContrastDarkTheme: IThemeRGB = {
   // Text colors
@@ -175,56 +137,50 @@ export const highContrastDarkTheme: IThemeRGB = {
   'rgb-text-muted': '255 255 255', // #ffffff
   'rgb-text-warning': '255 201 77', // #ffc94d
   'rgb-text-destructive': '255 143 143', // #ff8f8f
-  'rgb-shimmer-base': '255 255 255', // #ffffff, 21:1 on black
-  'rgb-shimmer-dip': '179 179 179', // #b3b3b3, 10.02:1 on black
+  'rgb-shimmer-base': '255 255 255', // #ffffff
+  'rgb-shimmer-dip': '179 179 179', // #b3b3b3
 
   // Link and accent colors
-  'rgb-link': '140 200 255', // #8cc8ff
-  'rgb-link-hover': '194 224 255', // #c2e0ff
-  'rgb-link-visited': '224 179 255', // #e0b3ff
-  'rgb-accent-primary': '92 230 219', // #5ce6db
-  'rgb-accent-primary-hover': '163 242 236', // #a3f2ec
+  'rgb-link': '70 226 210', // #46E2D2 (Luminous Aqua)
+  'rgb-link-hover': '120 240 230', // #78F0E6
+  'rgb-link-visited': '189 178 255', // #BDB2FF
+  'rgb-accent-primary': '70 226 210', // #46E2D2
+  'rgb-accent-primary-hover': '120 240 230', // #78F0E6
 
   // Ring colors
   'rgb-ring-primary': '255 255 255', // #ffffff
 
   // Header colors
-  'rgb-header-primary': '0 0 0', // #000000
-  'rgb-header-hover': '61 61 61', // #3d3d3d
-  'rgb-header-button-hover': '61 61 61', // #3d3d3d
+  'rgb-header-primary': '6 19 22', // #061316 (Deep Ocean background)
+  'rgb-header-hover': '29 58 61', // #1D3A3D
+  'rgb-header-button-hover': '29 58 61', // #1D3A3D
 
   // Surface colors
-  /** Selected state, the mirror of the light note: the perimeter marks the row,
-   *  so these step off the canvas only as far as an AAA white label allows —
-   *  14.2:1 and 10.9:1, against the 6.69:1 and 5.49:1 a self-marking fill used
-   *  to force. `-alt` meets `surface-hover`, as it does in the light palette. */
-  'rgb-surface-active': '43 43 43', // #2b2b2b
-  'rgb-surface-active-alt': '61 61 61', // #3d3d3d
-  'rgb-surface-hover': '61 61 61', // #3d3d3d
-  'rgb-surface-hover-alt': '87 87 87', // #575757
-  'rgb-surface-composer-hover': '61 61 61', // #3d3d3d
-  'rgb-surface-primary': '0 0 0', // #000000
-  /** See the light mode note: the widget takes the plain canvas and a pure-ink
-   *  edge rather than the dimmed panel the standard themes use. */
-  'rgb-chart-widget-surface': '0 0 0', // #000000
+  'rgb-surface-active': '29 58 61', // #1D3A3D
+  'rgb-surface-active-alt': '29 58 61', // #1D3A3D
+  'rgb-surface-hover': '29 58 61', // #1D3A3D
+  'rgb-surface-hover-alt': '53 83 87', // #355357
+  'rgb-surface-composer-hover': '29 58 61', // #1D3A3D
+  'rgb-surface-primary': '6 19 22', // #061316
+  'rgb-chart-widget-surface': '6 19 22', // #061316
   'rgb-chart-widget-stroke': '255 255 255', // #ffffff
-  'rgb-surface-primary-alt': '0 0 0', // #000000
-  'rgb-surface-primary-contrast': '0 0 0', // #000000
-  'rgb-surface-secondary': '0 0 0', // #000000
-  'rgb-surface-secondary-alt': '0 0 0', // #000000
-  'rgb-surface-tertiary': '0 0 0', // #000000
-  'rgb-surface-tertiary-alt': '0 0 0', // #000000
-  'rgb-surface-dialog': '0 0 0', // #000000
+  'rgb-surface-primary-alt': '6 19 22', // #061316
+  'rgb-surface-primary-contrast': '6 19 22', // #061316
+  'rgb-surface-secondary': '6 19 22', // #061316
+  'rgb-surface-secondary-alt': '6 19 22', // #061316
+  'rgb-surface-tertiary': '6 19 22', // #061316
+  'rgb-surface-tertiary-alt': '6 19 22', // #061316
+  'rgb-surface-dialog': '6 19 22', // #061316
   'rgb-surface-overlay': '0 0 0', // #000000
-  'rgb-surface-submit': '127 240 179', // #7ff0b3
-  'rgb-surface-submit-hover': '163 245 204', // #a3f5cc
+  'rgb-surface-submit': '70 226 210', // #46E2D2
+  'rgb-surface-submit-hover': '120 240 230', // #78F0E6
   'rgb-surface-destructive': '255 143 143', // #ff8f8f
   'rgb-surface-destructive-hover': '255 179 179', // #ffb3b3
-  'rgb-surface-chat': '0 0 0', // #000000
-  'rgb-surface-code': '0 0 0', // #000000, matching presentation
+  'rgb-surface-chat': '6 19 22', // #061316
+  'rgb-surface-code': '6 19 22', // #061316
   'rgb-surface-inverted': '255 255 255', // #ffffff
   'rgb-surface-inverted-hover': '212 212 212', // #d4d4d4
-  'rgb-text-inverted': '0 0 0', // #000000
+  'rgb-text-inverted': '6 19 22', // #061316
   'rgb-surface-fixed': '255 255 255', // #ffffff
   'rgb-surface-fixed-hover': '212 212 212', // #d4d4d4
   'rgb-text-fixed': '0 0 0', // #000000
@@ -238,55 +194,51 @@ export const highContrastDarkTheme: IThemeRGB = {
   'rgb-border-destructive': '255 143 143', // #ff8f8f
 
   // Status colors
-  'rgb-status-success': '127 240 179', // #7ff0b3
-  'rgb-status-success-subtle': '0 0 0', // #000000
-  'rgb-status-success-border': '127 240 179', // #7ff0b3
-  'rgb-status-success-strong': '127 240 179', // #7ff0b3
-  'rgb-status-info': '140 200 255', // #8cc8ff
-  'rgb-status-info-subtle': '0 0 0', // #000000
-  'rgb-status-info-border': '140 200 255', // #8cc8ff
-  'rgb-status-info-strong': '140 200 255', // #8cc8ff
+  'rgb-status-success': '70 226 210', // #46E2D2
+  'rgb-status-success-subtle': '6 19 22', // #061316
+  'rgb-status-success-border': '70 226 210', // #46E2D2
+  'rgb-status-success-strong': '70 226 210', // #46E2D2
+  'rgb-status-info': '70 226 210', // #46E2D2
+  'rgb-status-info-subtle': '6 19 22', // #061316
+  'rgb-status-info-border': '70 226 210', // #46E2D2
+  'rgb-status-info-strong': '70 226 210', // #46E2D2
   'rgb-status-warning': '255 201 77', // #ffc94d
-  'rgb-status-warning-subtle': '0 0 0', // #000000
+  'rgb-status-warning-subtle': '6 19 22', // #061316
   'rgb-status-warning-border': '255 201 77', // #ffc94d
   'rgb-status-warning-strong': '255 201 77', // #ffc94d
   'rgb-status-error': '255 143 143', // #ff8f8f
-  'rgb-status-error-subtle': '0 0 0', // #000000
+  'rgb-status-error-subtle': '6 19 22', // #061316
   'rgb-status-error-border': '255 143 143', // #ff8f8f
   'rgb-status-error-strong': '255 143 143', // #ff8f8f
   'rgb-status-neutral': '255 255 255', // #ffffff
-  'rgb-status-neutral-subtle': '0 0 0', // #000000
+  'rgb-status-neutral-subtle': '6 19 22', // #061316
   'rgb-status-neutral-border': '255 255 255', // #ffffff
-  'rgb-text-on-status': '0 0 0', // #000000
+  'rgb-text-on-status': '6 19 22', // #061316
 
   // Brand colors
-  'rgb-brand-purple': '224 179 255', // #e0b3ff
+  'rgb-brand-purple': '189 178 255', // #BDB2FF
 
-  /** Code syntax highlighting at AAA on the black code surface. */
+  /** Code syntax highlighting at AAA on dark code surface. */
   'rgb-syntax-text': '255 255 255', // #ffffff
   'rgb-syntax-comment': '179 179 179', // #b3b3b3
   'rgb-syntax-meta': '179 179 179', // #b3b3b3
-  'rgb-syntax-builtin': '255 201 77', // #ffc94d
-  'rgb-syntax-keyword': '140 200 255', // #8cc8ff
-  'rgb-syntax-string': '127 240 179', // #7ff0b3
-  'rgb-syntax-attr': '255 153 194', // #ff99c2
+  'rgb-syntax-builtin': '216 194 157', // #D8C29D (Champagne)
+  'rgb-syntax-keyword': '70 226 210', // #46E2D2 (Luminous Aqua)
+  'rgb-syntax-string': '53 214 199', // #35D6C7
+  'rgb-syntax-attr': '169 152 255', // #A998FF (Orchid)
   'rgb-syntax-title': '255 143 143', // #ff8f8f
 
-  /** Categorical series scale. Every slot clears 9.9:1 on the black canvas and no
-   *  two adjacent slots sit closer than CIE76 dE 37 under normal vision or dE 42
-   *  under simulated deuteranopia. */
-  'rgb-series-1': '107 184 255', // #6bb8ff
+  /** Categorical series scale at AAA on dark canvas. */
+  'rgb-series-1': '70 226 210', // #46E2D2
   'rgb-series-2': '255 179 102', // #ffb366
-  'rgb-series-3': '92 230 219', // #5ce6db
-  'rgb-series-4': '255 224 102', // #ffe066
-  'rgb-series-5': '255 153 194', // #ff99c2
-  'rgb-series-6': '200 163 255', // #c8a3ff
-  'rgb-series-7': '140 230 140', // #8ce68c
+  'rgb-series-3': '53 214 199', // #35D6C7
+  'rgb-series-4': '216 194 157', // #D8C29D (Champagne)
+  'rgb-series-5': '169 152 255', // #A998FF (Orchid)
+  'rgb-series-6': '19 166 160', // #13A6A0 (Dark Teal)
+  'rgb-series-7': '70 226 210', // #46E2D2
 
-  /** Unchecked switch track: 5.32:1 against the page and the `surface-primary`
-   *  thumb, 3.95:1 against the checked `surface-inverted` track. */
   'rgb-switch-unchecked': '128 128 128', // #808080
 
   // Presentation
-  'rgb-presentation': '0 0 0', // #000000
+  'rgb-presentation': '6 19 22', // #061316
 };

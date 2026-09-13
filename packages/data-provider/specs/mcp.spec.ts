@@ -93,7 +93,7 @@ describe('MCPOptionsSchema', () => {
     const result = MCPOptionsSchema.safeParse({
       type: 'streamable-http',
       url: 'https://mcp-server.com/http',
-      headers: { Authorization: 'Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}' },
+      headers: { Authorization: 'Bearer {{BAANZON_OPENID_ACCESS_TOKEN}}' },
     });
 
     expect(result.success).toBe(true);

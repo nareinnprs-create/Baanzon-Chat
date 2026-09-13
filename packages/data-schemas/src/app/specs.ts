@@ -7,7 +7,7 @@ import type { TCustomConfig } from 'librechat-data-provider';
 import logger from '~/config/winston';
 
 /**
- * Sets up Model Specs from the config (`librechat.yaml`) file.
+ * Sets up Model Specs from the config (`baanzon.yaml`) file.
  * @param [endpoints] - The loaded custom configuration for endpoints.
  * @param [modelSpecs] - The loaded custom configuration for model specs.
  * @param [interfaceConfig] - The loaded interface configuration.
