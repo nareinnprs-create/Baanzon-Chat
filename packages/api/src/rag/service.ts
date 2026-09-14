@@ -1,6 +1,6 @@
 import { logger } from '@librechat/data-schemas';
 import type {
-  KnowlEdgeCollection,
+  KnowledgeCollection,
   CollectionScope,
   VectorChunk,
   CreateCollectionParams,
@@ -31,14 +31,14 @@ export interface RagServiceDeps {
 }
 
 export interface RagService {
-  createCollection(params: CreateCollectionParams): Promise<KnowlEdgeCollection>;
-  listCollections(userId: string): Promise<KnowlEdgeCollection[]>;
-  getCollection(userId: string, collectionId: string): Promise<KnowlEdgeCollection | null>;
+  createCollection(params: CreateCollectionParams): Promise<KnowledgeCollection>;
+  listCollections(userId: string): Promise<KnowledgeCollection[]>;
+  getCollection(userId: string, collectionId: string): Promise<KnowledgeCollection | null>;
   updateCollection(
     userId: string,
     collectionId: string,
     patch: CollectionPatch,
-  ): Promise<KnowlEdgeCollection | null>;
+  ): Promise<KnowledgeCollection | null>;
   deleteCollection(userId: string, collectionId: string): Promise<boolean>;
   addDocument(params: AddDocumentParams): Promise<{ documentId: string; chunkCount: number }>;
   deleteDocument(userId: string, collectionId: string, documentId: string): Promise<boolean>;
@@ -46,7 +46,7 @@ export interface RagService {
 }
 
 type CollectionPatch = Partial<
-  Pick<KnowlEdgeCollection, 'name' | 'description' | 'scope' | 'documentCount' | 'chunkCount'>
+  Pick<KnowledgeCollection, 'name' | 'description' | 'scope' | 'documentCount' | 'chunkCount'>
 >;
 
 const SCOPES: CollectionScope[] = ['private', 'project', 'global'];
@@ -80,13 +80,13 @@ function keywordScore(text: string, query: string): number {
 
 export function createRagService(deps: RagServiceDeps): RagService {
   const service: RagService = {
-    async createCollection(params: CreateCollectionParams): Promise<KnowlEdgeCollection> {
+    async createCollection(params: CreateCollectionParams): Promise<KnowledgeCollection> {
       assertValidCollectionName(params.name);
       const scope: CollectionScope = SCOPES.includes(params.scope as CollectionScope)
         ? (params.scope as CollectionScope)
         : 'private';
       const id = randomUUID();
-      const collection: KnowlEdgeCollection = {
+      const collection: KnowledgeCollection = {
         id,
         userId: params.userId,
         name: params.name.trim(),
@@ -243,3 +243,5 @@ export function createRagService(deps: RagServiceDeps): RagService {
 
   return service;
 }
+
+

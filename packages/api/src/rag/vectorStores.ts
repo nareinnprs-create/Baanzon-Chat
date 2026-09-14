@@ -24,7 +24,7 @@ export class InMemoryVectorStore {
 
   async upsertChunks(collectionId: string, chunks: VectorChunk[]): Promise<void> {
     const map = this.stores.get(collectionId) ?? new Map<string, VectorChunk[]>();
-    this.stores.set(collectionId, map用途);
+    this.stores.set(collectionId, map);
     for (const chunk of chunks) {
       const list = map.get(chunk.documentId) ?? [];
       const existing = list.findIndex((c) => c.chunkIndex === chunk.chunkIndex);
@@ -38,7 +38,7 @@ export class InMemoryVectorStore {
   }
 
   async semanticSearch(collectionId: string, query: string, limit: number): Promise<VectorChunk[]> {
-    const map = this.stores.get(collectionId);
+    const map = this.stores.get(collectionId) ?? new Map<string, VectorChunk[]>();
     if (!map) {
       return [];
     }
@@ -68,10 +68,12 @@ export class InMemoryVectorStore {
   }
 
   async deleteDocument(collectionId: string, documentId: string): Promise<void> {
-    this.stores.get(collectionId)?.delete(documentId);
+    const map = this.stores.get(collectionId) ?? new Map<string, VectorChunk[]>();
   }
 
   async deleteCollection(collectionId: string): Promise<void> {
     this.stores.delete(collectionId);
   }
 }
+
+

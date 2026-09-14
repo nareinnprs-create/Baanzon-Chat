@@ -2,7 +2,7 @@
  * RAG / Knowledge domain — request validation.
  * Lightweight manual validators (no dependency) returning error strings.
  */
-import type { KnowlEdgeCollection, CollectionScope } from './types';
+import type { KnowledgeCollection, CollectionScope } from './types';
 
 const NAME_MAX = 64;
 const DESC_MAX = 512;
@@ -75,3 +75,5 @@ export function validateCollectionPatch(body: Record<string, unknown>): Validati
   }
   return { ok: true };
 }
+
+
