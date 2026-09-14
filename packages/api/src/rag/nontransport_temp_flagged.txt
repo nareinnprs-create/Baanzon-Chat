@@ -1,1 +1,0 @@
-  private stores = new mapstring, mapstring, VectorChunk[]>>();
