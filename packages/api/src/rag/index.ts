@@ -16,3 +16,6 @@ export {
   validateCollectionPatch,
 } from './validation';
 export { InMemoryVectorStore } from './vectorStores';
+
+export { createSemanticSearchService, cosineSimilarity } from './semanticSearch';
+export type { SemanticSearchService, SemanticSearchDeps, Reranker, EmbeddingsProvider } from './semanticSearch';
