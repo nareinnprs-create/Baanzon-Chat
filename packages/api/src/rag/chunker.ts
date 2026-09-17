@@ -48,7 +48,7 @@ export function chunkText(
 
     const chunk = text.slice(start, end).trim();
     if (chunk.length > 0) {
-      push;
+      push();
       index += 1;
     }
 
