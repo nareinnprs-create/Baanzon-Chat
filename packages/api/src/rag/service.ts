@@ -28,6 +28,9 @@ export interface RagServiceDeps {
   semantic?: {
     search(collectionId: string, query: string, limit: number): Promise<VectorChunk[]>;
   };
+  reranker?: {
+    rerank(query: string, snippets: RetrievedSnippet[]): Promise<RetrievedSnippet[]>;
+  };
 }
 
 export interface RagService {
@@ -237,7 +240,9 @@ export function createRagService(deps: RagServiceDeps): RagService {
       }
 
       snippets.sort((a, b) => b.score - a.score);
-      return snippets.slice(0, topK);
+      return deps.reranker
+        ? (await deps.reranker.rerank(params.query, snippets)).slice(0, topK)
+        : snippets.slice(0, topK);
     },
   };
 
