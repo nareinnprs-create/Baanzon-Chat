@@ -142,7 +142,9 @@ function buildPostLoginPayload() {
       isBirthday() ||
       isEnabled(process.env.SHOW_BIRTHDAY_ICON) ||
       process.env.SHOW_BIRTHDAY_ICON === '',
-    helpAndFaqURL: process.env.HELP_AND_FAQ_URL || 'https://librechat.ai',
+    // No upstream fallback: a deployment that leaves HELP_AND_FAQ_URL blank
+    // means "no help link", and the client hides the item for '' or '/'.
+    helpAndFaqURL: process.env.HELP_AND_FAQ_URL || '/',
     sharedLinksEnabled,
     publicSharedLinksEnabled,
     openidReuseTokens,

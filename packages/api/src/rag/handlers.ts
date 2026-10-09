@@ -6,109 +6,165 @@
  * (express is not a runtime dependency of this workspace); the returned
  * functions take request DTOs and return response DTOs.
  */
-import type { RagService } from './service';
+import { logger } from '@librechat/data-schemas';
 import type {
   AddDocumentParams,
+  CollectionPatch,
   CreateCollectionParams,
+  KnowledgeCollection,
+  KnowledgeCollectionListing,
   RetrievedSnippet,
   RetrieveParams,
 } from './types';
+import type { AddDocumentResult, RagService } from './service';
+import type { RagActor } from './authorization';
+import { RagError } from './errors';
+
+export type HandlerResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; status: number; message: string };
+
 export interface RagHandlers {
+  /**
+   * `actor` carries the caller's role from the request. It is forwarded
+   * unchanged rather than inspected here: the service is the enforcement point
+   * for what a caller may do, and this layer only shapes DTOs and statuses.
+   */
   createCollection(
     params: CreateCollectionParams,
-  ): Promise<{ ok: true; data: unknown } | { ok: false; status: number; message: string }>;
-  listCollections(
-    userId: string,
-  ): Promise<{ ok: true; data: unknown } | { ok: false; status: number; message: string }>;
-  getCollection(
-    userId: string,
-    collectionId: string,
-  ): Promise<{ ok: true; data: unknown } | { ok: false; status: number; message: string }>;
-  deleteCollection(
+    actor?: RagActor,
+  ): Promise<HandlerResult<KnowledgeCollection>>;
+  listCollections(userId: string): Promise<HandlerResult<KnowledgeCollectionListing>>;
+  getCollection(userId: string, collectionId: string): Promise<HandlerResult<KnowledgeCollection>>;
+  updateCollection(
     userId: string,
     collectionId: string,
-  ): Promise<{ ok: true; data: boolean } | { ok: false; status: number; message: string }>;
-  addDocument(
-    params: AddDocumentParams,
-  ): Promise<{ ok: true; data: unknown } | { ok: false; status: number; message: string }>;
+    patch: CollectionPatch,
+    actor?: RagActor,
+  ): Promise<HandlerResult<KnowledgeCollection>>;
+  deleteCollection(userId: string, collectionId: string): Promise<HandlerResult<boolean>>;
+  /**
+   * The whole ingest result, not just its two always-true counters. The
+   * optional caveats (`ledgerStale`, `embedding`) were already reaching the
+   * response at runtime while this signature named a narrower type, so a client
+   * reading them off the body had no contract to read them from; naming the
+   * service's own result type is what makes them part of the API rather than an
+   * accident of the object passed through.
+   */
+  addDocument(params: AddDocumentParams): Promise<HandlerResult<AddDocumentResult>>;
   deleteDocument(
     userId: string,
     collectionId: string,
     documentId: string,
-  ): Promise<{ ok: true; data: boolean } | { ok: false; status: number; message: string }>;
-  retrieve(params: RetrieveParams): Promise<{ ok: true; data: RetrievedSnippet[] } | {
-    ok: false;
-    status: number;
-    message: string;
-  }>;
+  ): Promise<HandlerResult<boolean>>;
+  retrieve(params: RetrieveParams): Promise<HandlerResult<RetrievedSnippet[]>>;
 }
 
-function denied(message = 'Forbidden'): { ok: false; status: number; message: string } {
-  return { ok: false, status: 403, message };
-}
+const missing = (message = 'Not Found'): HandlerResult<never> => ({
+  ok: false,
+  status: 404,
+  message,
+});
 
-function missing(message = 'Not Found'): { ok: false; status: number; message: string } {
-  return { ok: false, status: 404, message };
-}
-
-function invalid(message: string): { ok: false; status: number; message: string } {
-  return { ok: false, status: 400, message };
+/**
+ * Classify by the error's declared status. Anything that is not a `RagError` is
+ * an internal fault: it is logged and reported as a bare 500, because a driver
+ * message (`MongoServerSelectionError: …`) would otherwise tell a caller about
+ * the deployment's internals. The domain's `RagError` messages are written for
+ * the caller and do reach the response.
+ */
+function mapThrown(err: unknown): HandlerResult<never> {
+  if (err instanceof RagError) {
+    return { ok: false, status: err.status, message: err.message };
+  }
+  logger.error('[rag] unexpected domain error', err);
+  return { ok: false, status: 500, message: 'Internal error' };
 }
 
 export function createRagHandlers(service: RagService): RagHandlers {
   return {
-    async createCollection(params) {
-      const collection = await service.createCollection(params);
-      if (!collection) {
-        return denied('Collection scope not permitted');
+    async createCollection(params, actor) {
+      try {
+        return { ok: true, data: await service.createCollection(params, actor) };
+      } catch (err) {
+        return mapThrown(err);
       }
-      return collection ? { ok: true, data: collection } : denied();
     },
 
     async listCollections(userId) {
-      const collections = await service.listCollections(userId);
-      return { ok: true, data: collections };
+      try {
+        return { ok: true, data: await service.listCollections(userId) };
+      } catch (err) {
+        return mapThrown(err);
+      }
     },
 
     async getCollection(userId, collectionId) {
-      const collection = await service.getCollection(userId, collectionId);
-      if (!collection) {
-        return missing();
+      try {
+        const collection = await service.getCollection(userId, collectionId);
+        if (!collection) {
+          return missing();
+        }
+        return { ok: true, data: collection };
+      } catch (err) {
+        return mapThrown(err);
       }
-      return { ok: true, data: collection };
+    },
+
+    async updateCollection(userId, collectionId, patch, actor) {
+      try {
+        const collection = await service.updateCollection(userId, collectionId, patch, actor);
+        if (!collection) {
+          return missing();
+        }
+        return { ok: true, data: collection };
+      } catch (err) {
+        return mapThrown(err);
+      }
     },
 
     async deleteCollection(userId, collectionId) {
-      const deleted = await service.deleteCollection(userId, collectionId);
-      if (!deleted) {
-        return missing();
+      try {
+        const deleted = await service.deleteCollection(userId, collectionId);
+        if (!deleted) {
+          return missing();
+        }
+        return { ok: true, data: deleted };
+      } catch (err) {
+        return mapThrown(err);
       }
-      return { ok: true, data: deleted };
     },
 
     async addDocument(params) {
       try {
-        const result = await service.addDocument(params);
-        return { ok: true, data: result };
+        return { ok: true, data: await service.addDocument(params) };
       } catch (err) {
-        return invalid((err as Error).message);
+        return mapThrown(err);
       }
     },
 
     async deleteDocument(userId, collectionId, documentId) {
-      const deleted = await service.deleteDocument(userId, collectionId, documentId);
-      if (!deleted) {
-        return missing();
+      try {
+        const deleted = await service.deleteDocument(userId, collectionId, documentId);
+        if (!deleted) {
+          return missing();
+        }
+        return { ok: true, data: deleted };
+      } catch (err) {
+        return mapThrown(err);
       }
-      return { ok: true, data: deleted };
     },
 
     async retrieve(params) {
-      const snippets = await service.retrieve(params);
-      if (snippets.length === 0) {
-        return { ok: true, data: [] };
+      try {
+        const snippets = await service.retrieve(params);
+        if (snippets == null) {
+          return missing();
+        }
+        return { ok: true, data: snippets };
+      } catch (err) {
+        return mapThrown(err);
       }
-      return { ok: true, data: snippets };
     },
   };
 }

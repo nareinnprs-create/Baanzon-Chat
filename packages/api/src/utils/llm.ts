@@ -1,10 +1,10 @@
-import { librechat } from 'librechat-data-provider';
+import { baanzon } from 'librechat-data-provider';
 import type { DynamicSettingProps, ImageDetail } from 'librechat-data-provider';
 
-type LibreChatKeys = keyof typeof librechat;
+type BaanzonKeys = keyof typeof baanzon;
 
 type LibreChatParams = {
-  modelOptions: Omit<NonNullable<DynamicSettingProps['conversation']>, LibreChatKeys>;
+  modelOptions: Omit<NonNullable<DynamicSettingProps['conversation']>, BaanzonKeys>;
   resendFiles: boolean;
   promptPrefix?: string | null;
   maxContextTokens?: number;
@@ -22,8 +22,8 @@ export function extractLibreChatParams(
 ): LibreChatParams {
   if (!options) {
     return {
-      modelOptions: {} as Omit<NonNullable<DynamicSettingProps['conversation']>, LibreChatKeys>,
-      resendFiles: librechat.resendFiles.default as boolean,
+      modelOptions: {} as Omit<NonNullable<DynamicSettingProps['conversation']>, BaanzonKeys>,
+      resendFiles: baanzon.resendFiles.default as boolean,
     };
   }
 
@@ -31,7 +31,7 @@ export function extractLibreChatParams(
 
   const resendFiles =
     (delete modelOptions.resendFiles, options.resendFiles) ??
-    (librechat.resendFiles.default as boolean);
+    (baanzon.resendFiles.default as boolean);
   const promptPrefix = (delete modelOptions.promptPrefix, options.promptPrefix);
   const maxContextTokens = (delete modelOptions.maxContextTokens, options.maxContextTokens);
   const fileTokenLimit = (delete modelOptions.fileTokenLimit, options.fileTokenLimit);
@@ -41,7 +41,7 @@ export function extractLibreChatParams(
   return {
     modelOptions: modelOptions as Omit<
       NonNullable<DynamicSettingProps['conversation']>,
-      LibreChatKeys
+      BaanzonKeys
     >,
     maxContextTokens,
     fileTokenLimit,

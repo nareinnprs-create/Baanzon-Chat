@@ -26,7 +26,7 @@ describe('withOfficeContrast', () => {
    *  contrast mode still rendered light whenever the OS was light. Pinning
    *  `color-scheme` is what stops the iframe consulting the OS at all. */
   it.each([
-    ['dark', true, '#000000', '#ffffff'],
+    ['dark', true, '#061316', '#ffffff'],
     ['light', false, '#ffffff', '#000000'],
   ] as const)('resolves %s mode against the OS preference', (mode, isDarkMode, canvas, ink) => {
     const rendered = withOfficeContrast(backendDocument, isDarkMode);

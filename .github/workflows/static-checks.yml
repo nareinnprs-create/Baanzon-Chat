@@ -1,0 +1,114 @@
+# Static checks — the gate that should have caught this repo's 109 lint errors and
+# 121 test failures while nothing ran it.
+#
+# This runs the repo's OWN gate runner (scripts/static-checks.mts) rather than a
+# reimplementation, so `npm run static-checks` locally and CI cannot drift apart.
+#
+# DEPENDENCY TRAP — READ BEFORE THE FIRST RUN:
+# scripts/static-checks.mts activates its tree-wide gates off the paths of the diff,
+# and three of those filters name workflow files that did not exist until now:
+#   FILTERS.eslint_config      (.github/workflows/static-checks.yml)
+#   FILTERS.config             (.github/workflows/static-checks.yml)
+#   FILTERS.i18n               (.github/workflows/static-checks.yml)
+#   FILTERS.unused_packages    (.github/workflows/static-checks.yml)
+#   FILTERS.circular_deps      (.github/workflows/backend-review.yml)  — still absent
+#   FILTERS.typecheck          (.github/workflows/backend-review.yml, frontend-review.yml)
+# Creating static-checks.yml is therefore what switches the ESLint-config, config,
+# i18n and unused-package filters from permanently-dormant to reachable. Those gates
+# have never run against a real diff, so expect NEW failures the first time this
+# workflow goes green-to-red — that is the point, not a regression in the workflow.
+#
+# The filter and the runner must stay in sync: if you change the FILTERS block in
+# scripts/static-checks.mts, change the workflow's path triggers to match.
+
+name: Static checks
+
+on:
+  pull_request:
+    # No base-branch filter on purpose. Branch policy (CLAUDE.md, "Branching and Pull
+    # Requests") is to branch off `dev` and target `dev`, but gating must not be
+    # skippable by picking a different base, so every pull request runs this.
+  push:
+    branches:
+      - b1 # this branch
+      - dev # integration branch, the merge target
+      - main # released branch (also the repository default)
+
+permissions:
+  contents: read
+
+concurrency:
+  # Same PR/ref supersedes an in-flight run; the newer head is the one that matters.
+  group: static-checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-checks:
+    name: ESLint, Prettier, imports, types, config, i18n, depcheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          # The gate filters on a diff, so it needs the history to diff against.
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc # 24.16.0, matches Dockerfile and Dockerfile.multi
+          # Both package-lock.json and bun.lock are tracked (known issue P1-10).
+          # `packageManager` is npm@11.13.0 and config/update.js plus both Dockerfiles
+          # use `npm ci`, so npm is the install of record and the lockfile the cache
+          # is keyed on. See the top-level note in this file's history before switching.
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        # Same command as config/update.js:118 (`npm ci`) and both Dockerfiles.
+        run: npm ci
+
+      - name: Install depcheck globally
+        # scripts/static-checks.mts:resolveDepcheck() falls back to a global `depcheck`
+        # binary and SKIPS the unused-npm-packages gate when it is absent. Installing it
+        # here is what makes that gate real in CI instead of a silent pass.
+        run: npm install -g depcheck@1.4.7
+
+      - name: Resolve the diff base
+        # static-checks.mts filters on changed paths. On a clean CI checkout there is no
+        # staged diff and a clean working tree, so a bare `npm run static-checks:full`
+        # would report "Nothing to check" and exit 0 — a green gate that checked
+        # nothing. It must be handed a range (or a commit).
+        id: base
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base='${{ github.event.pull_request.base.sha }}'
+          else
+            base='${{ github.event.before }}'
+          fi
+          # A branch's first push has an all-zero `before`; fall back to the parent.
+          if [ -z "$base" ] || printf '%s' "$base" | grep -Eq '^0{40}$'; then
+            base="$(git rev-parse HEAD^ 2>/dev/null || true)"
+          fi
+          if [ -n "$base" ] && ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            git fetch --no-tags --depth=1 origin "$base" || true
+          fi
+          if [ -n "$base" ] && git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            echo "base=$base" >> "$GITHUB_OUTPUT"
+            echo "Diffing against $base"
+          else
+            echo "base=" >> "$GITHUB_OUTPUT"
+            echo 'No diffable base commit in this checkout; falling back to --commit HEAD.'
+          fi
+
+      - name: Run static checks (full tier)
+        shell: bash
+        run: |
+          if [ -n "${{ steps.base.outputs.base }}" ]; then
+            npm run static-checks:full -- --against "${{ steps.base.outputs.base }}"
+          else
+            # Root commit: diff-tree --root yields every tracked file.
+            npm run static-checks:full -- --commit HEAD
+          fi

@@ -1,0 +1,228 @@
+(node:30724) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL src/plugins/runtime.spec.ts (5.483 s)
+  getDeploymentPluginHookCapabilities
+    ΓêÜ returns undefined unless DEPLOYMENT_PLUGIN_HOOKS is enabled (20 ms)
+  registerDeploymentPluginHooks
+    ΓêÜ registers nothing when plugins loaded without hook capabilities (22 ms)
+    ├ù executes a plugin command hook end-to-end through a run hook registry (24 ms)
+    ├ù fires Claude-alias matchers against runtime tool names with plugin-namespace payloads (26 ms)
+    ├ù keeps native payloads for matchers authored in the runtime namespace (19 ms)
+    ├ù keeps native payloads for the native alternative of a mixed-namespace matcher (18 ms)
+    ├ù lets an overlapping once declaration fire after its sibling is spent (17 ms)
+    ├ù serves the run seam through the plugin hook source (17 ms)
+    ├ù fires every SessionStart handler once per conversation and per lifecycle source (17 ms)
+    ├ù reports the caller's working directory in hook payloads (18 ms)
+    ├ù presents Claude payloads to matcherless tool guards (17 ms)
+    ├ù persists once-only state per declaration across runs of the same conversation (16 ms)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ executes a plugin command hook end-to-end through a run hook registry
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      127 |     await writePlugin('guard');
+      128 |     await initialize();
+    > 129 |     expect(hasDeploymentPluginHooks()).toBe(true);
+          |                                        ^
+      130 |
+      131 |     const registry = new HookRegistry();
+      132 |     const registered = registerDeploymentPluginHooks({
+
+      at Object.toBe (src/plugins/runtime.spec.ts:129:40)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ fires Claude-alias matchers against runtime tool names with plugin-namespace payloads
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 4
+
+    - ObjectContaining {
+    -   "decision": "deny",
+    -   "reason": "alias-guarded",
+    + Object {
+    +   "additionalContexts": Array [],
+    +   "errors": Array [],
+    +   "injectedMessages": Array [],
+      }
+
+      181 |       },
+      182 |     });
+    > 183 |     expect(result).toEqual(expect.objectContaining({ decision: 'deny', reason: 'alias-guarded' }));
+          |                    ^
+      184 |   });
+      185 |
+      186 |   it('keeps native payloads for matchers authored in the runtime namespace', async () => {
+
+      at Object.toEqual (src/plugins/runtime.spec.ts:183:20)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ keeps native payloads for matchers authored in the runtime namespace
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 4
+
+    - ObjectContaining {
+    -   "decision": "deny",
+    -   "reason": "native-guarded",
+    + Object {
+    +   "additionalContexts": Array [],
+    +   "errors": Array [],
+    +   "injectedMessages": Array [],
+      }
+
+      216 |       },
+      217 |     });
+    > 218 |     expect(result).toEqual(expect.objectContaining({ decision: 'deny', reason: 'native-guarded' }));
+          |                    ^
+      219 |   });
+      220 |
+      221 |   it('keeps native payloads for the native alternative of a mixed-namespace matcher', async () => {
+
+      at Object.toEqual (src/plugins/runtime.spec.ts:218:20)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ keeps native payloads for the native alternative of a mixed-namespace matcher
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 4
+
+    - ObjectContaining {
+    -   "decision": "deny",
+    -   "reason": "mixed-native",
+    + Object {
+    +   "additionalContexts": Array [],
+    +   "errors": Array [],
+    +   "injectedMessages": Array [],
+      }
+
+      251 |       },
+      252 |     });
+    > 253 |     expect(result).toEqual(expect.objectContaining({ decision: 'deny', reason: 'mixed-native' }));
+          |                    ^
+      254 |   });
+      255 |
+      256 |   it('lets an overlapping once declaration fire after its sibling is spent', async () => {
+
+      at Object.toEqual (src/plugins/runtime.spec.ts:253:20)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ lets an overlapping once declaration fire after its sibling is spent
+
+    ENOENT: no such file or directory, open 'C:\Users\manag\AppData\Local\Temp\lc-plugin-runtime-BfK3cx\data\overlap\overlap.log'
+
+      295 |     await firePreToolUse('read_file');
+      296 |
+    > 297 |     const log = await fs.promises.readFile(path.join(dataDir, 'overlap', 'overlap.log'), 'utf8');
+          |                 ^
+      298 |     expect(log.trim().split('\n')).toHaveLength(2);
+      299 |   });
+      300 |
+
+      at Object.<anonymous> (src/plugins/runtime.spec.ts:297:17)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ serves the run seam through the plugin hook source
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      307 |     });
+      308 |     const source = getPluginHookSource();
+    > 309 |     expect(source?.hasHooks()).toBe(true);
+          |                                ^
+      310 |     expect(hasDeploymentPluginToolApprovalHooks()).toBe(true);
+      311 |     expect(hasDeploymentPluginToolApprovalHooks(['unmatched_tool'])).toBe(false);
+      312 |     expect(hasDeploymentPluginToolApprovalHooks(['write_file'])).toBe(true);
+
+      at Object.toBe (src/plugins/runtime.spec.ts:309:32)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ fires every SessionStart handler once per conversation and per lifecycle source
+
+    ENOENT: no such file or directory, open 'C:\Users\manag\AppData\Local\Temp\lc-plugin-runtime-GuwVAY\data\session\starts.log'
+
+      328 |     await fireRunStart('conversation-a', 'resume');
+      329 |
+    > 330 |     const log = await fs.promises.readFile(path.join(dataDir, 'session', 'starts.log'), 'utf8');
+          |                 ^
+      331 |     const lines = log.trim().split('\n').sort();
+      332 |     expect(lines).toEqual(['sibling', 'sibling', 'sibling', 'started', 'started', 'started']);
+      333 |   });
+
+      at Object.<anonymous> (src/plugins/runtime.spec.ts:330:17)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ reports the caller's working directory in hook payloads
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 4
+
+    - ObjectContaining {
+    -   "reason": "/workspace/session|C:\\Users\\manag\\AppData\\Local\\Temp\\lc-plugin-runtime-ogydgk\\plugin\\cwd",
+    + Object {
+    +   "additionalContexts": Array [],
+    +   "errors": Array [],
+    +   "injectedMessages": Array [],
+      }
+
+      369 |     });
+      370 |     /** Payload carries the session cwd; the process still runs from the plugin root. */
+    > 371 |     expect(result).toEqual(
+          |                    ^
+      372 |       expect.objectContaining({
+      373 |         reason: `/workspace/session|${path.join(pluginsDir, 'cwd')}`,
+      374 |       }),
+
+      at Object.toEqual (src/plugins/runtime.spec.ts:371:20)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ presents Claude payloads to matcherless tool guards
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 4
+
+    - ObjectContaining {
+    -   "decision": "deny",
+    -   "reason": "wildcard-guarded",
+    + Object {
+    +   "additionalContexts": Array [],
+    +   "errors": Array [],
+    +   "injectedMessages": Array [],
+      }
+
+      407 |       },
+      408 |     });
+    > 409 |     expect(result).toEqual(
+          |                    ^
+      410 |       expect.objectContaining({ decision: 'deny', reason: 'wildcard-guarded' }),
+      411 |     );
+      412 |   });
+
+      at Object.toEqual (src/plugins/runtime.spec.ts:409:20)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ persists once-only state per declaration across runs of the same conversation
+
+    ENOENT: no such file or directory, open 'C:\Users\manag\AppData\Local\Temp\lc-plugin-runtime-Mq5OQw\data\oncely\once.log'
+
+      450 |     await firePreToolUse('conversation-other', 'write_file');
+      451 |
+    > 452 |     const log = await fs.promises.readFile(path.join(dataDir, 'oncely', 'once.log'), 'utf8');
+          |                 ^
+      453 |     expect(log.trim().split('\n')).toHaveLength(3);
+      454 |   });
+      455 | });
+
+      at Object.<anonymous> (src/plugins/runtime.spec.ts:452:17)
+
+Test Suites: 1 failed, 1 total
+Tests:       10 failed, 2 passed, 12 total
+Snapshots:   0 total
+Time:        5.597 s, estimated 6 s
+Ran all test suites matching src/plugins/runtime.spec.ts.

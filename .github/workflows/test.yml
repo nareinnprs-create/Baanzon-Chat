@@ -1,0 +1,146 @@
+# Tests — every `npm run test:*` script as its own step.
+#
+# Suite-to-script map (root package.json):
+#   npm run test:client                    -> cd client && npm run test:ci
+#   npm run test:api                       -> cd api && npm run test:ci
+#   npm run test:packages:api              -> cd packages/api && npm run test:ci
+#   npm run test:packages:data-provider    -> cd packages/data-provider && npm run test:ci
+#   npm run test:packages:data-schemas     -> cd packages/data-schemas && npm run test:ci
+#   npm run test:config                    -> jest --config config/jest.config.js
+#
+# `npm run test:all` chains those five with `&&`, so the first failure cancels every
+# later suite and you learn about one suite per run. That is why the suites run as
+# separate steps here: each step carries `continue-on-error`, which records the
+# failure as that step's `outcome` instead of aborting the job, and the final
+# "Aggregate" step turns any non-success outcome into a non-zero exit. The job is
+# therefore still red if any suite failed — it just reports every suite first.
+#
+# No secrets are referenced. These suites run entirely on local fixtures:
+# mongodb-memory-server supplies a real in-memory MongoDB, and api/test/jestSetup.js
+# sets dummy MONGO_URI / JWT / CREDS values itself.
+
+name: Tests
+
+on:
+  pull_request:
+    # Every pull request, whatever the base: see the note in static-checks.yml.
+  push:
+    branches:
+      - b1
+      - dev
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Jest suites (6)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc # 24.16.0
+          cache: npm
+          # package-lock.json is the lockfile of record (packageManager npm@11.13.0).
+          # bun.lock is also tracked — known issue P1-10.
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the workspace packages
+        # Cross-package imports resolve through the npm workspace symlinks in
+        # node_modules, which point at `dist`, so the packages must be built before
+        # the suites that import them. This is a prerequisite, not a check.
+        run: npm run build:packages
+
+      - name: Prepare the test environment
+        shell: bash
+        run: |
+          # scripts/static-checks.mts does the same two things before the config suite;
+          # api/data/auth.json is read at require time and .env.test is gitignored
+          # (only .env.test.example is tracked), so a fresh checkout has neither.
+          mkdir -p api/data
+          [ -f api/data/auth.json ] || echo '{}' > api/data/auth.json
+          [ -f api/test/.env.test ] || cp api/test/.env.test.example api/test/.env.test
+
+      # Cheapest first, so a broken baseline is visible before the slow suites run.
+      - name: test:packages:data-provider
+        id: suite_data_provider
+        continue-on-error: true
+        run: npm run test:packages:data-provider
+
+      - name: test:packages:data-schemas
+        id: suite_data_schemas
+        continue-on-error: true
+        run: npm run test:packages:data-schemas
+
+      - name: test:packages:api
+        id: suite_packages_api
+        continue-on-error: true
+        run: npm run test:packages:api
+
+      - name: test:api
+        id: suite_api
+        continue-on-error: true
+        run: npm run test:api
+
+      - name: test:config
+        id: suite_config
+        continue-on-error: true
+        run: npm run test:config
+
+      - name: test:client
+        id: suite_client
+        continue-on-error: true
+        run: npm run test:client
+
+      - name: Aggregate suite results (fails the job if any suite failed)
+        # This is what restores fail-closed behaviour after continue-on-error.
+        # `always()` so it also runs when a suite step failed hard.
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          failed=0
+          report() {
+            local suite="$1" outcome="$2"
+            if [ "$outcome" = "success" ]; then
+              printf 'PASS  %s\n' "$suite"
+            elif [ "$outcome" = "skipped" ]; then
+              printf 'SKIP  %s\n' "$suite"
+            else
+              printf 'FAIL  %s\n' "$suite"
+              failed=1
+            fi
+          }
+          report 'test:packages:data-provider' '${{ steps.suite_data_provider.outcome }}'
+          report 'test:packages:data-schemas'    '${{ steps.suite_data_schemas.outcome }}'
+          report 'test:packages:api'             '${{ steps.suite_packages_api.outcome }}'
+          report 'test:api'                       '${{ steps.suite_api.outcome }}'
+          report 'test:config'                    '${{ steps.suite_config.outcome }}'
+          report 'test:client'                    '${{ steps.suite_client.outcome }}'
+          exit "$failed"
+
+      - name: Upload test reports
+        # jest-junit is configured as testResultsProcessor in every jest config, so
+        # junit.xml lands in each workspace root.
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: junit-reports
+          path: |
+            api/junit.xml
+            client/junit.xml
+            packages/*/junit.xml
+          if-no-files-found: ignore
+          retention-days: 14

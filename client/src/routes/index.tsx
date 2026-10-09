@@ -56,6 +56,16 @@ const loadProjectWorkspace = () =>
     Component: m.ProjectWorkspace,
   }));
 
+const loadKnowledgeView = () =>
+  import('~/components/Knowledge').then((m) => ({
+    Component: m.KnowledgeView,
+  }));
+
+const loadKnowledgeCollectionWorkspace = () =>
+  import('~/components/Knowledge').then((m) => ({
+    Component: m.KnowledgeCollectionWorkspace,
+  }));
+
 const baseEl = document.querySelector('base');
 const baseHref = baseEl?.getAttribute('href') || '/';
 
@@ -179,6 +189,14 @@ export const router = createBrowserRouter(
             {
               path: 'projects/:projectId',
               lazy: loadProjectWorkspace,
+            },
+            {
+              path: 'knowledge',
+              lazy: loadKnowledgeView,
+            },
+            {
+              path: 'knowledge/:collectionId',
+              lazy: loadKnowledgeCollectionWorkspace,
             },
             {
               path: 'agents',

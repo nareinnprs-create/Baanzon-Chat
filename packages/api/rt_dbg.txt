@@ -1,0 +1,40 @@
+(node:19072) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL src/plugins/runtime.spec.ts (5.954 s)
+  getDeploymentPluginHookCapabilities
+    Γùï skipped returns undefined unless DEPLOYMENT_PLUGIN_HOOKS is enabled
+  registerDeploymentPluginHooks
+    ├ù executes a plugin command hook end-to-end through a run hook registry (56 ms)
+    Γùï skipped registers nothing when plugins loaded without hook capabilities
+    Γùï skipped fires Claude-alias matchers against runtime tool names with plugin-namespace payloads
+    Γùï skipped keeps native payloads for matchers authored in the runtime namespace
+    Γùï skipped keeps native payloads for the native alternative of a mixed-namespace matcher
+    Γùï skipped lets an overlapping once declaration fire after its sibling is spent
+    Γùï skipped serves the run seam through the plugin hook source
+    Γùï skipped fires every SessionStart handler once per conversation and per lifecycle source
+    Γùï skipped reports the caller's working directory in hook payloads
+    Γùï skipped presents Claude payloads to matcherless tool guards
+    Γùï skipped persists once-only state per declaration across runs of the same conversation
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ executes a plugin command hook end-to-end through a run hook registry
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      127 |     await writePlugin('guard');
+      128 |     await initialize();
+    > 129 |     expect(hasDeploymentPluginHooks()).toBe(true);
+          |                                        ^
+      130 |
+      131 |     const registry = new HookRegistry();
+      132 |     const registered = registerDeploymentPluginHooks({
+
+      at Object.toBe (src/plugins/runtime.spec.ts:129:40)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 11 skipped, 12 total
+Snapshots:   0 total
+Time:        6.087 s, estimated 7 s
+Ran all test suites matching src/plugins/runtime.spec.ts with tests matching "registerDeploymentPluginHooks executes".

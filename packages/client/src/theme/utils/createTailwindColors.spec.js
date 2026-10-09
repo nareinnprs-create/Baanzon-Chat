@@ -4,7 +4,7 @@ describe('createTailwindColors', () => {
   it('includes the gray midpoint used by the dark hover surface', () => {
     const colors = createTailwindColors();
 
-    expect(colors.gray[650]).toBe('#393939');
+    expect(colors.gray[650]).toBe('#3f5254');
   });
 
   it('exposes semantic overlay and strong status colors', () => {

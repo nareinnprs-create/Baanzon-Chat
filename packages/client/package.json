@@ -37,7 +37,9 @@
     "build:watch": "tsdown --watch",
     "dev": "tsdown --watch",
     "test": "jest",
-    "test:ci": "jest --ci"
+    "test:ci": "jest --ci",
+    "typecheck": "tsc --noEmit",
+    "typecheck:spec": "tsc --noEmit -p tsconfig.test.json"
   },
   "peerDependencies": {
     "@ariakit/react": "^0.4.29",

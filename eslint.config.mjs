@@ -234,14 +234,15 @@ export default [
     )
     .map((config) => ({
       ...config,
-      files: ['**/*.ts', '**/*.tsx'],
+      files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
     })),
   {
-    files: ['**/*.ts', '**/*.tsx'],
-    // e2e specs are not part of `client/tsconfig.json`'s program, so typed
-    // linting them errors with "file not found in project"; they still get
-    // the non-type-checked recommended rules from the block above.
-    ignores: ['packages/**/*', 'client/vite.config.ts', 'e2e/**/*'],
+    files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
+    // e2e specs and `scripts/*.mts` are not part of `client/tsconfig.json`'s
+    // program, so typed linting them errors with "file not found in project";
+    // they still get the non-type-checked recommended rules from the block
+    // above, which is what makes the gate scripts lintable at all.
+    ignores: ['packages/**/*', 'client/vite.config.ts', 'e2e/**/*', 'scripts/**/*'],
     plugins: {
       '@typescript-eslint': typescriptEslintEslintPlugin,
       jest: fixupPluginRules(jest),

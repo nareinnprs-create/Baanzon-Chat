@@ -32,28 +32,35 @@
       const loadingContainerStyle = document.createElement('style');
       let backgroundColor;
 
+      /* Every value below is a copy of `rgb-surface-primary` from the theme
+       * registry — highContrastDarkTheme/highContrastLightTheme in
+       * packages/client/src/theme/themes/highContrast.ts, darkTheme and
+       * defaultTheme in the sibling files — because that is the surface React
+       * paints once it mounts, and anything else here flashes for the whole
+       * bundle load. The copy is unavoidable: this script runs synchronously in
+       * <head>, before any bundle, stylesheet or CSS custom property exists, so
+       * the registry is not reachable from here. client/src/__tests__/
+       * loadingCanvas.spec.ts holds the shipped script to the registry, so a
+       * palette change fails there instead of flashing here. */
       if (theme === 'high-contrast-dark') {
-        backgroundColor = '#000000';
+        backgroundColor = '#061316';
       } else if (theme === 'high-contrast-light') {
         backgroundColor = '#ffffff';
       } else if (theme === 'dark') {
         backgroundColor = '#061316';
       } else if (theme === 'light') {
-        backgroundColor = '#F7FAF8';
+        backgroundColor = '#ffffff';
       } else {
-        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const prefersMoreContrast = [
-          '(prefers-contrast: more)',
-          '(prefers-contrast: custom)',
-          '(forced-colors: active)',
-        ].some(function (query) {
-          return window.matchMedia(query).matches;
-        });
-        backgroundColor = prefersDarkScheme
-          ? prefersMoreContrast
-            ? '#000000'
-            : '#061316'
-          : '#F7FAF8';
+        /* `system`, and anything unset or unrecognised, which ThemeProvider also
+         * resolves as `system`. Only the OS colour scheme is left to read: the
+         * canvas no longer varies with the OS contrast preference, because
+         * `rgb-surface-primary` is the same value in the standard dark and the
+         * high-contrast dark palette. A future palette that gives the contrast
+         * canvas its own value has to bring the prefers-contrast and
+         * forced-colors queries back here to go with it. */
+        backgroundColor = window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? '#061316'
+          : '#ffffff';
       }
 
       loadingContainerStyle.innerHTML = `

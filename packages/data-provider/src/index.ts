@@ -40,6 +40,7 @@ export * from './types/graph';
 export * from './types/insights';
 export * from './types/subagents';
 export * from './types/queuedTurns';
+export * from './types/knowledge';
 /* access permissions */
 export * from './accessPermissions';
 /* query/mutation keys */

@@ -41,8 +41,11 @@ export const defaultSocialLogins = ['google', 'facebook', 'openid', 'github', 'd
 
 export const BASE_ONLY_CONFIG_SECTIONS = ['filters'] as const;
 /** Sections that may be stored in the tenant's base config document but must
- * not be overridden or tombstoned by role, group, or user config documents. */
-export const BASE_PRINCIPAL_CONFIG_SECTIONS = ['langfuse'] as const;
+ *  not be overridden or tombstoned by role, group, or user config documents.
+ *  `rag` qualifies because its retrieval limits and its vector index are
+ *  process-wide, so a per-principal override would let one user's config move a
+ *  ceiling that every user shares — last request wins. */
+export const BASE_PRINCIPAL_CONFIG_SECTIONS = ['langfuse', 'rag'] as const;
 
 export const defaultRetrievalModels = [
   'gpt-4o',
@@ -2644,6 +2647,39 @@ export const langfuseConfigSchema = z.object({
 
 export type LangfuseConfig = z.infer<typeof langfuseConfigSchema>;
 
+export const ragSchema = z.object({
+  /** Master switch: when true every knowledge route answers 503. The routes
+   *  stay mounted, because config is resolved per request and a route table
+   *  could not react to a later reload. Defaults to true — the feature is
+   *  opt-in, and turning it on takes an explicit `disabled: false`. */
+  disabled: z.boolean().optional().default(true),
+  /** External RAG API base URL. Only consulted once a semantic client is
+   *  actually injected; until then retrieval is keyword-only regardless of
+   *  this value. `RAG_API_URL` is used only when the key is absent, so an
+   *  explicit '' here keeps retrieval keyword-only. */
+  apiUrl: z.string().optional().default(''),
+  chunkSize: z.number().int().positive().optional().default(800),
+  chunkOverlap: z.number().int().min(0).optional().default(80),
+  /** Hybrid balance: 0.5 = equal semantic/keyword. */
+  hybridAlpha: z.number().min(0).max(1).optional().default(0.5),
+  candidateK: z.number().int().positive().optional().default(32),
+  topK: z.number().int().positive().optional().default(6),
+  minScore: z.number().min(0).max(1).optional().default(0.1),
+  inMemoryMaxCollections: z.number().int().positive().optional().default(200),
+  inMemoryMaxChunks: z.number().int().positive().optional().default(20000),
+  /** Milliseconds one ingest-side embedder call may take before its batch of
+   *  chunks is stored without vectors. Governs nothing until an embedder is
+   *  actually injected into the RAG runtime; no shipped wiring supplies one, and
+   *  these three levers are what bounds the write path on the day one does. */
+  embeddingTimeoutMs: z.number().int().positive().optional().default(15000),
+  /** Chunk texts per embedder call, so one large ingest is not one call per chunk. */
+  embeddingBatchSize: z.number().int().positive().optional().default(64),
+  /** Embedder calls in flight at once. */
+  embeddingConcurrency: z.number().int().positive().optional().default(2),
+});
+
+export type TRagConfig = z.infer<typeof ragSchema>;
+
 export const configSchema = z.object({
   version: z.string(),
   cache: z.boolean().default(true),
@@ -2651,6 +2687,7 @@ export const configSchema = z.object({
   webSearch: webSearchSchema.optional(),
   langfuse: langfuseConfigSchema.optional(),
   memory: memorySchema.optional(),
+  rag: ragSchema.optional(),
   summarization: summarizationConfigSchema.optional(),
   skillSync: skillSyncConfigSchema,
   secureImageLinks: z.boolean().optional(),

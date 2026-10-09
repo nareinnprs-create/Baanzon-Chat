@@ -1,11 +1,11 @@
 services:
   api:
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.multi
-    #   target: api-build
-    image: registry.librechat.ai/danny-avila/librechat-dev-api:latest
-    container_name: LibreChat-API
+    build:
+      context: .
+      dockerfile: Dockerfile.multi
+      target: api-build
+    image: baanzon-chat-api:latest
+    container_name: baanzon-api
     ports:
       - 3080:3080
     depends_on:
@@ -19,7 +19,7 @@ services:
     environment:
       - HOST=0.0.0.0
       - NODE_ENV=production
-      - MONGO_URI=mongodb://mongodb:27017/LibreChat
+      - MONGO_URI=mongodb://mongodb:27017/BaanzonChat
       - MEILI_HOST=http://meilisearch:7700
       - BAANZON_TEMP_CREDENTIALS_PATH=/app/data/.env.temp
       - RAG_PORT=${RAG_PORT:-8000}
@@ -40,7 +40,7 @@ services:
       - ./uploads:/app/uploads
       - ./logs:/app/api/logs
       - ./skill:/app/skill
-      - librechat-data:/app/data
+      - baanzon-data:/app/data
 
   admin-panel:
     image: registry.librechat.ai/clickhouse/librechat-admin-panel:latest
@@ -59,7 +59,7 @@ services:
 
   client:
     image: nginx:1.27.0-alpine
-    container_name: LibreChat-NGINX
+    container_name: baanzon-nginx
     ports:
       - 80:80
       - 443:443
@@ -113,4 +113,4 @@ services:
 
 volumes:
   pgdata2:
-  librechat-data:
+  baanzon-data:

@@ -44,7 +44,9 @@ See [budgets, reproduction and failure diagnosis](e2e/lighthouse/README.md).
 
 A green build is not a typecheck: `packages/api`, `packages/client` and `packages/data-schemas` build
 with `tsdown`, which emits without checking types. Run `npx tsc --noEmit` in the workspace you
-changed. `packages/client` excludes `*.spec.ts(x)` and `*.test.ts(x)` from typechecking entirely.
+changed. `packages/client/tsconfig.json` excludes `*.spec.ts(x)` and `*.test.ts(x)`, so its specs
+are covered by the sibling `tsconfig.test.json` — `npm run typecheck:spec` there, and the same
+`tsc --noEmit -p` inside the slow tier of `scripts/static-checks.mts`.
 `npm run sort-imports` with no arguments rewrites every source root — pass the paths you touched. See
 `CLAUDE.md` under "Typechecking" and "Formatting".
 

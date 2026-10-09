@@ -216,7 +216,9 @@ describe('reference theme', () => {
     expect(markup).not.toMatch(/#[0-9a-f]{3,8}\b/i);
     expect(markup).not.toMatch(/\brgba?\((?!var\()/);
 
-    const colours = createTailwindColors();
+    /** The palette spreads nested `gray`/`green` ramps next to the flat slot
+     *  entries, so it is indexed by name rather than by a fixed key union. */
+    const colours: Record<string, unknown> = createTailwindColors();
     const meter = screen.getByTestId('meter');
     const slotOf = (el: Element) => /\bbg-series-(\d)\b/.exec(el.className)?.[1];
 

@@ -1,0 +1,1587 @@
+(node:11652) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:10196) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS src/middleware/__tests__/concurrency.cache_integration.spec.ts (9.768 s)
+(node:8112) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:30888) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL src/mcp/registry/__tests__/MCPReinitRecovery.integration.test.ts (10.39 s)
+  ΓùÅ MCP reinitialize recovery ΓÇô integration (issue #12143) ΓÇ║ should store a stub config when the MCP server is unreachable at startup
+
+    TypeError: (0 , _dataSchemas.scopedCacheKey) is not a function
+
+      1018 |    *  an entry populated in one tenant's context must never satisfy another's. */
+      1019 |   private getReadThroughCacheKey(serverName: string, userId?: string): string {
+    > 1020 |     return scopedCacheKey(userId ? `${serverName}::${userId}` : serverName);
+           |                          ^
+      1021 |   }
+      1022 |
+      1023 |   /**
+
+      at MCPServersRegistry.getReadThroughCacheKey (src/mcp/registry/MCPServersRegistry.ts:1020:26)
+      at MCPServersRegistry.getReadThroughCacheKey [as getServerConfig] (src/mcp/registry/MCPServersRegistry.ts:376:27)
+      at Object.getServerConfig (src/mcp/registry/__tests__/MCPReinitRecovery.integration.test.ts:226:35)
+
+  ΓùÅ MCP reinitialize recovery ΓÇô integration (issue #12143) ΓÇ║ should recover via reinspectServer after the MCP server comes back online
+
+    TypeError: (0 , _dataSchemas.scopedCacheKey) is not a function
+
+      1018 |    *  an entry populated in one tenant's context must never satisfy another's. */
+      1019 |   private getReadThroughCacheKey(serverName: string, userId?: string): string {
+    > 1020 |     return scopedCacheKey(userId ? `${serverName}::${userId}` : serverName);
+           |                          ^
+      1021 |   }
+      1022 |
+      1023 |   /**
+
+      at MCPServersRegistry.getReadThroughCacheKey (src/mcp/registry/MCPServersRegistry.ts:1020:26)
+      at MCPServersRegistry.getReadThroughCacheKey [as getServerConfig] (src/mcp/registry/MCPServersRegistry.ts:376:27)
+      at Object.getServerConfig (src/mcp/registry/__tests__/MCPReinitRecovery.integration.test.ts:247:39)
+
+  ΓùÅ MCP reinitialize recovery ΓÇô integration (issue #12143) ΓÇ║ should allow a real client connection after reinspection succeeds
+
+    TypeError: (0 , _dataSchemas.scopedCacheKey) is not a function
+
+      1018 |    *  an entry populated in one tenant's context must never satisfy another's. */
+      1019 |   private getReadThroughCacheKey(serverName: string, userId?: string): string {
+    > 1020 |     return scopedCacheKey(userId ? `${serverName}::${userId}` : serverName);
+           |                          ^
+      1021 |   }
+      1022 |
+      1023 |   /**
+
+      at MCPServersRegistry.getReadThroughCacheKey (src/mcp/registry/MCPServersRegistry.ts:1020:26)
+      at MCPServersRegistry.getReadThroughCacheKey [as getServerConfig] (src/mcp/registry/MCPServersRegistry.ts:376:27)
+      at Object.getServerConfig (src/mcp/registry/__tests__/MCPReinitRecovery.integration.test.ts:282:28)
+
+  ΓùÅ MCP reinitialize recovery ΓÇô integration (issue #12143) ΓÇ║ should not attempt connections to stub servers via ConnectionsRepository
+
+    TypeError: (0 , _dataSchemas.scopedCacheKey) is not a function
+
+      1018 |    *  an entry populated in one tenant's context must never satisfy another's. */
+      1019 |   private getReadThroughCacheKey(serverName: string, userId?: string): string {
+    > 1020 |     return scopedCacheKey(userId ? `${serverName}::${userId}` : serverName);
+           |                          ^
+      1021 |   }
+      1022 |
+      1023 |   /**
+
+      at MCPServersRegistry.getReadThroughCacheKey (src/mcp/registry/MCPServersRegistry.ts:1020:26)
+      at MCPServersRegistry.getReadThroughCacheKey [as getServerConfig] (src/mcp/registry/MCPServersRegistry.ts:376:27)
+      at Object.getServerConfig (src/mcp/registry/__tests__/MCPReinitRecovery.integration.test.ts:310:28)
+
+  ΓùÅ MCP reinitialize recovery ΓÇô integration (issue #12143) ΓÇ║ addServerStub should clear negative read-through cache entries
+
+    TypeError: (0 , _dataSchemas.scopedCacheKey) is not a function
+
+      1018 |    *  an entry populated in one tenant's context must never satisfy another's. */
+      1019 |   private getReadThroughCacheKey(serverName: string, userId?: string): string {
+    > 1020 |     return scopedCacheKey(userId ? `${serverName}::${userId}` : serverName);
+           |                          ^
+      1021 |   }
+      1022 |
+      1023 |   /**
+
+      at MCPServersRegistry.getReadThroughCacheKey (src/mcp/registry/MCPServersRegistry.ts:1020:26)
+      at MCPServersRegistry.getReadThroughCacheKey [as getServerConfig] (src/mcp/registry/MCPServersRegistry.ts:376:27)
+      at Object.getServerConfig (src/mcp/registry/__tests__/MCPReinitRecovery.integration.test.ts:322:36)
+
+  ΓùÅ MCP reinitialize recovery ΓÇô integration (issue #12143) ΓÇ║ concurrent reinspectServer calls should not crash or corrupt state
+
+    TypeError: (0 , _dataSchemas.scopedCacheKey) is not a function
+
+      1018 |    *  an entry populated in one tenant's context must never satisfy another's. */
+      1019 |   private getReadThroughCacheKey(serverName: string, userId?: string): string {
+    > 1020 |     return scopedCacheKey(userId ? `${serverName}::${userId}` : serverName);
+           |                          ^
+      1021 |   }
+      1022 |
+      1023 |   /**
+
+      at MCPServersRegistry.getReadThroughCacheKey (src/mcp/registry/MCPServersRegistry.ts:1020:26)
+      at MCPServersRegistry.getReadThroughCacheKey [as getServerConfig] (src/mcp/registry/MCPServersRegistry.ts:376:27)
+      at Object.getServerConfig (src/mcp/registry/__tests__/MCPReinitRecovery.integration.test.ts:346:28)
+
+  ΓùÅ MCP reinitialize recovery ΓÇô integration (issue #12143) ΓÇ║ concurrent reinitMCPServer-equivalent flows should not crash or corrupt state
+
+    TypeError: (0 , _dataSchemas.scopedCacheKey) is not a function
+
+      1018 |    *  an entry populated in one tenant's context must never satisfy another's. */
+      1019 |   private getReadThroughCacheKey(serverName: string, userId?: string): string {
+    > 1020 |     return scopedCacheKey(userId ? `${serverName}::${userId}` : serverName);
+           |                          ^
+      1021 |   }
+      1022 |
+      1023 |   /**
+
+      at MCPServersRegistry.getReadThroughCacheKey (src/mcp/registry/MCPServersRegistry.ts:1020:26)
+      at MCPServersRegistry.getReadThroughCacheKey [as getServerConfig] (src/mcp/registry/MCPServersRegistry.ts:376:27)
+      at Object.getServerConfig (src/mcp/registry/__tests__/MCPReinitRecovery.integration.test.ts:393:28)
+
+  ΓùÅ MCP reinitialize recovery ΓÇô integration (issue #12143) ΓÇ║ reinspectServer should throw MCPInspectionFailedError when the server is still unreachable
+
+    TypeError: (0 , _dataSchemas.scopedCacheKey) is not a function
+
+      1018 |    *  an entry populated in one tenant's context must never satisfy another's. */
+      1019 |   private getReadThroughCacheKey(serverName: string, userId?: string): string {
+    > 1020 |     return scopedCacheKey(userId ? `${serverName}::${userId}` : serverName);
+           |                          ^
+      1021 |   }
+      1022 |
+      1023 |   /**
+
+      at MCPServersRegistry.getReadThroughCacheKey (src/mcp/registry/MCPServersRegistry.ts:1020:26)
+      at MCPServersRegistry.getReadThroughCacheKey [as getServerConfig] (src/mcp/registry/MCPServersRegistry.ts:376:27)
+      at Object.getServerConfig (src/mcp/registry/__tests__/MCPReinitRecovery.integration.test.ts:484:28)
+
+(node:28880) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts (11.161 s)
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ add and get operations ΓÇ║ should add and retrieve a server config
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ add and get operations ΓÇ║ should add and retrieve a server config
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ add and get operations ΓÇ║ should return undefined for non-existent server
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ add and get operations ΓÇ║ should return undefined for non-existent server
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ add and get operations ΓÇ║ should throw error when adding duplicate server
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ add and get operations ΓÇ║ should throw error when adding duplicate server
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ add and get operations ΓÇ║ should handle multiple server configs
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ add and get operations ΓÇ║ should handle multiple server configs
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ getAll operation ΓÇ║ should return empty object when no servers exist
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ getAll operation ΓÇ║ should return empty object when no servers exist
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ getAll operation ΓÇ║ should return all server configs
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ getAll operation ΓÇ║ should return all server configs
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ getAll operation ΓÇ║ should reflect additions in getAll
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ getAll operation ΓÇ║ should reflect additions in getAll
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ update operation ΓÇ║ should update an existing server config
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ update operation ΓÇ║ should update an existing server config
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ update operation ΓÇ║ should throw error when updating non-existent server
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ update operation ΓÇ║ should throw error when updating non-existent server
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ update operation ΓÇ║ should reflect updates in getAll
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ update operation ΓÇ║ should reflect updates in getAll
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ remove operation ΓÇ║ should remove an existing server config
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ remove operation ΓÇ║ should remove an existing server config
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ remove operation ΓÇ║ should throw error when removing non-existent server
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ remove operation ΓÇ║ should throw error when removing non-existent server
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ remove operation ΓÇ║ should remove server from getAll results
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ remove operation ΓÇ║ should remove server from getAll results
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ remove operation ΓÇ║ should allow re-adding a removed server
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ remove operation ΓÇ║ should allow re-adding a removed server
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ concurrent write safety ΓÇ║ should handle concurrent add calls without data loss
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ concurrent write safety ΓÇ║ should handle concurrent add calls without data loss
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ concurrent write safety ΓÇ║ should handle concurrent getAll calls
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ concurrent write safety ΓÇ║ should handle concurrent getAll calls
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ concurrent write safety ΓÇ║ atomically preserves concurrent instruction backfills from separate replicas
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ concurrent write safety ΓÇ║ atomically preserves concurrent instruction backfills from separate replicas
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ concurrent write safety ΓÇ║ routes every aggregate mutation through Redis-side atomic updates
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ concurrent write safety ΓÇ║ routes every aggregate mutation through Redis-side atomic updates
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ concurrent write safety ΓÇ║ preserves patches concurrent with whole-entry mutations on other replicas
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ concurrent write safety ΓÇ║ preserves patches concurrent with whole-entry mutations on other replicas
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ concurrent write safety ΓÇ║ preserves empty arrays through every Redis-side mutation path
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ concurrent write safety ΓÇ║ preserves empty arrays through every Redis-side mutation path
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ concurrent write safety ΓÇ║ preserves empty arrays in an untouched entry when another entry is patched
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ concurrent write safety ΓÇ║ preserves empty arrays in an untouched entry when another entry is patched
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ reset operation ΓÇ║ should clear all configs
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ reset operation ΓÇ║ should clear all configs
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ local snapshot behavior ΓÇ║ should collapse repeated getAll calls into a single Redis GET within TTL
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ local snapshot behavior ΓÇ║ should collapse repeated getAll calls into a single Redis GET within TTL
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ local snapshot behavior ΓÇ║ should invalidate snapshot after add
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ local snapshot behavior ΓÇ║ should invalidate snapshot after add
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ local snapshot behavior ΓÇ║ should invalidate snapshot after update and preserve other entries
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ local snapshot behavior ΓÇ║ should invalidate snapshot after update and preserve other entries
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ local snapshot behavior ΓÇ║ should invalidate snapshot after remove
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ local snapshot behavior ΓÇ║ should invalidate snapshot after remove
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ local snapshot behavior ΓÇ║ should invalidate snapshot after reset
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ local snapshot behavior ΓÇ║ should invalidate snapshot after reset
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ local snapshot behavior ΓÇ║ should not retroactively modify previously returned snapshot references
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ local snapshot behavior ΓÇ║ should not retroactively modify previously returned snapshot references
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ local snapshot behavior ΓÇ║ should hit Redis again after snapshot TTL expires
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedisAggregateKey Integration Tests ΓÇ║ local snapshot behavior ΓÇ║ should hit Redis again after snapshot TTL expires
+
+    TypeError: Cannot read properties of undefined (reading 'reset')
+
+      56 |
+      57 |   afterEach(async () => {
+    > 58 |     await cache.reset();
+         |                 ^
+      59 |   });
+      60 |
+      61 |   afterAll(async () => {
+
+      at Object.reset (src/mcp/registry/cache/__tests__/ServerConfigsCacheRedisAggregateKey.cache_integration.spec.ts:58:17)
+
+(node:8172) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL src/mcp/__tests__/MCPFlowRedis.cache_integration.spec.ts
+  ΓùÅ MCP OAuth flow state across Redis-backed instances ΓÇ║ shares pending and completed OAuth state between pod instances
+
+    MCP cross-instance flow tests require a real Redis client
+
+      18 |   beforeAll(async () => {
+      19 |     if (!keyvRedisClient || !keyvRedisClientReady) {
+    > 20 |       throw new Error('MCP cross-instance flow tests require a real Redis client');
+         |             ^
+      21 |     }
+      22 |     await keyvRedisClientReady;
+      23 |     const namespace = `MCPFlowRedis-${process.pid}-${randomUUID()}`;
+
+      at Object.<anonymous> (src/mcp/__tests__/MCPFlowRedis.cache_integration.spec.ts:20:13)
+
+  ΓùÅ MCP OAuth flow state across Redis-backed instances ΓÇ║ retains a terminal OAuth failure for polling on another pod
+
+    MCP cross-instance flow tests require a real Redis client
+
+      18 |   beforeAll(async () => {
+      19 |     if (!keyvRedisClient || !keyvRedisClientReady) {
+    > 20 |       throw new Error('MCP cross-instance flow tests require a real Redis client');
+         |             ^
+      21 |     }
+      22 |     await keyvRedisClientReady;
+      23 |     const namespace = `MCPFlowRedis-${process.pid}-${randomUUID()}`;
+
+      at Object.<anonymous> (src/mcp/__tests__/MCPFlowRedis.cache_integration.spec.ts:20:13)
+
+  ΓùÅ MCP OAuth flow state across Redis-backed instances ΓÇ║ does not delete a replacement attempt observed on another pod
+
+    MCP cross-instance flow tests require a real Redis client
+
+      18 |   beforeAll(async () => {
+      19 |     if (!keyvRedisClient || !keyvRedisClientReady) {
+    > 20 |       throw new Error('MCP cross-instance flow tests require a real Redis client');
+         |             ^
+      21 |     }
+      22 |     await keyvRedisClientReady;
+      23 |     const namespace = `MCPFlowRedis-${process.pid}-${randomUUID()}`;
+
+      at Object.<anonymous> (src/mcp/__tests__/MCPFlowRedis.cache_integration.spec.ts:20:13)
+
+  ΓùÅ MCP OAuth flow state across Redis-backed instances ΓÇ║ fails the exact observed attempt across pods
+
+    MCP cross-instance flow tests require a real Redis client
+
+      18 |   beforeAll(async () => {
+      19 |     if (!keyvRedisClient || !keyvRedisClientReady) {
+    > 20 |       throw new Error('MCP cross-instance flow tests require a real Redis client');
+         |             ^
+      21 |     }
+      22 |     await keyvRedisClientReady;
+      23 |     const namespace = `MCPFlowRedis-${process.pid}-${randomUUID()}`;
+
+      at Object.<anonymous> (src/mcp/__tests__/MCPFlowRedis.cache_integration.spec.ts:20:13)
+
+FAIL src/mcp/registry/cache/__tests__/ServerConfigsCacheRedis.cache_integration.spec.ts
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ add and get operations ΓÇ║ should add and retrieve a server config
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ add and get operations ΓÇ║ should return undefined for non-existent server
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ add and get operations ΓÇ║ should throw error when adding duplicate server
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ add and get operations ΓÇ║ should handle multiple server configs
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ add and get operations ΓÇ║ should isolate caches by owner namespace
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ patch operation ΓÇ║ preserves empty arrays in a patched per-key entry
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ getAll operation ΓÇ║ should return empty object when no servers exist
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ getAll operation ΓÇ║ should return all server configs
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ getAll operation ΓÇ║ should reflect updates in getAll
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ getAll operation ΓÇ║ should only return configs for the specific owner
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ update operation ΓÇ║ should update an existing server config
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ update operation ΓÇ║ should throw error when updating non-existent server
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ update operation ΓÇ║ should reflect updates in getAll
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ update operation ΓÇ║ should only update in the specific owner namespace
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ remove operation ΓÇ║ should remove an existing server config
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ remove operation ΓÇ║ should throw error when removing non-existent server
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ remove operation ΓÇ║ should remove server from getAll results
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ remove operation ΓÇ║ should allow re-adding a removed server
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ remove operation ΓÇ║ should only remove from the specific owner namespace
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ getAll parallel fetching ΓÇ║ should handle many configs efficiently with parallel fetching
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ getAll parallel fetching ΓÇ║ should handle concurrent getAll calls without timeout
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ getAll parallel fetching ΓÇ║ should return consistent results across concurrent calls
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ ServerConfigsCacheRedis Integration Tests ΓÇ║ getAll parallel fetching ΓÇ║ should complete 100 concurrent requests in under 5s (regression test for N+1 fix)
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+PASS src/endpoints/google/youtube.spec.ts
+PASS src/files/documents/html.spec.ts (17.949 s)
+PASS src/files/documents/zipSafety.spec.ts (5.291 s)
+FAIL src/admin/secrets.integration.spec.ts (9.083 s)
+  ΓùÅ config secret registry ΓÇö real handlers against a real Config collection ΓÇ║ langfuse.secretKey ΓÇ║ encrypts dotted patch writes at rest, sets the masked preview companion, and redacts the secret from the response
+
+    expect(received).not.toBeNull()
+
+    Received: null
+
+      216 | async function readRawOverrides(principalId: string): Promise<Record<string, unknown>> {
+      217 |   const doc = await mongoose.models.Config.findOne({ principalId });
+    > 218 |   expect(doc).not.toBeNull();
+          |                   ^
+      219 |   expect(doc!.$isNew).toBe(false);
+      220 |   return (doc!.toObject() as { overrides: Record<string, unknown> }).overrides;
+      221 | }
+
+      at toBeNull (src/admin/secrets.integration.spec.ts:218:19)
+      at Object.<anonymous> (src/admin/secrets.integration.spec.ts:283:27)
+
+  ΓùÅ config secret registry ΓÇö real handlers against a real Config collection ΓÇ║ langfuse.secretKey ΓÇ║ encrypts object-valued upsert writes at rest, sets the masked preview companion, and redacts reads
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 200
+
+      304 |           upsertRes,
+      305 |         );
+    > 306 |         expect(upsertRes.statusCode).toBe(201);
+          |                                      ^
+      307 |         expect(JSON.stringify(upsertRes.body)).not.toContain(SECRET);
+      308 |
+      309 |         const overrides = await readRawOverrides(principalId);
+
+      at Object.toBe (src/admin/secrets.integration.spec.ts:306:38)
+
+  ΓùÅ config secret registry ΓÇö real handlers against a real Config collection ΓÇ║ langfuse.secretKey ΓÇ║ preserves the stored secret and its preview companion across an unrelated dotted patch
+
+    expect(received).not.toBeNull()
+
+    Received: null
+
+      216 | async function readRawOverrides(principalId: string): Promise<Record<string, unknown>> {
+      217 |   const doc = await mongoose.models.Config.findOne({ principalId });
+    > 218 |   expect(doc).not.toBeNull();
+          |                   ^
+      219 |   expect(doc!.$isNew).toBe(false);
+      220 |   return (doc!.toObject() as { overrides: Record<string, unknown> }).overrides;
+      221 | }
+
+      at toBeNull (src/admin/secrets.integration.spec.ts:218:19)
+      at Object.<anonymous> (src/admin/secrets.integration.spec.ts:342:27)
+
+  ΓùÅ config secret registry ΓÇö real handlers against a real Config collection ΓÇ║ langfuse.secretKey ΓÇ║ round-trips a redacted read (including the visible preview companion) back through a full upsert without clobbering the secret
+
+    expect(received).not.toBeNull()
+
+    Received: null
+
+      216 | async function readRawOverrides(principalId: string): Promise<Record<string, unknown>> {
+      217 |   const doc = await mongoose.models.Config.findOne({ principalId });
+    > 218 |   expect(doc).not.toBeNull();
+          |                   ^
+      219 |   expect(doc!.$isNew).toBe(false);
+      220 |   return (doc!.toObject() as { overrides: Record<string, unknown> }).overrides;
+      221 | }
+
+      at toBeNull (src/admin/secrets.integration.spec.ts:218:19)
+      at Object.<anonymous> (src/admin/secrets.integration.spec.ts:371:27)
+
+  ΓùÅ config secret registry ΓÇö real handlers against a real Config collection ΓÇ║ langfuse.secretKey ΓÇ║ clears the secret and its preview companion when explicitly set to an empty value
+
+    expect(received).not.toBeNull()
+
+    Received: null
+
+      216 | async function readRawOverrides(principalId: string): Promise<Record<string, unknown>> {
+      217 |   const doc = await mongoose.models.Config.findOne({ principalId });
+    > 218 |   expect(doc).not.toBeNull();
+          |                   ^
+      219 |   expect(doc!.$isNew).toBe(false);
+      220 |   return (doc!.toObject() as { overrides: Record<string, unknown> }).overrides;
+      221 | }
+
+      at toBeNull (src/admin/secrets.integration.spec.ts:218:19)
+      at Object.<anonymous> (src/admin/secrets.integration.spec.ts:422:27)
+
+  ΓùÅ config secret registry ΓÇö real handlers against a real Config collection ΓÇ║ langfuse.secretKey ΓÇ║ rejects a direct dotted-patch write to the preview companion path itself
+
+    expect(received).not.toBeNull()
+
+    Received: null
+
+      216 | async function readRawOverrides(principalId: string): Promise<Record<string, unknown>> {
+      217 |   const doc = await mongoose.models.Config.findOne({ principalId });
+    > 218 |   expect(doc).not.toBeNull();
+          |                   ^
+      219 |   expect(doc!.$isNew).toBe(false);
+      220 |   return (doc!.toObject() as { overrides: Record<string, unknown> }).overrides;
+      221 | }
+
+      at toBeNull (src/admin/secrets.integration.spec.ts:218:19)
+      at Object.<anonymous> (src/admin/secrets.integration.spec.ts:459:27)
+
+  ΓùÅ config secret registry ΓÇö real handlers against a real Config collection ΓÇ║ langfuse.secretKey ΓÇ║ never persists a client-supplied display value as the real secret via an object-valued upsert
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 200
+
+      483 |           res,
+      484 |         );
+    > 485 |         expect(res.statusCode).toBe(201);
+          |                                ^
+      486 |
+      487 |         const overrides = await readRawOverrides(principalId);
+      488 |         expect(getAtPath(overrides, path)).toBeUndefined();
+
+      at Object.toBe (src/admin/secrets.integration.spec.ts:485:32)
+
+PASS src/mcp/__tests__/MCPConnectionSSRF.test.ts
+PASS src/mcp/registry/cache/__tests__/RegistryStatusCache.cache_integration.spec.ts (5.971 s)
+FAIL src/plugins/runtime.spec.ts
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ executes a plugin command hook end-to-end through a run hook registry
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      127 |     await writePlugin('guard');
+      128 |     await initialize();
+    > 129 |     expect(hasDeploymentPluginHooks()).toBe(true);
+          |                                        ^
+      130 |
+      131 |     const registry = new HookRegistry();
+      132 |     const registered = registerDeploymentPluginHooks({
+
+      at Object.toBe (src/plugins/runtime.spec.ts:129:40)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ fires Claude-alias matchers against runtime tool names with plugin-namespace payloads
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 4
+
+    - ObjectContaining {
+    -   "decision": "deny",
+    -   "reason": "alias-guarded",
+    + Object {
+    +   "additionalContexts": Array [],
+    +   "errors": Array [],
+    +   "injectedMessages": Array [],
+      }
+
+      181 |       },
+      182 |     });
+    > 183 |     expect(result).toEqual(expect.objectContaining({ decision: 'deny', reason: 'alias-guarded' }));
+          |                    ^
+      184 |   });
+      185 |
+      186 |   it('keeps native payloads for matchers authored in the runtime namespace', async () => {
+
+      at Object.toEqual (src/plugins/runtime.spec.ts:183:20)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ keeps native payloads for matchers authored in the runtime namespace
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 4
+
+    - ObjectContaining {
+    -   "decision": "deny",
+    -   "reason": "native-guarded",
+    + Object {
+    +   "additionalContexts": Array [],
+    +   "errors": Array [],
+    +   "injectedMessages": Array [],
+      }
+
+      216 |       },
+      217 |     });
+    > 218 |     expect(result).toEqual(expect.objectContaining({ decision: 'deny', reason: 'native-guarded' }));
+          |                    ^
+      219 |   });
+      220 |
+      221 |   it('keeps native payloads for the native alternative of a mixed-namespace matcher', async () => {
+
+      at Object.toEqual (src/plugins/runtime.spec.ts:218:20)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ keeps native payloads for the native alternative of a mixed-namespace matcher
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 4
+
+    - ObjectContaining {
+    -   "decision": "deny",
+    -   "reason": "mixed-native",
+    + Object {
+    +   "additionalContexts": Array [],
+    +   "errors": Array [],
+    +   "injectedMessages": Array [],
+      }
+
+      251 |       },
+      252 |     });
+    > 253 |     expect(result).toEqual(expect.objectContaining({ decision: 'deny', reason: 'mixed-native' }));
+          |                    ^
+      254 |   });
+      255 |
+      256 |   it('lets an overlapping once declaration fire after its sibling is spent', async () => {
+
+      at Object.toEqual (src/plugins/runtime.spec.ts:253:20)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ lets an overlapping once declaration fire after its sibling is spent
+
+    ENOENT: no such file or directory, open 'C:\Users\manag\AppData\Local\Temp\lc-plugin-runtime-sajkNS\data\overlap\overlap.log'
+
+      295 |     await firePreToolUse('read_file');
+      296 |
+    > 297 |     const log = await fs.promises.readFile(path.join(dataDir, 'overlap', 'overlap.log'), 'utf8');
+          |                 ^
+      298 |     expect(log.trim().split('\n')).toHaveLength(2);
+      299 |   });
+      300 |
+
+      at Object.<anonymous> (src/plugins/runtime.spec.ts:297:17)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ serves the run seam through the plugin hook source
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      307 |     });
+      308 |     const source = getPluginHookSource();
+    > 309 |     expect(source?.hasHooks()).toBe(true);
+          |                                ^
+      310 |     expect(hasDeploymentPluginToolApprovalHooks()).toBe(true);
+      311 |     expect(hasDeploymentPluginToolApprovalHooks(['unmatched_tool'])).toBe(false);
+      312 |     expect(hasDeploymentPluginToolApprovalHooks(['write_file'])).toBe(true);
+
+      at Object.toBe (src/plugins/runtime.spec.ts:309:32)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ fires every SessionStart handler once per conversation and per lifecycle source
+
+    ENOENT: no such file or directory, open 'C:\Users\manag\AppData\Local\Temp\lc-plugin-runtime-UfL7nS\data\session\starts.log'
+
+      328 |     await fireRunStart('conversation-a', 'resume');
+      329 |
+    > 330 |     const log = await fs.promises.readFile(path.join(dataDir, 'session', 'starts.log'), 'utf8');
+          |                 ^
+      331 |     const lines = log.trim().split('\n').sort();
+      332 |     expect(lines).toEqual(['sibling', 'sibling', 'sibling', 'started', 'started', 'started']);
+      333 |   });
+
+      at Object.<anonymous> (src/plugins/runtime.spec.ts:330:17)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ reports the caller's working directory in hook payloads
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 4
+
+    - ObjectContaining {
+    -   "reason": "/workspace/session|C:\\Users\\manag\\AppData\\Local\\Temp\\lc-plugin-runtime-fzQAEj\\plugin\\cwd",
+    + Object {
+    +   "additionalContexts": Array [],
+    +   "errors": Array [],
+    +   "injectedMessages": Array [],
+      }
+
+      369 |     });
+      370 |     /** Payload carries the session cwd; the process still runs from the plugin root. */
+    > 371 |     expect(result).toEqual(
+          |                    ^
+      372 |       expect.objectContaining({
+      373 |         reason: `/workspace/session|${path.join(pluginsDir, 'cwd')}`,
+      374 |       }),
+
+      at Object.toEqual (src/plugins/runtime.spec.ts:371:20)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ presents Claude payloads to matcherless tool guards
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 4
+
+    - ObjectContaining {
+    -   "decision": "deny",
+    -   "reason": "wildcard-guarded",
+    + Object {
+    +   "additionalContexts": Array [],
+    +   "errors": Array [],
+    +   "injectedMessages": Array [],
+      }
+
+      407 |       },
+      408 |     });
+    > 409 |     expect(result).toEqual(
+          |                    ^
+      410 |       expect.objectContaining({ decision: 'deny', reason: 'wildcard-guarded' }),
+      411 |     );
+      412 |   });
+
+      at Object.toEqual (src/plugins/runtime.spec.ts:409:20)
+
+  ΓùÅ registerDeploymentPluginHooks ΓÇ║ persists once-only state per declaration across runs of the same conversation
+
+    ENOENT: no such file or directory, open 'C:\Users\manag\AppData\Local\Temp\lc-plugin-runtime-q7BvF5\data\oncely\once.log'
+
+      450 |     await firePreToolUse('conversation-other', 'write_file');
+      451 |
+    > 452 |     const log = await fs.promises.readFile(path.join(dataDir, 'oncely', 'once.log'), 'utf8');
+          |                 ^
+      453 |     expect(log.trim().split('\n')).toHaveLength(3);
+      454 |   });
+      455 | });
+
+      at Object.<anonymous> (src/plugins/runtime.spec.ts:452:17)
+
+PASS src/agents/triggers/delivery.integration.spec.ts (6.473 s)
+FAIL src/plugins/load.spec.ts (6.651 s)
+  ΓùÅ loadPlugin ΓÇ║ path containment ΓÇ║ skips a skill whose SKILL.md is a symlink escaping the plugin root
+
+    ENOENT: no such file or directory, symlink 'C:\Users\manag\AppData\Local\Temp\lc-plugin-load-wE3HYQ\outside' -> 'C:\Users\manag\AppData\Local\Temp\lc-plugin-load-wE3HYQ\demo\skills\escaped'
+
+      54 |   const linked = path.join(root, 'skills', name);
+      55 |   if (isWindows) {
+    > 56 |     await fs.promises.symlink(targetDirectory, linked, 'junction');
+         |     ^
+      57 |     return;
+      58 |   }
+      59 |   await fs.promises.mkdir(linked, { recursive: true });
+
+      at linkSkillDirectory (src/plugins/load.spec.ts:56:5)
+      at Object.<anonymous> (src/plugins/load.spec.ts:282:7)
+
+  ΓùÅ loadPlugin ΓÇ║ path containment ΓÇ║ accepts a symlink that resolves within the plugin root
+
+    ENOENT: no such file or directory, symlink 'C:\Users\manag\AppData\Local\Temp\lc-plugin-load-WHnXzu\demo\shared' -> 'C:\Users\manag\AppData\Local\Temp\lc-plugin-load-WHnXzu\demo\skills\shared'
+
+      54 |   const linked = path.join(root, 'skills', name);
+      55 |   if (isWindows) {
+    > 56 |     await fs.promises.symlink(targetDirectory, linked, 'junction');
+         |     ^
+      57 |     return;
+      58 |   }
+      59 |   await fs.promises.mkdir(linked, { recursive: true });
+
+      at linkSkillDirectory (src/plugins/load.spec.ts:56:5)
+      at Object.<anonymous> (src/plugins/load.spec.ts:296:7)
+
+PASS src/oauth/tokens.spec.ts
+FAIL src/cache/__tests__/redisClients.cache_integration.spec.ts (35.443 s)
+  ΓùÅ redisClients Integration Tests ΓÇ║ ioredis Client Tests ΓÇ║ when connecting to a Redis cluster ΓÇ║ should connect to cluster and perform set/get/delete operations
+
+    None of startup nodes is available
+
+      at EventEmitter.handleCloseEvent (../../node_modules/ioredis/built/cluster/index.js:605:29)
+      at ../../node_modules/ioredis/built/cluster/index.js:578:18
+
+  ΓùÅ redisClients Integration Tests ΓÇ║ keyvRedisClient Tests ΓÇ║ when connecting to a Redis cluster ΓÇ║ should connect to cluster and perform set/get/delete operations
+
+    All the root nodes are unavailable
+
+      at RedisClusterSlots.#discoverWithRootNodes (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:175:11)
+      at RedisClusterSlots.connect (../../node_modules/@redis/client/lib/cluster/cluster-slots.ts:155:7)
+      at Class.connect (../../node_modules/@redis/client/lib/cluster/index.ts:335:5)
+
+  ΓùÅ redisClients Integration Tests ΓÇ║ keyvRedisClient Tests ΓÇ║ when connecting to a Redis cluster ΓÇ║ should execute same-slot catalog scripts on the owning master
+
+    expect(received).resolves.toBe()
+
+    Received promise rejected instead of resolved
+    Rejected to value: [Error: All the root nodes are unavailable]
+
+      157 |         const keys = [`catalog:revision:{${hashTag}}`, `catalog:tools:{${hashTag}}`];
+      158 |
+    > 159 |         await expect(
+          |               ^
+      160 |           clients.evalKeyvRedisScript(
+      161 |             "redis.call('SET', KEYS[1], ARGV[1]); redis.call('SET', KEYS[2], ARGV[1]); return 1",
+      162 |             { keys, arguments: ['published'] },
+
+      at expect (../../node_modules/jest/node_modules/expect/build/index.js:2116:15)
+      at Object.expect (src/cache/__tests__/redisClients.cache_integration.spec.ts:159:15)
+
+PASS src/stream/__tests__/hitlResumeRedis.stream_integration.spec.ts
+PASS src/stream/__tests__/protocolRollout.stream_integration.spec.ts
+FAIL src/agents/subagentThreads.spec.ts (44.336 s)
+  ΓùÅ SubagentThreadTaskStore ΓÇ║ cancels a child admitted after the deletion snapshot from its durable lease
+
+    expect(received).resolves.toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 1
+    Received:    0
+
+      4360 |     await expect(
+      4361 |       deletingStore.cancelPlan(plan, [parentConversationId, requireThreadId(started)]),
+    > 4362 |     ).resolves.toBeGreaterThanOrEqual(1);
+           |                ^
+      4363 |     await waitForSettled(ownerStore, config.scopeId, started);
+      4364 |     expect(ownerStore.get(config.scopeId, taskId)).toMatchObject({ status: 'cancelled' });
+      4365 |
+
+      at Object.toBeGreaterThanOrEqual (../../node_modules/jest/node_modules/expect/build/index.js:2140:20)
+      at Object.toBeGreaterThanOrEqual (src/agents/subagentThreads.spec.ts:4362:16)
+
+PASS src/storage/__tests__/metadata.test.ts
+PASS src/stream/__tests__/RedisJobStore.stream_integration.spec.ts (11.449 s)
+  ΓùÅ Console
+
+    console.warn
+      No run step or runId found for message delta event
+
+      4257 |       // Pass event string directly - GraphEvents values are lowercase strings
+      4258 |       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    > 4259 |       aggregateContent({ event: event.event as any, data: event.data as any });
+           |       ^
+      4260 |     }
+      4261 |
+      4262 |     const reasoningIndices = new Set([
+
+      at aggregateContent (../../node_modules/@librechat/agents/src/stream.ts:2686:17)
+      at RedisJobStore.aggregateContent [as getContentParts] (src/stream/implementations/RedisJobStore.ts:4259:7)
+      at Object.<anonymous> (src/stream/__tests__/RedisJobStore.stream_integration.spec.ts:1923:22)
+
+    console.warn
+      No run step or runId found for message delta event
+
+      4257 |       // Pass event string directly - GraphEvents values are lowercase strings
+      4258 |       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    > 4259 |       aggregateContent({ event: event.event as any, data: event.data as any });
+           |       ^
+      4260 |     }
+      4261 |
+      4262 |     const reasoningIndices = new Set([
+
+      at aggregateContent (../../node_modules/@librechat/agents/src/stream.ts:2686:17)
+      at RedisJobStore.aggregateContent [as getContentParts] (src/stream/implementations/RedisJobStore.ts:4259:7)
+      at Object.<anonymous> (src/stream/__tests__/RedisJobStore.stream_integration.spec.ts:1923:22)
+
+    console.warn
+      No run step or runId found for message delta event
+
+      4257 |       // Pass event string directly - GraphEvents values are lowercase strings
+      4258 |       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    > 4259 |       aggregateContent({ event: event.event as any, data: event.data as any });
+           |       ^
+      4260 |     }
+      4261 |
+      4262 |     const reasoningIndices = new Set([
+
+      at aggregateContent (../../node_modules/@librechat/agents/src/stream.ts:2686:17)
+      at RedisJobStore.aggregateContent [as getContentParts] (src/stream/implementations/RedisJobStore.ts:4259:7)
+      at Object.<anonymous> (src/stream/__tests__/RedisJobStore.stream_integration.spec.ts:1923:22)
+
+    console.warn
+      No run step or runId found for message delta event
+
+      4257 |       // Pass event string directly - GraphEvents values are lowercase strings
+      4258 |       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    > 4259 |       aggregateContent({ event: event.event as any, data: event.data as any });
+           |       ^
+      4260 |     }
+      4261 |
+      4262 |     const reasoningIndices = new Set([
+
+      at aggregateContent (../../node_modules/@librechat/agents/src/stream.ts:2686:17)
+      at RedisJobStore.aggregateContent [as getContentParts] (src/stream/implementations/RedisJobStore.ts:4259:7)
+      at Object.<anonymous> (src/stream/__tests__/RedisJobStore.stream_integration.spec.ts:1964:22)
+
+    console.warn
+      No run step or runId found for message delta event
+
+      4257 |       // Pass event string directly - GraphEvents values are lowercase strings
+      4258 |       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    > 4259 |       aggregateContent({ event: event.event as any, data: event.data as any });
+           |       ^
+      4260 |     }
+      4261 |
+      4262 |     const reasoningIndices = new Set([
+
+      at aggregateContent (../../node_modules/@librechat/agents/src/stream.ts:2686:17)
+      at RedisJobStore.aggregateContent [as getContentParts] (src/stream/implementations/RedisJobStore.ts:4259:7)
+      at Object.<anonymous> (src/stream/__tests__/RedisJobStore.stream_integration.spec.ts:1964:22)
+
+    console.warn
+      No run step or runId found for message delta event
+
+      4257 |       // Pass event string directly - GraphEvents values are lowercase strings
+      4258 |       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    > 4259 |       aggregateContent({ event: event.event as any, data: event.data as any });
+           |       ^
+      4260 |     }
+      4261 |
+      4262 |     const reasoningIndices = new Set([
+
+      at aggregateContent (../../node_modules/@librechat/agents/src/stream.ts:2686:17)
+      at RedisJobStore.aggregateContent [as getContentParts] (src/stream/implementations/RedisJobStore.ts:4259:7)
+      at Object.<anonymous> (src/stream/__tests__/RedisJobStore.stream_integration.spec.ts:1964:22)
+
+    console.warn
+      No run step or runId found for message delta event
+
+      4257 |       // Pass event string directly - GraphEvents values are lowercase strings
+      4258 |       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    > 4259 |       aggregateContent({ event: event.event as any, data: event.data as any });
+           |       ^
+      4260 |     }
+      4261 |
+      4262 |     const reasoningIndices = new Set([
+
+      at aggregateContent (../../node_modules/@librechat/agents/src/stream.ts:2686:17)
+      at RedisJobStore.aggregateContent [as getContentParts] (src/stream/implementations/RedisJobStore.ts:4259:7)
+      at Object.<anonymous> (src/stream/__tests__/RedisJobStore.stream_integration.spec.ts:1964:22)
+
+    console.warn
+      No run step or runId found for message delta event
+
+      4257 |       // Pass event string directly - GraphEvents values are lowercase strings
+      4258 |       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    > 4259 |       aggregateContent({ event: event.event as any, data: event.data as any });
+           |       ^
+      4260 |     }
+      4261 |
+      4262 |     const reasoningIndices = new Set([
+
+      at aggregateContent (../../node_modules/@librechat/agents/src/stream.ts:2686:17)
+      at RedisJobStore.aggregateContent [as getContentParts] (src/stream/implementations/RedisJobStore.ts:4259:7)
+      at Object.<anonymous> (src/stream/__tests__/RedisJobStore.stream_integration.spec.ts:1964:22)
+
+    console.log
+      Skipping consumer group test - requires claim mechanism for historical messages
+
+      at Object.log (src/stream/__tests__/RedisJobStore.stream_integration.spec.ts:2193:17)
+
+(node:8172) [MONGOOSE] Warning: Mongoose: looks like you're trying to test a Mongoose app with Jest's mock timers enabled. Please make sure you read Mongoose's docs on configuring Jest to test Node.js apps: https://mongoosejs.com/docs/jest.html. Set the SUPPRESS_JEST_WARNINGS to true to hide this warning.
+(node:8172) [MONGOOSE] Warning: Mongoose: looks like you're trying to test a Mongoose app with Jest's mock timers enabled. Please make sure you read Mongoose's docs on configuring Jest to test Node.js apps: https://mongoosejs.com/docs/jest.html. Set the SUPPRESS_JEST_WARNINGS to true to hide this warning.
+PASS src/agents/hooks/executor.spec.ts (29.322 s)
+PASS src/agents/openai/service.spec.ts
+PASS src/stream/__tests__/staleJobReaping.spec.ts (42.42 s)
+PASS src/stream/__tests__/collectedUsage.spec.ts (57.046 s)
+PASS src/langfuse/feedback.spec.ts (55.92 s)
+PASS src/agents/remote/lifecycle.spec.ts
+PASS src/mcp/registry/cache/__tests__/ReadThroughAllCache.spec.ts (26.847 s)
+PASS src/storage/s3/__tests__/crud.test.ts (40.584 s)
+PASS src/telemetry/grpc.spec.ts (16.649 s)
+PASS src/agents/__tests__/run-summarization.test.ts (20.054 s)
+PASS src/code/environments.integration.spec.ts (14.067 s)
+PASS src/mcp/registry/__tests__/MCPServersInitializer.cache_integration.spec.ts (16.28 s)
+PASS src/agents/hitl/preflight.spec.ts
+PASS src/stream/__tests__/pendingAction.spec.ts

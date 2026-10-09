@@ -288,8 +288,8 @@ describe('high contrast mermaid palette', () => {
     expect(light.nodeBorder).toBe('#000000');
 
     const dark = contrastMermaidVariables(true, true)!;
-    expect(dark.background).toBe('#000000');
-    expect(dark.mainBkg).toBe('#000000');
+    expect(dark.background).toBe('#061316');
+    expect(dark.mainBkg).toBe('#061316');
     expect(dark.lineColor).toBe('#ffffff');
     expect(dark.textColor).toBe('#ffffff');
     expect(dark.nodeBorder).toBe('#ffffff');
@@ -306,7 +306,7 @@ describe('high contrast mermaid palette', () => {
     const contrastComponent = contrast['/components/ui/MermaidDiagram.tsx'];
     expect(contrastComponent).toContain('theme: "base"');
     expect(contrastComponent).toContain('"lineColor":"#ffffff"');
-    expect(contrast['mermaid.css']).toContain('#000000');
+    expect(contrast['mermaid.css']).toContain('#061316');
   });
 
   it('builds the artifact controls from the contrast palette', () => {
@@ -332,8 +332,8 @@ describe('high contrast mermaid palette', () => {
     expect(light).toMatchObject({
       taskBkgColor: '#0b4fa0',
       activeTaskBkgColor: '#8f3b00',
-      doneTaskBkgColor: '#005c2e',
-      doneTaskBorderColor: '#005c2e',
+      doneTaskBkgColor: '#00504d',
+      doneTaskBorderColor: '#00504d',
       critBkgColor: '#a10000',
       critBorderColor: '#a10000',
       gridColor: '#000000',
@@ -346,13 +346,13 @@ describe('high contrast mermaid palette', () => {
     expect(dark).toMatchObject({
       taskBkgColor: '#6bb8ff',
       activeTaskBkgColor: '#ffb366',
-      doneTaskBkgColor: '#7ff0b3',
-      doneTaskBorderColor: '#7ff0b3',
+      doneTaskBkgColor: '#46e2d2',
+      doneTaskBorderColor: '#46e2d2',
       critBkgColor: '#ff8f8f',
       critBorderColor: '#ff8f8f',
       gridColor: '#ffffff',
-      taskTextColor: '#000000',
-      taskTextDarkColor: '#000000',
+      taskTextColor: '#061316',
+      taskTextDarkColor: '#061316',
       taskTextOutsideColor: '#ffffff',
     });
   });
@@ -432,7 +432,7 @@ describe('high contrast mermaid palette', () => {
     expect(light.pieLegendTextColor).toBe('#000000');
 
     const dark = contrastMermaidVariables(true, true)!;
-    expect(dark.pieSectionTextColor).toBe('#000000');
+    expect(dark.pieSectionTextColor).toBe('#061316');
     expect(dark.pieTitleTextColor).toBe('#ffffff');
     expect(dark.pieLegendTextColor).toBe('#ffffff');
   });
