@@ -142,17 +142,17 @@ describe('markdown artifacts', () => {
     it('appends a contrast override that outranks the media query', () => {
       const standard = getMarkdownFiles('# Test')['index.html'];
       expect(standard).toContain('prefers-color-scheme: dark');
-      expect(standard).not.toContain('background-color: #000000');
+      expect(standard).not.toContain('background-color: #061316');
 
       const contrastDark = getMarkdownFiles('# Test', true, true)['index.html'];
       const overrideIndex = contrastDark.lastIndexOf('.markdown-body { color: #ffffff');
       expect(overrideIndex).toBeGreaterThan(contrastDark.indexOf('prefers-color-scheme: dark'));
-      expect(contrastDark).toContain('background-color: #000000');
-      expect(contrastDark).toContain('color: #8cc8ff');
+      expect(contrastDark).toContain('background-color: #061316');
+      expect(contrastDark).toContain('color: #46e2d2');
 
       const contrastLight = getMarkdownFiles('# Test', false, true)['index.html'];
       expect(contrastLight).toContain('.markdown-body { color: #000000');
-      expect(contrastLight).toContain('color: #0000cc');
+      expect(contrastLight).toContain('color: #00504d');
     });
 
     /** Anything the base sheet colours inside the media query has to be answered

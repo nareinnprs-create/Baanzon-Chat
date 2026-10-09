@@ -41,10 +41,10 @@ cache: true
 # field that becomes the trace userId (id, email, username, name, openidId,
 # samlId, ldapId, googleId, githubId, discordId, appleId, facebookId); a user
 # without a value for that field keeps the internal id. The two allowlists copy
-# fields into trace metadata as librechat.user.<field> (the userId fields plus
-# role and provider) and librechat.conversation.id, librechat.endpoint,
-# librechat.endpoint.type, librechat.provider, librechat.model,
-# librechat.model.label, librechat.spec.
+# fields into trace metadata as baanzon.user.<field> (the userId fields plus
+# role and provider) and baanzon.conversation.id, baanzon.endpoint,
+# baanzon.endpoint.type, baanzon.provider, baanzon.model,
+# baanzon.model.label, baanzon.spec.
 #
 # langfuse:
 #   headers:
@@ -100,7 +100,7 @@ cache: true
 #   #   /r/{storageRegion}/t/{tenantId}/{basePath}/{userId}/{file} (non-inline files)
 #   # storageRegion defaults to AWS_REGION when omitted, but only affects new keys
 #   # when includeRegionInPath is true. Existing files are not moved automatically.
-#   # LibreChat does not configure CloudFront origins, Route53, or regional routing.
+#   # Baanzon Chat does not configure CloudFront origins, Route53, or regional routing.
 #   storageRegion: "us-east-2"
 #   includeRegionInPath: false
 #   # Direct-download filename/content-type overrides require the CloudFront cache/origin
@@ -120,7 +120,7 @@ cache: true
 #     intervalMinutes: 60
 #     runOnStartup: true
 #     sources:
-#       - id: librechat-skills
+#       - id: baanzon-skills
 #         owner: your-org
 #         repo: your-skills-repo
 #         ref: main
@@ -142,7 +142,7 @@ cache: true
 
 # Custom interface configuration
 interface:
-  customWelcome: 'Welcome to LibreChat! Enjoy your experience.'
+  customWelcome: 'Welcome to Baanzon Chat! Enjoy your experience.'
   # Enable/disable file search as a chatarea selection (default: true)
   # Note: This setting does not disable the Agents File Search Capability.
   # To disable the Agents Capability, see the Agents Endpoint configuration instead.
@@ -283,9 +283,9 @@ interface:
   #     de-DE: 'Ich verstehe und möchte fortfahren' # You can narrow translation to regions like (de-DE or de-CH)
   #   subLabel:
   #     en: |
-  #       Librechat hasn't reviewed this MCP server. Attackers may attempt to steal your data or trick the model into taking unintended actions, including destroying data. <a href="https://google.de" target="_blank"><strong>Learn more.</strong></a>
+  #       Baanzon Chat hasn't reviewed this MCP server. Attackers may attempt to steal your data or trick the model into taking unintended actions, including destroying data. <a href="https://google.de" target="_blank"><strong>Learn more.</strong></a>
   #     de: |
-  #       LibreChat hat diesen MCP-Server nicht überprüft. Angreifer könnten versuchen, Ihre Daten zu stehlen oder das Modell zu unbeabsichtigten Aktionen zu verleiten, einschließlich der Zerstörung von Daten. <a href="https://google.de" target="_blank"><strong>Mehr erfahren.</strong></a>
+  #       Baanzon Chat hat diesen MCP-Server nicht überprüft. Angreifer könnten versuchen, Ihre Daten zu stehlen oder das Modell zu unbeabsichtigten Aktionen zu verleiten, einschließlich der Zerstörung von Daten. <a href="https://google.de" target="_blank"><strong>Mehr erfahren.</strong></a>
 
   # Temporary chat retention period in hours (default: 720, min: 1, max: 8760)
   # temporaryChatRetention: 1
@@ -502,8 +502,8 @@ actions:
 #     args:
 #       - -y
 #       - "@modelcontextprotocol/server-filesystem"
-#       - /home/user/LibreChat/
-#     iconPath: /home/user/LibreChat/client/public/assets/logo.svg
+#       - /home/user/baanzon-chat/
+#     iconPath: /home/user/baanzon-chat/client/public/assets/logo.svg
 #   mcp-obsidian:
 #     command: npx
 #     args:
@@ -538,7 +538,7 @@ endpoints:
   #   # Defense in depth against looping provider streams. Disabled by default.
   #   maxDeltaEventsPerTurn: 100000
   #   # (optional) Per-tool overrides for maxToolCallArgBytes, keyed by tool name; 0 disables that
-  #   # tool's guard. LibreChat ships { create_file: 131072 } so document-sized file writes are not
+  #   # tool's guard. Baanzon Chat ships { create_file: 131072 } so document-sized file writes are not
   #   # cut off; entries here merge over (and can replace) that default.
   #   maxToolCallArgBytesByTool:
   #     create_file: 131072
@@ -644,10 +644,10 @@ endpoints:
   #         pairing:
   #           allowPrincipalWorkers: true
   #           tokenEnv: CODE_BRIDGE_ADMIN_TOKEN
-  #   # (optional) Trusted origin for internal event delivery. By default, LibreChat
+  #   # (optional) Trusted origin for internal event delivery. By default, Baanzon Chat
   #   # uses its own bound listener; override only for an internal TLS/front-door route.
   #   eventDriven:
-  #     # selfUrl: 'https://librechat.internal'
+  #     # selfUrl: 'https://baanzon.internal'
   #   # (optional) Automatic conversational delivery for supported completed background tasks.
   #   # Enabled by default; set false to keep background tools and subagents poll-only.
   #   backgroundTasks:
@@ -667,14 +667,14 @@ endpoints:
   #     type: mongo # mongo (default) or memory (single-process development only)
   #     ttl: 86400 # Approval window in seconds; defaults to 24 hours
   #   # (optional) Authenticate machine clients for the Agent Management API.
-  #   # Each verified OAuth client is bound server-side to one existing LibreChat
+  #   # Each verified OAuth client is bound server-side to one existing Baanzon Chat
   #   # user and tenant; that user's normal role and Agent ACLs still apply.
   #   managementApi:
   #     auth:
   #       oidc:
   #         enabled: true
   #         issuer: 'https://identity.example.com/'
-  #         audience: 'https://librechat.example.com/agents'
+  #         audience: 'https://baanzon.example.com/agents'
   #         # jwksUri: 'https://identity.example.com/.well-known/jwks.json'
   #       clients:
   #         - clientId: 'machine-client-id'
@@ -692,10 +692,10 @@ endpoints:
   # consumes them — native provider APIs ignore unknown headers.
   # openAI:
   #   headers:
-  #     cf-aig-metadata: '{"user_email":"{{BAANZON_USER_EMAIL}}","app":"librechat"}'
+  #     cf-aig-metadata: '{"user_email":"{{BAANZON_USER_EMAIL}}","app":"baanzon"}'
   # google:
   #   headers:
-  #     cf-aig-metadata: '{"user_email":"{{BAANZON_USER_EMAIL}}","app":"librechat"}'
+  #     cf-aig-metadata: '{"user_email":"{{BAANZON_USER_EMAIL}}","app":"baanzon"}'
 
   # Anthropic endpoint configuration with Vertex AI support
   # Use this to run Anthropic Claude models through Google Cloud Vertex AI
@@ -710,7 +710,7 @@ endpoints:
   #   # Useful for correlating reverse-proxied requests by conversation, since an
   #   # unknown header is simply ignored by the native Anthropic API.
   #   headers:
-  #     cf-aig-metadata: '{"user_email":"{{BAANZON_USER_EMAIL}}","app":"librechat"}'
+  #     cf-aig-metadata: '{"user_email":"{{BAANZON_USER_EMAIL}}","app":"baanzon"}'
   #     X-Conversation-Id: '{{BAANZON_BODY_CONVERSATIONID}}'
   #
   #   # Vertex AI Configuration - enables running Claude models via Google Cloud
@@ -1157,10 +1157,10 @@ endpoints:
 #   keenableSearchOptions:
 #     maxResults: 5             # 1-20 results per search (default: 8)
 #     # site: example.com       # Restrict search to a single domain
-#     # attributionTitle: LibreChat  # X-Keenable-Title header sent with each request
+#     # attributionTitle: Baanzon Chat  # X-Keenable-Title header sent with each request
 #     # timeout: 15000          # HTTP request timeout in milliseconds (max 120000)
 #   keenableScraperOptions:
-#     # attributionTitle: LibreChat  # X-Keenable-Title header sent with each fetch
+#     # attributionTitle: Baanzon Chat  # X-Keenable-Title header sent with each fetch
 #     timeout: 15000            # HTTP request timeout in milliseconds (max 120000)
 #
 # Keenable search paired with another scraper (Firecrawl here) also works; each
@@ -1228,6 +1228,53 @@ endpoints:
 #     # instructions: "You are a memory management assistant. Store and manage user information accurately."
 #     # model_parameters:
 #     #   temperature: 0.1
+
+# Knowledge retrieval — document collections behind `/api/knowledge`, used to
+# ground answers in your own documents. OPT-IN: this is off on a fresh install,
+# and until you turn it on every knowledge route answers 503.
+# To turn it on: uncomment the `rag:` block below and set `disabled: false`.
+# The default vector index is in-memory and lives in the API process, so it is
+# not durable: chunks are lost on restart or deploy, and each replica indexes
+# only what it ingested. Point `apiUrl` at a durable RAG service, or plan to
+# re-index after a restart.
+# `rag:` is base-config-only: database overrides and tombstones cannot change it
+# for individual users, groups, or roles, because the vector index and the
+# limits below are shared by the whole process.
+# rag:
+#   # (optional) Master switch, default true. When true, every knowledge route
+#   # answers 503 with { error: 'Knowledge retrieval is disabled' }. The routes
+#   # stay mounted because config is resolved per request. Set this to false to
+#   # turn the feature on.
+#   disabled: false
+#   # (optional) External RAG API base URL. Only consulted once a semantic client
+#   # is actually injected into the domain; until then retrieval is keyword-only
+#   # whatever this is set to. Omit this key to fall back to the RAG_API_URL
+#   # environment variable; set it to '' to force keyword-only retrieval even
+#   # when RAG_API_URL is set.
+#   apiUrl: ''
+#   # (optional) Default chunk size in characters, applied when a collection is
+#   # created. Each collection keeps its own value afterwards.
+#   chunkSize: 800
+#   # (optional) Default chunk overlap in characters, applied when a collection
+#   # is created. Each collection keeps its own value afterwards.
+#   chunkOverlap: 80
+#   # (optional) Weight of the semantic score in the hybrid merge, 0-1. 0.5 weighs
+#   # semantic and keyword equally, 1 ranks on the semantic score alone. With no
+#   # semantic client wired the weight is treated as 0, so retrieval falls back
+#   # to keyword ranking rather than returning nothing.
+#   hybridAlpha: 0.5
+#   # (optional) Chunks gathered from the vector store before the hybrid merge
+#   candidateK: 32
+#   # (optional) Snippets returned to the caller
+#   topK: 6
+#   # (optional) Lowest hybrid score a chunk can reach and still be kept, 0-1
+#   minScore: 0.1
+#   # (optional) Collections held by the default in-memory vector store, which
+#   # only applies when no other vector store is supplied
+#   inMemoryMaxCollections: 200
+#   # (optional) Chunks held by the default in-memory vector store, which only
+#   # applies when no other vector store is supplied
+#   inMemoryMaxChunks: 20000
 
 # Apply opt-in content filters to source-classified submitted and reusable content.
 # `filters` is base-config-only: database overrides and tombstones cannot add,

@@ -37,7 +37,7 @@ const DropdownVariableCard = ({ parsed }: { parsed: ParsedVariable }) => {
 
   return (
     <div
-      className="bg-surface-secondary/50 rounded-lg border border-border-medium p-2.5 hover:bg-surface-secondary"
+      className="rounded-lg border border-border-medium bg-surface-secondary/50 p-2.5 hover:bg-surface-secondary"
       role="listitem"
       aria-label={localize('com_ui_variable_with_options', {
         name: parsed.name,
@@ -99,7 +99,7 @@ const SpecialVariableChip = ({ parsed }: { parsed: ParsedVariable }) => {
 
 const SimpleVariableChip = ({ parsed }: { parsed: ParsedVariable }) => (
   <span
-    className="bg-surface-secondary/50 inline-flex items-center gap-1.5 rounded-lg border border-border-medium px-2.5 py-1.5 text-xs font-medium text-text-primary hover:bg-surface-tertiary"
+    className="inline-flex items-center gap-1.5 rounded-lg border border-border-medium bg-surface-secondary/50 px-2.5 py-1.5 text-xs font-medium text-text-primary hover:bg-surface-tertiary"
     role="listitem"
   >
     <Variable className="size-3 text-text-secondary" aria-hidden="true" />

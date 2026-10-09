@@ -1,0 +1,85 @@
+# Security — dependency advisories and secret scanning.
+#
+# Advisory gate is scoped to high and critical on purpose: the medium/low set in this
+# dependency tree is large enough that gating on it would mean a permanently red
+# build that everyone learns to ignore. `npm audit --level=high` exits non-zero only
+# for high/critical.
+#
+# Secrets: the only secret referenced is `${{ secrets.GITHUB_TOKEN }}`, which GitHub
+# provisions automatically for every repository — nothing to create. See the
+# gitleaks job for the one case that needs a secret to be provisioned by an admin.
+
+name: Security
+
+on:
+  pull_request:
+    # Every pull request, whatever the base: see the note in static-checks.yml.
+  push:
+    branches:
+      - b1
+      - dev
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  npm-audit:
+    name: npm audit (high/critical)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc # 24.16.0
+
+      - name: Audit the dependency tree
+        # No `npm ci` here: `npm audit` reads package-lock.json, and installing
+        # 1.7 MB of lockfile's worth of dependencies only to throw them away would
+        # double the job's time.
+        #
+        # LOCKFILE FINDING (known issue P1-10): the repo tracks BOTH
+        # package-lock.json and bun.lock, and they resolve different versions. This
+        # gate audits the npm one, which is the install of record —
+        # `packageManager` is npm@11.13.0, config/update.js runs `npm ci`, and both
+        # Dockerfiles copy package.json + package-lock.json and never invoke bun.
+        # The bun resolution is therefore NOT audited here and NOT reproducible from
+        # this job; if bun becomes a supported path, that is a second audit run.
+        run: npm audit --level=high
+
+  secret-scan:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      # gitleaks reads the pull request's base ref through the API to compute the
+      # commit range it scans. Nothing more is granted.
+      pull-requests: read
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Scan history for committed secrets
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          # Automatically provisioned by GitHub; no secret to create.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PROVISIONING NOTE: gitleaks-action requires a licence key when the
+          # repository is owned by an organisation (free for personal accounts).
+          # If this job fails with a licence error, an admin must add the
+          # `GITLEAKS_LICENSE` repository secret — it is intentionally NOT referenced
+          # here, because referencing an unprovisioned secret fails the step outright.
+          # GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+        # No `with:` inputs are passed on purpose: the action's defaults scan the full
+        # history of the ref that triggered the event and fail the job on any finding.

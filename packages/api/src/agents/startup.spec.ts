@@ -104,18 +104,18 @@ describe('createAgentStartupTelemetry', () => {
     });
 
     expect(startSpan).toHaveBeenCalledWith(
-      'librechat.agent.startup',
+      'baanzon.agent.startup',
       { kind: SpanKind.INTERNAL },
       context.active(),
     );
     expect(span.addEvent).toHaveBeenNthCalledWith(1, 'job_created', {
-      'librechat.agent.startup.elapsed_ms': 25,
+      'baanzon.agent.startup.elapsed_ms': 25,
     });
     expect(span.addEvent).toHaveBeenNthCalledWith(2, 'first_response_event_queued', {
-      'librechat.agent.startup.elapsed_ms': 50,
+      'baanzon.agent.startup.elapsed_ms': 50,
     });
     expect(span.addEvent).toHaveBeenNthCalledWith(3, 'first_content_delta_queued', {
-      'librechat.agent.startup.elapsed_ms': 80,
+      'baanzon.agent.startup.elapsed_ms': 80,
     });
     expect(recordAgentStartupMilestone).toHaveBeenCalledTimes(3);
     expect(recordAgentStartupMilestone).toHaveBeenNthCalledWith(1, 'job_created', 0.025);
@@ -131,9 +131,9 @@ describe('createAgentStartupTelemetry', () => {
     );
     expect(recordAgentStartupResult).toHaveBeenCalledWith('content_queued');
     expect(span.setAttributes).toHaveBeenCalledWith({
-      'librechat.agent.startup.duration_ms': 80,
-      'librechat.agent.startup.milestones.count': 3,
-      'librechat.agent.startup.result': 'content_queued',
+      'baanzon.agent.startup.duration_ms': 80,
+      'baanzon.agent.startup.milestones.count': 3,
+      'baanzon.agent.startup.result': 'content_queued',
     });
     expect(span.end).toHaveBeenCalledTimes(1);
   });
@@ -177,8 +177,8 @@ describe('createAgentStartupTelemetry', () => {
     expect(recordAgentStartupResult).toHaveBeenCalledWith('error');
     expect(span.setAttributes).toHaveBeenCalledWith(
       expect.objectContaining({
-        'librechat.agent.startup.milestones.count': 1,
-        'librechat.agent.startup.result': 'error',
+        'baanzon.agent.startup.milestones.count': 1,
+        'baanzon.agent.startup.result': 'error',
       }),
     );
     expect(span.setStatus).toHaveBeenCalledWith({ code: SpanStatusCode.ERROR });
@@ -247,7 +247,7 @@ describe('agentStartupTelemetryMiddleware', () => {
     expect(next).toHaveBeenCalledTimes(2);
     expect(getAgentStartupTelemetry(req)).toBeDefined();
     expect(startSpan).toHaveBeenCalledWith(
-      'librechat.agent.startup',
+      'baanzon.agent.startup',
       {
         kind: SpanKind.INTERNAL,
         startTime: 1_750_000_000_000,
@@ -271,7 +271,7 @@ describe('agentStartupTelemetryMiddleware', () => {
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(telemetry).toBeDefined();
-    expect(span.setAttribute).toHaveBeenCalledWith('librechat.stream.id', 'stream-123');
+    expect(span.setAttribute).toHaveBeenCalledWith('baanzon.stream.id', 'stream-123');
     expect(recordAgentStartupMilestone).toHaveBeenCalledWith('ack_sent', expect.any(Number));
     expect(recordAgentStartupResult).not.toHaveBeenCalled();
     expect(span.end).not.toHaveBeenCalled();

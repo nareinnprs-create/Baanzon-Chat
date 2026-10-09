@@ -77,6 +77,10 @@ import {
   type ParentSubagentThreadRecord,
 } from './conversation';
 import { createChatProjectMethods, type ChatProjectMethods } from './chatProject';
+import {
+  createKnowledgeCollectionMethods,
+  type KnowledgeCollectionMethods,
+} from './knowledgeCollection';
 export type {
   AssignConversationToProjectResult,
   ChatProjectSortBy,
@@ -214,6 +218,7 @@ export type AllMethods = UserMethods &
   KeyMethods &
   FileMethods &
   MemoryMethods &
+  KnowledgeCollectionMethods &
   ToolFavoriteMethods &
   AgentCategoryMethods &
   AgentApiKeyMethods &
@@ -460,6 +465,7 @@ export function createMethods(
     ...messageMethods,
     ...conversationMethods,
     ...createChatProjectMethods(mongoose),
+    ...createKnowledgeCollectionMethods(mongoose),
     /* Tier 3 */
     ...txMethods,
     ...transactionMethods,
@@ -522,6 +528,7 @@ export type {
   ConversationMethods,
   AgentEventActorReconciliationStorageMetrics,
   ChatProjectMethods,
+  KnowledgeCollectionMethods,
   TxMethods,
   TransactionMethods,
   SpendTokensMethods,

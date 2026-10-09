@@ -8,9 +8,9 @@ export const defaultTheme: IThemeRGB = {
   // Text colors
   'rgb-text-primary': '16 42 45', // #102A2D (Primary Text)
   'rgb-text-secondary': '82 104 106', // #52686A (Secondary Text)
-  'rgb-text-secondary-alt': '110 127 128', // #6E7F80 (Muted Text)
-  'rgb-text-tertiary': '110 127 128', // #6E7F80 (Muted Text)
-  'rgb-text-muted': '110 127 128', // #6E7F80 (Muted Text)
+  'rgb-text-secondary-alt': '95 112 113', // #5F7071 (Muted Text, WCAG AA)
+  'rgb-text-tertiary': '95 112 113', // #5F7071 (Muted Text, WCAG AA)
+  'rgb-text-muted': '95 112 113', // #5F7071 (Muted Text, WCAG AA)
   'rgb-text-warning': '180 83 9', // #b45309 (amber-700)
   'rgb-text-destructive': '220 38 38', // #dc2626 (red-600)
   'rgb-shimmer-base': '16 42 45', // #102A2D, matching text-primary
@@ -74,7 +74,7 @@ export const defaultTheme: IThemeRGB = {
   'rgb-status-success-subtle': '236 253 245', // #ecfdf5 (green-50)
   'rgb-status-success-border': '110 231 183', // #6ee7b7 (green-300)
   'rgb-status-success-strong': '2 133 94', // #02855e
-  'rgb-status-info': '8 127 131', // #087F83 (Baanzon Teal)
+  'rgb-status-info': '7 121 125', // #07797D (Baanzon Teal, stepped for the Mist fill)
   'rgb-status-info-subtle': '232 243 240', // #E8F3F0 (Mist)
   'rgb-status-info-border': '53 214 199', // #35D6C7 (Luminous Aqua)
   'rgb-status-info-strong': '8 127 131', // #087F83 (Teal)
@@ -107,14 +107,14 @@ export const defaultTheme: IThemeRGB = {
   /** Categorical series scale. CVD-safe, Baanzon Aurora-stepped. */
   'rgb-series-1': '8 127 131', // #087F83 (Baanzon Teal)
   'rgb-series-2': '233 86 13', // #e9560d (orange)
-  'rgb-series-3': '53 214 199', // #35D6C7 (Luminous Aqua)
+  'rgb-series-3': '30 145 124', // #1E917C (Teal-green, WCAG-compliant)
   'rgb-series-4': '182 123 5', // #b67b05 (amber)
-  'rgb-series-5': '155 138 251', // #9B8AFB (Soft Orchid)
-  'rgb-series-6': '216 194 157', // #D8C29D (Champagne)
-  'rgb-series-7': '4 120 87', // #047857 (green-700)
+  'rgb-series-5': '118 101 251', // #7665FB (Deep orchid, WCAG-compliant)
+  'rgb-series-6': '140 106 47', // #8C6A2F (Umber, WCAG-compliant)
+  'rgb-series-7': '162 28 175', // #A21CAF (Fuchsia — was #047857, identical to success)
 
-  /** Unchecked switch track. 3.03:1 against the white canvas. */
-  'rgb-switch-unchecked': '160 185 180', // #A0B9B4
+  /** Unchecked switch track. 3.54:1 against white surface (#FFFFFF). */
+  'rgb-switch-unchecked': '113 142 137', // #718E89
 
   // Presentation
   'rgb-presentation': '255 255 255', // #FFFFFF

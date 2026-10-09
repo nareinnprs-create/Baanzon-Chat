@@ -22,6 +22,7 @@ import { agentsConfigSetup } from './agents';
 import { loadWebSearchConfig } from './web';
 import { processModelSpecs } from './specs';
 import { loadEndpoints } from './endpoints';
+import { loadRagConfig } from './rag';
 import { loadOCRConfig } from './ocr';
 import logger from '~/config/winston';
 
@@ -169,12 +170,14 @@ export const AppService = async (params?: {
   const filters = loadFiltersConfig(config);
   const messageFilter = config.messageFilter;
   const langfuse = loadLangfuseConfig(config);
+  const rag = loadRagConfig(config.rag);
 
   const defaultConfig = {
     ocr,
     paths,
     config,
     memory,
+    rag,
     speech,
     actions,
     balance,

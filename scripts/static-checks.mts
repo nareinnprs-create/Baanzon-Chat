@@ -426,6 +426,27 @@ function diffPaths(args: string[]): { files: string[]; existing: string[] } {
   };
 }
 
+/**
+ * `git status --porcelain=v1 -z` emits `XY <path>\0`, with a second record for
+ * the old path of a rename or copy — `XY <new>\0<old>\0`. That old path is
+ * history, not a file to check. `git status` takes no `--diff-filter`, so the
+ * ACMRTUXB narrowing the diff selectors get for free happens here instead: D
+ * and U are dropped because a deleted or unmerged path cannot be opened.
+ */
+function splitPorcelainZ(output: string): string[] {
+  const records = output.split('\0').filter(Boolean);
+  const paths: string[] = [];
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    const status = record.slice(0, 2);
+    if (status.includes('D') || status.includes('U')) continue;
+    // The new path is the first record; the second is the rename's old path.
+    paths.push(record.slice(3));
+    if (status.includes('R') || status.includes('C')) i++;
+  }
+  return paths;
+}
+
 function resolveTarget(): Target {
   // Precedence would silently drop the losers: `--against origin/dev pkg.json`
   // checked only the file, and paired with --commit the base ref was never even
@@ -500,10 +521,20 @@ function resolveTarget(): Target {
     };
   }
 
-  return {
+  const staged = {
     label: 'staged diff',
     ...diffPaths(['diff', '-z', '--cached', '--name-only']),
   };
+  if (argv.includes('--staged') || staged.files.length > 0) {
+    return staged;
+  }
+
+  const files = splitPorcelainZ(
+    captureStdout(GIT, ['status', '--porcelain=v1', '-z', '--untracked-files=all']),
+  );
+  return files.length > 0
+    ? { label: 'working tree (nothing staged)', files, existing: files }
+    : staged;
 }
 
 /** Recursively yields repo-relative paths of source files under `dir`. */
@@ -728,6 +759,19 @@ async function findUnusedI18nKeys(): Promise<CheckOutcome> {
     return tokenList.some((token) => token.includes(key));
   };
 
+  // i18next resolves `key_one`/`key_other` from a bare `t('key', { count })`
+  // call, so the suffixed forms never appear as literals in the source. Only
+  // the CLDR plural categories are stripped, and only from a key that really is
+  // a plural pair — otherwise a key that legitimately ends in `_one` would
+  // lose its reference and be reported as dead.
+  const PLURAL_SUFFIX = /_(zero|one|two|few|many|other)$/;
+  const isReferencedPlural = (key: string): boolean => {
+    const match = PLURAL_SUFFIX.exec(key);
+    if (!match) return false;
+    const base = key.slice(0, -match[0].length);
+    return keys.includes(base) && isReferenced(base);
+  };
+
   const unused = keys.filter((key) => {
     // Special variable labels are built dynamically from TSpecialVarLabel.
     if (key.startsWith('com_ui_special_var_') && tokens.has('TSpecialVarLabel')) return false;
@@ -738,7 +782,7 @@ async function findUnusedI18nKeys(): Promise<CheckOutcome> {
     ) {
       return false;
     }
-    return !isReferenced(key);
+    return !isReferenced(key) && !isReferencedPlural(key);
   });
 
   if (unused.length === 0) return { ok: true };
@@ -763,10 +807,11 @@ function findCircularDependencies(): CheckOutcome {
 // --------------------------------------------------------------- TypeScript
 
 /**
- * One entry per `tsc --noEmit` the review workflows run. `paths` includes each
- * project's upstream packages, so an edit to data-provider still typechecks the
- * projects that consume it; `requires` lists the builds its imports resolve
- * through, mirroring those jobs' dependency on the build artifacts.
+ * One entry per `tsc --noEmit` the review workflows run, plus the projects
+ * those workflows have no step for. `paths` includes each project's upstream
+ * packages, so an edit to data-provider still typechecks the projects that
+ * consume it; `requires` lists the builds its imports resolve through,
+ * mirroring those jobs' dependency on the build artifacts.
  */
 const ROOT_MANIFESTS = ['package.json', 'package-lock.json'];
 
@@ -805,6 +850,20 @@ const TYPECHECK_PROJECTS = [
   },
   {
     project: 'packages/client/tsconfig.json',
+    paths: [
+      'packages/data-provider/**',
+      'packages/client/**',
+      ...ROOT_MANIFESTS,
+      BACKEND_REVIEW,
+      '!**.md',
+    ],
+    requires: ['build:data-provider'],
+  },
+  // `tsconfig.json` above drops `**/*.spec.ts(x)`/`**/*.test.ts(x)` from its
+  // program, so this is the only gate that sees the 48 test files in this
+  // package. Same tier, same requires as the project it splits out of.
+  {
+    project: 'packages/client/tsconfig.test.json',
     paths: [
       'packages/data-provider/**',
       'packages/client/**',
@@ -1098,6 +1157,20 @@ function report(symbol: string, title: string, detail: string): void {
   console.log(`  ${symbol} ${title.padEnd(TITLE_WIDTH)} ${detail}`);
 }
 
+function plannedState(
+  check: Check,
+  selected: readonly Check[],
+  groups: Record<FilterName, boolean>,
+): string {
+  if (!selected.includes(check)) return 'deselected';
+  if (OPTIONS.skip.includes(check.id)) return 'skipped (--skip)';
+  if (!groups[check.group]) return 'not affected';
+  if (check.tier === 'slow' && !OPTIONS.full && !OPTIONS.only.includes(check.id)) {
+    return 'slow tier (--full)';
+  }
+  return 'would run';
+}
+
 function printBlock(text: string): void {
   const trimmed = text.trim();
   if (!trimmed) return;
@@ -1138,16 +1211,7 @@ async function main(): Promise<void> {
   if (OPTIONS.list) {
     console.log(`Static checks · ${target.label} · ${target.files.length} file(s)`);
     for (const check of CHECKS) {
-      const state = !selected.includes(check)
-        ? 'deselected'
-        : OPTIONS.skip.includes(check.id)
-          ? 'skipped (--skip)'
-          : !groups[check.group]
-            ? 'not affected'
-            : check.tier === 'slow' && !OPTIONS.full && !OPTIONS.only.includes(check.id)
-              ? 'slow tier (--full)'
-              : 'would run';
-      report(' ', `${check.title} (${check.id})`, state);
+      report(' ', `${check.title} (${check.id})`, plannedState(check, selected, groups));
     }
     return;
   }
@@ -1159,15 +1223,22 @@ async function main(): Promise<void> {
   }
 
   const failures: string[] = [];
+  // Requested by id but never given a verdict — the silent-pass hole a gate
+  // must not have, since `--only` reads as "verify this" and nothing did.
+  const unverified: string[] = [];
   let skipped = 0;
+  let ran = 0;
 
   for (const check of selected) {
+    const requested = OPTIONS.only.includes(check.id);
     if (OPTIONS.skip.includes(check.id)) {
       skipped++;
+      if (requested) unverified.push(check.id);
       report('–', check.title, 'skipped (--skip)');
       continue;
     }
     if (!groups[check.group]) {
+      if (requested) unverified.push(check.id);
       report('–', check.title, 'not affected by this diff');
       continue;
     }
@@ -1177,6 +1248,7 @@ async function main(): Promise<void> {
       continue;
     }
 
+    ran++;
     const started = Date.now();
     // The CI job gives every step continue-on-error; a check that throws
     // (malformed translation JSON, say) must not cancel the ones after it.
@@ -1190,6 +1262,8 @@ async function main(): Promise<void> {
 
     if (outcome.skipped) {
       skipped++;
+      // A check whose own filter matched nothing never inspected the target.
+      if (requested) unverified.push(check.id);
       report('–', check.title, `skipped: ${outcome.skipped}`);
       continue;
     }
@@ -1207,6 +1281,22 @@ async function main(): Promise<void> {
 
   const tail = skipped > 0 ? ` (${skipped} skipped)` : '';
   if (failures.length === 0) {
+    if (unverified.length > 0) {
+      console.log(
+        `\nRequested check${unverified.length === 1 ? '' : 's'} verified nothing: ` +
+          `${unverified.join(', ')} — each was skipped or matches nothing in this target, ` +
+          'so the request is not evidence of correctness.',
+      );
+      process.exitCode = 1;
+      return;
+    }
+    if (OPTIONS.only.length > 0 && ran === 0) {
+      console.log(
+        `\nNo requested check ran: ${OPTIONS.only.join(', ')} — the request verified nothing.`,
+      );
+      process.exitCode = 1;
+      return;
+    }
     console.log(`\nAll affected static checks passed${tail}.`);
     return;
   }

@@ -37,9 +37,9 @@ describe('CloudFront cookie refresh helpers', () => {
   beforeEach(() => {
     mockApiBaseUrl.mockReturnValue('');
     mockGetTokenHeader.mockReturnValue('Bearer test-token');
-    fetchMock = jest.fn(() =>
+    fetchMock = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>(() =>
       Promise.resolve(refreshResponse({ ok: true })),
-    ) as jest.MockedFunction<typeof fetch>;
+    );
     global.fetch = fetchMock;
     configureCloudFrontCookieRefresh(undefined);
     jest.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000);

@@ -1,0 +1,125 @@
+# Typecheck — one `tsc --noEmit` per workspace, never a build.
+#
+# Why not `npm run build:*`:
+#   packages/api, packages/client and packages/data-schemas build with `tsdown`,
+#   which emits without checking types. A green build there says nothing about
+#   types (AGENTS.md "Verification", CLAUDE.md "Typechecking"). Only
+#   packages/data-provider runs `tsc` as part of its build.
+#   The build step below exists solely to produce `dist` .d.ts files for the
+#   workspaces that import each other — it is a prerequisite, not the gate.
+#
+# Known blind spot, deliberately NOT papered over:
+#   packages/client/tsconfig.json excludes `**/*.spec.ts(x)` and `**/*.test.ts(x)`,
+#   so test files there are never typechecked by this project. Its
+#   tsconfig.test.json is meant to cover them but is currently unusable — it sets
+#   `isolatedDeclarations: true` with `declaration: false`, which tsc rejects with
+#   TS5069. Verified locally:
+#     npx tsc --noEmit -p packages/client/tsconfig.test.json
+#     -> TS5069: Option 'isolatedDeclarations' cannot be specified without
+#        specifying option 'declaration' or option 'composite'.
+#   Until that config is fixed (add `"isolatedDeclarations": false` to it), a type
+#   error in a packages/client spec surfaces only when that test runs — this
+#   workflow cannot see it, and no step here pretends otherwise.
+
+name: Typecheck
+
+on:
+  pull_request:
+    # Every pull request, whatever the base: see the note in static-checks.yml.
+  push:
+    branches:
+      - b1
+      - dev
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: typecheck-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    name: tsc --noEmit (5 projects)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc # 24.16.0
+          cache: npm
+          # package-lock.json is the lockfile of record (packageManager npm@11.13.0,
+          # npm ci in config/update.js and both Dockerfiles). bun.lock is also
+          # tracked — known issue P1-10, two divergent lockfiles.
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build workspace dependencies for type resolution
+        # Mirrors TYPECHECK_PROJECTS[].requires in scripts/static-checks.mts:
+        # data-schemas and packages/client resolve data-provider through its dist,
+        # packages/api resolves both, and client resolves packages/client through
+        # its dist. Without these builds, missing-property errors are stale-artifact
+        # noise rather than real defects. This is NOT the typecheck.
+        run: npm run build:data-provider && npm run build:data-schemas && npm run build:client-package
+
+      # Every project gets its own step so one failure cannot hide the others —
+      # the same contract scripts/static-checks.mts keeps ("every selected check
+      # runs even after one fails"). Each step's `outcome` is folded into the job
+      # result by the final step, which is what actually fails the job.
+      - name: packages/data-provider
+        id: tc_data_provider
+        continue-on-error: true
+        run: npx tsc --noEmit -p packages/data-provider/tsconfig.json
+
+      - name: packages/data-schemas
+        id: tc_data_schemas
+        continue-on-error: true
+        run: npx tsc --noEmit -p packages/data-schemas/tsconfig.json
+
+      - name: packages/api
+        id: tc_api
+        continue-on-error: true
+        run: npx tsc --noEmit -p packages/api/tsconfig.json
+
+      - name: packages/client
+        id: tc_packages_client
+        continue-on-error: true
+        run: npx tsc --noEmit -p packages/client/tsconfig.json
+
+      - name: client
+        id: tc_client
+        continue-on-error: true
+        run: npx tsc --noEmit -p client/tsconfig.json
+
+      - name: Aggregate project results (fails the job if any project failed)
+        # continue-on-error turns a red project into a recorded `outcome` instead of
+        # an aborted job, so this step is what restores the fail-closed behaviour.
+        # It must never be skipped, hence `always()`.
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          failed=0
+          check() {
+            local project="$1" outcome="$2"
+            if [ "$outcome" = "success" ]; then
+              printf 'PASS  %s\n' "$project"
+            elif [ "$outcome" = "skipped" ]; then
+              printf 'SKIP  %s\n' "$project"
+            else
+              printf 'FAIL  %s\n' "$project"
+              failed=1
+            fi
+          }
+          check 'packages/data-provider' '${{ steps.tc_data_provider.outcome }}'
+          check 'packages/data-schemas'  '${{ steps.tc_data_schemas.outcome }}'
+          check 'packages/api'           '${{ steps.tc_api.outcome }}'
+          check 'packages/client'        '${{ steps.tc_packages_client.outcome }}'
+          check 'client'                 '${{ steps.tc_client.outcome }}'
+          exit "$failed"

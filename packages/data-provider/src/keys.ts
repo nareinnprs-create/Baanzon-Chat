@@ -97,6 +97,9 @@ export enum QueryKeys {
   subagentThread = 'subagentThread',
   codeEnvironments = 'codeEnvironments',
   agentQueuedTurns = 'agentQueuedTurns',
+  /* Knowledge collections */
+  knowledgeCollections = 'knowledgeCollections',
+  knowledgeCollection = 'knowledgeCollection',
 }
 
 // Dynamic query keys that require parameters
@@ -156,4 +159,11 @@ export enum MutationKeys {
   pairCodeEnvironment = 'pairCodeEnvironment',
   updateCodeEnvironmentSettings = 'updateCodeEnvironmentSettings',
   deleteCodeEnvironment = 'deleteCodeEnvironment',
+  /* Knowledge collections */
+  createKnowledgeCollection = 'createKnowledgeCollection',
+  updateKnowledgeCollection = 'updateKnowledgeCollection',
+  deleteKnowledgeCollection = 'deleteKnowledgeCollection',
+  addKnowledgeDocument = 'addKnowledgeDocument',
+  deleteKnowledgeDocument = 'deleteKnowledgeDocument',
+  retrieveKnowledge = 'retrieveKnowledge',
 }

@@ -70,6 +70,8 @@ export * from './actions';
 export * from './prompts';
 /* Projects */
 export * from './projects';
+/* RAG / Knowledge */
+export * from './rag';
 /* Conversations */
 export * from './conversations';
 /* Skills */

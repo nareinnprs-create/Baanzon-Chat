@@ -27,7 +27,7 @@ function generateMarkdownFromObject(obj: object, depth = 0): string {
     .join('\n');
 }
 
-async function generatePromptForFile(filePath: string, fileName: string) {
+async function generatePromptForFile(filePath: string) {
   const modulePath = path.resolve(filePath); // Ensuring path is correctly resolved
   const fileModule = await import(modulePath); // Dynamically importing the file as a module
   let comparisonsMarkdown = '';
@@ -66,7 +66,7 @@ async function createPromptsForTranslations() {
     if (!file.includes('Eng.ts')) {
       // Ensure English or base file is excluded
       const filePath = path.join(baseDirPath, file);
-      const promptContent = await generatePromptForFile(filePath, file);
+      const promptContent = await generatePromptForFile(filePath);
       const outputFilePath = path.join(promptsDirPath, `${path.basename(file, '.ts')}.md`);
 
       await fs.promises.writeFile(outputFilePath, promptContent);

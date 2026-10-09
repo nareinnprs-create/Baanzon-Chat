@@ -10,6 +10,7 @@ import * as qt from './types/queuedTurns';
 import * as sch from './types/schedules';
 import * as a from './types/assistants';
 import * as m from './types/mutations';
+import * as k from './types/knowledge';
 import * as ag from './types/agents';
 import * as q from './types/queries';
 import * as sk from './types/skills';
@@ -1604,3 +1605,52 @@ export interface ActiveJobsResponse {
 export const getActiveJobs = (): Promise<ActiveJobsResponse> => {
   return request.get(endpoints.activeJobs());
 };
+
+/* Knowledge */
+export function listKnowledgeCollections(): Promise<k.TKnowledgeCollectionListResponse> {
+  return request.get(endpoints.knowledgeCollections);
+}
+
+export function getKnowledgeCollection(id: string): Promise<k.TKnowledgeCollectionResponse> {
+  return request.get(endpoints.knowledgeCollectionById(id));
+}
+
+export function createKnowledgeCollection(
+  payload: k.TKnowledgeCreateRequest,
+): Promise<k.TKnowledgeCollection> {
+  return request.post(endpoints.knowledgeCollections, payload);
+}
+
+export function updateKnowledgeCollection(
+  payload: k.TKnowledgeUpdateRequest,
+): Promise<k.TKnowledgeUpdateResponse> {
+  const { id, ...data } = payload;
+  return request.patch(endpoints.knowledgeCollectionById(id), data);
+}
+
+export function deleteKnowledgeCollection(id: string): Promise<k.TKnowledgeDeletedResponse> {
+  return request.delete(endpoints.knowledgeCollectionById(id));
+}
+
+export function addKnowledgeDocument(
+  collectionId: string,
+  payload: k.TKnowledgeAddDocumentRequest,
+): Promise<k.TKnowledgeDocumentResponse> {
+  const { content, source, metadata } = payload;
+  return request.post(endpoints.knowledgeDocuments(collectionId), { content, source, metadata });
+}
+
+export function deleteKnowledgeDocument(
+  collectionId: string,
+  documentId: string,
+): Promise<k.TKnowledgeDeletedResponse> {
+  return request.delete(endpoints.knowledgeDocumentById(collectionId, documentId));
+}
+
+export function retrieveKnowledge(
+  collectionId: string,
+  payload: k.TKnowledgeRetrieveRequest,
+): Promise<k.TKnowledgeRetrieveResponse> {
+  const { query, hybridAlpha, topK } = payload;
+  return request.post(endpoints.knowledgeRetrieve(collectionId), { query, hybridAlpha, topK });
+}

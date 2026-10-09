@@ -1,0 +1,115 @@
+PACKAGES SCOPE
+
+Summary (conservative: test fixtures, MCP stub-config design, and i18n keys declassified):
+  - blocker: 4
+  - major: 2
+  - minor: 102
+  - tech-debt: 34
+  - total cataloged: 142
+
+Table (<=80):
+01. packages/data-provider/src/data-service.ts:1252 | STUB | blocker | high | Implement unshipped backend | /* These were introduced by the original UI PR and are shipped as stubs in */
+02. packages/data-provider/src/keys.ts:148 | STUB | blocker | high | Implement unshipped backend | * phase 2 and currently stubbed in the data-service layer. */
+03. packages/data-provider/src/types/mutations.ts:406 | STUB | blocker | high | Implement unshipped backend | /* Skill tree / node mutations (phase 2 — stubbed in data-service) */
+04. packages/data-schemas/src/methods/skill.ts:1797 | STUB | blocker | high | Implement unshipped backend | * For phase 1, skill files are stubbed at the upload boundary, so the risk
+05. packages/client/src/components/Combobox.tsx:58 | HACK | major | med | Replace hack | /** Hacky fix for radix-ui Android issue: https://github.com/radix-ui/primitives/issues/16
+06. packages/client/src/components/Combobox.tsx:150 | HACK | major | med | Replace hack | /** Hacky fix for radix-ui Android issue: https://github.com/radix-ui/primitives/issues/16
+07. packages/api/src/agents/activityLabels/wiring.ts:335 | PENDING | minor | low | Review | * already published a PENDING part, so staying silent would
+08. packages/api/src/agents/handlers.ts:3871 | must-* | minor | low | N/A (prose/user-facing string) | '. This attached environment must update its Baanzon Chat Code worker before protected fil
+09. packages/api/src/flow/manager.ts:115 | PENDING | minor | low | Review | * Lifetime of a PENDING OAuth flow: how long the auth button stays valid and an
+10. packages/api/src/flow/manager.ts:542 | PENDING | minor | low | Review | * Stores initial PENDING flow state without starting the monitor loop.
+11. packages/api/src/flow/types.ts:21 | PENDING | minor | low | Review | /** Maximum time a flow may remain PENDING. Defaults to the storage TTL. */
+12. packages/api/src/mcp/MCPConnectionFactory.ts:1112 | PENDING | minor | low | Review | * entries are deleted; PENDING entries are completed with fresh tokens so
+13. packages/api/src/mcp/MCPConnectionFactory.ts:1542 | PENDING | minor | low | Review | // Start monitoring in background — createFlow will find the existing PENDING state
+14. packages/api/src/mcp/MCPConnectionFactory.ts:2017 | PENDING | minor | low | Review | // createFlow will find the existing PENDING state written by initFlow above,
+15. packages/api/src/oauth/expiry.ts:26 | STUB | minor | low | N/A (prose/verb, not an unimplemented seam) | * consumer that stubs OpenID token validation cannot leave the arithmetic reading `undefin
+16. packages/api/src/utils/axios.ts:15 | STUB | minor | low | N/A (prose/verb, not an unimplemented seam) | * stub streams entirely.
+17. packages/api/src/utils/oidc.ts:39 | PLACEHOLDER | minor | low | N/A (template token) | export const GRAPH_TOKEN_PLACEHOLDER = '{{BAANZON_GRAPH_ACCESS_TOKEN}}';
+18. packages/api/src/utils/oidc.ts:298 | PLACEHOLDER | minor | low | N/A (template token) | const genericPlaceholder = '{{BAANZON_OPENID_TOKEN}}';
+19. packages/data-provider/src/parameterSettings.ts:31 | PLACEHOLDER | minor | low | N/A (i18n key) | selectPlaceholder: 'com_ui_select_model',
+20. packages/data-provider/src/parameterSettings.ts:32 | PLACEHOLDER | minor | low | N/A (i18n key) | searchPlaceholder: 'com_ui_select_search_model',
+21. packages/data-provider/src/parameterSettings.ts:65 | PLACEHOLDER | minor | low | N/A (i18n key) | placeholder: 'com_endpoint_stop_placeholder',
+22. packages/data-provider/src/parameterSettings.ts:91 | PLACEHOLDER | minor | low | N/A (i18n key) | placeholder: 'com_endpoint_openai_custom_name_placeholder',
+23. packages/data-provider/src/parameterSettings.ts:101 | PLACEHOLDER | minor | low | N/A (i18n key) | placeholder: 'com_endpoint_default',
+24. packages/data-provider/src/parameterSettings.ts:128 | PLACEHOLDER | minor | low | N/A (i18n key) | placeholder: 'com_endpoint_openai_prompt_prefix_placeholder',
+25. packages/data-provider/src/parameterSettings.ts:158 | PLACEHOLDER | minor | low | N/A (i18n key) | placeholder: 'com_endpoint_default',
+26. packages/data-provider/src/parameterSettings.ts:231 | PLACEHOLDER | minor | low | N/A (i18n key) | placeholder: 'com_endpoint_default',
+27. packages/data-provider/src/parameterSettings.ts:403 | PLACEHOLDER | minor | low | N/A (i18n key) | placeholder: 'com_endpoint_default',
+28. packages/data-provider/src/parameterSettings.ts:471 | PLACEHOLDER | minor | low | N/A (i18n key) | selectPlaceholder: 'com_endpoint_prompt_cache_ttl_default',
+29. packages/data-provider/src/parameterSettings.ts:567 | PLACEHOLDER | minor | low | N/A (i18n key) | placeholder: 'com_endpoint_openai_prompt_prefix_placeholder',
+30. packages/data-provider/src/parameterSettings.ts:578 | PLACEHOLDER | minor | low | N/A (i18n key) | selectPlaceholder: 'com_ui_select_region',
+31. packages/data-provider/src/parameterSettings.ts:579 | PLACEHOLDER | minor | low | N/A (i18n key) | searchPlaceholder: 'com_ui_select_search_region',
+32. packages/data-provider/src/parameterSettings.ts:592 | PLACEHOLDER | minor | low | N/A (i18n key) | placeholder: 'com_endpoint_default',
+33. packages/data-provider/src/parameterSettings.ts:633 | PLACEHOLDER | minor | low | N/A (i18n key) | selectPlaceholder: 'com_endpoint_prompt_cache_ttl_default',
+34. packages/data-provider/src/parameterSettings.ts:747 | PLACEHOLDER | minor | low | N/A (i18n key) | placeholder: 'com_endpoint_default',
+35. packages/data-provider/src/parameterSettings.ts:777 | PLACEHOLDER | minor | low | N/A (i18n key) | placeholder: 'com_ui_auto',
+36. packages/data-schemas/src/methods/agent.ts:1084 | STUB | minor | low | N/A (prose/verb, not an unimplemented seam) | * so file deletion cannot leave orphaned stubs behind (see issue #12776).
+37. packages/api/src/agents/handlers.ts:4806 | TODO | tech-debt | med | Address TODO | // TODO: PDF artifact support requires a document content block path
+38. packages/api/src/endpoints/anthropic/helpers.ts:111 | TODO | tech-debt | med | Address TODO | * TODO: Remove the cast once `@librechat/agents` updates its
+39. packages/api/src/mcp/ConnectionsRepository.ts:237 | TODO | tech-debt | med | Address TODO | //TODO in the future we should use a scoped config getter (APPLevel, UserLevel, Private)
+40. packages/api/src/mcp/catalog/recovery.ts:236 | STUB | tech-debt | low | N/A (documented MCP recovery design) | /** Only the config tier retries a failed stub on its own clock. A `yaml`- or `user`-sourc
+41. packages/api/src/mcp/catalog/recovery.ts:237 | STUB | tech-debt | low | N/A (documented MCP recovery design) | * stub has no such timer, so skipping it unconditionally would hide the server for good —
+42. packages/api/src/mcp/registry/MCPServersInitializer.ts:163 | STUB | tech-debt | low | N/A (documented MCP recovery design) | `${MCPServersInitializer.prefix(serverName)} Stored stub config for recovery via reinitial
+43. packages/api/src/mcp/registry/MCPServersInitializer.ts:167 | STUB | tech-debt | low | N/A (documented MCP recovery design) | `${MCPServersInitializer.prefix(serverName)} Failed to store stub config:`,
+44. packages/api/src/mcp/registry/MCPServersRegistry.ts:22 | STUB | tech-debt | low | N/A (documented MCP recovery design) | /** How long a failure stub is considered fresh before re-attempting inspection (5 minutes
+45. packages/api/src/mcp/registry/MCPServersRegistry.ts:366 | STUB | tech-debt | low | N/A (documented MCP recovery design) | * failed stub from one tenant can never satisfy a no-userId lookup from
+46. packages/api/src/mcp/registry/MCPServersRegistry.ts:513 | STUB | tech-debt | low | N/A (documented MCP recovery design) | * Stores a minimal config stub so the server remains "known" to the registry
+47. packages/api/src/mcp/registry/MCPServersRegistry.ts:650 | STUB | tech-debt | low | N/A (documented MCP recovery design) | * Uses the stored stub config to attempt a full inspection and replaces the stub on succes
+48. packages/api/src/mcp/registry/MCPServersRegistry.ts:845 | STUB | tech-debt | low | N/A (documented MCP recovery design) | * Stale failure stubs are retried after `CONFIG_STUB_RETRY_MS` to recover from transient e
+49. packages/api/src/mcp/registry/MCPServersRegistry.ts:861 | STUB | tech-debt | low | N/A (documented MCP recovery design) | logger.info('[MCP][config] Retrying stale failure stub');
+50. packages/api/src/mcp/registry/MCPServersRegistry.ts:928 | STUB | tech-debt | low | N/A (documented MCP recovery design) | logger.info(`${prefix} Stored stub config for recovery`);
+51. packages/api/src/mcp/registry/MCPServersRegistry.ts:930 | STUB | tech-debt | low | N/A (documented MCP recovery design) | logger.error(`${prefix} Failed to store stub config; will retry on next request`);
+52. packages/api/src/mcp/registry/MCPServersRegistry.ts:973 | TODO | tech-debt | med | Address TODO | // TODO: Refactor callers to use config.requiresOAuth directly instead of this method.
+53. packages/api/src/mcp/registry/MCPServersRegistry.ts:1122 | STUB | tech-debt | low | N/A (documented MCP recovery design) | * an `inspectionFailed` stub from a rejected domain — never satisfies another tenant's loo
+54. packages/api/src/prompts/artifacts/components.ts:94 | PLACEHOLDER | tech-debt | med | Localize hardcoded string | <SelectValue placeholder="Theme" />
+55. packages/api/src/skills/sync/github.ts:350 | TODO | tech-debt | med | Address TODO | // `always-apply: # TODO`, which js-yaml yields as null). Apply the same
+56. packages/client/src/components/DataTable.tsx:422 | PLACEHOLDER | tech-debt | med | Localize hardcoded string | placeholder="Search..."
+57. packages/client/src/components/InputCombobox.tsx:20 | PLACEHOLDER | tech-debt | med | Localize hardcoded string | placeholder = 'Select an option',
+58. packages/client/src/components/InputNumber.tsx:10 | TODO | tech-debt | med | Address TODO | // TODO help needed
+59. packages/client/src/components/MultiSelect.tsx:78 | PLACEHOLDER | tech-debt | med | Localize hardcoded string | placeholder = 'Select...',
+60. packages/data-provider/src/actions.ts:264 | TODO | tech-debt | med | Address TODO | // TODO: maybe doing it in a different way later on. but we want that the user needs to fo
+61. packages/data-provider/src/config.ts:2975 | TODO | tech-debt | med | Address TODO | // TODO: Add agent models (agentsModels)
+62. packages/data-provider/src/config.ts:3031 | TODO | tech-debt | med | Address TODO | [EModelEndpoint.agents]: openAIModels, // TODO: Add agent models (agentsModels)
+63. packages/data-provider/src/schemas.ts:1471 | TODO | tech-debt | med | Address TODO | * TODO: Map the following fields:
+64. packages/data-provider/src/types.ts:32 | TODO | tech-debt | med | Address TODO | /* TODO: Cleanup EndpointOption types */
+65. packages/data-provider/src/types.ts:273 | TODO | tech-debt | med | Address TODO | // TODO `label` needs to be changed to the proper `TranslationKeys`
+66. packages/data-schemas/src/admin/capabilities.ts:194 | TODO | tech-debt | med | Address TODO | * TODO: Section-level config capabilities are scaffolded but not yet active.
+67. packages/data-schemas/src/app/turnstile.ts:11 | your- | tech-debt | med | Replace placeholder string | * siteKey: "your-site-key-here"
+68. packages/api/run1.txt:887 | STUB | minor | low | N/A (test fixture) | ΓùÅ MCP reinitialize recovery ΓÇô integration (issue #12143) ΓÇ║ should store a stub confi
+69. packages/api/run1.txt:935 | STUB | minor | low | N/A (test fixture) | ΓùÅ MCP reinitialize recovery ΓÇô integration (issue #12143) ΓÇ║ should not attempt connec
+70. packages/api/run1_final.txt:11 | STUB | minor | low | N/A (test fixture) | ΓùÅ MCP reinitialize recovery ΓÇô integration (issue #12143) ΓÇ║ should store a stub confi
+71. packages/api/run1_final.txt:59 | STUB | minor | low | N/A (test fixture) | ΓùÅ MCP reinitialize recovery ΓÇô integration (issue #12143) ΓÇ║ should not attempt connec
+72. packages/api/run2.txt:11 | STUB | minor | low | N/A (test fixture) | ΓùÅ MCP reinitialize recovery ΓÇô integration (issue #12143) ΓÇ║ should store a stub confi
+73. packages/api/run2.txt:59 | STUB | minor | low | N/A (test fixture) | ΓùÅ MCP reinitialize recovery ΓÇô integration (issue #12143) ΓÇ║ should not attempt connec
+74. packages/api/src/agents/__tests__/initialize.test.ts:2 | STUB | minor | low | N/A (test fixture) | * Stub `buildBashExecutionToolDescription` since the installed SDK version
+75. packages/api/src/agents/__tests__/run-summarization.test.ts:84 | STUB | minor | low | N/A (test fixture) | // Stub the durable checkpointer so the HITL-enabled path doesn't need a live Mongo.
+76. packages/api/src/agents/__tests__/skills.test.ts:3 | STUB | minor | low | N/A (test fixture) | * export yet — the `Constants.SKILL_TOOL` stub and the tool definitions
+77. packages/api/src/agents/__tests__/skills.test.ts:6 | STUB | minor | low | N/A (test fixture) | * `formatSkillCatalog` is deliberately NOT stubbed. Its truncation ladder is
+78. packages/api/src/agents/__tests__/skills.test.ts:7 | STUB | minor | low | N/A (test fixture) | * the behaviour the catalog warnings report on, and a passthrough stub hides
+79. packages/api/src/agents/__tests__/skills.test.ts:1303 | STUB | minor | low | N/A (test fixture) | * the registry mock's stub of `buildBashExecutionToolDescription`
+80. packages/api/src/agents/steering/__tests__/media.spec.ts:9 | STUB | minor | low | N/A (test fixture) | /** Stand-in for AgentClient: the encode fan-out is stubbed at the same seam
+
+Notable (RAG + schema drift):
+01. packages/api/src/rag/embeddings.spec.ts:260 | STUB | minor | * used to be invisible: a stub that returned zero vectors looked exactly like a
+02. packages/data-schemas/src/methods/skill.ts:1797 | STUB | blocker | * For phase 1, skill files are stubbed at the upload boundary, so the risk
+03. packages/data-schemas/src/methods/agent.ts:1084 | STUB | minor | * so file deletion cannot leave orphaned stubs behind (see issue #12776).
+04. packages/data-schemas/src/admin/capabilities.ts:194 | TODO | tech-debt | * TODO: Section-level config capabilities are scaffolded but not yet active.
+05. packages/data-schemas/src/app/turnstile.ts:11 | your- | tech-debt | * siteKey: "your-site-key-here"
+06. packages/data-schemas/src/utils/transactions.spec.ts:4 | STUB | minor | // The cache-hit path does not touch the database, so a stub mongoose is fine.
+
+RAG focus result (grep #2): 0 hits in semanticSearch.ts, embeddings.ts, authorization.ts,
+vectorStores.ts; 1 hit in service.ts:546 (WIP prose: "wipe a shared collection's index" — a
+false positive). EmbeddingsProvider is a 6-line interface, InMemoryVectorStore is a full
+implementation (not a stub), and the keyword fallback is implemented at service.ts:674-731.
+
+i18n / hardcoded-string notes:
+  - packages/client/src/components/DataTable.tsx:422 hardcoded "Search..." (unlocalized)
+  - packages/client/src/components/InputCombobox.tsx:20 'Select an option' (unlocalized)
+  - packages/client/src/components/MultiSelect.tsx:78 'Select...' (unlocalized)
+  - packages/data-provider/src/parameterSettings.ts placeholder fields are com_* i18n keys (OK)
+
+Grep commands:
+1. Full scan: cd "C:/Users/manag/Baanzon Chat/LibreChat" && rg -n --no-heading "(PENDING|TODO|FIXME|HACK|XXX|STUB|PLACEHOLDER|WIP|TBD|need fix|must add|must enhance|must upgrade|must update|<fill|your-)" packages --glob "!**/node_modules/**" --glob "!**/dist/**" --glob "!**/build/**" --glob "!**/coverage/**" --glob "!**/.turbo/**" --glob "!**/.next/**"
+2. RAG focus: cd "C:/Users/manag/Baanzon Chat/LibreChat" && rg -n --no-heading "(PENDING|TODO|FIXME|HACK|XXX|STUB|PLACEHOLDER|WIP|TBD)" packages/api/src/rag/semanticSearch.ts packages/api/src/rag/embeddings.ts packages/api/src/rag/service.ts packages/api/src/rag/authorization.ts packages/api/src/rag/vectorStores.ts
+3. data-schemas turnstile: cd "C:/Users/manag/Baanzon Chat/LibreChat" && rg -n --no-heading "(your-|PLACEHOLDER|TODO)" packages/data-schemas/src/app/turnstile.ts
+4. InMemoryVectorStore stubs: cd "C:/Users/manag/Baanzon Chat/LibreChat" && rg -n --no-heading "InMemoryVectorStore|STUB" packages/api/src/rag/vectorStores.ts packages/api/src/rag/vectorStores.spec.ts

@@ -1,0 +1,532 @@
+# Lint — repo-wide ESLint, in a form that actually terminates.
+#
+# WHY THIS FILE EXISTS
+# `npm run lint` is `eslint .`, and a bare `eslint .` on this tree does not finish
+# inside a 900 s budget. Measured across 26 timed batches over 4565 files, the cost
+# is NOT slow code — it is fixed per-invocation overhead: ~9 s to load the flat
+# config, and ~60 x ~10 s of startup across the batches. Total ESLint work is
+# ~2400 s; the largest single batch is `packages/api` at 1261 files / 586 s. A
+# gate nobody can wait for is a gate that gets deleted, so this file does two
+# things: run the whole tree in ONE invocation (one config load, and a warm cache
+# makes the rerun essentially free), and split the tree per workspace in parallel
+# so a failure names the workspace that produced it.
+#
+# WHAT THIS ADDS TO EXISTING COVERAGE (additive, replaces nothing)
+# static-checks.yml runs scripts/static-checks.mts, whose ESLint check
+# (scripts/static-checks.mts:574 lintChangedFiles) is pointed at the *diff*
+# (`context.sourceFiles`, filtered by SOURCE_FILE_PATTERN at line 120). Its
+# eslint-config check (line 647 validateEslintConfig) lints three smoke files.
+# Neither is a repo-wide lint: before this file, no CI job ever ran ESLint over
+# all 4565 files, so a rule violation introduced in one commit and untouched
+# after it was never linted again. This file is the full-tree gate; the diff
+# gate in static-checks.yml stays, because a 60-second diff-scoped check is the
+# fast signal and this one is the slow, authoritative one.
+#
+# EXPECT THE FIRST RUN TO BE RED — inherited debt, not a broken workflow.
+# At HEAD the tree carries 30 errors and 17 warnings across 24 files, all
+# pre-existing (none in the uncommitted set). `--max-warnings=0` is not
+# decoration: CLAUDE.md "Code Style" requires every ESLint warning and error to
+# be resolved, so warnings count as failures. A separate workstream is closing
+# that debt toward 0/0; this gate is written for the target state and goes green
+# when it lands. It is deliberately NOT softened with `|| true`,
+# `--quiet`, or a raised `--max-warnings` to manufacture a green first run — the
+# same reasoning static-checks.yml records in its own header.
+#
+# REQUIRED vs ADVISORY — why the single invocation is the gate
+#   repo-lint       REQUIRED.     `eslint .` — the only job that covers the whole
+#                                tree. The workspace matrix below provably does
+#                                not: the 7 workspace paths miss root-level
+#                                files, and the root eslint.config.mjs IS
+#                                lintable (verified: `npx eslint
+#                                eslint.config.mjs` exits 0 over 1 file). A
+#                                required gate that skips the file defining the
+#                                rules is not a gate.
+#   workspace-lint  ADVISORY.     `continue-on-error: true` at the JOB level, so
+#                                GitHub reports it as a non-blocking check. It
+#                                exists for failure isolation and for the
+#                                per-workspace rule counts, not as the gate.
+#   sort-imports    REQUIRED.     Was advisory only while it was red on 99
+#                                pre-existing files; the backlog is now clear,
+#                                so it gates like repo-lint.
+# Nothing here can be silently skipped: repo-lint has no `continue-on-error`, no
+# `if:` that can be false on a pull request, and no path filter. Its only
+# early-exit is the aggregate step, which exists to fail the job closed.
+#
+# NO `--ext` UNDER FLAT CONFIG — verified, do not add it back
+# eslint.config.mjs is flat config. A directory target is expanded to every
+# extension named in a `files` entry, which is why `npm run lint` already
+# covers .ts/.tsx with no flag. Verified on this tree:
+#   npx eslint config --format=json      -> 47 files (.js, .cjs, .mjs, .ts)
+#   npx eslint config --ext .ts,.js ...  -> the same 47 files, --ext ignored
+# So `--ext` is accepted and then does nothing: it cannot narrow the set, and
+# adding it would be cargo cult from eslintrc. Note this also means
+# `--no-warn-ignored` (which static-checks.mts passes) is for explicit file
+# lists, not a directory target, and is deliberately absent here.
+#
+# FORMAT: one `--format`, not two
+# ESLint 9 models `--format` as a single string (node_modules/eslint/lib/
+# options.js:374 `type: "String"`), and cli.js:113 printResults takes one
+# formatter plus one `--output-file`. Repeating `--format` silently keeps only
+# the LAST one, so "stylish to the log and json to a file in one pass" does not
+# exist in this version. The job takes `--format=json --output-file` and the
+# next step renders both the log and the job summary from that one report.
+#
+# NO BUN. The repo tracks both package-lock.json and bun.lock and the decision is
+# PENDING; every other workflow here installs with npm against package-lock.json
+# (`packageManager` is npm@11.13.0, config/update.js:118 and both Dockerfiles
+# run `npm ci`). No bun check is added here, and none should be until that
+# decision lands.
+#
+# The summary script below is duplicated across the two ESLint jobs on purpose:
+# scripts/static-checks.mts is out of this file's scope, and both test.yml and
+# typecheck.yml already inline their per-job aggregation rather than sharing a
+# helper. Keep the two copies in step.
+
+name: Lint
+
+on:
+  pull_request:
+    # Every pull request, whatever the base: see the note in static-checks.yml.
+  push:
+    branches:
+      - b1
+      - dev
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  # CLAUDE.md "Code Style": all ESLint warnings and errors must be resolved.
+  # So warnings fail the gate, and 0 is the only defensible value.
+  MAX_WARNINGS: '0'
+  REPORT_DIR: ${{ github.workspace }}/.eslint-reports
+
+jobs:
+  # ---------------------------------------------------------------- required
+  repo-lint:
+    name: ESLint (whole repo, one invocation)
+    runs-on: ubuntu-latest
+    # 30 min = 1800 s. Arithmetic: npm ci on this tree ~120-240 s, checkout and
+    # setup-node ~35 s, the single ESLint invocation 400-600 s (measured), report
+    # render ~2 s, cache save ~20 s -> ~580-900 s worst case. 1800 s is ~2x
+    # headroom on the top of that range. A timeout that fires on a slow-but-correct
+    # run is worse than a slow gate, so the ceiling is set well above the
+    # measurement rather than near it.
+    timeout-minutes: 30
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc # 24.16.0
+          cache: npm
+          # package-lock.json is the lockfile of record (packageManager npm@11.13.0).
+          # bun.lock is also tracked — known issue P1-10, decision pending.
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        # Required before the cache step: the cache key reads the installed
+        # ESLint version, not the manifest.
+        id: install
+        run: npm ci
+
+      - name: Resolve the installed ESLint version
+        # Part of the cache key, so an ESLint bump invalidates the cache even if
+        # the key's lockfile segment somehow did not move. `require` on
+        # eslint/package.json is exported; verified: prints 9.39.1.
+        id: ver
+        run: echo "version=$(node -p "require('eslint/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the ESLint cache
+        id: cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          # Exact key, and deliberately NO `restore-keys`. A prefix fallback would
+          # happily restore a cache built against a different dependency tree,
+          # which is exactly the invalidation this key exists to guarantee — and it
+          # buys nothing: on a lockfile bump the full re-lint is work that SHOULD
+          # be redone. Same-key hits are the common case (a PR that does not touch
+          # package-lock.json reuses dev's cache).
+          key: eslint-full-${{ runner.os }}-v${{ steps.ver.outputs.version }}-${{ hashFiles('package-lock.json') }}
+          # Default location, at the workspace root, because that is the path
+          # actions/cache is built around. It is not in .gitignore and this file's
+          # scope is .github/workflows/**, so no ignore rule is added; the file
+          # only ever exists inside a throwaway CI checkout that never commits.
+          path: .eslintcache
+          # No `lookup-only` and no `fail-on-cache-miss`: both are defaults, and a
+          # cache miss must not fail the job. The lint step echoes this step's
+          # `cache-hit` output so a cold start is visible in the log rather than
+          # looking like a hang.
+
+      - name: Lint the whole repo
+        id: lint
+        # continue-on-error so the report step below always runs and the failure
+        # is reported once, with counts, instead of as a bare non-zero exit. The
+        # report step is what fails the job — same contract as test.yml and
+        # typecheck.yml.
+        continue-on-error: true
+        run: |
+          mkdir -p "$REPORT_DIR"
+          echo "eslint ${{ steps.ver.outputs.version }} | max-warnings=$MAX_WARNINGS | cache-hit=${{ steps.cache.outputs.cache-hit }}"
+          npx eslint . \
+            --cache \
+            --cache-strategy content \
+            --max-warnings="$MAX_WARNINGS" \
+            --format=json \
+            --output-file="$REPORT_DIR/repo-lint.json"
+
+      - name: Report and fail closed
+        # This is the gate. `always()` so it also runs when ESLint itself died.
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          node - "$REPORT_DIR/repo-lint.json" "$MAX_WARNINGS" 'repo-lint (eslint .)' <<'JSEOF'
+          const fs = require('node:fs');
+          const path = require('node:path');
+
+          const report = process.argv[2];
+          const maxWarnings = Number(process.argv[3]);
+          const label = process.argv[4];
+          if (!fs.existsSync(report)) {
+            console.error('No ESLint report at ' + report + ' — the lint step did not produce one.');
+            process.exit(1);
+          }
+          const results = JSON.parse(fs.readFileSync(report, 'utf8'));
+          const root = process.env.GITHUB_WORKSPACE || process.cwd();
+          const rel = (p) => path.relative(root, p).split(path.sep).join('/');
+          const area = (p) => {
+            const parts = rel(p).split('/');
+            return parts[0] === 'packages' && parts[1] ? 'packages/' + parts[1] : parts[0] || '(repository root)';
+          };
+
+          const areas = new Map();
+          const rules = new Map();
+          const dirty = [];
+          let errors = 0;
+          let warnings = 0;
+
+          for (const r of results) {
+            errors += r.errorCount;
+            warnings += r.warningCount;
+            if (r.messages.length === 0) continue;
+            const a = areas.get(area(r.filePath)) || { errors: 0, warnings: 0, files: 0 };
+            a.errors += r.errorCount;
+            a.warnings += r.warningCount;
+            a.files += 1;
+            areas.set(area(r.filePath), a);
+            dirty.push(r);
+            for (const m of r.messages) {
+              const id = m.ruleId || '(parse error)';
+              rules.set(id, (rules.get(id) || 0) + 1);
+            }
+          }
+
+          const areaRows = [...areas.entries()].sort(
+            (a, b) => b[1].errors - a[1].errors || b[1].warnings - a[1].warnings,
+          );
+          const ruleRows = [...rules.entries()].sort((a, b) => b[1] - a[1]);
+
+          const pad = (s, n) => String(s).padEnd(n);
+          const lpad = (s, n) => String(s).padStart(n);
+          const head = errors + ' error(s), ' + warnings + ' warning(s); --max-warnings=' + maxWarnings;
+          const log = [];
+          log.push('ESLint ' + label);
+          log.push(results.length + ' files linted — ' + head);
+          log.push('');
+          log.push(pad('AREA', 24) + lpad('ERRORS', 8) + lpad('WARNINGS', 10) + lpad('FILES', 8));
+          for (const [k, v] of areaRows) {
+            log.push(pad(k, 24) + lpad(v.errors, 8) + lpad(v.warnings, 10) + lpad(v.files, 8));
+          }
+          log.push('');
+          log.push(pad('RULE', 48) + lpad('COUNT', 7));
+          for (const [k, n] of ruleRows) log.push(pad(k, 48) + lpad(n, 7));
+          if (dirty.length) {
+            log.push('');
+            log.push('FILES WITH PROBLEMS (showing ' + Math.min(dirty.length, 20) + ' of ' + dirty.length + ')');
+            for (const r of dirty.slice(0, 20)) {
+              log.push('  ' + rel(r.filePath));
+              for (const m of r.messages.slice(0, 5)) {
+                log.push('    ' + m.line + ':' + m.column + '  ' + pad(m.ruleId || 'parse error', 44) + m.message);
+              }
+              if (r.messages.length > 5) log.push('    ... ' + (r.messages.length - 5) + ' more in this file');
+            }
+          }
+          console.log(log.join('\n'));
+
+          const md = [];
+          md.push('### ESLint — ' + label);
+          md.push('');
+          md.push(results.length + ' files linted — **' + errors + ' error(s), ' + warnings + ' warning(s)** (`--max-warnings=' + maxWarnings + '`)');
+          md.push('');
+          md.push('| Area | Errors | Warnings | Files with problems |');
+          md.push('| --- | ---: | ---: | ---: |');
+          for (const [k, v] of areaRows) md.push('| `' + k + '` | ' + v.errors + ' | ' + v.warnings + ' | ' + v.files + ' |');
+          md.push('');
+          md.push('| Rule | Count |');
+          md.push('| --- | ---: |');
+          for (const [k, n] of ruleRows) md.push('| `' + k + '` | ' + n + ' |');
+          md.push('');
+          if (process.env.GITHUB_STEP_SUMMARY) {
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md.join('\n') + '\n');
+          }
+
+          if (errors > 0 || (maxWarnings >= 0 && warnings > maxWarnings)) {
+            console.error('ESLint FAILED for ' + label + ': ' + errors + ' error(s), ' + warnings + ' warning(s).');
+            process.exit(1);
+          }
+          console.log('ESLint PASSED for ' + label + '.');
+          JSEOF
+
+      - name: Save the ESLint cache
+        # Runs even when the lint failed, and that is safe: ESLint's cache stores
+        # each file's RESULT, messages included, so a later cache hit re-reports
+        # the same diagnostics instead of skipping them. Verified on config/
+        # (47 files): cold run and three subsequent cache-hit runs all reported
+        # errors=3 warnings=1. A cached file is skipped, never silenced.
+        # Skipped only if the install failed (no cache file would exist) or the
+        # lint was cancelled (a half-written cache must not be published).
+        if: ${{ always() && steps.install.outcome == 'success' && steps.lint.outcome != 'cancelled' }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          key: eslint-full-${{ runner.os }}-v${{ steps.ver.outputs.version }}-${{ hashFiles('package-lock.json') }}
+          path: .eslintcache
+
+      - name: Upload the ESLint report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: eslint-report-repo
+          path: ${{ env.REPORT_DIR }}/repo-lint.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # ---------------------------------------------------------------- advisory
+  workspace-lint:
+    name: ESLint (${{ matrix.workspace }}) — advisory
+    runs-on: ubuntu-latest
+    # Job-level continue-on-error is what makes this advisory: GitHub renders the
+    # check as non-blocking, so it reports a red workspace without being able to
+    # gate a merge. The required gate is repo-lint.
+    continue-on-error: true
+    timeout-minutes: 25
+    strategy:
+      # Every workspace reports, so one red workspace does not hide the other six.
+      fail-fast: false
+      matrix:
+        workspace:
+          - packages/api
+          - packages/client
+          - client
+          - packages/data-schemas
+          - packages/data-provider
+          - api
+          - config
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc # 24.16.0
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        id: install
+        run: npm ci
+
+      - name: Resolve the installed ESLint version
+        id: ver
+        run: echo "version=$(node -p "require('eslint/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the ESLint cache
+        id: cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          # Keyed per workspace, so seven parallel jobs never race to save the
+          # same entry (the first save wins and the rest are wasted). The
+          # `ws-` prefix also keeps these entries disjoint from repo-lint's.
+          key: eslint-ws-${{ matrix.workspace }}-${{ runner.os }}-v${{ steps.ver.outputs.version }}-${{ hashFiles('package-lock.json') }}
+          path: .eslintcache
+
+      - name: Lint ${{ matrix.workspace }}
+        id: lint
+        continue-on-error: true
+        run: |
+          mkdir -p "$REPORT_DIR"
+          echo "eslint ${{ steps.ver.outputs.version }} | workspace=${{ matrix.workspace }} | max-warnings=$MAX_WARNINGS | cache-hit=${{ steps.cache.outputs.cache-hit }}"
+          npx eslint "${{ matrix.workspace }}" \
+            --cache \
+            --cache-strategy content \
+            --max-warnings="$MAX_WARNINGS" \
+            --format=json \
+            --output-file="$REPORT_DIR/workspace-lint.json"
+
+      # Byte-identical to repo-lint's report step apart from the label and the
+      # report path. Same inline-aggregation pattern as test.yml/typecheck.yml.
+      - name: Report
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          node - "$REPORT_DIR/workspace-lint.json" "$MAX_WARNINGS" '${{ matrix.workspace }}' <<'JSEOF'
+          const fs = require('node:fs');
+          const path = require('node:path');
+
+          const report = process.argv[2];
+          const maxWarnings = Number(process.argv[3]);
+          const label = process.argv[4];
+          if (!fs.existsSync(report)) {
+            console.error('No ESLint report at ' + report + ' — the lint step did not produce one.');
+            process.exit(1);
+          }
+          const results = JSON.parse(fs.readFileSync(report, 'utf8'));
+          const root = process.env.GITHUB_WORKSPACE || process.cwd();
+          const rel = (p) => path.relative(root, p).split(path.sep).join('/');
+          const area = (p) => {
+            const parts = rel(p).split('/');
+            return parts[0] === 'packages' && parts[1] ? 'packages/' + parts[1] : parts[0] || '(repository root)';
+          };
+
+          const areas = new Map();
+          const rules = new Map();
+          const dirty = [];
+          let errors = 0;
+          let warnings = 0;
+
+          for (const r of results) {
+            errors += r.errorCount;
+            warnings += r.warningCount;
+            if (r.messages.length === 0) continue;
+            const a = areas.get(area(r.filePath)) || { errors: 0, warnings: 0, files: 0 };
+            a.errors += r.errorCount;
+            a.warnings += r.warningCount;
+            a.files += 1;
+            areas.set(area(r.filePath), a);
+            dirty.push(r);
+            for (const m of r.messages) {
+              const id = m.ruleId || '(parse error)';
+              rules.set(id, (rules.get(id) || 0) + 1);
+            }
+          }
+
+          const areaRows = [...areas.entries()].sort(
+            (a, b) => b[1].errors - a[1].errors || b[1].warnings - a[1].warnings,
+          );
+          const ruleRows = [...rules.entries()].sort((a, b) => b[1] - a[1]);
+
+          const pad = (s, n) => String(s).padEnd(n);
+          const lpad = (s, n) => String(s).padStart(n);
+          const head = errors + ' error(s), ' + warnings + ' warning(s); --max-warnings=' + maxWarnings;
+          const log = [];
+          log.push('ESLint ' + label);
+          log.push(results.length + ' files linted — ' + head);
+          log.push('');
+          log.push(pad('AREA', 24) + lpad('ERRORS', 8) + lpad('WARNINGS', 10) + lpad('FILES', 8));
+          for (const [k, v] of areaRows) {
+            log.push(pad(k, 24) + lpad(v.errors, 8) + lpad(v.warnings, 10) + lpad(v.files, 8));
+          }
+          log.push('');
+          log.push(pad('RULE', 48) + lpad('COUNT', 7));
+          for (const [k, n] of ruleRows) log.push(pad(k, 48) + lpad(n, 7));
+          if (dirty.length) {
+            log.push('');
+            log.push('FILES WITH PROBLEMS (showing ' + Math.min(dirty.length, 20) + ' of ' + dirty.length + ')');
+            for (const r of dirty.slice(0, 20)) {
+              log.push('  ' + rel(r.filePath));
+              for (const m of r.messages.slice(0, 5)) {
+                log.push('    ' + m.line + ':' + m.column + '  ' + pad(m.ruleId || 'parse error', 44) + m.message);
+              }
+              if (r.messages.length > 5) log.push('    ... ' + (r.messages.length - 5) + ' more in this file');
+            }
+          }
+          console.log(log.join('\n'));
+
+          const md = [];
+          md.push('### ESLint — ' + label);
+          md.push('');
+          md.push(results.length + ' files linted — **' + errors + ' error(s), ' + warnings + ' warning(s)** (`--max-warnings=' + maxWarnings + '`)');
+          md.push('');
+          md.push('| Area | Errors | Warnings | Files with problems |');
+          md.push('| --- | ---: | ---: | ---: |');
+          for (const [k, v] of areaRows) md.push('| `' + k + '` | ' + v.errors + ' | ' + v.warnings + ' | ' + v.files + ' |');
+          md.push('');
+          md.push('| Rule | Count |');
+          md.push('| --- | ---: |');
+          for (const [k, n] of ruleRows) md.push('| `' + k + '` | ' + n + ' |');
+          md.push('');
+          if (process.env.GITHUB_STEP_SUMMARY) {
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md.join('\n') + '\n');
+          }
+
+          if (errors > 0 || (maxWarnings >= 0 && warnings > maxWarnings)) {
+            console.error('ESLint FAILED for ' + label + ': ' + errors + ' error(s), ' + warnings + ' warning(s).');
+            process.exit(1);
+          }
+          console.log('ESLint PASSED for ' + label + '.');
+          JSEOF
+
+      - name: Save the ESLint cache
+        if: ${{ always() && steps.install.outcome == 'success' && steps.lint.outcome != 'cancelled' }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          key: eslint-ws-${{ matrix.workspace }}-${{ runner.os }}-v${{ steps.ver.outputs.version }}-${{ hashFiles('package-lock.json') }}
+          path: .eslintcache
+
+  # ---------------------------------------------------------------- advisory
+  sort-imports:
+    name: Import sort order
+    runs-on: ubuntu-latest
+    # REQUIRED as of the sort cleanup: the inherited backlog is cleared, so this
+    # is a real gate. It was advisory only while it was red on 99 pre-existing
+    # files; a check that is green everywhere but ignored is not a gate.
+    # 5 min = 300 s. Arithmetic: this script imports only node: builtins
+    # (scripts/sort-imports.mts:23-25 — node:fs/promises, node:path, node:url),
+    # so there is no `npm ci` at all: checkout ~20 s + the scan (23.1 s as
+    # measured, 5.2 s re-measured here) ~= 45 s. 300 s is ~6x that.
+    timeout-minutes: 5
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc # 24.16.0
+          # No `cache: npm` and no install: the script has no dependencies.
+
+      - name: Check import order
+        id: sort
+        run: npm run sort-imports:check
+
+      - name: Summarise
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          if [ "${{ steps.sort.outcome }}" = "success" ]; then
+            echo 'Import order clean.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          {
+            echo '### Import sort order'
+            echo
+            echo '`npm run sort-imports:check` with no arguments scans every source'
+            echo 'root (`api`, `client/src`, `packages/{api,data-provider,data-schemas,client}/src`)'
+            echo 'and exits 1 if any file is unsorted. This is a required check.'
+            echo
+            echo 'Pass file paths, never a directory: `collectFiles()` filters arguments'
+            echo 'through `hasSourceExtension`, so a directory argument is dropped and the'
+            echo 'tool prints "All 0 files already sorted" and exits 0 without linting'
+            echo 'anything. Trust the file count in the output, not the exit code.'
+            echo
+            echo 'Fix everything:      `npm run sort-imports`'
+            echo 'Fix specific files:  `npm run sort-imports -- <files>`'
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat "$GITHUB_STEP_SUMMARY"

@@ -425,6 +425,7 @@ const startServer = async () => {
   app.use('/api/agents', routes.agents);
   app.use('/api/banner', routes.banner);
   app.use('/api/memories', routes.memories);
+  app.use('/api/knowledge', routes.knowledge);
   app.use('/api/schedules', rejectScheduleWritesUntilReady, routes.schedules);
   app.use('/api/permissions', routes.accessPermissions);
 
