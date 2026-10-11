@@ -82,6 +82,9 @@ export enum QueryKeys {
   skillFiles = 'skillFiles',
   skillFileContent = 'skillFileContent',
   /* Skill tree (phase 2 — filesystem-style node view) */
+  /* DECISION NEEDED: tree/node keys belong to the skill-tree feature whose
+   * data-service calls throw. They are inert string ids; keep only if the
+   * feature ships (and its backend endpoints are wired). */
   skillTree = 'skillTree',
   skillNodeContent = 'skillNodeContent',
   /* Tool favorites (starred marketplace items) */
@@ -144,8 +147,9 @@ export enum MutationKeys {
   updateProject = 'updateProject',
   deleteProject = 'deleteProject',
   assignConversationToProject = 'assignConversationToProject',
-  /* Skill mutations from the original UI PR — tree/node operations are
-   * phase 2 and currently stubbed in the data-service layer. */
+  /* DECISION NEEDED: skill-node mutations from the original UI PR — tree/node
+   * operations are phase 2 and the data-service layer now throws. Retain only
+   * once the feature and its backend endpoints are wired. */
   createSkillNode = 'createSkillNode',
   updateSkillNode = 'updateSkillNode',
   deleteSkillNode = 'deleteSkillNode',

@@ -127,6 +127,22 @@ Guidelines:
       description:
         'The size of the generated images. For gpt-image-1: auto (default), 1024x1024, 1536x1024, 1024x1536. For dall-e-2: 256x256, 512x512, 1024x1024.',
     },
+    mask_ids: {
+      type: 'array',
+      items: { type: 'string' },
+      maxItems: 1,
+      description: `Optional IDs of an uploaded mask image (PNG) whose fully transparent areas indicate where
+the \`image_ids\` image should be edited (inpainting). At most one mask is supported.
+When editing multiple images, the mask is applied to the first image. Omit when no mask is needed.
+Only use IDs that are still visible in the conversation context; never invent or hallucinate IDs.`,
+    },
+    n: {
+      type: 'integer',
+      minimum: 1,
+      maximum: 10,
+      description:
+        'The number of edited images to generate. Defaults to 1. Must be between 1 and 10.',
+    },
   },
   required: ['image_ids', 'prompt'],
 };

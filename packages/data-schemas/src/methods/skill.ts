@@ -1794,8 +1794,14 @@ export function createSkillMethods(
    *   - periodic reconciliation: `fileCount = count(skill_files where skillId = ?)`
    *   - treat `fileCount` as advisory and recompute on read when accuracy
    *     matters
-   * For phase 1, skill files are stubbed at the upload boundary, so the risk
-   * window doesn't open in practice.
+   * DECISION NEEDED: this comment previously claimed "For phase 1, skill
+   * files are stubbed at the upload boundary, so the risk window doesn't open
+   * in practice." That is no longer true — per-file uploads
+   * (POST /api/skills/:id/files) are live and persist SkillFile rows through
+   * this path, so the `fileCount`/`version` drift window described above is
+   * real. Pick one of the reconciliation options (transaction, periodic
+   * recount, or advisory-with-recompute-on-read) before depending on
+   * `fileCount` accuracy.
    */
   async function bumpSkillVersionAndAdjustFileCount(
     skillId: Types.ObjectId | string,

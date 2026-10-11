@@ -1249,82 +1249,59 @@ export function deleteSkillFile(
 /* -------------------------------------------------------------------------- */
 /* Skill Tree (nodes) — phase 2 backend                                       */
 /* -------------------------------------------------------------------------- */
-/* These were introduced by the original UI PR and are shipped as stubs in    */
-/* phase 1 so the tree UI compiles. Each resolves with empty/no-op data until */
-/* the backend persists a folder hierarchy. The call surface matches what the */
-/* tree hooks expect so wiring real endpoints later is a one-line swap.       */
+/* DECISION NEEDED: These were introduced by the original UI PR and shipped as */
+/* stubs in phase 1 so the tree UI compiles. No backend endpoints exist (see   */
+/* api-endpoints.skillTree), so the stubs below now THROW instead of silently  */
+/* resolving empty/no-op data — silently succeeding hid that the feature is    */
+/* unimplemented and let callers persist fabricated state. Wire real endpoints */
+/* (or delete these) before enabling the tree UI.                             */
 
 export const getSkillTree = (_skillId: string): Promise<t.TSkillTreeResponse> => {
-  return Promise.resolve({ nodes: [] });
+  throw new Error('DECISION NEEDED: getSkillTree is a phase-2 stub — no backend endpoint exists.');
 };
 
 export const createSkillNode = (
-  skillId: string,
-  data: FormData | t.TCreateSkillNodeRequest,
+  _skillId: string,
+  _data: FormData | t.TCreateSkillNodeRequest,
 ): Promise<t.TSkillNode> => {
-  const name = data instanceof FormData ? (data.get('name') as string) || 'untitled' : data.name;
-  const type = data instanceof FormData ? 'file' : data.type;
-  const now = new Date().toISOString();
-  return Promise.resolve({
-    _id: `pending-${now}`,
-    skillId,
-    parentId: null,
-    type,
-    name,
-    order: 0,
-    author: '',
-    createdAt: now,
-    updatedAt: now,
-  });
+  throw new Error(
+    'DECISION NEEDED: createSkillNode is a phase-2 stub — no backend endpoint exists.',
+  );
 };
 
-export const updateSkillNode = (variables: {
+export const updateSkillNode = (_variables: {
   skillId: string;
   nodeId: string;
   data: t.TUpdateSkillNodeRequest;
 }): Promise<t.TSkillNode> => {
-  const now = new Date().toISOString();
-  return Promise.resolve({
-    _id: variables.nodeId,
-    skillId: variables.skillId,
-    parentId: variables.data.parentId ?? null,
-    type: 'file',
-    name: variables.data.name ?? '',
-    order: variables.data.order ?? 0,
-    author: '',
-    createdAt: now,
-    updatedAt: now,
-  });
+  throw new Error(
+    'DECISION NEEDED: updateSkillNode is a phase-2 stub — no backend endpoint exists.',
+  );
 };
 
 export const deleteSkillNode = (_variables: { skillId: string; nodeId: string }): Promise<void> => {
-  return Promise.resolve();
+  throw new Error(
+    'DECISION NEEDED: deleteSkillNode is a phase-2 stub — no backend endpoint exists.',
+  );
 };
 
 export const getSkillNodeContent = (_variables: {
   skillId: string;
   nodeId: string;
 }): Promise<{ content: string; mimeType: string }> => {
-  return Promise.resolve({ content: '', mimeType: 'text/plain' });
+  throw new Error(
+    'DECISION NEEDED: getSkillNodeContent is a phase-2 stub — no backend endpoint exists.',
+  );
 };
 
-export const updateSkillNodeContent = (variables: {
+export const updateSkillNodeContent = (_variables: {
   skillId: string;
   nodeId: string;
   content: string;
 }): Promise<t.TSkillNode> => {
-  const now = new Date().toISOString();
-  return Promise.resolve({
-    _id: variables.nodeId,
-    skillId: variables.skillId,
-    parentId: null,
-    type: 'file',
-    name: '',
-    order: 0,
-    author: '',
-    createdAt: now,
-    updatedAt: now,
-  });
+  throw new Error(
+    'DECISION NEEDED: updateSkillNodeContent is a phase-2 stub — no backend endpoint exists.',
+  );
 };
 
 export function getGitHubSkillSyncStatus(): Promise<sk.TGitHubSkillSyncStatusResponse> {
