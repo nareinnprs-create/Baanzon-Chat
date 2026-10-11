@@ -4,13 +4,14 @@
 #   npm run test:client                    -> cd client && npm run test:ci
 #   npm run test:api                       -> cd api && npm run test:ci
 #   npm run test:packages:api              -> cd packages/api && npm run test:ci
+#   npm run test:packages:client           -> cd packages/client && npm run test:ci
 #   npm run test:packages:data-provider    -> cd packages/data-provider && npm run test:ci
 #   npm run test:packages:data-schemas     -> cd packages/data-schemas && npm run test:ci
 #   npm run test:config                    -> jest --config config/jest.config.js
 #
-# `npm run test:all` chains those five with `&&`, so the first failure cancels every
-# later suite and you learn about one suite per run. That is why the suites run as
-# separate steps here: each step carries `continue-on-error`, which records the
+# `npm run test:all` chains those six workspaces with `&&`, so the first failure
+# cancels every later suite and you learn about one suite per run. That is why the
+# suites run as separate steps here: each step carries `continue-on-error`, which records the
 # failure as that step's `outcome` instead of aborting the job, and the final
 # "Aggregate" step turns any non-success outcome into a non-zero exit. The job is
 # therefore still red if any suite failed — it just reports every suite first.
@@ -39,7 +40,7 @@ concurrency:
 
 jobs:
   test:
-    name: Jest suites (6)
+    name: Jest suites (7)
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -52,7 +53,7 @@ jobs:
           node-version-file: .nvmrc # 24.16.0
           cache: npm
           # package-lock.json is the lockfile of record (packageManager npm@11.13.0).
-          # bun.lock is also tracked — known issue P1-10.
+          # bun.lock is tracked but bun is not a supported or gated path (P1-10).
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies
@@ -90,6 +91,11 @@ jobs:
         continue-on-error: true
         run: npm run test:packages:api
 
+      - name: test:packages:client
+        id: suite_packages_client
+        continue-on-error: true
+        run: npm run test:packages:client
+
       - name: test:api
         id: suite_api
         continue-on-error: true
@@ -126,6 +132,7 @@ jobs:
           report 'test:packages:data-provider' '${{ steps.suite_data_provider.outcome }}'
           report 'test:packages:data-schemas'    '${{ steps.suite_data_schemas.outcome }}'
           report 'test:packages:api'             '${{ steps.suite_packages_api.outcome }}'
+          report 'test:packages:client'          '${{ steps.suite_packages_client.outcome }}'
           report 'test:api'                       '${{ steps.suite_api.outcome }}'
           report 'test:config'                    '${{ steps.suite_config.outcome }}'
           report 'test:client'                    '${{ steps.suite_client.outcome }}'

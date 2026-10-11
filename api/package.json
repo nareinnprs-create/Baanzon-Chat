@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/danny-avila/LibreChat.git"
+    "url": "git+https://github.com/opraiz-technology/baanzon-chat.git"
   },
   "keywords": [],
   "author": "",
@@ -30,9 +30,9 @@
     "~/*": "./*"
   },
   "bugs": {
-    "url": "https://github.com/danny-avila/LibreChat/issues"
+    "url": "https://github.com/opraiz-technology/baanzon-chat/issues"
   },
-  "homepage": "https://librechat.ai",
+  "homepage": "https://baanzon.com",
   "dependencies": {
     "@anthropic-ai/vertex-sdk": "^0.16.0",
     "@aws-sdk/client-bedrock-runtime": "^3.1013.0",

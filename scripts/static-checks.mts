@@ -8,8 +8,13 @@
  * `client/` and `packages/`. Tree-wide gates (config migration tests, unused
  * i18n keys, unused npm packages) run only when the diff touches the paths
  * that gate them in CI. Circular-dependency detection and the TypeScript
- * project checks come from the Backend Unit Tests workflow rather than the
- * Static Checks job, but they gate on a commit's paths the same way.
+ * project checks are run by this script too, but are triggered off a commit's
+ * paths by .github/workflows/static-checks.yml and .github/workflows/typecheck.yml
+ * respectively.
+ *
+ * Note the filters below name the workflow files that OWN each gate; editing one
+ * of those files reruns the gate. Keep them pointed at real workflows — the
+ * former backend-review.yml/frontend-review.yml never existed.
  *
  * Like the CI job, every selected check runs even after one fails, and the
  * failures are summarized at the end.
@@ -50,11 +55,10 @@ import type { Dirent } from 'node:fs';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 /**
- * Path filters, mirroring the `dorny/paths-filter` block in
- * .github/workflows/static-checks.yml. A group is active when some changed
- * file matches one of its patterns and no exclusion (`!`) pattern.
- * Keep the two in sync — the workflow additionally defines a `runner` group
- * for its own smoke test of this script, which has no local counterpart.
+ * Path filters. A group is active when some changed file matches one of its
+ * patterns and no exclusion (`!`) pattern. The workflow file named in each group
+ * is the one that owns that gate in CI, so editing it reruns the gate.
+ * Keep this block in sync with .github/workflows/static-checks.yml.
  */
 const FILTERS = {
   eslint: [
@@ -76,25 +80,24 @@ const FILTERS = {
     '.github/workflows/static-checks.yml',
     '!**.md',
   ],
-  // Mirrors the Backend Unit Tests workflow, which owns both of these jobs.
+  // Mirrored by the static-checks job, which runs this script (circular-deps is one of its gates).
   circular_deps: [
     'api/**',
     'packages/**',
     'package.json',
     'package-lock.json',
     'config/circular-deps.mjs',
-    '.github/workflows/backend-review.yml',
+    '.github/workflows/static-checks.yml',
     '!**.md',
   ],
-  // The review workflows trigger their TypeScript jobs on the root manifests
+  // The typecheck workflow triggers its TypeScript jobs on the root manifests
   // too, since a dependency or @types bump can break compilation on its own.
   typecheck: [
     'client/**',
     'packages/**',
     'package.json',
     'package-lock.json',
-    '.github/workflows/backend-review.yml',
-    '.github/workflows/frontend-review.yml',
+    '.github/workflows/typecheck.yml',
     '!**.md',
   ],
   unused_packages: [
@@ -807,8 +810,8 @@ function findCircularDependencies(): CheckOutcome {
 // --------------------------------------------------------------- TypeScript
 
 /**
- * One entry per `tsc --noEmit` the review workflows run, plus the projects
- * those workflows have no step for. `paths` includes each project's upstream
+ * One entry per `tsc --noEmit` .github/workflows/typecheck.yml runs, plus the
+ * projects that workflow has no step for. `paths` includes each project's upstream
  * packages, so an edit to data-provider still typechecks the projects that
  * consume it; `requires` lists the builds its imports resolve through,
  * mirroring those jobs' dependency on the build artifacts.
@@ -816,13 +819,12 @@ function findCircularDependencies(): CheckOutcome {
 const ROOT_MANIFESTS = ['package.json', 'package-lock.json'];
 
 /** Each imported gate reruns in CI when its owning workflow changes. */
-const BACKEND_REVIEW = '.github/workflows/backend-review.yml';
-const FRONTEND_REVIEW = '.github/workflows/frontend-review.yml';
+const TYPECHECK_WORKFLOW = '.github/workflows/typecheck.yml';
 
 const TYPECHECK_PROJECTS = [
   {
     project: 'packages/data-provider/tsconfig.json',
-    paths: ['packages/data-provider/**', ...ROOT_MANIFESTS, BACKEND_REVIEW, '!**.md'],
+    paths: ['packages/data-provider/**', ...ROOT_MANIFESTS, TYPECHECK_WORKFLOW, '!**.md'],
     requires: [],
   },
   {
@@ -831,7 +833,7 @@ const TYPECHECK_PROJECTS = [
       'packages/data-provider/**',
       'packages/data-schemas/**',
       ...ROOT_MANIFESTS,
-      BACKEND_REVIEW,
+      TYPECHECK_WORKFLOW,
       '!**.md',
     ],
     requires: ['build:data-provider'],
@@ -843,7 +845,7 @@ const TYPECHECK_PROJECTS = [
       'packages/data-schemas/**',
       'packages/api/**',
       ...ROOT_MANIFESTS,
-      BACKEND_REVIEW,
+      TYPECHECK_WORKFLOW,
       '!**.md',
     ],
     requires: ['build:data-provider', 'build:data-schemas'],
@@ -854,7 +856,7 @@ const TYPECHECK_PROJECTS = [
       'packages/data-provider/**',
       'packages/client/**',
       ...ROOT_MANIFESTS,
-      BACKEND_REVIEW,
+      TYPECHECK_WORKFLOW,
       '!**.md',
     ],
     requires: ['build:data-provider'],
@@ -868,7 +870,7 @@ const TYPECHECK_PROJECTS = [
       'packages/data-provider/**',
       'packages/client/**',
       ...ROOT_MANIFESTS,
-      BACKEND_REVIEW,
+      TYPECHECK_WORKFLOW,
       '!**.md',
     ],
     requires: ['build:data-provider'],
@@ -880,7 +882,7 @@ const TYPECHECK_PROJECTS = [
       'packages/data-provider/**',
       'packages/client/**',
       ...ROOT_MANIFESTS,
-      FRONTEND_REVIEW,
+      TYPECHECK_WORKFLOW,
       '!**.md',
     ],
     requires: ['build:data-provider', 'build:client-package'],

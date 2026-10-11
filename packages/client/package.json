@@ -4,7 +4,7 @@
   "description": "Baanzon Chat shared UI components and theme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/danny-avila/LibreChat"
+    "url": "https://github.com/opraiz-technology/baanzon-chat"
   },
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",

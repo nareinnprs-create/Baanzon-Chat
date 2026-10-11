@@ -6,20 +6,19 @@
 #
 # DEPENDENCY TRAP — READ BEFORE THE FIRST RUN:
 # scripts/static-checks.mts activates its tree-wide gates off the paths of the diff,
-# and three of those filters name workflow files that did not exist until now:
+# and each filter names the workflow file that owns that gate:
 #   FILTERS.eslint_config      (.github/workflows/static-checks.yml)
 #   FILTERS.config             (.github/workflows/static-checks.yml)
 #   FILTERS.i18n               (.github/workflows/static-checks.yml)
 #   FILTERS.unused_packages    (.github/workflows/static-checks.yml)
-#   FILTERS.circular_deps      (.github/workflows/backend-review.yml)  — still absent
-#   FILTERS.typecheck          (.github/workflows/backend-review.yml, frontend-review.yml)
-# Creating static-checks.yml is therefore what switches the ESLint-config, config,
-# i18n and unused-package filters from permanently-dormant to reachable. Those gates
-# have never run against a real diff, so expect NEW failures the first time this
-# workflow goes green-to-red — that is the point, not a regression in the workflow.
+#   FILTERS.circular_deps      (.github/workflows/static-checks.yml)
+#   FILTERS.typecheck          (.github/workflows/typecheck.yml)
+# Those gates (ESLint-config, config, i18n, unused-package, circular-deps and
+# typecheck) have not all run against a real diff yet, so expect NEW failures the
+# first time this workflow goes green-to-red — that is the point, not a regression.
 #
 # The filter and the runner must stay in sync: if you change the FILTERS block in
-# scripts/static-checks.mts, change the workflow's path triggers to match.
+# scripts/static-checks.mts, point it at real workflow files.
 
 name: Static checks
 
@@ -58,10 +57,9 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: .nvmrc # 24.16.0, matches Dockerfile and Dockerfile.multi
-          # Both package-lock.json and bun.lock are tracked (known issue P1-10).
-          # `packageManager` is npm@11.13.0 and config/update.js plus both Dockerfiles
-          # use `npm ci`, so npm is the install of record and the lockfile the cache
-          # is keyed on. See the top-level note in this file's history before switching.
+          # package-lock.json is the lockfile of record: packageManager npm@11.13.0
+          # and config/update.js plus both Dockerfiles use `npm ci`. bun.lock is
+          # tracked but bun is not a supported or gated path (P1-10).
           cache: npm
           cache-dependency-path: package-lock.json
 

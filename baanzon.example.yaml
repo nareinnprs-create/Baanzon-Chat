@@ -149,12 +149,17 @@ interface:
   fileSearch: true
   # Privacy policy settings
   privacyPolicy:
-    externalUrl: 'https://librechat.ai/privacy-policy'
+    # Point this at Baanzon's own policy. The stock LibreChat URL was removed
+    # because it is not Baanzon's policy; set your real URL to re-enable the
+    # external link (do not point users at another product's legal pages).
+    # externalUrl: 'https://example.com/privacy-policy'
     openNewTab: true
 
   # Terms of service
   termsOfService:
-    externalUrl: 'https://librechat.ai/tos'
+    # Same as above: set Baanzon's own terms URL, or leave unset so only the
+    # modal content below is shown. The stock LibreChat URL is not Baanzon's.
+    # externalUrl: 'https://example.com/tos'
     openNewTab: true
     modalAcceptance: true
     modalTitle: 'Terms of Service for LibreChat'
@@ -409,7 +414,6 @@ registration:
 actions:
   allowedDomains:
     - 'swapi.dev'
-    - 'librechat.ai'
     - 'google.com'
     # - 'http://10.225.26.25:7894'  # Internal IP with protocol/port (uncomment if needed)
   # `allowedAddresses` is an SSRF exemption list, NOT a strict whitelist.

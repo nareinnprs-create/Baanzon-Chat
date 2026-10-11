@@ -38,9 +38,10 @@ Completion".
 ## Verification
 
 For startup, auth, config, file, or message-loading changes, avoid serial database
-reads and reuse loaded request data. Run `npm run lighthouse` before completion:
-the CI lane adds 250 ms per Mongo query and checks the visible conversation's LCP.
-See [budgets, reproduction and failure diagnosis](e2e/lighthouse/README.md).
+reads and reuse loaded request data — batch the reads and carry already-loaded
+request data forward instead of re-querying. This is verified by hand: there is no
+`npm run lighthouse` script, no `e2e/lighthouse/` budget lane, and no CI step that
+adds Mongo latency, so confirm the query count yourself.
 
 A green build is not a typecheck: `packages/api`, `packages/client` and `packages/data-schemas` build
 with `tsdown`, which emits without checking types. Run `npx tsc --noEmit` in the workspace you

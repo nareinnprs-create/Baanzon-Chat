@@ -46,13 +46,12 @@ jobs:
         # 1.7 MB of lockfile's worth of dependencies only to throw them away would
         # double the job's time.
         #
-        # LOCKFILE FINDING (known issue P1-10): the repo tracks BOTH
-        # package-lock.json and bun.lock, and they resolve different versions. This
-        # gate audits the npm one, which is the install of record —
-        # `packageManager` is npm@11.13.0, config/update.js runs `npm ci`, and both
-        # Dockerfiles copy package.json + package-lock.json and never invoke bun.
-        # The bun resolution is therefore NOT audited here and NOT reproducible from
-        # this job; if bun becomes a supported path, that is a second audit run.
+        # LOCKFILE DECISION (P1-10, resolved): npm is the install of record, so
+        # this gate audits package-lock.json. `packageManager` is npm@11.13.0,
+        # config/update.js runs `npm ci`, and both Dockerfiles copy package.json +
+        # package-lock.json and never invoke bun. `bun.lock` is still tracked but
+        # bun is not a supported or gated path, so its resolution is intentionally
+        # NOT audited here; supporting bun would add a second audit run.
         run: npm audit --level=high
 
   secret-scan:
@@ -75,11 +74,11 @@ jobs:
         env:
           # Automatically provisioned by GitHub; no secret to create.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # PROVISIONING NOTE: gitleaks-action requires a licence key when the
-          # repository is owned by an organisation (free for personal accounts).
-          # If this job fails with a licence error, an admin must add the
-          # `GITLEAKS_LICENSE` repository secret — it is intentionally NOT referenced
-          # here, because referencing an unprovisioned secret fails the step outright.
-          # GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+          # gitleaks-action requires a licence key only when the repository is owned
+          # by an organisation (personal accounts need none). An undefined repository
+          # secret resolves to an empty string — it does NOT fail the step — so this
+          # is passed unconditionally: empty on personal repos (runs licence-free)
+          # and supplied automatically once an admin provisions `GITLEAKS_LICENSE`.
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
         # No `with:` inputs are passed on purpose: the action's defaults scan the full
         # history of the ref that triggered the event and fail the job on any finding.
