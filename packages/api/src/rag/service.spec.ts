@@ -1699,7 +1699,9 @@ describe('rag service retrieve', () => {
 
     const ranked = async (
       overrides: Partial<RagServiceDeps['config']>,
-      semantic?: { search(collectionId: string, query: string, limit: number): Promise<VectorChunk[]> },
+      semantic?: {
+        search(collectionId: string, query: string, limit: number): Promise<VectorChunk[]>;
+      },
     ) => {
       const harness = makeHarness(overrides, semantic);
       const collection = await harness.service.createCollection({
@@ -1939,11 +1941,19 @@ describe('rag service retrieve', () => {
       // With corrected per-candidate semantics, clamping alpha affects only blended candidates.
       // At alpha=5 (clamped to 1), doc-b (has semantic signal) blends as 1*1+0*0=1; doc-a (no semantic)
       // keeps kw=1. At alpha=-5 (clamped to 0), doc-b blends as 0*1+1*0=0; doc-a keeps kw=1.
-      expect(high.map(([id, score]) => [id, score]).sort((a,b) => String(a[0]).localeCompare(String(b[0])))).toEqual([
+      expect(
+        high
+          .map(([id, score]) => [id, score])
+          .sort((a, b) => String(a[0]).localeCompare(String(b[0]))),
+      ).toEqual([
         ['doc-a', 1],
         ['doc-b', 1],
       ]);
-      expect(low.map(([id, score]) => [id, score]).sort((a,b) => String(a[0]).localeCompare(String(b[0])))).toEqual([
+      expect(
+        low
+          .map(([id, score]) => [id, score])
+          .sort((a, b) => String(a[0]).localeCompare(String(b[0]))),
+      ).toEqual([
         ['doc-a', 1],
         ['doc-b', 0],
       ]);
