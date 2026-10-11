@@ -23,6 +23,8 @@ import { createRagService } from './service';
 
 export interface RagRuntimeConfig {
   disabled?: boolean;
+  /** Enable semantic search path (keyword fallback guaranteed). */
+  semanticEnabled?: boolean;
   apiUrl?: string;
   chunkSize?: number;
   chunkOverlap?: number;
@@ -99,6 +101,7 @@ export function resolveRagConfig(config?: RagRuntimeConfig): Required<RagRuntime
     embeddingTimeoutMs: config?.embeddingTimeoutMs ?? RAG_DEFAULTS.embeddingTimeoutMs,
     embeddingBatchSize: config?.embeddingBatchSize ?? RAG_DEFAULTS.embeddingBatchSize,
     embeddingConcurrency: config?.embeddingConcurrency ?? RAG_DEFAULTS.embeddingConcurrency,
+    semanticEnabled: config?.semanticEnabled ?? (RAG_DEFAULTS as any).semanticEnabled ?? false,
   };
 }
 
@@ -152,7 +155,7 @@ export function createRagRuntime(deps: RagRuntimeDeps, appConfig?: RagRuntimeCon
     knowledgeStore: createMongoKnowledgeStore(deps.knowledgeMethods),
     ...(countCollections != null ? { countCollections } : {}),
     vectorStore: deps.vectorStore,
-    ...(deps.semantic ? { semantic: deps.semantic } : {}),
+    ...(deps.semantic && config.semanticEnabled ? { semantic: deps.semantic } : {}),
     ...(deps.embedder ? { embedder: deps.embedder } : {}),
     ...(deps.reranker ? { reranker: deps.reranker } : {}),
   });

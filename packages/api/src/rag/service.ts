@@ -668,9 +668,14 @@ export function createRagService(deps: RagServiceDeps): RagService {
       if (!collection) {
         return null;
       }
-      const semantic = deps.semantic
-        ? await deps.semantic.search(params.collectionId, params.query, deps.config.candidateK)
-        : [];
+      let semantic: VectorChunk[] = [];
+      if (deps.semantic) {
+        try {
+          semantic = await deps.semantic.search(params.collectionId, params.query, deps.config.candidateK);
+        } catch (error) {
+          semantic = [];
+        }
+      }
       const keyword = deps.vectorStore.semanticSearch
         ? await deps.vectorStore.semanticSearch(
             params.collectionId,

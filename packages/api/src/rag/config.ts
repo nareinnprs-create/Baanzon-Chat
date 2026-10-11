@@ -35,6 +35,8 @@ export const RAG_DEFAULTS = {
   embeddingBatchSize: 64,
   /** Embedder calls in flight at once. */
   embeddingConcurrency: 2,
+  /** Enable semantic search path (keyword fallback guaranteed). */
+  semanticEnabled: false,
 } as const;
 
 export interface RagDomainConfig {

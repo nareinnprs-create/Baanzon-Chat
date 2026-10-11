@@ -173,6 +173,7 @@ describe('resolveRagConfig', () => {
       embeddingTimeoutMs: RAG_DEFAULTS.embeddingTimeoutMs,
       embeddingBatchSize: RAG_DEFAULTS.embeddingBatchSize,
       embeddingConcurrency: RAG_DEFAULTS.embeddingConcurrency,
+      semanticEnabled: (RAG_DEFAULTS as any).semanticEnabled ?? false,
     });
   });
 
@@ -190,6 +191,7 @@ describe('resolveRagConfig', () => {
       embeddingTimeoutMs: 1000,
       embeddingBatchSize: 8,
       embeddingConcurrency: 3,
+    semanticEnabled: false,
     });
 
     expect(config).toEqual({
@@ -206,6 +208,7 @@ describe('resolveRagConfig', () => {
       embeddingTimeoutMs: 1000,
       embeddingBatchSize: 8,
       embeddingConcurrency: 3,
+    semanticEnabled: false,
     });
   });
 
@@ -316,8 +319,8 @@ describe('createRagRuntime', () => {
     };
 
     /** Retrieve with a query matching nothing in the stored text, on purpose. */
-    const topHit = async (deps: RagRuntimeDeps) => {
-      const runtime = createRagRuntime(deps);
+    const topHit = async (deps: RagRuntimeDeps, config: any = { semanticEnabled: true }) => {
+      const runtime = createRagRuntime(deps, config);
       const created = await runtime.domainHandlers.createCollection({
         userId: 'u-1',
         name: 'handbook',
@@ -563,6 +566,7 @@ describe('createRagRuntimeResolver', () => {
     embeddingTimeoutMs: 15_000,
     embeddingBatchSize: 64,
     embeddingConcurrency: 2,
+    semanticEnabled: false,
   };
 
   it('returns the identical runtime for two configs that are equal by value', () => {
@@ -636,7 +640,8 @@ describe('createRagRuntimeResolver', () => {
       ['inMemoryMaxChunks', { ...BASE, inMemoryMaxChunks: 20_001 }],
       ['embeddingTimeoutMs', { ...BASE, embeddingTimeoutMs: 15_001 }],
       ['embeddingBatchSize', { ...BASE, embeddingBatchSize: 65 }],
-      ['embeddingConcurrency', { ...BASE, embeddingConcurrency: 3 }],
+      ['embeddingConcurrency', { ...BASE, embeddingConcurrency: 3,
+    semanticEnabled: false }],
     ];
 
     const runtimes = variants.map(([field, config]) => {
