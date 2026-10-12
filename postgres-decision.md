@@ -1,6 +1,6 @@
 # ADR-001 — Primary Database: PostgreSQL Mandate vs. MongoDB Reality
 
-> **Status:** PROPOSED — awaiting sign-off
+> **[DECISION NEEDED]** Status: PROPOSED — awaiting sign-off
 > **Date:** 2026-09-27
 > **Blueprint clause:** `Masterblueprint(1).md` §45 (Database), §24 (Knowledge/RAG), §46 (Storage)
 > **Supersedes:** `needtodo.md` 27.1, `buildscope.md` (neither addresses this)
