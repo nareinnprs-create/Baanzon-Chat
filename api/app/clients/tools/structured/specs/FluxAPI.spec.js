@@ -52,10 +52,14 @@ describe('FluxAPI', () => {
   });
 
   describe('polling timeout', () => {
-    it('should throw descriptive error on polling timeout', async () => {
+    // maxAttempts=30 bounds the loop at 30 * 2000ms = 60s; the 120s deadline is a
+    // secondary guard that is not reached first. The thrown error reports both.
+    const TIMEOUT_MESSAGE =
+      'Flux API polling timed out after 60s (31 attempts). Please try again or adjust your request.';
+
+    it('should throw descriptive error on polling timeout after maxAttempts', async () => {
       const tool = new FluxAPI({ FLUX_API_KEY: 'test-key' });
-      const processFileURL = jest.fn();
-      tool.processFileURL = processFileURL;
+      tool.processFileURL = jest.fn();
 
       // Mock successful task submission
       axios.post.mockResolvedValueOnce({
@@ -71,19 +75,26 @@ describe('FluxAPI', () => {
         prompt: 'test prompt',
         endpoint: '/v1/flux-pro',
       });
+      // Attach a handler immediately so the eventual rejection is not reported as unhandled.
+      callPromise.catch(() => {});
 
       // Advance timers to trigger timeout
       await jest.runOnlyPendingTimersAsync();
       await jest.advanceTimersByTimeAsync(120000);
 
-      await expect(callPromise).rejects.toThrow(/Flux API polling timed out after \d+s/);
-      expect(logger.error).toHaveBeenCalled();
+      await expect(callPromise).rejects.toThrow(TIMEOUT_MESSAGE);
+      // 30 polls occur (2s each) before the 31st iteration trips maxAttempts.
+      expect(axios.get).toHaveBeenCalledTimes(30);
+      expect(logger.error).toHaveBeenCalledWith('[FluxAPI] Polling timeout:', {
+        attempts: 31,
+        elapsed: 60000,
+        taskId: 'test-task-id',
+      });
     }, 15000);
 
-    it('should throw descriptive error on finetuned polling timeout', async () => {
+    it('should throw descriptive error on finetuned polling timeout after maxAttempts', async () => {
       const tool = new FluxAPI({ FLUX_API_KEY: 'test-key' });
-      const processFileURL = jest.fn();
-      tool.processFileURL = processFileURL;
+      tool.processFileURL = jest.fn();
 
       // Mock successful task submission
       axios.post.mockResolvedValueOnce({
@@ -101,13 +112,21 @@ describe('FluxAPI', () => {
         finetune_id: 'finetune-123',
         endpoint: '/v1/flux-pro-finetuned',
       });
+      // Attach a handler immediately so the eventual rejection is not reported as unhandled.
+      callPromise.catch(() => {});
 
       // Advance timers to trigger timeout
       await jest.runOnlyPendingTimersAsync();
       await jest.advanceTimersByTimeAsync(120000);
 
-      await expect(callPromise).rejects.toThrow(/Flux API polling timed out after \d+s/);
-      expect(logger.error).toHaveBeenCalled();
+      await expect(callPromise).rejects.toThrow(TIMEOUT_MESSAGE);
+      // 30 polls occur (2s each) before the 31st iteration trips maxAttempts.
+      expect(axios.get).toHaveBeenCalledTimes(30);
+      expect(logger.error).toHaveBeenCalledWith('[FluxAPI] Polling timeout:', {
+        attempts: 31,
+        elapsed: 60000,
+        taskId: 'test-task-id',
+      });
     }, 15000);
   });
 

@@ -71,12 +71,15 @@
 # exist in this version. The job takes `--format=json --output-file` and the
 # next step renders both the log and the job summary from that one report.
 #
-# LOCKFILE DECISION (P1-10): npm is the install of record. `packageManager` is
-# npm@11.13.0, config/update.js and both Dockerfiles run `npm ci`, and every
-# workflow here installs with npm against package-lock.json. `bun.lock` is still
-# tracked, but bun is NOT a supported or gated path: no bun check is added here,
-# and none should be until bun support is introduced deliberately (removing the
-# 15 `b:*` scripts and `bun.lock` is tracked as follow-up, not done by this file).
+# DECISION NEEDED (P1-10): Bun vs npm lock standardization — npm is the install
+# of record. Rationale: `packageManager` is npm@11.13.0, config/update.js and
+# both Dockerfiles run `npm ci`, and every workflow here installs with npm
+# against package-lock.json; the two tracked lockfiles still DIVERGE
+# (REMEDIATION-PLAN.md §P1-10), so the audited security posture is not
+# reproducible under `bun install`. `bun.lock` remains tracked, but bun is NOT a
+# supported or gated path: no bun check is added here, and none should be until
+# bun support is introduced deliberately (removing the 15 `b:*` scripts and
+# `bun.lock` is tracked as follow-up, not done by this file).
 #
 # The summary script below is duplicated across the two ESLint jobs on purpose:
 # scripts/static-checks.mts is out of this file's scope, and both test.yml and
@@ -129,7 +132,7 @@ jobs:
           node-version-file: .nvmrc # 24.16.0
           cache: npm
           # package-lock.json is the lockfile of record (packageManager npm@11.13.0).
-          # bun.lock is also tracked; see the LOCKFILE DECISION note at the top.
+          # bun.lock is also tracked; see the DECISION NEEDED (P1-10) note at the top.
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies

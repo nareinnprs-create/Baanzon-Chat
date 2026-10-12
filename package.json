@@ -72,6 +72,7 @@
     "static-checks": "node scripts/static-checks.mts",
     "static-checks:full": "node scripts/static-checks.mts --full",
     "format": "npx prettier --write \"{,!(node_modules|venv)/**/}*.{js,jsx,ts,tsx}\"",
+    "//": "DECISION NEEDED (P1-10): npm is the install of record; bun is an unsupported, ungated path. Rationale: packageManager is npm@11.13.0 and npm ci + package-lock.json are used everywhere, while the tracked bun.lock diverges (REMEDIATION-PLAN.md §P1-10). No bun CI gate should be added until bun support is deliberate; removing bun.lock and these b:* scripts is tracked as follow-up. See .github/workflows/lint.yml.",
     "b:api": "NODE_ENV=production bun run api/server/index.js",
     "b:api-inspect": "NODE_ENV=production bun --inspect run api/server/index.js",
     "b:api:dev": "NODE_ENV=production bun run --watch api/server/index.js",
