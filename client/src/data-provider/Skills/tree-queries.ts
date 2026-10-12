@@ -3,6 +3,14 @@ import { QueryKeys, dataService } from 'librechat-data-provider';
 import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
 import type { TSkillTreeResponse } from 'librechat-data-provider';
 
+/**
+ * DECISION NEEDED: skill-tree is a deprecated phase-2 stub. dataService.
+ * getSkillTree and dataService.getSkillNodeContent below throw and no backend
+ * route exists, so these hooks can only fail. No active UI calls them — the only
+ * imported consumers (SkillFileEditor, SkillFilePreview) are exported from the
+ * Skills barrel but never rendered. Pending approval to wire the phase-2
+ * endpoints or delete the tree feature; do not mount these hooks before then.
+ */
 export const useGetSkillTreeQuery = (
   skillId: string | null | undefined,
   config?: UseQueryOptions<TSkillTreeResponse>,

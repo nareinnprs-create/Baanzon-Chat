@@ -1247,26 +1247,45 @@ export function deleteSkillFile(
 }
 
 /* -------------------------------------------------------------------------- */
-/* Skill Tree (nodes) — phase 2 backend                                       */
+/* Skill Tree (nodes) — DEPRECATED (phase 2), PENDING APPROVAL                 */
 /* -------------------------------------------------------------------------- */
-/* DECISION NEEDED: These were introduced by the original UI PR and shipped as */
-/* stubs in phase 1 so the tree UI compiles. No backend endpoints exist (see   */
-/* api-endpoints.skillTree), so the stubs below now THROW instead of silently  */
-/* resolving empty/no-op data — silently succeeding hid that the feature is    */
-/* unimplemented and let callers persist fabricated state. Wire real endpoints */
-/* (or delete these) before enabling the tree UI.                             */
+/* DEPRECATED: these six exports were introduced by the original tree UI PR and */
+/* shipped as phase-1 stubs so that UI compiles. They have no backend — no tree  */
+/* route is registered in /api or packages/api, and endpoints.skillTree only     */
+/* builds a URL nobody requests. The only callers are                            */
+/* client/src/data-provider/Skills/tree-queries.ts and tree-mutations.ts, whose  */
+/* consumers (SkillFileEditor, SkillFilePreview) are exported but never mounted, */
+/* so no active UI reaches them. They THROW instead of silently resolving        */
+/* empty/no-op data, which had hidden that the feature is unimplemented and let  */
+/* callers persist fabricated state.                                             */
+/* PENDING APPROVAL: wire real endpoints, or delete the tree feature and these   */
+/* exports, before enabling the tree UI.                                         */
+
+/**
+ * The single failure every skill-tree stub throws.
+ *
+ * It names the operation, states that no HTTP request was sent, and points at
+ * the missing route, so a caller reads an actionable sentence rather than a bare
+ * "not implemented" that looks like a transient, retryable fault and sends them
+ * back to the same dead end.
+ */
+const skillTreeUnavailable = (operation: string): Error =>
+  new Error(
+    `[skill-tree] ${operation}() is unavailable: no skill-tree backend route is registered, so ` +
+      `no request was sent. This is a deprecated phase-2 stub pending approval — the skill-tree ` +
+      `UI is not reachable in this build. Do not call it; implement the endpoint or remove the ` +
+      `tree feature first.`,
+  );
 
 export const getSkillTree = (_skillId: string): Promise<t.TSkillTreeResponse> => {
-  throw new Error('DECISION NEEDED: getSkillTree is a phase-2 stub — no backend endpoint exists.');
+  throw skillTreeUnavailable('getSkillTree');
 };
 
 export const createSkillNode = (
   _skillId: string,
   _data: FormData | t.TCreateSkillNodeRequest,
 ): Promise<t.TSkillNode> => {
-  throw new Error(
-    'DECISION NEEDED: createSkillNode is a phase-2 stub — no backend endpoint exists.',
-  );
+  throw skillTreeUnavailable('createSkillNode');
 };
 
 export const updateSkillNode = (_variables: {
@@ -1274,24 +1293,18 @@ export const updateSkillNode = (_variables: {
   nodeId: string;
   data: t.TUpdateSkillNodeRequest;
 }): Promise<t.TSkillNode> => {
-  throw new Error(
-    'DECISION NEEDED: updateSkillNode is a phase-2 stub — no backend endpoint exists.',
-  );
+  throw skillTreeUnavailable('updateSkillNode');
 };
 
 export const deleteSkillNode = (_variables: { skillId: string; nodeId: string }): Promise<void> => {
-  throw new Error(
-    'DECISION NEEDED: deleteSkillNode is a phase-2 stub — no backend endpoint exists.',
-  );
+  throw skillTreeUnavailable('deleteSkillNode');
 };
 
 export const getSkillNodeContent = (_variables: {
   skillId: string;
   nodeId: string;
 }): Promise<{ content: string; mimeType: string }> => {
-  throw new Error(
-    'DECISION NEEDED: getSkillNodeContent is a phase-2 stub — no backend endpoint exists.',
-  );
+  throw skillTreeUnavailable('getSkillNodeContent');
 };
 
 export const updateSkillNodeContent = (_variables: {
@@ -1299,9 +1312,7 @@ export const updateSkillNodeContent = (_variables: {
   nodeId: string;
   content: string;
 }): Promise<t.TSkillNode> => {
-  throw new Error(
-    'DECISION NEEDED: updateSkillNodeContent is a phase-2 stub — no backend endpoint exists.',
-  );
+  throw skillTreeUnavailable('updateSkillNodeContent');
 };
 
 export function getGitHubSkillSyncStatus(): Promise<sk.TGitHubSkillSyncStatusResponse> {

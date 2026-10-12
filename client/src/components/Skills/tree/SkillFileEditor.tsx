@@ -5,6 +5,13 @@ import { useGetSkillNodeContentQuery, useUpdateSkillNodeContentMutation } from '
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
+/**
+ * DECISION NEEDED: this component is not mounted anywhere. It is re-exported by
+ * the Skills barrel but never rendered, so its useGetSkillNodeContentQuery and
+ * useUpdateSkillNodeContentMutation calls are dead paths to the deprecated
+ * skill-tree stubs (which throw). Pending approval to wire the phase-2 backend
+ * or delete the tree UI before rendering it.
+ */
 interface SkillFileEditorProps {
   skillId: string;
   nodeId: string;

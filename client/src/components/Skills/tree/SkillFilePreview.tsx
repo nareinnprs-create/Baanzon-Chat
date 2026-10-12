@@ -4,6 +4,12 @@ import { useGetSkillNodeContentQuery } from '~/data-provider';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
+/**
+ * DECISION NEEDED: this component is not mounted anywhere. It is re-exported by
+ * the Skills barrel but never rendered, so its useGetSkillNodeContentQuery call
+ * is a dead path to the deprecated skill-tree stub (which throws). Pending
+ * approval to wire the phase-2 backend or delete the tree UI before rendering it.
+ */
 interface SkillFilePreviewProps {
   skillId: string;
   nodeId: string;
