@@ -139,6 +139,16 @@ export const router = createBrowserRouter(
           children: [
             {
               index: true,
+              element: <Navigate to="/home" replace={true} />,
+            },
+            {
+              /**
+               * Dedicated Home route. The onboarding surface (heading, subcopy,
+               * mode chips) is rendered by the single new-conversation landing at
+               * `/c/new`, so Home simply resolves there rather than duplicating
+               * that surface on a second code path.
+               */
+              path: 'home',
               element: <Navigate to="/c/new" replace={true} />,
             },
             {
