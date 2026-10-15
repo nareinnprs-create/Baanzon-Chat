@@ -137,10 +137,10 @@ Each phase: implement with ≥7 agents/subagents in parallel → typecheck → f
 | P1 RAG completion | **done** | ~76% | `267d683` |
 | P2 Hardening | **done** (branding/docker/engines/license/cleanup + secrets fail-fast P2.2, CSP/CORS P2.5, registration/email policy A14) | ~86% | `6bf52321`, `(this)` |
 | P3 Security/deps | partial (overrides `fast-uri`/`brace-expansion` fixed, P0/P1 bumps, dead nested override removed, lockfile synced; audited majors still staged) | ~88% | `6bf52321`, `(this)` |
-| P4 UX shell | partial (P4.1 ⌘K command palette shipped; P4.2–P4.5 pending) | ~89% | `(this)` |
+| P4 UX shell | partial (P4.1 ⌘K command palette + P4.3 in-conversation find shipped; P4.2 Home/onboarding, P4.4 PDF export, P4.5 notifications pending) | ~90% | `(this)` |
 | P5 UX capability | partial (P5.5 offline drafts + sync queue shipped; P5.1–P5.4/5.6 pending) | ~90% | `(this)` |
-| P6 Tests/CI-CD | partial (P6.2 missing tests: OllamaClient, RAG auth/errors; P6.1 thresholds + P6.3–P6.5 pending) | ~90% | `(this)` |
-| P7 Data/sandbox | partial (P7.1 pgvector store + P7.2 versioned migration ledger; P7.3 entities/P7.4 managed sandbox pending) | ~91% | `(this)` |
+| P6 Tests/CI-CD | partial (P6.1 coverage thresholds + P6.2 missing tests + P6.4 integration CI + spec typechecks; P6.3 e2e/a11y/lighthouse + P6.5 CD pending) | ~92% | `(this)` |
+| P7 Data/sandbox | partial (P7.1 pgvector store **+ wired via `rag.vectorStore` lever**, P7.2 migration ledger; P7.3 entities/P7.4 managed sandbox pending) | ~92% | `(this)` |
 | P8 Validation | pending | — | — |
 
 **P1 evidence (2026-10-15):** `packages/api` RAG suite 690/690; knowledge route 26/26;
@@ -152,6 +152,14 @@ registration + pgvector + RAG auth/errors 49/49; `packages/data-schemas` migrati
 `client` offline queue + command palette + `useSubmitMessage` 24/24; `api` OllamaClient 7/7.
 Regression: `packages/api` RAG suite **730/730**, knowledge route **26/26**. `tsc --noEmit` clean in
 `packages/api`, `packages/data-schemas`, `client`. `packages/api` + `packages/data-schemas` dist rebuilt.
+
+**P4.3/P6.1/P6.4/P7.1-wiring evidence (2026-10-15):** `packages/api` RAG suite **739/739** after the
+`rag.vectorStore` lever + `initializeRagVectorStore` (drift + wiring specs added); `client`
+InConversationFind **15/15**; `tsc --noEmit` clean in `packages/api`, `packages/data-provider`,
+`client`. Coverage thresholds added to all seven Jest configs (measured, set ~2pts below). CI: new
+`.github/workflows/integration.yml`; spec-typecheck coverage documented in `typecheck.yml` /
+`static-checks.mts`. **Cancelled this round (retry):** P7.4 managed sandbox, and the find agent's
+completion report (work recovered and verified by hand).
 
 ---
 

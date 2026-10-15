@@ -2705,6 +2705,15 @@ export const ragSchema = z.object({
    *  guaranteed). Defaults on, but only has an effect once an embeddings
    *  provider is configured for the deployment. */
   semanticEnabled: z.boolean().optional().default(true),
+  /** Vector backend the deployment runs: the process-scoped in-memory index
+   *  (default — applied by consumers from `RAG_DEFAULTS.vectorStore`) or the
+   *  durable PostgreSQL/pgvector store, which requires an injected executor at
+   *  startup; the wiring throws rather than falling back to memory. Optional
+   *  with no zod default on purpose: a `.default()` would make the key
+   *  required in `TRagConfig`, and `data-schemas`' `loadRagConfig` fills
+   *  required keys from its own `RAG_DEFAULTS`, which carries no
+   *  startup-only lever. */
+  vectorStore: z.enum(['inMemory', 'pg']).optional(),
   inMemoryMaxCollections: z.number().int().positive().optional().default(200),
   inMemoryMaxChunks: z.number().int().positive().optional().default(20000),
   /** Milliseconds one ingest-side embedder call may take before its batch of

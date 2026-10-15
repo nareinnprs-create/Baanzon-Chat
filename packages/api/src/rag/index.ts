@@ -6,7 +6,7 @@ export { RagError, badRequest, forbidden, notFound } from './errors';
 export type { RagErrorStatus } from './errors';
 export { chunkText } from './chunker';
 export { RAG_API_URL, RAG_DEFAULTS, loadRagConfig, isRagApiConfigured, usesRagApi } from './config';
-export type { RagDomainConfig } from './config';
+export type { RagDomainConfig, RagVectorStoreMode } from './config';
 export { createRagService } from './service';
 export type { RagService, RagServiceDeps, SnippetReranker, AddDocumentResult } from './service';
 export { createRagHandlers } from './handlers';
@@ -51,6 +51,7 @@ export type { OpenAIEmbeddings, OpenAIEmbeddingsOptions } from './openaiEmbeddin
 
 export {
   createRagIntegration,
+  initializeRagVectorStore,
   RAG_EMBEDDING_API_URL,
   RAG_EMBEDDING_API_KEY,
   RAG_EMBEDDING_MODEL,
@@ -58,4 +59,8 @@ export {
   DEFAULT_EMBEDDING_MODEL,
   DEFAULT_EMBEDDING_DIMENSION,
 } from './wiring';
-export type { RagIntegration, RagIntegrationOptions } from './wiring';
+export type {
+  RagIntegration,
+  RagIntegrationOptions,
+  InitializeRagVectorStoreOptions,
+} from './wiring';

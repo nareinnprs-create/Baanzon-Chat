@@ -27,6 +27,7 @@ import {
 } from '~/hooks';
 import KeyboardShortcutsDialog from '~/components/Nav/KeyboardShortcutsDialog';
 import KeyboardDeleteDialog from '~/components/Nav/KeyboardDeleteDialog';
+import { InConversationFind } from '~/components/InConversationFind';
 import { useUserTermsQuery, useGetStartupConfig } from '~/data-provider';
 import { MobileDrawerScrim } from '~/components/UnifiedSidebar/mobile';
 import useKeyboardShortcuts from '~/hooks/useKeyboardShortcuts';
@@ -198,6 +199,7 @@ export default function Root() {
             </PromptGroupsProvider>
             <KeyboardShortcutsProvider />
             <CommandPalette />
+            <InConversationFind />
           </AgentsMapContext.Provider>
           {config?.interface?.termsOfService?.modalAcceptance === true && (
             <TermsAndConditionsModal

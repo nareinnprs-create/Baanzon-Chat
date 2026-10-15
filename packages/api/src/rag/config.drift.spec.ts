@@ -89,6 +89,19 @@ const EMBED_LIMITS: [string, number][] = [
 const EMBED_LIMIT_KEYS = EMBED_LIMITS.map(([key]) => key);
 const GUARDED_KEYS = [...GEOMETRY_KEYS, ...EMBED_LIMIT_KEYS];
 
+/**
+ * The vector-store selector, guarded in the two copies that carry it. The
+ * third location — data-schemas' `RAG_DEFAULTS` — has none: this is a startup
+ * lever chosen before routes exist, not a per-request value the resolver
+ * spreads, so consumers apply `RAG_DEFAULTS.vectorStore`. The schema field is
+ * `.optional()` with no zod `.default()` on purpose: a default would make the
+ * key required in `TRagConfig`, and `packages/data-schemas/src/app/rag.ts`
+ * would stop typechecking against its own defaults object.
+ */
+const VECTOR_STORE_KEY = 'vectorStore';
+const VECTOR_STORE_MODE = "'inMemory'";
+const VECTOR_STORE_LOCATIONS = [LOCATIONS[0], LOCATIONS[2]];
+
 function readSource(location: GuardedLocation): string {
   return readFileSync(location.file, 'utf8');
 }
@@ -156,6 +169,29 @@ describe('RAG default drift guard', () => {
 
     it('enables the semantic half by default', () => {
       expect(readLiteral(location, 'semanticEnabled')).toBe(SEMANTIC_ENABLED);
+    });
+  });
+
+  describe('vectorStore lever', () => {
+    it('defaults to the in-memory store in RAG_DEFAULTS', () => {
+      expect(readLiteral(LOCATIONS[0], VECTOR_STORE_KEY)).toBe(VECTOR_STORE_MODE);
+    });
+
+    it('mirrors both modes as an optional enum in ragSchema', () => {
+      const literal = readLiteral(LOCATIONS[2], VECTOR_STORE_KEY);
+      expect(literal).toContain(VECTOR_STORE_MODE);
+      expect(literal).toContain("'pg'");
+      expect(literal).toContain('.optional()');
+    });
+
+    it('both copies name the same default mode', () => {
+      const values = VECTOR_STORE_LOCATIONS.map((location) =>
+        readLiteral(location, VECTOR_STORE_KEY),
+      );
+      expect(values).toHaveLength(2);
+      for (const literal of values) {
+        expect(literal).toContain(VECTOR_STORE_MODE);
+      }
     });
   });
 

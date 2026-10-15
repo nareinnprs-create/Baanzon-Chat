@@ -3,6 +3,9 @@ import { logger } from '@librechat/data-schemas';
 /** Env var for the external RAG API base URL (mirrors `~/files/rag.ts`). */
 export const RAG_API_URL = 'RAG_API_URL';
 
+/** Which vector backend the domain runs: process-scoped memory or PostgreSQL/pgvector. */
+export type RagVectorStoreMode = 'inMemory' | 'pg';
+
 export const RAG_DEFAULTS = {
   /**
    * Last-resort default for the feature kill switch: knowledge retrieval is on
@@ -22,6 +25,13 @@ export const RAG_DEFAULTS = {
   topK: 6,
   /** Minimum hybrid score. */
   minScore: 0.1,
+  /**
+   * Vector backend the deployment runs: the process-scoped in-memory index
+   * (default) or the durable PostgreSQL/pgvector store. `'pg'` is a startup
+   * lever needing an injected executor; the wiring throws rather than
+   * silently falling back to memory.
+   */
+  vectorStore: 'inMemory',
   /** In-memory store limits (dev/tests). */
   inMemoryMaxCollections: 200,
   inMemoryMaxChunks: 20_000,
@@ -50,6 +60,11 @@ export interface RagDomainConfig {
   candidateK: number;
   topK: number;
   minScore: number;
+  /**
+   * Vector backend selected at startup. Defaults to `RAG_DEFAULTS.vectorStore`
+   * (`'inMemory'`); `'pg'` only resolves alongside an injected executor/store.
+   */
+  vectorStore: RagVectorStoreMode;
   inMemoryMaxCollections: number;
   inMemoryMaxChunks: number;
   /**
