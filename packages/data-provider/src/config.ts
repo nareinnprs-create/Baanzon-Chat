@@ -2727,6 +2727,23 @@ export const ragSchema = z.object({
   embeddingConcurrency: z.number().int().positive().optional().default(2),
 });
 
+/**
+ * Code-execution sandbox levers. `mode` selects which execution capability
+ * backs code execution: `attached` (default) keeps the existing attached
+ * environment / Code API path, while `managed` runs code through the
+ * deployment-supplied kernel-isolated sandbox binary. `executable` names that
+ * binary; the deployment provides isolation, not this configuration.
+ */
+export const sandboxConfigSchema = z
+  .object({
+    mode: z.enum(['attached', 'managed']).optional().default('attached'),
+    /** Managed mode only: path to the deployment-supplied sandbox binary. */
+    executable: z.string().min(1).optional(),
+  })
+  .strict();
+
+export type SandboxConfig = z.infer<typeof sandboxConfigSchema>;
+
 export type TRagConfig = z.infer<typeof ragSchema>;
 
 export const configSchema = z.object({
@@ -2737,6 +2754,7 @@ export const configSchema = z.object({
   langfuse: langfuseConfigSchema.optional(),
   memory: memorySchema.optional(),
   rag: ragSchema.optional(),
+  sandbox: sandboxConfigSchema.optional(),
   summarization: summarizationConfigSchema.optional(),
   skillSync: skillSyncConfigSchema,
   secureImageLinks: z.boolean().optional(),
