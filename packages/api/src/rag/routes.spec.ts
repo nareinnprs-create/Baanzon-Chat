@@ -1824,13 +1824,11 @@ describe('createRagRoutes', () => {
       expect(knowledgeMethods.createKnowledgeCollection).not.toHaveBeenCalled();
     });
 
-    it('treats a request with no config at all as disabled, not enabled', async () => {
+    it('treats a request with no config at all as enabled, not disabled', async () => {
       // `config: undefined` is stated rather than left out, because `createRequest`
       // supplies `ENABLED_CONFIG` and omitting the key would pass the enabled
-      // config instead: this test used to be named "as enabled" and passed only
-      // because of that default, so it stayed green through the inverse of the
-      // behaviour it names. Nothing else in this file sends no config, so this is
-      // the only thing pinning the no-config path.
+      // config instead. Nothing else in this file sends no config, so this is the
+      // only thing pinning the no-config path.
       const { routes } = setup();
       const response = createResponse();
 
@@ -1845,10 +1843,9 @@ describe('createRagRoutes', () => {
       );
 
       // A deployment that configured nothing gets `RAG_DEFAULTS`, and the
-      // default is `disabled: true` — the feature is opt-in, so a request with
-      // no `rag:` block is refused rather than served from a bare default.
-      expect(statusOf(response)).toBe(503);
-      expect(bodyOf(response)).toEqual({ error: 'Knowledge retrieval is disabled' });
+      // default is `disabled: false` — the feature is on by default, and only an
+      // explicit `disabled: true` refuses a request.
+      expect(statusOf(response)).toBe(201);
     });
 
     it('re-enables a request whose own config object differs from the disabled one', async () => {

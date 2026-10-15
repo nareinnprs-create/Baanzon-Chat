@@ -1,8 +1,14 @@
 const express = require('express');
-const { createRagRoutes, InMemoryVectorStore, RAG_DEFAULTS } = require('@librechat/api');
-const { requireJwtAuth, configMiddleware } = require('~/server/middleware');
+const {
+  createRagRoutes,
+  createRagIntegration,
+  InMemoryVectorStore,
+  RAG_DEFAULTS,
+} = require('@librechat/api');
+const { requireJwtAuth, configMiddleware, createKnowledgeLimiters } = require('~/server/middleware');
 
 const router = express.Router();
+const { knowledgeIpLimiter, knowledgeUserLimiter } = createKnowledgeLimiters();
 
 /**
  * Knowledge bases and retrieval (blueprint §24, §45).
@@ -24,9 +30,23 @@ const vectorStore = new InMemoryVectorStore({
   maxChunks: RAG_DEFAULTS.inMemoryMaxChunks,
 });
 
-const routes = createRagRoutes({ knowledgeMethods, vectorStore });
+/**
+ * The semantic half is a boot-time integration, resolved from the environment
+ * once — the route factory takes its collaborators at construction, so a
+ * provider cannot be rebuilt per request. Unset, the domain ingests and
+ * retrieves keyword-only, which is the guaranteed fallback.
+ */
+const { embedder, semantic } = createRagIntegration({ vectorStore });
 
-router.use(requireJwtAuth);
+const routes = createRagRoutes({
+  knowledgeMethods,
+  vectorStore,
+  ...(semantic ? { semantic } : {}),
+  ...(embedder ? { embedder } : {}),
+});
+
+/** Auth first (the user limiter keys on the resolved user), then both windows. */
+router.use(requireJwtAuth, knowledgeIpLimiter, knowledgeUserLimiter);
 
 router.get('/', configMiddleware, routes.listCollections);
 router.post('/', configMiddleware, routes.createCollection);

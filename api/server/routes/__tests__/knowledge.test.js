@@ -45,9 +45,15 @@ jest.mock('~/server/middleware', () => {
     req.config = mockAppConfig;
     return next();
   });
+  const pass = (_req, _res, next) => next();
+  const createKnowledgeLimiters = jest.fn(() => ({
+    knowledgeIpLimiter: pass,
+    knowledgeUserLimiter: pass,
+  }));
   mockMiddleware.requireJwtAuth = requireJwtAuth;
   mockMiddleware.configMiddleware = configMiddleware;
-  return { requireJwtAuth, configMiddleware };
+  mockMiddleware.createKnowledgeLimiters = createKnowledgeLimiters;
+  return { requireJwtAuth, configMiddleware, createKnowledgeLimiters };
 });
 
 jest.mock('~/models', () => {
@@ -125,9 +131,9 @@ const MISSING_COLLECTION = '00000000-0000-0000-0000-000000000000';
 
 describe('knowledge routes', () => {
   beforeEach(() => {
-    // `RAG_DEFAULTS.disabled` is `true` (retrieval is opt-in), so every request
-    // has to carry an explicit `rag.disabled: false` to reach the handlers; the
-    // kill-switch test below is the one that leaves it on.
+    // Retrieval is on by default (`RAG_DEFAULTS.disabled` is `false`), so an
+    // explicit `rag.disabled: false` here only mirrors the resolved default; the
+    // kill-switch test below is the one that turns it off.
     mockAppConfig = { rag: { disabled: false } };
     mockAuthUser = { id: 'user-1', role: 'USER' };
     mockAuthRejection = null;
@@ -200,6 +206,16 @@ describe('knowledge routes', () => {
       expect(response.status).toBe(503);
       expect(response.body).toEqual({ error: 'Knowledge retrieval is disabled' });
       expect(mockMiddleware.configMiddleware).toHaveBeenCalled();
+    });
+
+    it('serves requests by default when no rag block is configured', async () => {
+      // No `rag` block at all: retrieval is on unless a deployment opts out.
+      mockAppConfig = {};
+
+      const response = await request(buildApp()).get('/api/knowledge');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({ collections: [] });
     });
   });
 

@@ -68,7 +68,8 @@ const GEOMETRY: [string, number][] = [
   ['inMemoryMaxChunks', 20000],
 ];
 
-const DISABLED = 'true';
+const DISABLED = 'false';
+const SEMANTIC_ENABLED = 'true';
 const GEOMETRY_KEYS = GEOMETRY.map(([key]) => key);
 
 /**
@@ -130,8 +131,13 @@ function toNumber(literal: string): number {
   return Number(literal.replace(/_/g, ''));
 }
 
+const BOOLEAN_KEYS = ['disabled', 'semanticEnabled'];
+
 function defaultsIn(location: GuardedLocation): Record<string, string> {
-  const values: Record<string, string> = { disabled: readLiteral(location, 'disabled') };
+  const values: Record<string, string> = {};
+  for (const key of BOOLEAN_KEYS) {
+    values[key] = readLiteral(location, key);
+  }
   for (const key of GUARDED_KEYS) {
     values[key] = readLiteral(location, key);
   }
@@ -144,15 +150,19 @@ describe('RAG default drift guard', () => {
       expect(toNumber(readLiteral(location, key))).toBe(expected);
     });
 
-    it('disables the feature by default', () => {
+    it('enables the feature by default', () => {
       expect(readLiteral(location, 'disabled')).toBe(DISABLED);
+    });
+
+    it('enables the semantic half by default', () => {
+      expect(readLiteral(location, 'semanticEnabled')).toBe(SEMANTIC_ENABLED);
     });
   });
 
   it('all three copies agree on every guarded default', () => {
     const seen = LOCATIONS.map(defaultsIn);
-    for (const key of [...GUARDED_KEYS, 'disabled']) {
-      const normalize = key === 'disabled' ? (value: string) => value : toNumber;
+    for (const key of [...GUARDED_KEYS, ...BOOLEAN_KEYS]) {
+      const normalize = BOOLEAN_KEYS.includes(key) ? (value: string) => value : toNumber;
       const values = seen.map((copy) => normalize(copy[key]));
       expect(values).toEqual(values.map(() => values[0]));
     }

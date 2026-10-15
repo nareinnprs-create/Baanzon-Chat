@@ -42,3 +42,17 @@ export type {
   EmbeddingReport,
   EmbedDegradation,
 } from './embeddings';
+
+export { createOpenAIEmbeddings } from './openaiEmbeddings';
+export type { OpenAIEmbeddings, OpenAIEmbeddingsOptions } from './openaiEmbeddings';
+
+export {
+  createRagIntegration,
+  RAG_EMBEDDING_API_URL,
+  RAG_EMBEDDING_API_KEY,
+  RAG_EMBEDDING_MODEL,
+  RAG_EMBEDDING_DIMENSION,
+  DEFAULT_EMBEDDING_MODEL,
+  DEFAULT_EMBEDDING_DIMENSION,
+} from './wiring';
+export type { RagIntegration, RagIntegrationOptions } from './wiring';

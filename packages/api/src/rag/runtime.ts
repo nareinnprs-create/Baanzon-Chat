@@ -101,7 +101,7 @@ export function resolveRagConfig(config?: RagRuntimeConfig): Required<RagRuntime
     embeddingTimeoutMs: config?.embeddingTimeoutMs ?? RAG_DEFAULTS.embeddingTimeoutMs,
     embeddingBatchSize: config?.embeddingBatchSize ?? RAG_DEFAULTS.embeddingBatchSize,
     embeddingConcurrency: config?.embeddingConcurrency ?? RAG_DEFAULTS.embeddingConcurrency,
-    semanticEnabled: config?.semanticEnabled ?? (RAG_DEFAULTS as any).semanticEnabled ?? false,
+    semanticEnabled: config?.semanticEnabled ?? RAG_DEFAULTS.semanticEnabled,
   };
 }
 

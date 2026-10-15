@@ -2650,9 +2650,10 @@ export type LangfuseConfig = z.infer<typeof langfuseConfigSchema>;
 export const ragSchema = z.object({
   /** Master switch: when true every knowledge route answers 503. The routes
    *  stay mounted, because config is resolved per request and a route table
-   *  could not react to a later reload. Defaults to true — the feature is
-   *  opt-in, and turning it on takes an explicit `disabled: false`. */
-  disabled: z.boolean().optional().default(true),
+   *  could not react to a later reload. Defaults to false — knowledge retrieval
+   *  is on by default, and the kill switch remains available with
+   *  `disabled: true`. */
+  disabled: z.boolean().optional().default(false),
   /** External RAG API base URL. Only consulted once a semantic client is
    *  actually injected; until then retrieval is keyword-only regardless of
    *  this value. `RAG_API_URL` is used only when the key is absent, so an
@@ -2665,6 +2666,10 @@ export const ragSchema = z.object({
   candidateK: z.number().int().positive().optional().default(32),
   topK: z.number().int().positive().optional().default(6),
   minScore: z.number().min(0).max(1).optional().default(0.1),
+  /** Enables the semantic/hybrid retrieval path (keyword fallback is always
+   *  guaranteed). Defaults on, but only has an effect once an embeddings
+   *  provider is configured for the deployment. */
+  semanticEnabled: z.boolean().optional().default(true),
   inMemoryMaxCollections: z.number().int().positive().optional().default(200),
   inMemoryMaxChunks: z.number().int().positive().optional().default(20000),
   /** Milliseconds one ingest-side embedder call may take before its batch of
@@ -3355,6 +3360,10 @@ export enum ViolationTypes {
    * Shared link retrieval limit violations.
    */
   SHARE_LIMIT = 'share_limit',
+  /**
+   * Knowledge retrieval / ingest limit violations.
+   */
+  KNOWLEDGE_LIMIT = 'knowledge_limit',
 }
 
 /**

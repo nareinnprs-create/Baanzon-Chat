@@ -5,11 +5,11 @@ export const RAG_API_URL = 'RAG_API_URL';
 
 export const RAG_DEFAULTS = {
   /**
-   * Last-resort default for the feature kill switch: knowledge retrieval is
-   * opt-in, so the default is disabled. `resolveRagConfig` reads this when the
-   * resolved config carries no `disabled` of its own.
+   * Last-resort default for the feature kill switch: knowledge retrieval is on
+   * by default, so the default is enabled. `resolveRagConfig` reads this when
+   * the resolved config carries no `disabled` of its own.
    */
-  disabled: true,
+  disabled: false,
   /** Chunk size in characters (blueprint §20 / §24). */
   chunkSize: 800,
   /** Chunk overlap in characters. */
@@ -36,7 +36,7 @@ export const RAG_DEFAULTS = {
   /** Embedder calls in flight at once. */
   embeddingConcurrency: 2,
   /** Enable semantic search path (keyword fallback guaranteed). */
-  semanticEnabled: false,
+  semanticEnabled: true,
 } as const;
 
 export interface RagDomainConfig {
@@ -60,6 +60,8 @@ export interface RagDomainConfig {
   embeddingTimeoutMs: number;
   embeddingBatchSize: number;
   embeddingConcurrency: number;
+  /** Enable the semantic half once an embeddings provider is wired. */
+  semanticEnabled: boolean;
 }
 
 /** Loads RAG config from defaults merged with `RAG_API_URL` env — same source `~/files/rag.ts` uses. */
