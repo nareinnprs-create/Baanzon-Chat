@@ -82,9 +82,10 @@ export enum QueryKeys {
   skillFiles = 'skillFiles',
   skillFileContent = 'skillFileContent',
   /* Skill tree (phase 2 — filesystem-style node view) */
-  /* DECISION NEEDED: tree/node keys belong to the skill-tree feature whose
-   * data-service calls throw. They are inert string ids; keep only if the
-   * feature ships (and its backend endpoints are wired). */
+  /* DECISION (phase 2): the tree is served by `GET /api/skills/:id/tree` and
+   * the node-content route; `data-service.getSkillTree` /
+   * `getSkillNodeContent` issue real requests, so these reaction-query keys are
+   * live. UI wiring (mounting the tree hooks) is the remaining step. */
   skillTree = 'skillTree',
   skillNodeContent = 'skillNodeContent',
   /* Tool favorites (starred marketplace items) */
@@ -147,9 +148,9 @@ export enum MutationKeys {
   updateProject = 'updateProject',
   deleteProject = 'deleteProject',
   assignConversationToProject = 'assignConversationToProject',
-  /* DECISION NEEDED: skill-node mutations from the original UI PR — tree/node
-   * operations are phase 2 and the data-service layer now throws. Retain only
-   * once the feature and its backend endpoints are wired. */
+  /* DECISION (phase 2): skill-tree node mutations are wired to the backend
+   * (`POST`/`PATCH`/`DELETE /api/skills/:id/tree...`), so these keys are kept.
+   * UI wiring (mounting the tree mutation hooks) is the remaining step. */
   createSkillNode = 'createSkillNode',
   updateSkillNode = 'updateSkillNode',
   deleteSkillNode = 'deleteSkillNode',

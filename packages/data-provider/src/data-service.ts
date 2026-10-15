@@ -1247,72 +1247,79 @@ export function deleteSkillFile(
 }
 
 /* -------------------------------------------------------------------------- */
-/* Skill Tree (nodes) — DEPRECATED (phase 2), PENDING APPROVAL                 */
+/* Skill tree (nodes) — phase 2                                                 */
 /* -------------------------------------------------------------------------- */
-/* DEPRECATED: these six exports were introduced by the original tree UI PR and */
-/* shipped as phase-1 stubs so that UI compiles. They have no backend — no tree  */
-/* route is registered in /api or packages/api, and endpoints.skillTree only     */
-/* builds a URL nobody requests. The only callers are                            */
-/* client/src/data-provider/Skills/tree-queries.ts and tree-mutations.ts, whose  */
-/* consumers (SkillFileEditor, SkillFilePreview) are exported but never mounted, */
-/* so no active UI reaches them. They THROW instead of silently resolving        */
-/* empty/no-op data, which had hidden that the feature is unimplemented and let  */
-/* callers persist fabricated state.                                             */
-/* PENDING APPROVAL: wire real endpoints, or delete the tree feature and these   */
-/* exports, before enabling the tree UI.                                         */
+/* DECISION (phase 2): the tree is a derived, path-addressed view over the      */
+/* skill body + its file rows; these six calls now hit the skill-tree routes    */
+/* (`GET/POST /api/skills/:id/tree`, plus `:nodeId` / `:nodeId/content`).       */
+/* `nodeId` is the skill-relative path (e.g. `SKILL.md`, `scripts/run.sh`), so  */
+/* it is URL-encoded into the single `path` segment the endpoint helper builds. */
+/* UI wiring (mounting the tree hooks) is the remaining step.                   */
 
-/**
- * The single failure every skill-tree stub throws.
- *
- * It names the operation, states that no HTTP request was sent, and points at
- * the missing route, so a caller reads an actionable sentence rather than a bare
- * "not implemented" that looks like a transient, retryable fault and sends them
- * back to the same dead end.
- */
-const skillTreeUnavailable = (operation: string): Error =>
-  new Error(
-    `[skill-tree] ${operation}() is unavailable: no skill-tree backend route is registered, so ` +
-      `no request was sent. This is a deprecated phase-2 stub pending approval — the skill-tree ` +
-      `UI is not reachable in this build. Do not call it; implement the endpoint or remove the ` +
-      `tree feature first.`,
-  );
+/** `true` only when a usable `FormData` global exists (browser / Node 18+). */
+const isFormData = (value: unknown): value is FormData =>
+  typeof FormData !== 'undefined' && value instanceof FormData;
 
-export const getSkillTree = (_skillId: string): Promise<t.TSkillTreeResponse> => {
-  throw skillTreeUnavailable('getSkillTree');
+const skillNodePath = (nodeId: string): string => encodeURIComponent(nodeId);
+
+const skillNodeContentPath = (nodeId: string): string =>
+  `${encodeURIComponent(nodeId)}/content`;
+
+export const getSkillTree = (skillId: string): Promise<t.TSkillTreeResponse> => {
+  return request.get(endpoints.skillTree({ skillId }));
 };
 
 export const createSkillNode = (
-  _skillId: string,
-  _data: FormData | t.TCreateSkillNodeRequest,
+  skillId: string,
+  data: FormData | t.TCreateSkillNodeRequest,
 ): Promise<t.TSkillNode> => {
-  throw skillTreeUnavailable('createSkillNode');
+  if (isFormData(data)) {
+    return request.postMultiPart(endpoints.skillTree({ skillId }), data);
+  }
+  return request.post(endpoints.skillTree({ skillId }), data);
 };
 
-export const updateSkillNode = (_variables: {
+export const updateSkillNode = (variables: {
   skillId: string;
   nodeId: string;
   data: t.TUpdateSkillNodeRequest;
 }): Promise<t.TSkillNode> => {
-  throw skillTreeUnavailable('updateSkillNode');
+  return request.patch(
+    endpoints.skillTree({ skillId: variables.skillId, path: skillNodePath(variables.nodeId) }),
+    variables.data,
+  );
 };
 
-export const deleteSkillNode = (_variables: { skillId: string; nodeId: string }): Promise<void> => {
-  throw skillTreeUnavailable('deleteSkillNode');
+export const deleteSkillNode = (variables: { skillId: string; nodeId: string }): Promise<void> => {
+  return request.delete(
+    endpoints.skillTree({ skillId: variables.skillId, path: skillNodePath(variables.nodeId) }),
+  );
 };
 
-export const getSkillNodeContent = (_variables: {
+export const getSkillNodeContent = (variables: {
   skillId: string;
   nodeId: string;
 }): Promise<{ content: string; mimeType: string }> => {
-  throw skillTreeUnavailable('getSkillNodeContent');
+  return request.get(
+    endpoints.skillTree({
+      skillId: variables.skillId,
+      path: skillNodeContentPath(variables.nodeId),
+    }),
+  );
 };
 
-export const updateSkillNodeContent = (_variables: {
+export const updateSkillNodeContent = (variables: {
   skillId: string;
   nodeId: string;
   content: string;
 }): Promise<t.TSkillNode> => {
-  throw skillTreeUnavailable('updateSkillNodeContent');
+  return request.put(
+    endpoints.skillTree({
+      skillId: variables.skillId,
+      path: skillNodeContentPath(variables.nodeId),
+    }),
+    { content: variables.content },
+  );
 };
 
 export function getGitHubSkillSyncStatus(): Promise<sk.TGitHubSkillSyncStatusResponse> {

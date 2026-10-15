@@ -126,6 +126,12 @@ import {
   type ListSkillsByAccessResult,
   type UpdateSkillResult,
   type ValidationIssue,
+  type SkillTreeNode,
+  type RenameSkillNodeParams,
+  type RenameSkillNodeResult,
+  type DeletedSkillFileRef,
+  type DeleteSkillNodeParams,
+  type DeleteSkillNodeResult,
 } from './skill';
 import { createScheduleMethods, type ScheduleMethods } from './schedule';
 import {
@@ -543,6 +549,12 @@ export type {
   ListSkillsByAccessResult,
   UpdateSkillResult,
   ValidationIssue,
+  SkillTreeNode,
+  RenameSkillNodeParams,
+  RenameSkillNodeResult,
+  DeletedSkillFileRef,
+  DeleteSkillNodeParams,
+  DeleteSkillNodeResult,
   SkillSyncStatusInput,
   SkillSyncCredentialSummary,
   UpsertSkillSyncCredentialInput,

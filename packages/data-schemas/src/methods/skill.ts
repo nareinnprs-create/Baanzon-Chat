@@ -814,6 +814,85 @@ export type CreateSkillResult = {
   warnings: ValidationIssue[];
 };
 
+/**
+ * A node in the filesystem-style skill tree (phase 2).
+ *
+ * DECISION (skill-tree): there is no separate `SkillNode` collection. The tree
+ * is a **derived view** over the persisted `Skill` body plus its `SkillFile`
+ * rows, so the node id is the skill-relative path itself (`SKILL.md` for the
+ * body, `scripts` for a folder, `scripts/run.sh` for a file). Folders are
+ * implicit: they exist exactly when a file path has an ancestor segment, which
+ * is why empty folders are not representable (the create-node route rejects
+ * them). Node identity is therefore stable across requests without a store.
+ */
+export type SkillTreeNode = {
+  /** Stable node id — the skill-relative path (`SKILL.md`, `scripts`, `scripts/run.sh`). */
+  _id: string;
+  skillId: string;
+  /** Parent folder path, or `null` for root-level nodes. */
+  parentId: string | null;
+  type: 'file' | 'folder';
+  name: string;
+  /** `SkillFile._id` for file nodes; absent for `SKILL.md` and folders. */
+  fileId?: string;
+  /** Server-derived sibling order (folders first, then files, lexicographic). */
+  order: number;
+  author: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type RenameSkillNodeParams = { skillId: string; fromPath: string; toPath: string };
+
+export type RenameSkillNodeResult = {
+  status: 'ok' | 'not_found' | 'conflict';
+  /** Number of `SkillFile` rows whose `relativePath` was rewritten. */
+  renamed: number;
+};
+
+/** Plain projection of a deleted `SkillFile` row, for storage-blob cleanup. */
+export type DeletedSkillFileRef = {
+  relativePath: string;
+  filepath: string;
+  storageKey?: string;
+  storageRegion?: string;
+  source: string;
+  author: string;
+  tenantId?: string;
+};
+
+export type DeleteSkillNodeParams = { skillId: string; path: string };
+
+export type DeleteSkillNodeResult = {
+  status: 'ok' | 'not_found';
+  /** Number of `SkillFile` rows deleted. */
+  deleted: number;
+  /** Rows removed by this call, so callers can clean up the stored blobs. */
+  files: DeletedSkillFileRef[];
+};
+
+/** Trailing path segment (`'a/b/c.md'` → `'c.md'`). */
+function skillNodeBasename(nodePath: string): string {
+  const slash = nodePath.lastIndexOf('/');
+  return slash === -1 ? nodePath : nodePath.slice(slash + 1);
+}
+
+/** Locale-independent string order, so the derived tree is stable across hosts. */
+function compareNodeNames(a: string, b: string): number {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
+/** Mongo duplicate-key on the `(skillId, relativePath)` unique index. */
+function isDuplicateKeyError(error: unknown): boolean {
+  return (
+    !!error &&
+    typeof error === 'object' &&
+    (error as { code?: unknown }).code === 11000
+  );
+}
+
 type BodyAlwaysApplyResult =
   | { status: 'absent' }
   | { status: 'valid'; value: boolean }
@@ -1091,6 +1170,12 @@ export function createSkillMethods(
       codeEnvRef: CodeEnvRef;
     }>,
   ) => Promise<{ matchedCount: number; modifiedCount: number }>;
+  /** Derives the phase-2 tree from the skill body + its persisted file rows. */
+  listSkillTree: (skillId: Types.ObjectId | string) => Promise<SkillTreeNode[] | null>;
+  /** Renames/moves a file row, or rewrites the path prefix of a derived folder subtree. */
+  renameSkillNode: (params: RenameSkillNodeParams) => Promise<RenameSkillNodeResult>;
+  /** Deletes a file row, or every file row beneath a derived folder path. */
+  deleteSkillNode: (params: DeleteSkillNodeParams) => Promise<DeleteSkillNodeResult>;
 } {
   const { ObjectId } = mongoose.Types;
 
@@ -1788,20 +1873,17 @@ export function createSkillMethods(
    * the rare case where a SkillFile write succeeds but the subsequent
    * `findByIdAndUpdate` here fails (connection drop, primary failover mid-
    * request), the `fileCount` on the parent Skill will drift from the true
-   * row count until the next successful upsert/delete corrects it. Options if
-   * this ever shows up in practice:
-   *   - wrap both ops in a transaction (requires a replica set)
-   *   - periodic reconciliation: `fileCount = count(skill_files where skillId = ?)`
-   *   - treat `fileCount` as advisory and recompute on read when accuracy
-   *     matters
-   * DECISION NEEDED: this comment previously claimed "For phase 1, skill
-   * files are stubbed at the upload boundary, so the risk window doesn't open
-   * in practice." That is no longer true — per-file uploads
-   * (POST /api/skills/:id/files) are live and persist SkillFile rows through
-   * this path, so the `fileCount`/`version` drift window described above is
-   * real. Pick one of the reconciliation options (transaction, periodic
-   * recount, or advisory-with-recompute-on-read) before depending on
-   * `fileCount` accuracy.
+   * row count until the next successful upsert/delete corrects it.
+   *
+   * DECISION (phase 2): `fileCount` stays **advisory**; the skill-tree read
+   * path does not depend on it. `listSkillTree` derives its nodes from the
+   * `SkillFile` rows themselves, so a drifted count can never hide or invent
+   * tree nodes. The atomic `$inc` is kept rather than recounting here (a
+   * recount is observationally stale under concurrent writers), and no
+   * reconciliation job is added. If `fileCount` ever becomes load-bearing for
+   * the UI, add periodic reconciliation
+   * (`fileCount = count(skill_files where skillId = ?)`) rather than trusting
+   * the counter.
    */
   async function bumpSkillVersionAndAdjustFileCount(
     skillId: Types.ObjectId | string,
@@ -1824,6 +1906,247 @@ export function createSkillMethods(
       .sort({ relativePath: 1 })
       .lean();
     return rows as unknown as Array<ISkillFile & { _id: Types.ObjectId }>;
+  }
+
+  /**
+   * Derives the phase-2 skill tree from the persisted body + file rows.
+   *
+   * Returns `null` when no `Skill` row exists for `skillId` (an external,
+   * registry-backed skill, or a row deleted since the caller authorized the
+   * request) so the handler can distinguish "no local tree" from "empty tree".
+   *
+   * Folders are synthesized from file-path ancestors. If a node path is both a
+   * file and a folder (a file literally named `scripts` alongside
+   * `scripts/run.sh`), the file node wins; descendants then hang off that node.
+   */
+  async function listSkillTree(
+    skillId: Types.ObjectId | string,
+  ): Promise<SkillTreeNode[] | null> {
+    const Skill = mongoose.models.Skill as Model<ISkillDocument>;
+    const SkillFile = mongoose.models.SkillFile as Model<ISkillFileDocument>;
+    const skill = (await Skill.findById(skillId).lean()) as unknown as
+      | (ISkill & { _id: Types.ObjectId })
+      | null;
+    if (!skill) {
+      return null;
+    }
+    const files = (await SkillFile.find({ skillId })
+      .select('-content')
+      .sort({ relativePath: 1 })
+      .lean()) as unknown as Array<ISkillFile & { _id: Types.ObjectId }>;
+
+    const skillIdStr = skill._id.toString();
+    const skillCreatedAt = (skill.createdAt ?? new Date()).toISOString();
+    const skillUpdatedAt = (skill.updatedAt ?? new Date()).toISOString();
+    const skillAuthor = skill.author.toString();
+
+    const nodes = new Map<string, SkillTreeNode>();
+    nodes.set('SKILL.md', {
+      _id: 'SKILL.md',
+      skillId: skillIdStr,
+      parentId: null,
+      type: 'file',
+      name: 'SKILL.md',
+      order: 0,
+      author: skillAuthor,
+      createdAt: skillCreatedAt,
+      updatedAt: skillUpdatedAt,
+    });
+
+    const folderParent = new Map<string, string | null>();
+    for (const file of files) {
+      const segments = file.relativePath.split('/');
+      for (let i = 1; i < segments.length; i++) {
+        const folderPath = segments.slice(0, i).join('/');
+        if (!folderParent.has(folderPath)) {
+          folderParent.set(folderPath, i === 1 ? null : segments.slice(0, i - 1).join('/'));
+        }
+      }
+      nodes.set(file.relativePath, {
+        _id: file.relativePath,
+        skillId: skillIdStr,
+        parentId: segments.length > 1 ? segments.slice(0, -1).join('/') : null,
+        type: 'file',
+        name: segments[segments.length - 1],
+        fileId: file._id.toString(),
+        order: 0,
+        author: file.author.toString(),
+        createdAt: (file.createdAt ?? new Date()).toISOString(),
+        updatedAt: (file.updatedAt ?? new Date()).toISOString(),
+      });
+    }
+    for (const [folderPath, parentId] of folderParent) {
+      if (nodes.has(folderPath)) {
+        continue;
+      }
+      nodes.set(folderPath, {
+        _id: folderPath,
+        skillId: skillIdStr,
+        parentId,
+        type: 'folder',
+        name: skillNodeBasename(folderPath),
+        order: 0,
+        author: skillAuthor,
+        createdAt: skillCreatedAt,
+        updatedAt: skillUpdatedAt,
+      });
+    }
+
+    // Server-derived sibling order: folders before files, then lexicographic.
+    const siblings = new Map<string, SkillTreeNode[]>();
+    for (const node of nodes.values()) {
+      const key = node.parentId ?? '';
+      const group = siblings.get(key);
+      if (group) {
+        group.push(node);
+      } else {
+        siblings.set(key, [node]);
+      }
+    }
+    for (const group of siblings.values()) {
+      group.sort((a, b) => {
+        if (a.type !== b.type) {
+          return a.type === 'folder' ? -1 : 1;
+        }
+        return compareNodeNames(a.name, b.name);
+      });
+      group.forEach((node, index) => {
+        node.order = index;
+      });
+    }
+
+    return Array.from(nodes.values()).sort((a, b) => {
+      const depthDelta = a._id.split('/').length - b._id.split('/').length;
+      return depthDelta !== 0 ? depthDelta : compareNodeNames(a._id, b._id);
+    });
+  }
+
+  /**
+   * Renames/moves a node. A file row is matched exactly; otherwise the path is
+   * treated as a derived folder and every descendant row has its path prefix
+   * rewritten. The stored blob is intentionally left in place — only the
+   * metadata path moves, so `filepath`/`file_id` stay valid — which keeps this
+   * to a single `SkillFile` write per row (no storage round-trip).
+   */
+  async function renameSkillNode(params: RenameSkillNodeParams): Promise<RenameSkillNodeResult> {
+    const Skill = mongoose.models.Skill as Model<ISkillDocument>;
+    const SkillFile = mongoose.models.SkillFile as Model<ISkillFileDocument>;
+    const skill = await Skill.findById(params.skillId).lean();
+    if (!skill) {
+      return { status: 'not_found', renamed: 0 };
+    }
+    if (params.fromPath === params.toPath) {
+      return { status: 'ok', renamed: 0 };
+    }
+
+    const direct = await SkillFile.findOne({
+      skillId: params.skillId,
+      relativePath: params.fromPath,
+    }).lean();
+    if (direct) {
+      const clash = await SkillFile.findOne({
+        skillId: params.skillId,
+        relativePath: params.toPath,
+      }).lean();
+      if (clash) {
+        return { status: 'conflict', renamed: 0 };
+      }
+      try {
+        await SkillFile.updateOne(
+          { skillId: params.skillId, relativePath: params.fromPath },
+          { $set: { relativePath: params.toPath, filename: skillNodeBasename(params.toPath) } },
+        );
+      } catch (error) {
+        if (isDuplicateKeyError(error)) {
+          return { status: 'conflict', renamed: 0 };
+        }
+        throw error;
+      }
+      await bumpSkillVersionAndAdjustFileCount(params.skillId, 0);
+      return { status: 'ok', renamed: 1 };
+    }
+
+    const prefix = `${params.fromPath}/`;
+    const rows = (await SkillFile.find({ skillId: params.skillId })
+      .select('relativePath')
+      .lean()) as unknown as Array<{ relativePath: string }>;
+    const descendants = rows.filter((row) => row.relativePath.startsWith(prefix));
+    if (descendants.length === 0) {
+      return { status: 'not_found', renamed: 0 };
+    }
+
+    const existing = new Set(rows.map((row) => row.relativePath));
+    const rewrites = descendants.map((row) => {
+      const target = `${params.toPath}${row.relativePath.slice(params.fromPath.length)}`;
+      return { from: row.relativePath, to: target };
+    });
+    for (const rewrite of rewrites) {
+      if (existing.has(rewrite.to)) {
+        return { status: 'conflict', renamed: 0 };
+      }
+    }
+
+    try {
+      await SkillFile.bulkWrite(
+        rewrites.map((rewrite) => ({
+          updateOne: {
+            filter: { skillId: params.skillId, relativePath: rewrite.from },
+            update: { $set: { relativePath: rewrite.to } },
+          },
+        })),
+      );
+    } catch (error) {
+      if (isDuplicateKeyError(error)) {
+        return { status: 'conflict', renamed: 0 };
+      }
+      throw error;
+    }
+    await bumpSkillVersionAndAdjustFileCount(params.skillId, 0);
+    return { status: 'ok', renamed: rewrites.length };
+  }
+
+  /**
+   * Deletes a node. A file row is matched exactly; otherwise every row at or
+   * below the derived folder path is removed. Returns plain row projections
+   * (not Mongoose documents) so the caller can clean up the stored blobs.
+   */
+  async function deleteSkillNode(params: DeleteSkillNodeParams): Promise<DeleteSkillNodeResult> {
+    const Skill = mongoose.models.Skill as Model<ISkillDocument>;
+    const SkillFile = mongoose.models.SkillFile as Model<ISkillFileDocument>;
+    const skill = await Skill.findById(params.skillId).lean();
+    if (!skill) {
+      return { status: 'not_found', deleted: 0, files: [] };
+    }
+
+    const rows = (await SkillFile.find({ skillId: params.skillId }).lean()) as unknown as Array<
+      ISkillFile & { _id: Types.ObjectId }
+    >;
+    const prefix = `${params.path}/`;
+    const direct = rows.some((row) => row.relativePath === params.path);
+    const targets = direct
+      ? rows.filter((row) => row.relativePath === params.path)
+      : rows.filter((row) => row.relativePath.startsWith(prefix));
+    if (targets.length === 0) {
+      return { status: 'not_found', deleted: 0, files: [] };
+    }
+
+    const result = await SkillFile.deleteMany({
+      _id: { $in: targets.map((row) => row._id) },
+    });
+    await bumpSkillVersionAndAdjustFileCount(params.skillId, -result.deletedCount);
+    return {
+      status: 'ok',
+      deleted: result.deletedCount,
+      files: targets.map((row) => ({
+        relativePath: row.relativePath,
+        filepath: row.filepath,
+        storageKey: row.storageKey,
+        storageRegion: row.storageRegion,
+        source: row.source,
+        author: row.author.toString(),
+        tenantId: row.tenantId,
+      })),
+    };
   }
 
   async function upsertSkillFile(
@@ -1963,6 +2286,9 @@ export function createSkillMethods(
     getSkillFileByPath,
     updateSkillFileContent,
     updateSkillFileCodeEnvIds,
+    listSkillTree,
+    renameSkillNode,
+    deleteSkillNode,
   };
 }
 
