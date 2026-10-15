@@ -3,6 +3,10 @@
   "version": "v0.8.8-rc2",
   "description": "Baanzon Chat - a unified, premium, multilingual, multimodal AI workspace",
   "packageManager": "npm@11.13.0",
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11"
+  },
   "workspaces": [
     "api",
     "client",
@@ -17,7 +21,6 @@
     "rebuild:package-lock": "node config/packages",
     "reinstall": "node config/update.js -l -g",
     "smart-reinstall": "node config/smart-reinstall.js",
-    "b:reinstall": "bun config/update.js -b -l -g",
     "reinstall:docker": "node config/update.js -d -g",
     "update:local": "node config/update.js -l",
     "update:docker": "node config/update.js -d",
@@ -27,7 +30,6 @@
     "rebase:deployed": "node config/deployed-update.js --rebase",
     "start:deployed": "docker compose -f ./deploy-compose.yml up -d || docker-compose -f ./deploy-compose.yml up -d",
     "stop:deployed": "docker compose -f ./deploy-compose.yml down || docker-compose -f ./deploy-compose.yml down",
-    "upgrade": "node config/upgrade.js",
     "create-user": "node config/create-user.js",
     "invite-user": "node config/invite-user.js",
     "list-users": "node config/list-users.js",
@@ -73,20 +75,6 @@
     "static-checks:full": "node scripts/static-checks.mts --full",
     "format": "npx prettier --write \"{,!(node_modules|venv)/**/}*.{js,jsx,ts,tsx}\"",
     "//": "DECISION NEEDED (P1-10): npm is the install of record; bun is an unsupported, ungated path. Rationale: packageManager is npm@11.13.0 and npm ci + package-lock.json are used everywhere, while the tracked bun.lock diverges (REMEDIATION-PLAN.md §P1-10). No bun CI gate should be added until bun support is deliberate; removing bun.lock and these b:* scripts is tracked as follow-up. See .github/workflows/lint.yml.",
-    "b:api": "NODE_ENV=production bun run api/server/index.js",
-    "b:api-inspect": "NODE_ENV=production bun --inspect run api/server/index.js",
-    "b:api:dev": "NODE_ENV=production bun run --watch api/server/index.js",
-    "b:data": "cd packages/data-provider && bun run b:build",
-    "b:build:client-package": "cd packages/client && bun run b:build",
-    "b:data-schemas": "cd packages/data-schemas && bun run b:build",
-    "b:build:api": "cd packages/api && bun run b:build",
-    "b:build:client": "cd client && bun --bun run b:build",
-    "b:client": "bun --bun run b:data && bun --bun run b:data-schemas && bun --bun run b:build:api && bun --bun run b:build:client-package && bun --bun run b:build:client",
-    "b:client:dev": "cd client && bun run b:dev",
-    "b:test:client": "cd client && bun run b:test",
-    "b:test:api": "cd api && bun run b:test",
-    "b:balance": "bun config/add-balance.js",
-    "b:list-balances": "bun config/list-balances.js",
     "reset-terms": "node config/reset-terms.js",
     "migrate:tenant-indexes": "node config/migrate-tenant-indexes.js",
     "migrate:tenant-indexes:dry-run": "node config/migrate-tenant-indexes.js --dry-run",
@@ -113,7 +101,7 @@
     "url": "git+https://github.com/opraiz-technology/baanzon-chat.git"
   },
   "author": "Opraiz Technology Pvt. Ltd.",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/opraiz-technology/baanzon-chat/issues"
   },
@@ -156,10 +144,10 @@
       "brace-expansion": "^1.1.16"
     },
     "minimatch@5": {
-      "brace-expansion": "^2.1.2"
+      "brace-expansion": "^2.1.7"
     },
     "minimatch@9": {
-      "brace-expansion": "^2.1.2"
+      "brace-expansion": "^2.1.7"
     },
     "minimatch@10": {
       "brace-expansion": "^5.0.8"
@@ -170,7 +158,7 @@
     "baseline-browser-mapping": "^2.11.0",
     "browserslist": "^4.28.7",
     "elliptic": "^6.6.1",
-    "fast-uri": "^3.1.6",
+    "fast-uri": "^3.1.8",
     "fflate": "^0.8.3",
     "form-data": "^4.0.6",
     "langsmith": "^0.6.0",

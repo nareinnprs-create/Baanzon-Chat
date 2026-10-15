@@ -160,6 +160,7 @@ interface:
     # Same as above: set Baanzon's own terms URL, or leave unset so only the
     # modal content below is shown. The stock LibreChat URL is not Baanzon's.
     # The modal copy below is placeholder text pending Baanzon's legal review.
+    # TODO: legal review required (Baanzon Chat contact/URLs applied below are placeholders pending review)
     # externalUrl: 'https://example.com/tos'
     openNewTab: true
     modalAcceptance: true
@@ -169,7 +170,7 @@ interface:
 
       *Effective Date: February 18, 2024*
 
-      Welcome to Baanzon Chat, the informational website for the open-source AI chat platform, available at https://baanzon.com. These Terms of Service ("Terms") govern your use of our website and the services we offer. By accessing or using the Website, you agree to be bound by these Terms and our Privacy Policy, accessible at https://baanzon.com/privacy.
+      Welcome to Baanzon Chat, the informational website for the open-source AI chat platform, available at https://baanzonchat.opraiz.com. These Terms of Service ("Terms") govern your use of our website and the services we offer. By accessing or using the Website, you agree to be bound by these Terms and our Privacy Policy, accessible at https://baanzonchat.opraiz.com/privacy.
 
       ## 1. Ownership
 
@@ -197,7 +198,7 @@ interface:
 
       ## 7. Contact Information
 
-      If you have any questions about these Terms, please contact us at contact@baanzon.com.
+      If you have any questions about these Terms, please contact us at support@baanzonchat.opraiz.com.
 
       By using the Website, you acknowledge that you have read these Terms of Service and agree to be bound by them.
 
