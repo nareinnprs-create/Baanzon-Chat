@@ -4,6 +4,7 @@ import path from 'node:path';
 
 import type { CredentialRuntimeState } from './credentials';
 import {
+  assertProductionSecrets,
   bootstrapCredentials,
   credentialNames,
   getCredentialFingerprints,
@@ -177,5 +178,73 @@ describe('credentials', () => {
 
   it('does not classify an arbitrary credential as a legacy default', () => {
     expect(isLegacyCredential('JWT_SECRET', 'test-only-secret')).toBe(false);
+  });
+
+  describe('assertProductionSecrets', () => {
+    const configuredSecrets = {
+      CREDS_KEY: 'a'.repeat(64),
+      CREDS_IV: 'b'.repeat(32),
+      JWT_SECRET: 'c'.repeat(64),
+      JWT_REFRESH_SECRET: 'd'.repeat(64),
+    };
+
+    beforeEach(() => {
+      delete process.env.NODE_ENV;
+      delete process.env.BAANZON_ALLOW_EPHEMERAL_SECRETS;
+    });
+
+    it('throws when a production secret is missing', () => {
+      process.env.NODE_ENV = 'production';
+
+      expect(() => assertProductionSecrets(process.env)).toThrow(
+        'Refusing to start in production',
+      );
+      expect(() => assertProductionSecrets(process.env)).toThrow('CREDS_KEY');
+      expect(() => assertProductionSecrets(process.env)).toThrow(
+        'BAANZON_ALLOW_EPHEMERAL_SECRETS=true',
+      );
+    });
+
+    it('throws when a production secret resolves from an ephemeral source', () => {
+      Object.assign(process.env, configuredSecrets);
+      process.env.NODE_ENV = 'production';
+
+      expect(() =>
+        assertProductionSecrets(process.env, {
+          generated: ['JWT_SECRET'],
+          loadedFromFile: [],
+        }),
+      ).toThrow('JWT_SECRET');
+      expect(() =>
+        assertProductionSecrets(process.env, {
+          generated: [],
+          loadedFromFile: ['CREDS_KEY'],
+        }),
+      ).toThrow('CREDS_KEY');
+    });
+
+    it('warns instead of throwing when the escape hatch is enabled', () => {
+      process.env.NODE_ENV = 'production';
+      process.env.BAANZON_ALLOW_EPHEMERAL_SECRETS = 'true';
+
+      expect(() => assertProductionSecrets(process.env)).not.toThrow();
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('BAANZON_ALLOW_EPHEMERAL_SECRETS'),
+      );
+    });
+
+    it('allows production when every secret is present and permanent', () => {
+      Object.assign(process.env, configuredSecrets);
+      process.env.NODE_ENV = 'production';
+
+      expect(() => assertProductionSecrets(process.env)).not.toThrow();
+      expect(console.warn).not.toHaveBeenCalled();
+    });
+
+    it('ignores missing secrets outside production', () => {
+      process.env.NODE_ENV = 'development';
+
+      expect(() => assertProductionSecrets(process.env)).not.toThrow();
+    });
   });
 });

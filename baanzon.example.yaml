@@ -326,6 +326,22 @@ registration:
   # allowedDomains:
   # - "gmail.com"
 
+  # Reject registrations that do not present a valid invite token (default: false).
+  # When true, a bare ALLOW_REGISTRATION=true no longer permits open registration on
+  # /api/auth/register; a valid invite token (or an invite-gated admin flow) is required.
+  inviteOnly: false
+
+  # Require a verified email address before a local account may sign in (default: true).
+  # Not enforced when outbound email is unconfigured, since no user could verify.
+  requireEmailVerification: true
+
+  # Require a verified email whenever NODE_ENV=production, regardless of
+  # requireEmailVerification above (default: true). Keep this true in production.
+  emailVerificationRequiredInProduction: true
+
+  # Legacy escape hatch: ALLOW_UNVERIFIED_EMAIL_LOGIN=true still permits an unverified
+  # local sign-in even when the settings above would require verification.
+
 # Example Balance settings
 # balance:
 #   enabled: false

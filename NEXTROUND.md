@@ -134,14 +134,24 @@ Each phase: implement with ≥7 agents/subagents in parallel → typecheck → f
 
 | Phase | Status | % of project after | Commit |
 |-------|--------|--------------------|--------|
-| P1 RAG completion | in progress | — | — |
-| P2 Hardening | pending | — | — |
-| P3 Security/deps | pending | — | — |
-| P4 UX shell | pending | — | — |
-| P5 UX capability | pending | — | — |
-| P6 Tests/CI-CD | pending | — | — |
-| P7 Data/sandbox | pending | — | — |
+| P1 RAG completion | **done** | ~76% | `267d683` |
+| P2 Hardening | **done** (branding/docker/engines/license/cleanup + secrets fail-fast P2.2, CSP/CORS P2.5, registration/email policy A14) | ~86% | `6bf52321`, `(this)` |
+| P3 Security/deps | partial (overrides `fast-uri`/`brace-expansion` fixed, P0/P1 bumps, dead nested override removed, lockfile synced; audited majors still staged) | ~88% | `6bf52321`, `(this)` |
+| P4 UX shell | partial (P4.1 ⌘K command palette shipped; P4.2–P4.5 pending) | ~89% | `(this)` |
+| P5 UX capability | partial (P5.5 offline drafts + sync queue shipped; P5.1–P5.4/5.6 pending) | ~90% | `(this)` |
+| P6 Tests/CI-CD | partial (P6.2 missing tests: OllamaClient, RAG auth/errors; P6.1 thresholds + P6.3–P6.5 pending) | ~90% | `(this)` |
+| P7 Data/sandbox | partial (P7.1 pgvector store + P7.2 versioned migration ledger; P7.3 entities/P7.4 managed sandbox pending) | ~91% | `(this)` |
 | P8 Validation | pending | — | — |
+
+**P1 evidence (2026-10-15):** `packages/api` RAG suite 690/690; knowledge route 26/26;
+`tsc --noEmit` clean in `packages/api`, `packages/data-provider`, `packages/data-schemas`;
+`packages/api`, `packages/data-provider`, `packages/data-schemas` rebuilt (dist).
+
+**P2/P3/P4.1/P5.5/P6.2/P7.1/P7.2 evidence (2026-10-15):** new specs green — `packages/api`
+registration + pgvector + RAG auth/errors 49/49; `packages/data-schemas` migration ledger 18/18;
+`client` offline queue + command palette + `useSubmitMessage` 24/24; `api` OllamaClient 7/7.
+Regression: `packages/api` RAG suite **730/730**, knowledge route **26/26**. `tsc --noEmit` clean in
+`packages/api`, `packages/data-schemas`, `client`. `packages/api` + `packages/data-schemas` dist rebuilt.
 
 ---
 

@@ -2041,6 +2041,41 @@ export const turnstileSchema = z.object({
 
 export type TTurnstileConfig = z.infer<typeof turnstileSchema>;
 
+/**
+ * Registration and invite policy. Every field is optional at the YAML level and
+ * carries a default that reproduces the pre-existing behaviour, so omitting the
+ * whole `registration` block changes nothing.
+ */
+export const registrationConfigSchema = z
+  .object({
+    /** Social login providers offered on the registration screen. */
+    socialLogins: z.array(z.string()).optional(),
+    /**
+     * Email domains permitted to register and to sign in. Matches the part after
+     * `@`, case-insensitively; an omitted or empty list allows every domain.
+     */
+    allowedDomains: z.array(z.string()).optional(),
+    /**
+     * Reject registration that does not present a valid invite token. Defaults to
+     * `false`, preserving open registration (still gated by `ALLOW_REGISTRATION`).
+     */
+    inviteOnly: z.boolean().default(false),
+    /**
+     * Require a verified email address before a local account may authenticate.
+     * Defaults to `true`, matching the existing `ALLOW_UNVERIFIED_EMAIL_LOGIN` gate.
+     */
+    requireEmailVerification: z.boolean().default(true),
+    /**
+     * Regardless of `requireEmailVerification`, demand a verified email when
+     * `NODE_ENV=production`. Defaults to `true`, so a production deployment never
+     * authenticates an unverified local user.
+     */
+    emailVerificationRequiredInProduction: z.boolean().default(true),
+  })
+  .default({ socialLogins: defaultSocialLogins });
+
+export type TRegistrationConfig = z.infer<typeof registrationConfigSchema>;
+
 export type TRumConfig = {
   provider: 'hyperdx';
   enabled: boolean;
@@ -2717,12 +2752,7 @@ export const configSchema = z.object({
       allowedAddresses: allowedAddressesSchema,
     })
     .optional(),
-  registration: z
-    .object({
-      socialLogins: z.array(z.string()).optional(),
-      allowedDomains: z.array(z.string()).optional(),
-    })
-    .default({ socialLogins: defaultSocialLogins }),
+  registration: registrationConfigSchema,
   balance: balanceSchema.optional(),
   transactions: transactionsSchema.optional(),
   speech: z
