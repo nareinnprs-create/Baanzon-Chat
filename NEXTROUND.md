@@ -137,10 +137,10 @@ Each phase: implement with ≥7 agents/subagents in parallel → typecheck → f
 | P1 RAG completion | **done** | ~76% | `267d683` |
 | P2 Hardening | **done** (branding/docker/engines/license/cleanup + secrets fail-fast P2.2, CSP/CORS P2.5, registration/email policy A14) | ~86% | `6bf52321`, `(this)` |
 | P3 Security/deps | partial (overrides `fast-uri`/`brace-expansion` fixed, P0/P1 bumps, dead nested override removed, lockfile synced; audited majors still staged) | ~88% | `6bf52321`, `(this)` |
-| P4 UX shell | partial (P4.1 ⌘K command palette + P4.3 in-conversation find shipped; P4.2 Home/onboarding, P4.4 PDF export, P4.5 notifications pending) | ~90% | `(this)` |
+| P4 UX shell | partial (P4.1 ⌘K command palette + P4.2 Home/onboarding + P4.3 in-conversation find shipped; P4.4 PDF export, P4.5 notifications pending) | ~91% | `3b942d354` |
 | P5 UX capability | partial (P5.5 offline drafts + sync queue shipped; P5.1–P5.4/5.6 pending) | ~90% | `(this)` |
-| P6 Tests/CI-CD | partial (P6.1 coverage thresholds + P6.2 missing tests + P6.4 integration CI + spec typechecks; P6.3 e2e/a11y/lighthouse + P6.5 CD pending) | ~92% | `(this)` |
-| P7 Data/sandbox | partial (P7.1 pgvector store **+ wired via `rag.vectorStore` lever**, P7.2 migration ledger; P7.3 entities/P7.4 managed sandbox pending) | ~92% | `(this)` |
+| P6 Tests/CI-CD | partial (P6.1 coverage thresholds + P6.2 missing tests + P6.2b CRUD route tests + P6.4 integration CI + P6.5 CD pipeline; P6.3 e2e/a11y/lighthouse pending) | ~94% | `afe944726`, `fe90852ad` |
+| P7 Data/sandbox | partial (P7.1 pgvector store **+ wired via `rag.vectorStore` lever**, P7.2 migration ledger, P7.4 `managed` sandbox with injected executor; P7.3 28 entities pending) | ~94% | `6d866bc75` |
 | P8 Validation | pending | — | — |
 
 **P1 evidence (2026-10-15):** `packages/api` RAG suite 690/690; knowledge route 26/26;
@@ -160,6 +160,16 @@ InConversationFind **15/15**; `tsc --noEmit` clean in `packages/api`, `packages/
 `.github/workflows/integration.yml`; spec-typecheck coverage documented in `typecheck.yml` /
 `static-checks.mts`. **Cancelled this round (retry):** P7.4 managed sandbox, and the find agent's
 completion report (work recovered and verified by hand).
+
+**P4.2/A9/P6.2b/P6.5/P7.4 evidence:** `packages/data-provider` unit suite **1889/1889**,
+`packages/data-schemas` **3106/3106**; new specs green — `packages/api` sandbox + skill-tree
+**18/18**, `client` Home onboarding **6/6**, `api` CRUD routes (tags/projects/apiKeys) **43/43**.
+`tsc --noEmit` clean in `packages/api`, `packages/data-provider`, `packages/data-schemas`, `client`.
+`packages/api` build fixed for `--isolatedDeclarations` (explicit `SkillTreeHandlers` return type).
+Full `packages/api` run: the only failures are Redis/DB integration suites (`ECONNREFUSED
+127.0.0.1:6379`, "Connection is closed") that need local Redis/Mongo — now covered by
+`.github/workflows/integration.yml`. **A9 skill-tree UI wiring deferred** (backend + data-service
+complete; client entry point open).
 
 ---
 
