@@ -30,6 +30,7 @@ import KeyboardDeleteDialog from '~/components/Nav/KeyboardDeleteDialog';
 import { useUserTermsQuery, useGetStartupConfig } from '~/data-provider';
 import { MobileDrawerScrim } from '~/components/UnifiedSidebar/mobile';
 import useKeyboardShortcuts from '~/hooks/useKeyboardShortcuts';
+import { CommandPalette } from '~/components/CommandPalette';
 import useDrawerDismiss from '~/hooks/Nav/useDrawerDismiss';
 import useSidebarToggle from '~/hooks/Nav/useSidebarToggle';
 import useSidebarState from '~/hooks/Nav/useSidebarState';
@@ -196,6 +197,7 @@ export default function Root() {
               </div>
             </PromptGroupsProvider>
             <KeyboardShortcutsProvider />
+            <CommandPalette />
           </AgentsMapContext.Provider>
           {config?.interface?.termsOfService?.modalAcceptance === true && (
             <TermsAndConditionsModal

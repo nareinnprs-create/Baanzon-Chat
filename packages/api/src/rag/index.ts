@@ -27,6 +27,9 @@ export {
 export { InMemoryVectorStore } from './vectorStores';
 export type { InMemoryVectorStoreOptions } from './vectorStores';
 
+export { createPgVectorStore } from './pgVectorStore';
+export type { PgVectorStoreOptions, PgQueryExecutor } from './pgVectorStore';
+
 export { createSemanticSearchService, cosineSimilarity } from './semanticSearch';
 export type {
   SemanticSearchService,
