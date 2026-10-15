@@ -6,14 +6,19 @@ module.exports = {
   moduleNameMapper: {
     '^@src/(.*)$': '<rootDir>/src/$1',
   },
-  // coverageThreshold: {
-  //   global: {
-  //     statements: 58,
-  //     branches: 49,
-  //     functions: 50,
-  //     lines: 57,
-  //   },
-  // },
+  /**
+   * Floors sit two points below the measured suite coverage
+   * (statements 67.58 / branches 71.06 / functions 38.37 / lines 69.71), so a
+   * normal run passes while CI still fails on a silent regression.
+   */
+  coverageThreshold: {
+    global: {
+      statements: 65,
+      branches: 69,
+      functions: 36,
+      lines: 67,
+    },
+  },
   maxWorkers: '50%',
   restoreMocks: true,
 };

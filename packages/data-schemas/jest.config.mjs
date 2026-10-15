@@ -11,14 +11,19 @@ export default {
     '^@src/(.*)$': '<rootDir>/src/$1',
     '^~/(.*)$': '<rootDir>/src/$1',
   },
-  // coverageThreshold: {
-  //   global: {
-  //     statements: 58,
-  //     branches: 49,
-  //     functions: 50,
-  //     lines: 57,
-  //   },
-  // },
+  /**
+   * Floors sit two points below the measured suite coverage
+   * (statements 80.17 / branches 75.95 / functions 85.31 / lines 80.39), so a
+   * normal run passes while CI still fails on a silent regression.
+   */
+  coverageThreshold: {
+    global: {
+      statements: 78,
+      branches: 73,
+      functions: 83,
+      lines: 78,
+    },
+  },
   // Download the in-memory MongoDB binary once, before workers fork: on a cold
   // cache the parallel downloads race their final rename and fail whole suites.
   globalSetup: '<rootDir>/jest.globalSetup.mjs',

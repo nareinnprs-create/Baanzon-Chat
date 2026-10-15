@@ -43,14 +43,19 @@ export default {
     '^@src/(.*)$': '<rootDir>/src/$1',
     '~/(.*)': '<rootDir>/src/$1',
   },
-  // coverageThreshold: {
-  //   global: {
-  //     statements: 58,
-  //     branches: 49,
-  //     functions: 50,
-  //     lines: 57,
-  //   },
-  // },
+  /**
+   * Floors sit two points below the measured suite coverage
+   * (statements 67.74 / branches 74.29 / functions 67.69 / lines 68.28), so a
+   * normal run passes while CI still fails on a silent regression.
+   */
+  coverageThreshold: {
+    global: {
+      statements: 65,
+      branches: 72,
+      functions: 65,
+      lines: 66,
+    },
+  },
   setupFiles: ['<rootDir>/jest.setup.cjs', '<rootDir>/../../config/jest.setup.logging.cjs'],
   maxWorkers: '50%',
   restoreMocks: true,

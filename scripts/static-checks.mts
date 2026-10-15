@@ -815,6 +815,12 @@ function findCircularDependencies(): CheckOutcome {
  * packages, so an edit to data-provider still typechecks the projects that
  * consume it; `requires` lists the builds its imports resolve through,
  * mirroring those jobs' dependency on the build artifacts.
+ *
+ * Spec coverage: packages/client's project excludes `*.spec.ts(x)`/`*.test.ts(x)`,
+ * so it needs a second entry (tsconfig.test.json) to reach them. packages/api and
+ * packages/data-schemas include the whole `src` tree and exclude only
+ * node_modules/dist, so their single tsconfig.json entry already typechecks their
+ * specs; adding a spec project for them would run the same `tsc --noEmit` twice.
  */
 const ROOT_MANIFESTS = ['package.json', 'package-lock.json'];
 
