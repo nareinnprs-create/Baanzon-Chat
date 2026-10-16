@@ -1,11 +1,31 @@
 import { Schema } from 'mongoose';
-import type { IMemoryEntry } from '~/types/memory';
+import type { IMemoryEntry, MemoryEmbedding } from '~/types/memory';
 
 const MEMORY_KEY_REGEX = /^[a-z_]+$/;
 
 export function isValidMemoryKey(key: string): boolean {
   return MEMORY_KEY_REGEX.test(key);
 }
+
+const MemoryEmbeddingSchema = new Schema<MemoryEmbedding>(
+  {
+    vectorId: {
+      type: String,
+      required: true,
+    },
+    model: {
+      type: String,
+    },
+    dimensions: {
+      type: Number,
+      min: 0,
+    },
+    embeddedAt: {
+      type: Date,
+    },
+  },
+  { _id: false },
+);
 
 const MemoryEntrySchema: Schema<IMemoryEntry> = new Schema({
   userId: {
@@ -42,6 +62,11 @@ const MemoryEntrySchema: Schema<IMemoryEntry> = new Schema({
   tenantId: {
     type: String,
     index: true,
+  },
+  /** Durable vector-store pointer; absent until the memory has been embedded. */
+  embedding: {
+    type: MemoryEmbeddingSchema,
+    default: undefined,
   },
 });
 

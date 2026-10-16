@@ -46,6 +46,16 @@ export * from './auditLog';
 export * from './group';
 /* Config */
 export * from './config';
+/* Org hierarchy (§45) */
+export * from './organization';
+export * from './membership';
+export * from './workspace';
+/* Message parts (§45) */
+export * from './messagePart';
+/* Agent runs (§45) */
+export * from './agentRun';
+/* Notifications (§45) */
+export * from './notification';
 /* Admin */
 export * from './admin';
 /* Web */

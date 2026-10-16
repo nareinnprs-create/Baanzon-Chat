@@ -91,6 +91,33 @@ export type {
   ListChatProjectsResult,
   UpdateChatProjectInput,
 } from './chatProject';
+/* Org hierarchy, message parts, agent runs, notifications (§45) */
+import {
+  createOrganizationMethods,
+  ORGANIZATION_SLUG_MAX_LENGTH,
+  slugifyOrganizationName,
+  type OrganizationMethods,
+} from './organization';
+import { createMembershipMethods, type MembershipMethods } from './membership';
+import {
+  createWorkspaceMethods,
+  WORKSPACE_SLUG_MAX_LENGTH,
+  slugifyWorkspaceName,
+  type WorkspaceMethods,
+} from './workspace';
+import { createMessagePartMethods, type MessagePartMethods } from './messagePart';
+import {
+  createAgentRunMethods,
+  AGENT_RUN_LIST_DEFAULT_LIMIT,
+  AGENT_RUN_LIST_MAX_LIMIT,
+  type AgentRunMethods,
+} from './agentRun';
+import {
+  createNotificationMethods,
+  NOTIFICATION_LIST_DEFAULT_LIMIT,
+  NOTIFICATION_LIST_MAX_LIMIT,
+  type NotificationMethods,
+} from './notification';
 /* Tier 3 — Complex (heavier injection) */
 import {
   createTxMethods,
@@ -248,6 +275,12 @@ export type AllMethods = UserMethods &
   MessageMethods &
   ConversationMethods &
   ChatProjectMethods &
+  OrganizationMethods &
+  MembershipMethods &
+  WorkspaceMethods &
+  MessagePartMethods &
+  AgentRunMethods &
+  NotificationMethods &
   TxMethods &
   TransactionMethods &
   SpendTokensMethods &
@@ -472,6 +505,12 @@ export function createMethods(
     ...conversationMethods,
     ...createChatProjectMethods(mongoose),
     ...createKnowledgeCollectionMethods(mongoose),
+    ...createOrganizationMethods(mongoose),
+    ...createMembershipMethods(mongoose),
+    ...createWorkspaceMethods(mongoose),
+    ...createMessagePartMethods(mongoose),
+    ...createAgentRunMethods(mongoose),
+    ...createNotificationMethods(mongoose),
     /* Tier 3 */
     ...txMethods,
     ...transactionMethods,
@@ -535,6 +574,12 @@ export type {
   AgentEventActorReconciliationStorageMetrics,
   ChatProjectMethods,
   KnowledgeCollectionMethods,
+  OrganizationMethods,
+  MembershipMethods,
+  WorkspaceMethods,
+  MessagePartMethods,
+  AgentRunMethods,
+  NotificationMethods,
   TxMethods,
   TransactionMethods,
   SpendTokensMethods,
@@ -575,3 +620,13 @@ export type {
 };
 
 export { recordAgentEventActorReceiptMetric, setAgentEventActorReceiptMetricObserver };
+export {
+  ORGANIZATION_SLUG_MAX_LENGTH,
+  slugifyOrganizationName,
+  WORKSPACE_SLUG_MAX_LENGTH,
+  slugifyWorkspaceName,
+  AGENT_RUN_LIST_DEFAULT_LIMIT,
+  AGENT_RUN_LIST_MAX_LIMIT,
+  NOTIFICATION_LIST_DEFAULT_LIMIT,
+  NOTIFICATION_LIST_MAX_LIMIT,
+};

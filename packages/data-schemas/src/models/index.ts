@@ -11,22 +11,28 @@ import { createSkillSyncStatusModel } from './skillSyncStatus';
 import { createConversationTagModel } from './conversationTag';
 import { createCodeEnvironmentModel } from './codeEnvironment';
 import { createAgentCategoryModel } from './agentCategory';
+import { createOrganizationModel } from './organization';
+import { createNotificationModel } from './notification';
 import { createChatProjectModel } from './chatProject';
 import { createAgentApiKeyModel } from './agentApiKey';
 import { createTransactionModel } from './transaction';
 import { createPromptGroupModel } from './promptGroup';
 import { createSystemGrantModel } from './systemGrant';
+import { createMessagePartModel } from './messagePart';
 import { createPluginAuthModel } from './pluginAuth';
 import { createSharedLinkModel } from './sharedLink';
 import { createAccessRoleModel } from './accessRole';
 import { createToolFavoriteModel } from './favorite';
+import { createMembershipModel } from './membership';
 import { createMCPServerModel } from './mcpServer';
 import { createAssistantModel } from './assistant';
 import { createSkillFileModel } from './skillFile';
+import { createWorkspaceModel } from './workspace';
 import { createConversationModel } from './convo';
 import { createToolCallModel } from './toolCall';
 import { createAclEntryModel } from './aclEntry';
 import { createAuditLogModel } from './auditLog';
+import { createAgentRunModel } from './agentRun';
 import { createSessionModel } from './session';
 import { createBalanceModel } from './balance';
 import { createMessageModel } from './message';
@@ -98,6 +104,12 @@ export function createModels(mongoose: typeof import('mongoose')): {
   ScheduleRun: ReturnType<typeof createScheduleRunModel>;
   RefreshTokenBridge: ReturnType<typeof createRefreshTokenBridgeModel>;
   OpenIDRefreshFlight: ReturnType<typeof createOpenIDRefreshFlightModel>;
+  Organization: ReturnType<typeof createOrganizationModel>;
+  Membership: ReturnType<typeof createMembershipModel>;
+  Workspace: ReturnType<typeof createWorkspaceModel>;
+  MessagePart: ReturnType<typeof createMessagePartModel>;
+  AgentRun: ReturnType<typeof createAgentRunModel>;
+  Notification: ReturnType<typeof createNotificationModel>;
 } {
   const models = {
     User: createUserModel(mongoose),
@@ -148,6 +160,12 @@ export function createModels(mongoose: typeof import('mongoose')): {
     ScheduleRun: createScheduleRunModel(mongoose),
     RefreshTokenBridge: createRefreshTokenBridgeModel(mongoose),
     OpenIDRefreshFlight: createOpenIDRefreshFlightModel(mongoose),
+    Organization: createOrganizationModel(mongoose),
+    Membership: createMembershipModel(mongoose),
+    Workspace: createWorkspaceModel(mongoose),
+    MessagePart: createMessagePartModel(mongoose),
+    AgentRun: createAgentRunModel(mongoose),
+    Notification: createNotificationModel(mongoose),
   };
   /**
    * Background index builds fail silently unless an 'index' listener is
