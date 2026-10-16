@@ -1,5 +1,5 @@
-import type { VectorChunk } from './types';
 import type { PgQueryExecutor } from './pgVectorStore';
+import type { VectorChunk } from './types';
 import { createPgVectorStore, createSchemaSql } from './pgVectorStore';
 
 /** Canned answer for the SQL fragment a test exercises; `[]` otherwise. */

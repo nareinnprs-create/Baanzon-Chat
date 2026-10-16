@@ -1,10 +1,10 @@
-import type { TOptions } from 'i18next';
 import { render, screen } from '@testing-library/react';
 import { Tools, type TAttachment, type TMessage } from 'librechat-data-provider';
-import i18n from '~/locales/i18n';
+import type { TOptions } from 'i18next';
 import { buildExportDocument, linearizeThread, tokenizeMessageText } from './citations';
 import ExportPdfDialog from './ExportPdfDialog';
 import PrintDocument from './PrintDocument';
+import i18n from '~/locales/i18n';
 
 const localize = (key: string, options?: TOptions) =>
   (i18n.t as unknown as (key: string, options?: TOptions) => string)(key, options);

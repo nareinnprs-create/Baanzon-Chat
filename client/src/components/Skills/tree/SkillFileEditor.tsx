@@ -1,12 +1,12 @@
 import { useRef, useState, useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { Save, FileText, Circle, AlertTriangle, RotateCcw } from 'lucide-react';
 import { QueryKeys } from 'librechat-data-provider';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button, Spinner, Textarea, useToastContext } from '@librechat/client';
+import { Save, FileText, Circle, AlertTriangle, RotateCcw } from 'lucide-react';
 import { useGetSkillNodeContentQuery, useUpdateSkillNodeContentMutation } from '~/data-provider';
-import { useLocalize } from '~/hooks';
 import SkillFilePreview from './SkillFilePreview';
 import { SKILL_TREE_LABELS } from './labels';
+import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
 const BODY_NODE_ID = 'SKILL.md';

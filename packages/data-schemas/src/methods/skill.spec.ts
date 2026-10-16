@@ -8,6 +8,7 @@ import {
   PrincipalType,
   PermissionBits,
 } from 'librechat-data-provider';
+import type { SkillTreeNode } from './skill';
 import {
   partitionIssues,
   validateSkillName,
@@ -21,7 +22,6 @@ import {
   filterExistingSkillIds,
   deriveStructuredFrontmatterFields,
 } from './skill';
-import type { SkillTreeNode } from './skill';
 import { createAclEntryMethods } from './aclEntry';
 import { createMethods } from './index';
 

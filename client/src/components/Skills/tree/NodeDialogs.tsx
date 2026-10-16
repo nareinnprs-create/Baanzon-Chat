@@ -2,9 +2,9 @@ import { useState, useRef, useCallback } from 'react';
 import { Upload, AlertTriangle } from 'lucide-react';
 import { Button, Input, Label, OGDialog, OGDialogContent, Spinner } from '@librechat/client';
 import type { TSkillNode } from 'librechat-data-provider';
-import { useLocalize } from '~/hooks';
 import { splitNodePath, isValidNodeName, isSelfOrDescendantPath } from './tree';
 import { SKILL_TREE_LABELS, formatSkillTreeLabel } from './labels';
+import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
 interface CreateInput {

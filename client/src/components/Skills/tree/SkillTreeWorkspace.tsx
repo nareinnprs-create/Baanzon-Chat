@@ -1,9 +1,9 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useAtom } from 'jotai';
+import { QueryKeys } from 'librechat-data-provider';
 import { useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, RotateCcw } from 'lucide-react';
 import { Button, Spinner, useToastContext } from '@librechat/client';
-import { QueryKeys } from 'librechat-data-provider';
 import type { TSkillFile, TSkillNode } from 'librechat-data-provider';
 import {
   useGetSkillQuery,
@@ -13,14 +13,14 @@ import {
   useDeleteSkillNodeMutation,
   useUploadSkillFileMutation,
 } from '~/data-provider';
-import { useLocalize, useSkillPermissions } from '~/hooks';
+import { DeleteNodeDialog, NewNodeDialog, RenameNodeDialog, UploadNodeDialog } from './NodeDialogs';
+import { buildNodeTree, collectFolderPaths, isSelfOrDescendantPath } from './tree';
 import { skillTreeExpandedFoldersAtom, skillTreeSelectedNodeAtom } from './atoms';
+import { useLocalize, useSkillPermissions } from '~/hooks';
 import SkillFileEditor from './SkillFileEditor';
 import { SKILL_TREE_LABELS } from './labels';
 import SkillTreeView from './SkillTreeView';
 import TreeToolbar from './TreeToolbar';
-import { DeleteNodeDialog, NewNodeDialog, RenameNodeDialog, UploadNodeDialog } from './NodeDialogs';
-import { buildNodeTree, collectFolderPaths, isSelfOrDescendantPath } from './tree';
 import { cn } from '~/utils';
 
 const TEXT_LIKE_MIME = new Set([

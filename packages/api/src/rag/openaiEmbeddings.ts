@@ -20,8 +20,8 @@
  *    `createSemanticSearchService`.
  */
 
-import type { ChunkEmbedder } from './embeddings';
 import type { EmbeddingsProvider } from './semanticSearch';
+import type { ChunkEmbedder } from './embeddings';
 
 /** Everything the adapter needs to reach a provider; all injected by the caller. */
 export interface OpenAIEmbeddingsOptions {

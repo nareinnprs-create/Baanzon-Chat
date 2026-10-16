@@ -1,12 +1,10 @@
-import type { TOptions } from 'i18next';
 import {
   Tools,
   type SearchResultData,
   type TAttachment,
   type TMessage,
 } from 'librechat-data-provider';
-import type { TranslationKeys } from '~/hooks';
-import { CLEANUP_REGEX, STANDALONE_PATTERN } from '~/utils/citations';
+import type { TOptions } from 'i18next';
 import type {
   CitationAnchor,
   ExportCitation,
@@ -15,6 +13,8 @@ import type {
   ExportPdfScope,
   SearchResultsByTurn,
 } from './types';
+import type { TranslationKeys } from '~/hooks';
+import { CLEANUP_REGEX, STANDALONE_PATTERN } from '~/utils/citations';
 
 type Localize = (key: TranslationKeys, options?: TOptions) => string;
 

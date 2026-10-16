@@ -1,7 +1,7 @@
 import { HumanMessage } from '@langchain/core/messages';
 import type { BaseMessage } from '@librechat/agents/langchain/messages';
-import { hydrateMissingIndexTokenCounts } from './tokenMap';
 import type { TokenCounter } from './tokenMap';
+import { hydrateMissingIndexTokenCounts } from './tokenMap';
 
 const messages: BaseMessage[] = [
   new HumanMessage('alpha'),

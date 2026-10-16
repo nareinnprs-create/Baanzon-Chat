@@ -1,5 +1,6 @@
 import { memo, useState } from 'react';
 import * as Ariakit from '@ariakit/react';
+import { DropdownPopup } from '@librechat/client';
 import {
   Folder,
   FolderOpen,
@@ -9,9 +10,8 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react';
-import { DropdownPopup } from '@librechat/client';
-import type { MenuItemProps } from '@librechat/client';
 import type { TSkillNode } from 'librechat-data-provider';
+import type { MenuItemProps } from '@librechat/client';
 import type { SkillTreeBranch } from './tree';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';

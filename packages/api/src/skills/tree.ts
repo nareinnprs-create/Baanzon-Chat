@@ -10,8 +10,8 @@ import type { TSkillNode, TSkillTreeResponse } from 'librechat-data-provider';
 import type { Response } from 'express';
 import type { SkillsHandlersDeps } from './handlers';
 import type { ServerRequest } from '~/types';
-import { resolveDownloadPath } from '~/storage/path';
 import { blockFilteredSkillFile } from './protection';
+import { resolveDownloadPath } from '~/storage/path';
 import { resolveSkillFilePathParam } from './path';
 import { isBinaryBuffer } from './binary';
 

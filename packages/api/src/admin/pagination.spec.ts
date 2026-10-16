@@ -1,8 +1,4 @@
-import {
-  DEFAULT_PAGE_LIMIT,
-  MAX_PAGE_LIMIT,
-  parsePagination,
-} from './pagination';
+import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT, parsePagination } from './pagination';
 
 describe('parsePagination', () => {
   it('applies the default limit and a zero offset when query params are missing', () => {

@@ -1,8 +1,8 @@
 import { Fragment, memo } from 'react';
 import type { TSkillNode } from 'librechat-data-provider';
-import { useLocalize } from '~/hooks';
 import type { SkillTreeBranch } from './tree';
 import SkillTreeNodeRow from './SkillTreeNodeRow';
+import { useLocalize } from '~/hooks';
 
 interface SkillTreeViewProps {
   branches: SkillTreeBranch[];

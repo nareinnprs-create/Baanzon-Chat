@@ -4,8 +4,8 @@ import mongoose, { Types } from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { createModels, createMethods, tenantStorage } from '@librechat/data-schemas';
 import type { AllMethods, IUser } from '@librechat/data-schemas';
-import type { ServerRequest } from '~/types';
 import type { SkillTreeHandlersDeps } from './tree';
+import type { ServerRequest } from '~/types';
 import { createSkillTreeHandlers } from './tree';
 
 const tenantId = 'skill-tree-test';

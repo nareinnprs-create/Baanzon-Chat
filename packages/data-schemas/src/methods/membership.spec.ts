@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import type { IMembership } from '..';
-import { createMembershipMethods } from './membership';
 import { tenantStorage } from '../config/tenantContext';
+import { createMembershipMethods } from './membership';
 import { createModels } from '../models';
 
 jest.mock('~/config/winston', () => ({

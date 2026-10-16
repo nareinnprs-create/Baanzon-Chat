@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAtom } from 'jotai';
-import { Search, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { IconButton, Spinner } from '@librechat/client';
+import { Search, ChevronDown, ChevronUp, X } from 'lucide-react';
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import {
   ACTIVE_HIGHLIGHT_NAME,

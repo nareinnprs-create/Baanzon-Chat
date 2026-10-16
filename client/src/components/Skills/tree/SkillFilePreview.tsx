@@ -1,8 +1,8 @@
-import { Download, FileQuestion } from 'lucide-react';
-import { apiBaseUrl } from 'librechat-data-provider';
 import { Button } from '@librechat/client';
-import { useLocalize } from '~/hooks';
+import { apiBaseUrl } from 'librechat-data-provider';
+import { Download, FileQuestion } from 'lucide-react';
 import { SKILL_TREE_LABELS } from './labels';
+import { useLocalize } from '~/hooks';
 
 /**
  * Fallback for nodes the text editor cannot open: binaries the tree content
