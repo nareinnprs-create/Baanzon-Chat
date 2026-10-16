@@ -140,8 +140,8 @@ Each phase: implement with ≥7 agents/subagents in parallel → typecheck → f
 | P4 UX shell | partial (P4.1 ⌘K palette + P4.2 Home/onboarding + P4.3 in-conversation find + P4.4 PDF export **with citations** shipped; P4.5 notifications pending) | ~93% | `(this)` |
 | P5 UX capability | partial (P5.5 offline drafts + sync queue shipped; P5.1–P5.4/5.6 pending) | ~90% | `(this)` |
 | P6 Tests/CI-CD | partial (P6.1 coverage + P6.2/P6.2b/P6.2c tests + **P6.3 e2e/axe/Lighthouse lanes** + P6.4 integration CI + P6.5 CD all present; remaining: prove CI green on a real diff + enforce the coverage gate) | ~97% | `(this)` |
-| P7 Data/sandbox | partial (P7.1 pgvector + wired, P7.2 migration ledger, P7.4 `managed` sandbox, **P7.3 6/28 entities** — orgs, memberships, workspaces, message_parts, agent_runs, notifications) | ~96% | `(this)` |
-| P8 Validation | pending | — | — |
+| P7 Data/sandbox | partial (P7.1 pgvector + wired, P7.2 migration ledger, P7.4 `managed` sandbox, **P7.3 15/28 entities** — batch 1: orgs, memberships, workspaces, message_parts, agent_runs, notifications, memories; batch 2: tools, tool_versions, tool_permissions, sources, citations, artifacts, artifact_versions, workflows, workflow_runs) | ~97% | `9c92bb435` |
+| P8 Validation | partial (local harness `scripts/validate.mjs` + `docs/validation.md` shipped; full matrix + final report pending) | — | `511bc7d0a` |
 
 **P1 evidence (2026-10-15):** `packages/api` RAG suite 690/690; knowledge route 26/26;
 `tsc --noEmit` clean in `packages/api`, `packages/data-provider`, `packages/data-schemas`;
@@ -186,6 +186,19 @@ feature-local English map (`TODO(i18n)`) pending a `translation.json` merge.
 **Documented (unpatched, pre-existing) bugs:** `api/server/utils/getFileStrategy.js` unguarded
 fallback throws on a missing config; `api/server/utils/handleText.js` `formatSteps` throws on a
 non-string `observation`.
+
+**P3/P7.3-batch2/P8/backend-bugfix evidence (2026-10-16):** `packages/data-schemas` full suite
+**101 suites · 3247/3247** (batch-2 entities: tools, tool_versions, tool_permissions, sources,
+citations, artifacts, artifact_versions, workflows, workflow_runs); `tsc --noEmit` clean in
+`packages/api`, `packages/data-schemas`, `client`; dist rebuilt. `api` bug-fix specs
+(getFileStrategy + handleText) **34/34**. npm overrides pinned for
+sharp/compression/@grpc-js/source-map-js/handlebars/MCP-SDK/proxy-addr/undici (`npm ci --dry-run`
+consistent). Static-suite cleanup: `sort-imports` **4608/4608**, `prettier` clean, `eslint` clean,
+i18n unused-key gate green. New local harness `scripts/validate.mjs` + `docs/validation.md`.
+**Fixed:** `getFileStrategy.js` no longer throws on a missing source; `handleText.js` `formatSteps`
+tolerates non-string observations.
+**Still deferred:** P4.5 notifications (agent cancelled, no files on disk — retry); P7.3 remaining
+~13 entities; skill-tree i18n merge.
 
 ---
 
