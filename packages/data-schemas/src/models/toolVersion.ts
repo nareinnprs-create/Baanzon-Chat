@@ -9,10 +9,6 @@ export function createToolVersionModel(
   applyTenantIsolation(toolVersionSchema);
   return (
     mongoose.models.ToolVersion ||
-    mongoose.model<IToolVersionDocument>(
-      'ToolVersion',
-      toolVersionSchema,
-      'tool_versions',
-    )
+    mongoose.model<IToolVersionDocument>('ToolVersion', toolVersionSchema, 'tool_versions')
   );
 }

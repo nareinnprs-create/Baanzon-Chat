@@ -61,3 +61,7 @@ export { default as artifactSchema } from './artifact';
 export { default as artifactVersionSchema } from './artifactVersion';
 export { default as workflowSchema } from './workflow';
 export { default as workflowRunSchema } from './workflowRun';
+export { default as deviceSchema } from './device';
+export { default as subscriptionSchema } from './subscription';
+export { default as usageRecordSchema } from './usageRecord';
+export { default as feedbackSchema } from './feedback';

@@ -69,6 +69,14 @@ export * from './artifactVersion';
 /* Workflows (§45) */
 export * from './workflow';
 export * from './workflowRun';
+/* Devices (§45) */
+export * from './device';
+/* Subscriptions (§45) */
+export * from './subscription';
+/* Usage Records (§45) */
+export * from './usageRecord';
+/* Feedback (§45) */
+export * from './feedback';
 /* Admin */
 export * from './admin';
 /* Web */

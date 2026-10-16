@@ -156,6 +156,10 @@ import {
   WORKFLOW_RUN_LIST_MAX_LIMIT,
   type WorkflowRunMethods,
 } from './workflowRun';
+import { createDeviceMethods, type DeviceMethods } from './device';
+import { createSubscriptionMethods, type SubscriptionMethods } from './subscription';
+import { createUsageRecordMethods, type UsageRecordMethods } from './usageRecord';
+import { createFeedbackMethods, type FeedbackMethods } from './feedback';
 /* Tier 3 — Complex (heavier injection) */
 import {
   createTxMethods,
@@ -328,6 +332,10 @@ export type AllMethods = UserMethods &
   ArtifactVersionMethods &
   WorkflowMethods &
   WorkflowRunMethods &
+  DeviceMethods &
+  SubscriptionMethods &
+  UsageRecordMethods &
+  FeedbackMethods &
   TxMethods &
   TransactionMethods &
   SpendTokensMethods &
@@ -567,6 +575,10 @@ export function createMethods(
     ...createArtifactVersionMethods(mongoose),
     ...createWorkflowMethods(mongoose),
     ...createWorkflowRunMethods(mongoose),
+    ...createDeviceMethods(mongoose),
+    ...createSubscriptionMethods(mongoose),
+    ...createUsageRecordMethods(mongoose),
+    ...createFeedbackMethods(mongoose),
     /* Tier 3 */
     ...txMethods,
     ...transactionMethods,
@@ -645,6 +657,10 @@ export type {
   ArtifactVersionMethods,
   WorkflowMethods,
   WorkflowRunMethods,
+  DeviceMethods,
+  SubscriptionMethods,
+  UsageRecordMethods,
+  FeedbackMethods,
   TxMethods,
   TransactionMethods,
   SpendTokensMethods,

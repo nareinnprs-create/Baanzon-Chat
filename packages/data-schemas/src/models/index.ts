@@ -15,8 +15,10 @@ import { createToolPermissionModel } from './toolPermission';
 import { createAgentCategoryModel } from './agentCategory';
 import { createOrganizationModel } from './organization';
 import { createNotificationModel } from './notification';
+import { createSubscriptionModel } from './subscription';
 import { createToolVersionModel } from './toolVersion';
 import { createWorkflowRunModel } from './workflowRun';
+import { createUsageRecordModel } from './usageRecord';
 import { createChatProjectModel } from './chatProject';
 import { createAgentApiKeyModel } from './agentApiKey';
 import { createTransactionModel } from './transaction';
@@ -33,6 +35,7 @@ import { createAssistantModel } from './assistant';
 import { createSkillFileModel } from './skillFile';
 import { createWorkspaceModel } from './workspace';
 import { createConversationModel } from './convo';
+import { createFeedbackModel } from './feedback';
 import { createWorkflowModel } from './workflow';
 import { createArtifactModel } from './artifact';
 import { createCitationModel } from './citation';
@@ -43,6 +46,7 @@ import { createAgentRunModel } from './agentRun';
 import { createSessionModel } from './session';
 import { createBalanceModel } from './balance';
 import { createMessageModel } from './message';
+import { createDeviceModel } from './device';
 import { createSourceModel } from './source';
 import { createActionModel } from './action';
 import { createBannerModel } from './banner';
@@ -128,6 +132,10 @@ export function createModels(mongoose: typeof import('mongoose')): {
   ArtifactVersion: ReturnType<typeof createArtifactVersionModel>;
   Workflow: ReturnType<typeof createWorkflowModel>;
   WorkflowRun: ReturnType<typeof createWorkflowRunModel>;
+  Device: ReturnType<typeof createDeviceModel>;
+  Subscription: ReturnType<typeof createSubscriptionModel>;
+  UsageRecord: ReturnType<typeof createUsageRecordModel>;
+  Feedback: ReturnType<typeof createFeedbackModel>;
 } {
   const models = {
     User: createUserModel(mongoose),
@@ -193,6 +201,10 @@ export function createModels(mongoose: typeof import('mongoose')): {
     ArtifactVersion: createArtifactVersionModel(mongoose),
     Workflow: createWorkflowModel(mongoose),
     WorkflowRun: createWorkflowRunModel(mongoose),
+    Device: createDeviceModel(mongoose),
+    Subscription: createSubscriptionModel(mongoose),
+    UsageRecord: createUsageRecordModel(mongoose),
+    Feedback: createFeedbackModel(mongoose),
   };
   /**
    * Background index builds fail silently unless an 'index' listener is
