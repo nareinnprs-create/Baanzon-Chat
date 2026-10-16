@@ -104,6 +104,9 @@ export enum QueryKeys {
   /* Knowledge collections */
   knowledgeCollections = 'knowledgeCollections',
   knowledgeCollection = 'knowledgeCollection',
+  /* Notifications / Activity Center */
+  notifications = 'notifications',
+  notificationsUnreadCount = 'notificationsUnreadCount',
 }
 
 // Dynamic query keys that require parameters

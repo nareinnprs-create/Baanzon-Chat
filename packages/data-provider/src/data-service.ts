@@ -5,6 +5,7 @@ import type * as t from './types';
 import * as permissions from './accessPermissions';
 import * as endpoints from './api-endpoints';
 import { uploadEventStream } from './upload';
+import * as nt from './types/notifications';
 import * as mcp from './types/mcpServers';
 import * as qt from './types/queuedTurns';
 import * as sch from './types/schedules';
@@ -1262,8 +1263,7 @@ const isFormData = (value: unknown): value is FormData =>
 
 const skillNodePath = (nodeId: string): string => encodeURIComponent(nodeId);
 
-const skillNodeContentPath = (nodeId: string): string =>
-  `${encodeURIComponent(nodeId)}/content`;
+const skillNodeContentPath = (nodeId: string): string => `${encodeURIComponent(nodeId)}/content`;
 
 export const getSkillTree = (skillId: string): Promise<t.TSkillTreeResponse> => {
   return request.get(endpoints.skillTree({ skillId }));
@@ -1648,4 +1648,49 @@ export function retrieveKnowledge(
 ): Promise<k.TKnowledgeRetrieveResponse> {
   const { query, hybridAlpha, topK } = payload;
   return request.post(endpoints.knowledgeRetrieve(collectionId), { query, hybridAlpha, topK });
+}
+
+/* Notifications / Activity Center */
+export function listNotifications(
+  params: nt.TNotificationsListParams = {},
+): Promise<nt.TNotificationsListResponse> {
+  const query = new URLSearchParams();
+  if (params.limit != null) {
+    query.set('limit', String(params.limit));
+  }
+  if (params.page != null) {
+    query.set('page', String(params.page));
+  }
+  if (params.unreadOnly != null) {
+    query.set('unreadOnly', String(params.unreadOnly));
+  }
+  const suffix = query.toString();
+  const url = `${endpoints.apiBaseUrl()}/api/notifications${suffix ? `?${suffix}` : ''}`;
+  return request.get(url);
+}
+
+export function getNotificationsUnreadCount(): Promise<nt.TNotificationsUnreadCountResponse> {
+  return request.get(`${endpoints.apiBaseUrl()}/api/notifications/unread-count`);
+}
+
+export function markNotificationRead(id: string): Promise<nt.TNotificationResponse> {
+  return request.post(`${endpoints.apiBaseUrl()}/api/notifications/${id}/read`, {});
+}
+
+export function markAllNotificationsRead(): Promise<nt.TNotificationsMarkAllReadResponse> {
+  return request.post(`${endpoints.apiBaseUrl()}/api/notifications/read-all`, {});
+}
+
+export function deleteNotification(id: string): Promise<nt.TNotificationDeleteResponse> {
+  return request.delete(`${endpoints.apiBaseUrl()}/api/notifications/${id}`);
+}
+
+export function createNotification(
+  payload: nt.TNotificationCreateRequest,
+): Promise<nt.TNotificationResponse> {
+  return request.post(`${endpoints.apiBaseUrl()}/api/notifications`, payload);
+}
+
+export function notificationStreamUrl(): string {
+  return `${endpoints.apiBaseUrl()}/api/notifications/stream`;
 }

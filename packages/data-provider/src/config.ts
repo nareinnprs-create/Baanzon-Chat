@@ -2746,6 +2746,22 @@ export type SandboxConfig = z.infer<typeof sandboxConfigSchema>;
 
 export type TRagConfig = z.infer<typeof ragSchema>;
 
+/**
+ * Notifications / Activity Center levers. `enabled` is the master switch: when
+ * false the `/api/notifications` routes answer 404. `realtime` enables the SSE
+ * stream at `/api/notifications/stream`; when false (or when a client cannot
+ * hold a stream open) the client falls back to polling at `pollingIntervalMs`.
+ */
+export const notificationsConfigSchema = z
+  .object({
+    enabled: z.boolean().optional().default(true),
+    realtime: z.boolean().optional().default(true),
+    pollingIntervalMs: z.number().int().positive().optional().default(60000),
+  })
+  .strict();
+
+export type NotificationsConfig = z.infer<typeof notificationsConfigSchema>;
+
 export const configSchema = z.object({
   version: z.string(),
   cache: z.boolean().default(true),
@@ -2755,6 +2771,7 @@ export const configSchema = z.object({
   memory: memorySchema.optional(),
   rag: ragSchema.optional(),
   sandbox: sandboxConfigSchema.optional(),
+  notifications: notificationsConfigSchema.optional(),
   summarization: summarizationConfigSchema.optional(),
   skillSync: skillSyncConfigSchema,
   secureImageLinks: z.boolean().optional(),

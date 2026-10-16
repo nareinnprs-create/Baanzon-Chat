@@ -41,6 +41,7 @@ export * from './types/insights';
 export * from './types/subagents';
 export * from './types/queuedTurns';
 export * from './types/knowledge';
+export * from './types/notifications';
 /* access permissions */
 export * from './accessPermissions';
 /* query/mutation keys */
