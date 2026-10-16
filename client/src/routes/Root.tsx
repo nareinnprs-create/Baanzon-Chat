@@ -31,6 +31,7 @@ import { useUserTermsQuery, useGetStartupConfig } from '~/data-provider';
 import { MobileDrawerScrim } from '~/components/UnifiedSidebar/mobile';
 import { InConversationFind } from '~/components/InConversationFind';
 import useKeyboardShortcuts from '~/hooks/useKeyboardShortcuts';
+import { NotificationsBell } from '~/components/Notifications';
 import { CommandPalette } from '~/components/CommandPalette';
 import useDrawerDismiss from '~/hooks/Nav/useDrawerDismiss';
 import useSidebarToggle from '~/hooks/Nav/useSidebarToggle';
@@ -201,6 +202,7 @@ export default function Root() {
             <KeyboardShortcutsProvider />
             <CommandPalette />
             <InConversationFind />
+            <NotificationsBell />
             <ExportPdf />
           </AgentsMapContext.Provider>
           {config?.interface?.termsOfService?.modalAcceptance === true && (
