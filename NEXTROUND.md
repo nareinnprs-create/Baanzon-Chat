@@ -137,10 +137,10 @@ Each phase: implement with ≥7 agents/subagents in parallel → typecheck → f
 | P1 RAG completion | **done** | ~76% | `267d683` |
 | P2 Hardening | **done** (branding/docker/engines/license/cleanup + secrets fail-fast P2.2, CSP/CORS P2.5, registration/email policy A14) | ~86% | `6bf52321`, `(this)` |
 | P3 Security/deps | partial (overrides `fast-uri`/`brace-expansion` fixed, P0/P1 bumps, dead nested override removed, lockfile synced; audited majors still staged) | ~88% | `6bf52321`, `(this)` |
-| P4 UX shell | partial (P4.1 ⌘K command palette + P4.2 Home/onboarding + P4.3 in-conversation find shipped; P4.4 PDF export, P4.5 notifications pending) | ~91% | `3b942d354` |
+| P4 UX shell | partial (P4.1 ⌘K palette + P4.2 Home/onboarding + P4.3 in-conversation find + P4.4 PDF export **with citations** shipped; P4.5 notifications pending) | ~93% | `(this)` |
 | P5 UX capability | partial (P5.5 offline drafts + sync queue shipped; P5.1–P5.4/5.6 pending) | ~90% | `(this)` |
-| P6 Tests/CI-CD | partial (P6.1 coverage thresholds + P6.2 missing tests + P6.2b CRUD route tests + P6.4 integration CI + P6.5 CD pipeline; P6.3 e2e/a11y/lighthouse pending) | ~94% | `afe944726`, `fe90852ad` |
-| P7 Data/sandbox | partial (P7.1 pgvector store **+ wired via `rag.vectorStore` lever**, P7.2 migration ledger, P7.4 `managed` sandbox with injected executor; P7.3 28 entities pending) | ~94% | `6d866bc75` |
+| P6 Tests/CI-CD | partial (P6.1 coverage + P6.2/P6.2b/P6.2c tests + **P6.3 e2e/axe/Lighthouse lanes** + P6.4 integration CI + P6.5 CD all present; remaining: prove CI green on a real diff + enforce the coverage gate) | ~97% | `(this)` |
+| P7 Data/sandbox | partial (P7.1 pgvector + wired, P7.2 migration ledger, P7.4 `managed` sandbox, **P7.3 6/28 entities** — orgs, memberships, workspaces, message_parts, agent_runs, notifications) | ~96% | `(this)` |
 | P8 Validation | pending | — | — |
 
 **P1 evidence (2026-10-15):** `packages/api` RAG suite 690/690; knowledge route 26/26;
@@ -170,6 +170,22 @@ Full `packages/api` run: the only failures are Redis/DB integration suites (`ECO
 127.0.0.1:6379`, "Connection is closed") that need local Redis/Mongo — now covered by
 `.github/workflows/integration.yml`. **A9 skill-tree UI wiring deferred** (backend + data-service
 complete; client entry point open).
+
+**P4.4/A9/P6.2c/P6.3/P7.3 evidence:** `client` suites green with the documented command —
+ExportPdf **14/14**, skill-tree **43/43**, Home **6/6**, command palette + in-conversation find
+**29/29**; `packages/api` new specs **49/49**; `api` CJS new tests (handleText, getFileStrategy,
+queue, canAccessResource) **43/43**; `packages/data-schemas` **3178/3179** (one timing-flaky
+`queuedTurn.spec.ts` fails only under the 92-suite parallel run; passes **43/43** standalone).
+`tsc --noEmit` clean in `client`, `packages/api`, `packages/data-schemas`; dists rebuilt in order.
+`e2e` smoke (Playwright + axe, no critical violations) passes; `lhci` accessibility **1.0**.
+**Fixed a latent client-test break:** `@testing-library/jest-dom` 6.x removed the `extend-expect`
+subpath (the dependency had already resolved to 6.9.1, but a stale hoisted copy masked it until an
+`npm install`); dropped it from `client/jest.config.cjs` and `client/test/setupTests.js`.
+**Deferred:** P4.5 notifications; P7.3 remaining ~22 entities; skill-tree UI strings are a
+feature-local English map (`TODO(i18n)`) pending a `translation.json` merge.
+**Documented (unpatched, pre-existing) bugs:** `api/server/utils/getFileStrategy.js` unguarded
+fallback throws on a missing config; `api/server/utils/handleText.js` `formatSteps` throws on a
+non-string `observation`.
 
 ---
 
