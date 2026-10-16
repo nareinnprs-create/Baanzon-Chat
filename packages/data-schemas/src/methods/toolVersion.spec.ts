@@ -95,9 +95,9 @@ describe('listToolVersions', () => {
 
     expect((await methods.listToolVersions(toolId)).map((v) => v.version)).toEqual([3, 2, 1]);
     expect(await methods.listToolVersions(toolId, { limit: 2 })).toHaveLength(2);
-    expect(await methods.listToolVersions(toolId, { limit: TOOL_VERSION_LIST_MAX_LIMIT + 50 })).toHaveLength(
-      3,
-    );
+    expect(
+      await methods.listToolVersions(toolId, { limit: TOOL_VERSION_LIST_MAX_LIMIT + 50 }),
+    ).toHaveLength(3);
     expect(await methods.listToolVersions('bad')).toEqual([]);
   });
 });

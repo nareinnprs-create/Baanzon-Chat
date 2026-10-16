@@ -134,11 +134,17 @@ describe('listArtifactsForUser / listArtifactsForConversation', () => {
     await methods.createArtifact({ title: 'b', type: 'code', user, conversationId: 'c1' });
     await methods.createArtifact({ title: 'a', type: 'code', user, conversationId: 'c1' });
     await methods.createArtifact({ title: 'x', type: 'code', user, conversationId: 'c2' });
-    await methods.createArtifact({ title: 'z', type: 'code', user: otherUser, conversationId: 'c1' });
+    await methods.createArtifact({
+      title: 'z',
+      type: 'code',
+      user: otherUser,
+      conversationId: 'c1',
+    });
 
-    expect(
-      (await methods.listArtifactsForConversation(user, 'c1')).map((a) => a.title),
-    ).toEqual(['b', 'a']);
+    expect((await methods.listArtifactsForConversation(user, 'c1')).map((a) => a.title)).toEqual([
+      'b',
+      'a',
+    ]);
     expect(await methods.listArtifactsForConversation(user, '')).toEqual([]);
   });
 });

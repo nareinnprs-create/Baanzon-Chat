@@ -39,9 +39,7 @@ export function createToolPermissionMethods(
     };
   }
 
-  async function grantToolPermission(
-    input: GrantToolPermissionInput,
-  ): Promise<IToolPermission> {
+  async function grantToolPermission(input: GrantToolPermissionInput): Promise<IToolPermission> {
     if (!isValidObjectIdString(input.toolId)) {
       throw new Error('A valid toolId is required');
     }

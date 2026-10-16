@@ -1,9 +1,5 @@
 import type { Model } from 'mongoose';
-import type {
-  ICitation,
-  ICitationDocument,
-  AddCitationInput,
-} from '~/types/citation';
+import type { ICitation, ICitationDocument, AddCitationInput } from '~/types/citation';
 import { isValidObjectIdString } from '~/utils/objectId';
 
 export interface CitationMethods {
@@ -44,10 +40,7 @@ export function createCitationMethods(mongoose: typeof import('mongoose')): Cita
     return citation;
   }
 
-  async function listCitationsForMessage(
-    userId: string,
-    messageId: string,
-  ): Promise<ICitation[]> {
+  async function listCitationsForMessage(userId: string, messageId: string): Promise<ICitation[]> {
     if (!isValidObjectIdString(userId)) {
       return [];
     }

@@ -107,9 +107,7 @@ describe('getWorkflowRun / markWorkflowRunRunning / completeWorkflowRun', () => 
     });
     expect(failed).toMatchObject({ status: 'failed', error: 'boom' });
 
-    expect(
-      await methods.completeWorkflowRun(otherUser, 'run-1', { status: 'failed' }),
-    ).toBeNull();
+    expect(await methods.completeWorkflowRun(otherUser, 'run-1', { status: 'failed' })).toBeNull();
     expect(await methods.completeWorkflowRun(user, 'missing', { status: 'failed' })).toBeNull();
   });
 });
@@ -145,9 +143,7 @@ describe('listWorkflowRunsForUser / listWorkflowRunsForWorkflow', () => {
 
 describe('tenant isolation', () => {
   it('keeps runs invisible across tenants', async () => {
-    await runAs(TENANT_A, () =>
-      methods.startWorkflowRun({ runId: 'run-1', workflowId, user }),
-    );
+    await runAs(TENANT_A, () => methods.startWorkflowRun({ runId: 'run-1', workflowId, user }));
 
     expect(await runAs(TENANT_B, () => methods.listWorkflowRunsForUser(user))).toEqual([]);
     expect(await runAs(TENANT_B, () => methods.getWorkflowRun(user, 'run-1'))).toBeNull();

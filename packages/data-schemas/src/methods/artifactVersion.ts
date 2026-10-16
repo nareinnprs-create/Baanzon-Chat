@@ -82,9 +82,7 @@ export function createArtifactVersionMethods(
     return await ArtifactVersion().findOne({ artifactId, version }).lean<IArtifactVersion>();
   }
 
-  async function getLatestArtifactVersion(
-    artifactId: string,
-  ): Promise<IArtifactVersion | null> {
+  async function getLatestArtifactVersion(artifactId: string): Promise<IArtifactVersion | null> {
     if (!isValidObjectIdString(artifactId)) {
       return null;
     }

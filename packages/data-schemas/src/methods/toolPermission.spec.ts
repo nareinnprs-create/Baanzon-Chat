@@ -70,20 +70,35 @@ describe('grantToolPermission', () => {
 
   it('rejects invalid ids and a blank principal', async () => {
     await expect(
-      methods.grantToolPermission({ toolId: 'bad', principalType: 'user', principalId, createdBy: user }),
+      methods.grantToolPermission({
+        toolId: 'bad',
+        principalType: 'user',
+        principalId,
+        createdBy: user,
+      }),
     ).rejects.toThrow(/toolId is required/i);
     await expect(
       methods.grantToolPermission({ toolId, principalType: 'user', principalId, createdBy: 'bad' }),
     ).rejects.toThrow(/createdBy is required/i);
     await expect(
-      methods.grantToolPermission({ toolId, principalType: 'user', principalId: '  ', createdBy: user }),
+      methods.grantToolPermission({
+        toolId,
+        principalType: 'user',
+        principalId: '  ',
+        createdBy: user,
+      }),
     ).rejects.toThrow(/principalId is required/i);
   });
 });
 
 describe('getToolPermission', () => {
   it('scopes the lookup to the exact principal', async () => {
-    await methods.grantToolPermission({ toolId, principalType: 'user', principalId, createdBy: user });
+    await methods.grantToolPermission({
+      toolId,
+      principalType: 'user',
+      principalId,
+      createdBy: user,
+    });
     const found = await methods.getToolPermission({ toolId, principalType: 'user', principalId });
     expect(found?.granted).toBe(true);
     expect(
@@ -97,7 +112,12 @@ describe('getToolPermission', () => {
 
 describe('listToolPermissions / listToolPermissionsForPrincipal', () => {
   it('lists grants per tool and per principal', async () => {
-    await methods.grantToolPermission({ toolId, principalType: 'user', principalId, createdBy: user });
+    await methods.grantToolPermission({
+      toolId,
+      principalType: 'user',
+      principalId,
+      createdBy: user,
+    });
     await methods.grantToolPermission({
       toolId,
       principalType: 'role',
@@ -121,7 +141,12 @@ describe('listToolPermissions / listToolPermissionsForPrincipal', () => {
 
 describe('revokeToolPermission', () => {
   it('removes the grant once', async () => {
-    await methods.grantToolPermission({ toolId, principalType: 'user', principalId, createdBy: user });
+    await methods.grantToolPermission({
+      toolId,
+      principalType: 'user',
+      principalId,
+      createdBy: user,
+    });
     const ref = { toolId, principalType: 'user' as const, principalId };
     expect(await methods.revokeToolPermission(ref)).toBe(true);
     expect(await methods.revokeToolPermission(ref)).toBe(false);

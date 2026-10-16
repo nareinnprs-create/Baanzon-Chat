@@ -253,10 +253,7 @@ describe('runMigrations (Mongo ledger)', () => {
 function createFakePg({ staleReads = false }: { staleReads?: boolean } = {}) {
   const statements: Array<{ text: string; params?: unknown[] }> = [];
   const applied = new Set<string>();
-  async function query<T = unknown>(
-    text: string,
-    params?: unknown[],
-  ): Promise<{ rows: T[] }> {
+  async function query<T = unknown>(text: string, params?: unknown[]): Promise<{ rows: T[] }> {
     statements.push({ text, params });
     if (text.includes('CREATE TABLE IF NOT EXISTS')) {
       return { rows: [] };
@@ -301,9 +298,7 @@ describe('runPgMigrations (pg ledger)', () => {
       raced: [],
       deferred: [],
     });
-    expect(fake.statements[0].text).toMatch(
-      /CREATE TABLE IF NOT EXISTS _baanzon_migrations/,
-    );
+    expect(fake.statements[0].text).toMatch(/CREATE TABLE IF NOT EXISTS _baanzon_migrations/);
     expect(fake.statements[0].text).toMatch(/id text PRIMARY KEY/);
     expect(fake.applied).toEqual(new Set(['001-init', '002-vectors']));
     expect(first.up).toHaveBeenCalledWith({

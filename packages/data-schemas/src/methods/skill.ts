@@ -886,11 +886,7 @@ function compareNodeNames(a: string, b: string): number {
 
 /** Mongo duplicate-key on the `(skillId, relativePath)` unique index. */
 function isDuplicateKeyError(error: unknown): boolean {
-  return (
-    !!error &&
-    typeof error === 'object' &&
-    (error as { code?: unknown }).code === 11000
-  );
+  return !!error && typeof error === 'object' && (error as { code?: unknown }).code === 11000;
 }
 
 type BodyAlwaysApplyResult =
@@ -1919,9 +1915,7 @@ export function createSkillMethods(
    * file and a folder (a file literally named `scripts` alongside
    * `scripts/run.sh`), the file node wins; descendants then hang off that node.
    */
-  async function listSkillTree(
-    skillId: Types.ObjectId | string,
-  ): Promise<SkillTreeNode[] | null> {
+  async function listSkillTree(skillId: Types.ObjectId | string): Promise<SkillTreeNode[] | null> {
     const Skill = mongoose.models.Skill as Model<ISkillDocument>;
     const SkillFile = mongoose.models.SkillFile as Model<ISkillFileDocument>;
     const skill = (await Skill.findById(skillId).lean()) as unknown as
@@ -2087,7 +2081,8 @@ export function createSkillMethods(
     }
 
     try {
-      await SkillFile.bulkWrite(
+      await tenantSafeBulkWrite(
+        SkillFile,
         rewrites.map((rewrite) => ({
           updateOne: {
             filter: { skillId: params.skillId, relativePath: rewrite.from },

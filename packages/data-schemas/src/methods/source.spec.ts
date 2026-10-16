@@ -68,9 +68,9 @@ describe('createSource', () => {
     await expect(methods.createSource({ title: '  ', type: 'web', user })).rejects.toThrow(
       /title is required/i,
     );
-    await expect(
-      methods.createSource({ title: 'Ok', type: 'web', user: 'bad' }),
-    ).rejects.toThrow(/user is required/i);
+    await expect(methods.createSource({ title: 'Ok', type: 'web', user: 'bad' })).rejects.toThrow(
+      /user is required/i,
+    );
   });
 });
 
@@ -110,9 +110,10 @@ describe('listSourcesForUser / listSourcesForConversation', () => {
     await methods.createSource({ title: 'x', type: 'web', user, conversationId: 'c2' });
     await methods.createSource({ title: 'z', type: 'web', user: otherUser, conversationId: 'c1' });
 
-    expect(
-      (await methods.listSourcesForConversation(user, 'c1')).map((s) => s.title),
-    ).toEqual(['b', 'a']);
+    expect((await methods.listSourcesForConversation(user, 'c1')).map((s) => s.title)).toEqual([
+      'b',
+      'a',
+    ]);
     expect(await methods.listSourcesForConversation(user, '')).toEqual([]);
   });
 });

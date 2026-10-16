@@ -1,9 +1,5 @@
 import type { Model } from 'mongoose';
-import type {
-  ISource,
-  ISourceDocument,
-  CreateSourceInput,
-} from '~/types/source';
+import type { ISource, ISourceDocument, CreateSourceInput } from '~/types/source';
 import { isValidObjectIdString } from '~/utils/objectId';
 
 /** Default page size for a source history. */

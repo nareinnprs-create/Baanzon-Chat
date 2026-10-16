@@ -76,10 +76,7 @@ export function createWorkflowMethods(mongoose: typeof import('mongoose')): Work
     if (options?.enabledOnly) {
       filter.enabled = true;
     }
-    return await Workflow()
-      .find(filter)
-      .sort({ createdAt: -1, _id: -1 })
-      .lean<IWorkflow[]>();
+    return await Workflow().find(filter).sort({ createdAt: -1, _id: -1 }).lean<IWorkflow[]>();
   }
 
   async function updateWorkflow(
@@ -90,9 +87,7 @@ export function createWorkflowMethods(mongoose: typeof import('mongoose')): Work
       return null;
     }
 
-    const update: Partial<
-      Pick<IWorkflow, 'name' | 'description' | 'definition' | 'enabled'>
-    > = {};
+    const update: Partial<Pick<IWorkflow, 'name' | 'description' | 'definition' | 'enabled'>> = {};
     if (typeof patch.name === 'string') {
       const name = patch.name.trim();
       if (!name) {

@@ -28,9 +28,7 @@ export interface ToolVersionMethods {
   deleteToolVersionsForTool(toolId: string): Promise<number>;
 }
 
-export function createToolVersionMethods(
-  mongoose: typeof import('mongoose'),
-): ToolVersionMethods {
+export function createToolVersionMethods(mongoose: typeof import('mongoose')): ToolVersionMethods {
   const ToolVersion = (): Model<IToolVersionDocument> =>
     mongoose.models.ToolVersion as Model<IToolVersionDocument>;
 

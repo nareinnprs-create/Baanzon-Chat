@@ -42,9 +42,7 @@ export interface WorkflowRunMethods {
   ): Promise<IWorkflowRun[]>;
 }
 
-export function createWorkflowRunMethods(
-  mongoose: typeof import('mongoose'),
-): WorkflowRunMethods {
+export function createWorkflowRunMethods(mongoose: typeof import('mongoose')): WorkflowRunMethods {
   const WorkflowRun = (): Model<IWorkflowRunDocument> =>
     mongoose.models.WorkflowRun as Model<IWorkflowRunDocument>;
 

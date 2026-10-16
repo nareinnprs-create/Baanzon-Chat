@@ -59,7 +59,12 @@ describe('addCitation', () => {
       score: 0.9,
     });
 
-    expect(citation).toMatchObject({ messageId: 'msg-1', index: 0, quote: 'quoted text', score: 0.9 });
+    expect(citation).toMatchObject({
+      messageId: 'msg-1',
+      index: 0,
+      quote: 'quoted text',
+      score: 0.9,
+    });
     expect(citation.sourceId.toString()).toBe(sourceId);
   });
 
@@ -90,7 +95,9 @@ describe('listCitationsForMessage / listCitationsForConversation', () => {
       index: 0,
     });
 
-    expect((await methods.listCitationsForMessage(user, 'msg-1')).map((c) => c.index)).toEqual([1, 2]);
+    expect((await methods.listCitationsForMessage(user, 'msg-1')).map((c) => c.index)).toEqual([
+      1, 2,
+    ]);
     expect(await methods.listCitationsForMessage(otherUser, 'msg-1')).toHaveLength(1);
     expect(await methods.listCitationsForMessage('bad', 'msg-1')).toEqual([]);
 

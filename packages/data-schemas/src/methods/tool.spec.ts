@@ -126,10 +126,7 @@ describe('listTools', () => {
     await methods.createTool({ name: 'C', type: 'native', createdBy: user, enabled: false });
 
     expect((await methods.listTools({ type: 'native' })).map((t) => t.name)).toEqual(['A', 'C']);
-    expect((await methods.listTools({ enabledOnly: true })).map((t) => t.name)).toEqual([
-      'A',
-      'B',
-    ]);
+    expect((await methods.listTools({ enabledOnly: true })).map((t) => t.name)).toEqual(['A', 'B']);
     expect(await methods.listTools()).toHaveLength(3);
   });
 });

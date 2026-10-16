@@ -21,7 +21,7 @@ let WorkflowRun: mongoose.Model<IWorkflowRun>;
 let methods: ReturnType<typeof createWorkflowMethods>;
 
 const user = new mongoose.Types.ObjectId().toString();
-const otherUser = new mongoose.Types.ObjectId().toString();
+const _otherUser = new mongoose.Types.ObjectId().toString();
 
 function runAs<T>(tenantId: string, fn: () => Promise<T>): Promise<T> {
   return tenantStorage.run({ tenantId }, fn);
@@ -91,14 +91,20 @@ describe('createWorkflow', () => {
       runAs(TENANT_A, () => methods.createWorkflow({ name: 'Alpha', createdBy: user })),
     ).rejects.toThrow();
 
-    const b = await runAs(TENANT_B, () => methods.createWorkflow({ name: 'Alpha', createdBy: user }));
+    const b = await runAs(TENANT_B, () =>
+      methods.createWorkflow({ name: 'Alpha', createdBy: user }),
+    );
     expect(b.slug).toBe('alpha');
   });
 });
 
 describe('getWorkflow / getWorkflowBySlug / listWorkflows / updateWorkflow', () => {
   it('reads by id and slug, filters by availability and updates', async () => {
-    const workflow = await methods.createWorkflow({ name: 'Alpha', createdBy: user, enabled: false });
+    const workflow = await methods.createWorkflow({
+      name: 'Alpha',
+      createdBy: user,
+      enabled: false,
+    });
     const id = workflow._id!.toString();
     await methods.createWorkflow({ name: 'Beta', createdBy: user });
 

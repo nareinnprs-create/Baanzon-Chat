@@ -81,7 +81,11 @@ describe('createArtifactVersion', () => {
       methods.createArtifactVersion({ artifactId: 'bad', createdBy: user, content: 'x' }),
     ).rejects.toThrow(/artifactId is required/i);
     await expect(
-      methods.createArtifactVersion({ artifactId: new mongoose.Types.ObjectId().toString(), createdBy: 'bad', content: 'x' }),
+      methods.createArtifactVersion({
+        artifactId: new mongoose.Types.ObjectId().toString(),
+        createdBy: 'bad',
+        content: 'x',
+      }),
     ).rejects.toThrow(/createdBy is required/i);
   });
 

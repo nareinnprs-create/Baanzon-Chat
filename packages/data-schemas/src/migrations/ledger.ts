@@ -124,7 +124,7 @@ export function planMigrations<T extends { id: string; engine?: MigrationEngine 
     }
     seen.add(migration.id);
   }
-  const ordered = [...migrations].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  const ordered = [...migrations].sort((a, b) => a.id.localeCompare(b.id));
   const queue: T[] = [];
   const deferred: string[] = [];
   for (const migration of ordered) {
