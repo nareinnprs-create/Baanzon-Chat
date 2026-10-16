@@ -7,12 +7,16 @@ import { createKnowledgeCollectionModel } from './knowledgeCollection';
 import { createAgentTriggerUserPurgeModel } from './triggerUserPurge';
 import { createRefreshTokenBridgeModel } from './refreshTokenBridge';
 import { createAgentTriggerDeliveryModel } from './triggerDelivery';
+import { createArtifactVersionModel } from './artifactVersion';
 import { createSkillSyncStatusModel } from './skillSyncStatus';
 import { createConversationTagModel } from './conversationTag';
 import { createCodeEnvironmentModel } from './codeEnvironment';
+import { createToolPermissionModel } from './toolPermission';
 import { createAgentCategoryModel } from './agentCategory';
 import { createOrganizationModel } from './organization';
 import { createNotificationModel } from './notification';
+import { createToolVersionModel } from './toolVersion';
+import { createWorkflowRunModel } from './workflowRun';
 import { createChatProjectModel } from './chatProject';
 import { createAgentApiKeyModel } from './agentApiKey';
 import { createTransactionModel } from './transaction';
@@ -29,6 +33,9 @@ import { createAssistantModel } from './assistant';
 import { createSkillFileModel } from './skillFile';
 import { createWorkspaceModel } from './workspace';
 import { createConversationModel } from './convo';
+import { createWorkflowModel } from './workflow';
+import { createArtifactModel } from './artifact';
+import { createCitationModel } from './citation';
 import { createToolCallModel } from './toolCall';
 import { createAclEntryModel } from './aclEntry';
 import { createAuditLogModel } from './auditLog';
@@ -36,6 +43,7 @@ import { createAgentRunModel } from './agentRun';
 import { createSessionModel } from './session';
 import { createBalanceModel } from './balance';
 import { createMessageModel } from './message';
+import { createSourceModel } from './source';
 import { createActionModel } from './action';
 import { createBannerModel } from './banner';
 import { createPresetModel } from './preset';
@@ -46,6 +54,7 @@ import { createTokenModel } from './token';
 import { createAgentModel } from './agent';
 import { createSkillModel } from './skill';
 import { createGroupModel } from './group';
+import { createToolModel } from './tool';
 import { createUserModel } from './user';
 import { createRoleModel } from './role';
 import { createFileModel } from './file';
@@ -110,6 +119,15 @@ export function createModels(mongoose: typeof import('mongoose')): {
   MessagePart: ReturnType<typeof createMessagePartModel>;
   AgentRun: ReturnType<typeof createAgentRunModel>;
   Notification: ReturnType<typeof createNotificationModel>;
+  Tool: ReturnType<typeof createToolModel>;
+  ToolVersion: ReturnType<typeof createToolVersionModel>;
+  ToolPermission: ReturnType<typeof createToolPermissionModel>;
+  Source: ReturnType<typeof createSourceModel>;
+  Citation: ReturnType<typeof createCitationModel>;
+  Artifact: ReturnType<typeof createArtifactModel>;
+  ArtifactVersion: ReturnType<typeof createArtifactVersionModel>;
+  Workflow: ReturnType<typeof createWorkflowModel>;
+  WorkflowRun: ReturnType<typeof createWorkflowRunModel>;
 } {
   const models = {
     User: createUserModel(mongoose),
@@ -166,6 +184,15 @@ export function createModels(mongoose: typeof import('mongoose')): {
     MessagePart: createMessagePartModel(mongoose),
     AgentRun: createAgentRunModel(mongoose),
     Notification: createNotificationModel(mongoose),
+    Tool: createToolModel(mongoose),
+    ToolVersion: createToolVersionModel(mongoose),
+    ToolPermission: createToolPermissionModel(mongoose),
+    Source: createSourceModel(mongoose),
+    Citation: createCitationModel(mongoose),
+    Artifact: createArtifactModel(mongoose),
+    ArtifactVersion: createArtifactVersionModel(mongoose),
+    Workflow: createWorkflowModel(mongoose),
+    WorkflowRun: createWorkflowRunModel(mongoose),
   };
   /**
    * Background index builds fail silently unless an 'index' listener is

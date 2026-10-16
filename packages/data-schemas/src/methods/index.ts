@@ -118,6 +118,44 @@ import {
   NOTIFICATION_LIST_MAX_LIMIT,
   type NotificationMethods,
 } from './notification';
+/* Tools, sources, citations, artifacts, workflows (§45) */
+import { createToolMethods, TOOL_NAME_MAX_LENGTH, type ToolMethods } from './tool';
+import {
+  createToolVersionMethods,
+  TOOL_VERSION_LIST_MAX_LIMIT,
+  type ToolVersionMethods,
+} from './toolVersion';
+import { createToolPermissionMethods, type ToolPermissionMethods } from './toolPermission';
+import {
+  createSourceMethods,
+  SOURCE_LIST_DEFAULT_LIMIT,
+  SOURCE_LIST_MAX_LIMIT,
+  type SourceMethods,
+} from './source';
+import { createCitationMethods, type CitationMethods } from './citation';
+import {
+  createArtifactMethods,
+  ARTIFACT_LIST_DEFAULT_LIMIT,
+  ARTIFACT_LIST_MAX_LIMIT,
+  type ArtifactMethods,
+} from './artifact';
+import {
+  createArtifactVersionMethods,
+  ARTIFACT_VERSION_LIST_MAX_LIMIT,
+  type ArtifactVersionMethods,
+} from './artifactVersion';
+import {
+  createWorkflowMethods,
+  WORKFLOW_SLUG_MAX_LENGTH,
+  slugifyWorkflowName,
+  type WorkflowMethods,
+} from './workflow';
+import {
+  createWorkflowRunMethods,
+  WORKFLOW_RUN_LIST_DEFAULT_LIMIT,
+  WORKFLOW_RUN_LIST_MAX_LIMIT,
+  type WorkflowRunMethods,
+} from './workflowRun';
 /* Tier 3 — Complex (heavier injection) */
 import {
   createTxMethods,
@@ -281,6 +319,15 @@ export type AllMethods = UserMethods &
   MessagePartMethods &
   AgentRunMethods &
   NotificationMethods &
+  ToolMethods &
+  ToolVersionMethods &
+  ToolPermissionMethods &
+  SourceMethods &
+  CitationMethods &
+  ArtifactMethods &
+  ArtifactVersionMethods &
+  WorkflowMethods &
+  WorkflowRunMethods &
   TxMethods &
   TransactionMethods &
   SpendTokensMethods &
@@ -511,6 +558,15 @@ export function createMethods(
     ...createMessagePartMethods(mongoose),
     ...createAgentRunMethods(mongoose),
     ...createNotificationMethods(mongoose),
+    ...createToolMethods(mongoose),
+    ...createToolVersionMethods(mongoose),
+    ...createToolPermissionMethods(mongoose),
+    ...createSourceMethods(mongoose),
+    ...createCitationMethods(mongoose),
+    ...createArtifactMethods(mongoose),
+    ...createArtifactVersionMethods(mongoose),
+    ...createWorkflowMethods(mongoose),
+    ...createWorkflowRunMethods(mongoose),
     /* Tier 3 */
     ...txMethods,
     ...transactionMethods,
@@ -580,6 +636,15 @@ export type {
   MessagePartMethods,
   AgentRunMethods,
   NotificationMethods,
+  ToolMethods,
+  ToolVersionMethods,
+  ToolPermissionMethods,
+  SourceMethods,
+  CitationMethods,
+  ArtifactMethods,
+  ArtifactVersionMethods,
+  WorkflowMethods,
+  WorkflowRunMethods,
   TxMethods,
   TransactionMethods,
   SpendTokensMethods,
@@ -629,4 +694,15 @@ export {
   AGENT_RUN_LIST_MAX_LIMIT,
   NOTIFICATION_LIST_DEFAULT_LIMIT,
   NOTIFICATION_LIST_MAX_LIMIT,
+  TOOL_NAME_MAX_LENGTH,
+  TOOL_VERSION_LIST_MAX_LIMIT,
+  SOURCE_LIST_DEFAULT_LIMIT,
+  SOURCE_LIST_MAX_LIMIT,
+  ARTIFACT_LIST_DEFAULT_LIMIT,
+  ARTIFACT_LIST_MAX_LIMIT,
+  ARTIFACT_VERSION_LIST_MAX_LIMIT,
+  WORKFLOW_SLUG_MAX_LENGTH,
+  slugifyWorkflowName,
+  WORKFLOW_RUN_LIST_DEFAULT_LIMIT,
+  WORKFLOW_RUN_LIST_MAX_LIMIT,
 };

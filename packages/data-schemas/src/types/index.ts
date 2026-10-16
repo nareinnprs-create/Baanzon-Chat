@@ -56,6 +56,19 @@ export * from './messagePart';
 export * from './agentRun';
 /* Notifications (§45) */
 export * from './notification';
+/* Tools (§45) */
+export * from './tool';
+export * from './toolVersion';
+export * from './toolPermission';
+/* Retrieval provenance (§45) */
+export * from './source';
+export * from './citation';
+/* Artifacts (§45) */
+export * from './artifact';
+export * from './artifactVersion';
+/* Workflows (§45) */
+export * from './workflow';
+export * from './workflowRun';
 /* Admin */
 export * from './admin';
 /* Web */
