@@ -137,10 +137,10 @@ Each phase: implement with ≥7 agents/subagents in parallel → typecheck → f
 | P1 RAG completion | **done** | ~76% | `267d683` |
 | P2 Hardening | **done** (branding/docker/engines/license/cleanup + secrets fail-fast P2.2, CSP/CORS P2.5, registration/email policy A14) | ~86% | `6bf52321`, `(this)` |
 | P3 Security/deps | partial (overrides `fast-uri`/`brace-expansion` fixed, P0/P1 bumps, dead nested override removed, lockfile synced; audited majors still staged) | ~88% | `6bf52321`, `(this)` |
-| P4 UX shell | partial (P4.1 ⌘K palette + P4.2 Home/onboarding + P4.3 in-conversation find + P4.4 PDF export **with citations** shipped; P4.5 notifications pending) | ~93% | `(this)` |
-| P5 UX capability | partial (P5.5 offline drafts + sync queue shipped; P5.1–P5.4/5.6 pending) | ~90% | `(this)` |
+| P4 UX shell | **done** (P4.1 ⌘K palette + P4.2 Home/onboarding + P4.3 in-conversation find + P4.4 PDF export w/ citations + P4.5 notifications/Activity Center w/ SSE realtime + polling fallback) | ~95% | `e6f623e1e`→`2ec8ee600` |
+| P5 UX capability | partial (P5.3 Deep Research flow + P5.4 Data Lab charts + P5.5 offline drafts/queue shipped; P5.6 workflow engine shipped, builder UI pending; P5.1 Canvas + P5.2 realtime voice pending) | ~92% | `ae02d93dc`, `150cf602b` |
 | P6 Tests/CI-CD | partial (P6.1 coverage + P6.2/P6.2b/P6.2c tests + **P6.3 e2e/axe/Lighthouse lanes** + P6.4 integration CI + P6.5 CD all present; remaining: prove CI green on a real diff + enforce the coverage gate) | ~97% | `(this)` |
-| P7 Data/sandbox | partial (P7.1 pgvector + wired, P7.2 migration ledger, P7.4 `managed` sandbox, **P7.3 15/28 entities** — batch 1: orgs, memberships, workspaces, message_parts, agent_runs, notifications, memories; batch 2: tools, tool_versions, tool_permissions, sources, citations, artifacts, artifact_versions, workflows, workflow_runs) | ~97% | `9c92bb435` |
+| P7 Data/sandbox | partial (P7.1 pgvector + wired, P7.2 migration ledger, P7.3 **§45 entities complete** — batches 1–3 incl. devices, subscriptions, usage_records, feedback, P7.4 `managed` sandbox; remaining: org→workspace→project tenant hierarchy) | ~98% | `557a9c45d` |
 | P8 Validation | partial (local harness `scripts/validate.mjs` + `docs/validation.md` shipped; full matrix + final report pending) | — | `511bc7d0a` |
 
 **P1 evidence (2026-10-15):** `packages/api` RAG suite 690/690; knowledge route 26/26;
@@ -199,6 +199,25 @@ i18n unused-key gate green. New local harness `scripts/validate.mjs` + `docs/val
 tolerates non-string observations.
 **Still deferred:** P4.5 notifications (agent cancelled, no files on disk — retry); P7.3 remaining
 ~13 entities; skill-tree i18n merge.
+
+**P4.5/P5.3/P5.4/P5.6/P7.3-batch3 evidence (2026-10-16):** `packages/data-schemas` full suite
+**105 suites · 3277/3277** (batch-3 entities: devices, subscriptions, usage_records, feedback);
+`packages/data-provider` **42 suites · 1889 pass / 1 skipped**; `packages/api` notifications +
+workflow-engine specs **39/39**; `client` Notifications + Data Lab + Deep Research **9 suites ·
+91/91**. `tsc --noEmit` clean in `client`, `packages/api`, `packages/data-provider`,
+`packages/data-schemas`; dists rebuilt in order. Static suite: `sort-imports` **4686/4686**,
+`prettier` clean, `eslint` clean (new → also fixed `packages/data-schemas` skill bulk-rename to
+`tenantSafeBulkWrite`, ledger comparator, unused var), i18n gate green.
+**Shipped:** P4.5 Notifications + Activity Center (DI service + in-process SSE hub, native
+`EventSource` with polling fallback, route `/api/notifications`) — **P4 now complete**; P7.3 §45
+entity set now complete (device/subscription/usage_record/feedback); P5.3 Deep Research client flow;
+P5.4 Data Lab charts (dependency-free SVG); P5.6 workflow orchestration engine (steps, retry,
+branch, pause/resume, cancel).
+**Recovered:** the workflow agent was cancelled at the report step but had written all six files;
+fixed its spec type errors by hand and verified.
+**Still deferred:** P5.1 Canvas, P5.2 realtime voice, P5.6 Workflow Builder UI; skill-tree + Data Lab
++ Deep Research i18n merge into `translation.json`; notifications list deep-paging bounded by the
+data-schemas 200-row fetch cap; notification producers (runner→publish) not wired.
 
 ---
 
