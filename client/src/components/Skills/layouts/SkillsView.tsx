@@ -1,3 +1,4 @@
+import { useState, lazy, Suspense } from 'react';
 import { Spinner, useMediaQuery } from '@librechat/client';
 import { PermissionTypes, Permissions } from 'librechat-data-provider';
 import { Navigate, useNavigate, useParams, useLocation, useSearchParams } from 'react-router-dom';
@@ -8,6 +9,9 @@ import SkillDetail from '~/components/Skills/display/SkillDetail';
 import SkillState from '~/components/Skills/display/SkillState';
 import OpenSidebar from '~/components/Chat/Menus/OpenSidebar';
 import { useGetSkillByIdQuery } from '~/data-provider';
+
+/** Loaded on demand — the node tree and editor are heavy and only used by the Files tab. */
+const SkillTreeWorkspace = lazy(() => import('~/components/Skills/tree/SkillTreeWorkspace'));
 
 /**
  * Skill detail / edit / create route content.
@@ -134,12 +138,63 @@ function DetailView({ skillId }: { skillId: string }) {
   );
 }
 
-/** Edit form — reached via the Edit button or `/skills/:id/edit` URL. */
+/** Edit view — the metadata form ("Details") and the node tree ("Files"). */
 function EditView({ skillId }: { skillId: string }) {
+  const localize = useLocalize();
+  const [panel, setPanel] = useState<'details' | 'files'>('details');
+
+  const tabClass = (active: boolean) =>
+    [
+      'relative -mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors',
+      active
+        ? 'border-border-heavy text-text-primary'
+        : 'border-transparent text-text-secondary hover:text-text-primary',
+    ].join(' ');
+
   return (
-    <div className="flex h-full w-full flex-col overflow-y-auto bg-presentation">
+    <div className="flex h-full w-full flex-col bg-presentation">
       <MobileSidebarToggle />
-      <SkillForm skillId={skillId} />
+      <div
+        role="tablist"
+        aria-label={localize('com_ui_skills')}
+        className="flex shrink-0 items-center gap-1 border-b border-border-light px-4"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={panel === 'details'}
+          className={tabClass(panel === 'details')}
+          onClick={() => setPanel('details')}
+        >
+          {localize('com_ui_details')}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={panel === 'files'}
+          className={tabClass(panel === 'files')}
+          onClick={() => setPanel('files')}
+        >
+          {localize('com_ui_files')}
+        </button>
+      </div>
+      {panel === 'details' ? (
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <SkillForm skillId={skillId} />
+        </div>
+      ) : (
+        <div className="min-h-0 flex-1">
+          <Suspense
+            fallback={
+              <div className="flex h-full items-center justify-center">
+                <Spinner className="text-text-secondary" aria-label={localize('com_ui_loading')} />
+              </div>
+            }
+          >
+            <SkillTreeWorkspace skillId={skillId} />
+          </Suspense>
+        </div>
+      )}
     </div>
   );
 }
