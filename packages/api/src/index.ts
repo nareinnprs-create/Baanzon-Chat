@@ -79,6 +79,7 @@ export * from './schedules';
 export * from './schedules/service';
 export * from './skills';
 export * from './favorites';
+export * from './notifications';
 /* User */
 export * from './user';
 /* Agent Plugins */

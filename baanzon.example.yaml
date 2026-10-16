@@ -1298,6 +1298,22 @@ endpoints:
 #   # applies when no other vector store is supplied
 #   inMemoryMaxChunks: 20000
 
+# Notifications / Activity Center. Drives the in-app notification feed served at
+# `/api/notifications` and the realtime push stream at
+# `/api/notifications/stream`. Every key is optional; the defaults below reproduce
+# today's behavior. These are returned to the client inside each notifications
+# response, so no `/api/config` change is needed.
+# notifications:
+#   # (optional) Master switch, default true. When false every notifications
+#   # route answers 404 and the client hides the Activity Center.
+#   enabled: true
+#   # (optional) Enable the SSE push stream, default true. When false the client
+#   # falls back to polling at pollingIntervalMs.
+#   realtime: true
+#   # (optional) Polling interval in milliseconds used when realtime is off or the
+#   # stream cannot be held open, default 60000.
+#   pollingIntervalMs: 60000
+
 # Apply opt-in content filters to source-classified submitted and reusable content.
 # `filters` is base-config-only: database overrides and tombstones cannot add,
 # change, or remove this policy for individual users, groups, or roles.
