@@ -11,9 +11,9 @@ describe('getFileStrategy', () => {
       expect(getFileStrategy({})).toBe(FileSources.local);
     });
 
-    it('throws when called without a config object (documents current behavior)', () => {
-      expect(() => getFileStrategy()).toThrow(TypeError);
-      expect(() => getFileStrategy(undefined)).toThrow(TypeError);
+    it('defaults to local when called without a config object', () => {
+      expect(getFileStrategy()).toBe(FileSources.local);
+      expect(getFileStrategy(undefined)).toBe(FileSources.local);
     });
   });
 
@@ -35,7 +35,9 @@ describe('getFileStrategy', () => {
         fileStrategies: { default: FileSources.azure },
       };
 
-      expect(getFileStrategy(defaultOnly, { context: FileContext.unknown })).toBe(FileSources.azure);
+      expect(getFileStrategy(defaultOnly, { context: FileContext.unknown })).toBe(
+        FileSources.azure,
+      );
       expect(getFileStrategy(defaultOnly)).toBe(FileSources.azure);
     });
 
