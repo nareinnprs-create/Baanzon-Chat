@@ -14,24 +14,24 @@ in `.github/workflows/release.yml` (P6.5). Three ideas define it:
 
 ## What runs, and when
 
-| Trigger | `build` job | `deploy` job |
-| --- | --- | --- |
-| Tag push `v*` (`v1.2.3`, `v1.2.3-rc.1`) | runs | runs — **waits for approval**, then pushes the image |
-| `workflow_dispatch` (Run workflow button) | runs | **skipped** (tag guard in its `if:`) |
-| Push to `b1` / `dev` / `main` | — (this workflow does not trigger) | — |
-| Pull request | — (this workflow does not trigger) | — |
+| Trigger                                   | `build` job                        | `deploy` job                                         |
+| ----------------------------------------- | ---------------------------------- | ---------------------------------------------------- |
+| Tag push `v*` (`v1.2.3`, `v1.2.3-rc.1`)   | runs                               | runs — **waits for approval**, then pushes the image |
+| `workflow_dispatch` (Run workflow button) | runs                               | **skipped** (tag guard in its `if:`)                 |
+| Push to `b1` / `dev` / `main`             | — (this workflow does not trigger) | —                                                    |
+| Pull request                              | — (this workflow does not trigger) | —                                                    |
 
 Tag pushes do **not** trigger the branch workflows either — their
 `push.branches` filters do not match tags — so the `build` job is the only CI
 at the tagged commit. It re-runs, at the exact release commit, the checks the
 commit already passed on its pull request:
 
-| Step | Script (root `package.json`) | Same as |
-| --- | --- | --- |
-| Workspace packages | `npm run build:packages` | `build.yml` |
-| Client bundle | `npm run build:client` | `build.yml` |
-| Types, 6 projects | `npx tsc --noEmit -p <project>/tsconfig.json` (+ `tsconfig.test.json` for `packages/client` specs) | `typecheck.yml` |
-| API suite | `npm run test:api` (`cd api && npm run test:ci`) | `test.yml` (its env prep step included) |
+| Step               | Script (root `package.json`)                                                                       | Same as                                 |
+| ------------------ | -------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Workspace packages | `npm run build:packages`                                                                           | `build.yml`                             |
+| Client bundle      | `npm run build:client`                                                                             | `build.yml`                             |
+| Types, 6 projects  | `npx tsc --noEmit -p <project>/tsconfig.json` (+ `tsconfig.test.json` for `packages/client` specs) | `typecheck.yml`                         |
+| API suite          | `npm run test:api` (`cd api && npm run test:ci`)                                                   | `test.yml` (its env prep step included) |
 
 The other six Jest suites stay in `test.yml`/`integration.yml` and run per pull
 request; the release job does not repeat them.
@@ -53,16 +53,16 @@ it. The mechanics:
 
 1. **One-time setup (repository admin):** Settings → Environments →
    **New environment** → name it `production` → enable **Required reviewers**
-   and pick the approvers. The environment is auto-created *without* protection
+   and pick the approvers. The environment is auto-created _without_ protection
    rules on the first run that references it, so a run that reaches the deploy
    job before this setup **deploys unattended**. Configuring the reviewers is
    part of the rollout, not an optional extra.
 2. **Per release:** on the run page the `deploy` job shows
-   *Waiting for a reviewer* → a reviewer opens it → **Review deployments** →
+   _Waiting for a reviewer_ → a reviewer opens it → **Review deployments** →
    select `production` → **Approve**. The image push runs only after that.
 3. **Optional hardening:** on the same environment page,
-   *Deployment branches and tags* can restrict which refs may deploy (e.g.
-   limit to tags matching `v*`), and *Wait timer* can add a cool-down.
+   _Deployment branches and tags_ can restrict which refs may deploy (e.g.
+   limit to tags matching `v*`), and _Wait timer_ can add a cool-down.
 
 Because the approval gate is environment-scoped, everything gated behind it —
 including the registry secrets stored on the environment — is invisible to the
@@ -74,14 +74,14 @@ All three are read by the `deploy` job only. The job **skips the image push
 cleanly (green, with a notice) if any is missing** — no registry configured is a
 no-op, never a failure — so the workflow can be merged before a registry exists.
 
-| Secret | Value | Example |
-| --- | --- | --- |
-| `REGISTRY` | Registry host **plus** namespace prefix; the image becomes `$REGISTRY/baanzon-chat-api` | `ghcr.io/your-org` or `registry.example.com/team` |
-| `REGISTRY_USERNAME` | Registry user or token owner | `your-bot` |
-| `REGISTRY_PASSWORD` | Registry token with push/write scope | PAT with `write:packages` (GHCR) or an access token (Docker Hub) |
+| Secret              | Value                                                                                   | Example                                                          |
+| ------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `REGISTRY`          | Registry host **plus** namespace prefix; the image becomes `$REGISTRY/baanzon-chat-api` | `ghcr.io/your-org` or `registry.example.com/team`                |
+| `REGISTRY_USERNAME` | Registry user or token owner                                                            | `your-bot`                                                       |
+| `REGISTRY_PASSWORD` | Registry token with push/write scope                                                    | PAT with `write:packages` (GHCR) or an access token (Docker Hub) |
 
 **Where to set them:** Settings → Secrets and variables → Actions. Storing them
-as **environment secrets on `production`** (the environment tab's *Secrets*
+as **environment secrets on `production`** (the environment tab's _Secrets_
 section) is recommended: they are then exposed only to the approved `deploy`
 job. Repository secrets also work but are visible to every workflow. A secret of
 the same name on the environment overrides the repository one for this job.
@@ -114,7 +114,7 @@ $REGISTRY/baanzon-chat-api:v0.9.0   # immutable version tag
 $REGISTRY/baanzon-chat-api:latest   # floating tag, matches deploy-compose.yml
 ```
 
-**Verification run:** *Run workflow* (manual dispatch) executes the `build` job
+**Verification run:** _Run workflow_ (manual dispatch) executes the `build` job
 on a branch of your choice and stops before deploying — useful as a release
 preflight. The dispatch button appears only once `release.yml` exists on the
 default branch (`main`); tag pushes need no such merge and run the workflow
