@@ -138,10 +138,20 @@ Each phase: implement with ≥7 agents/subagents in parallel → typecheck → f
 | P2 Hardening | **done** (branding/docker/engines/license/cleanup + secrets fail-fast P2.2, CSP/CORS P2.5, registration/email policy A14) | ~86% | `6bf52321`, `(this)` |
 | P3 Security/deps | partial (overrides `fast-uri`/`brace-expansion` fixed, P0/P1 bumps, dead nested override removed, lockfile synced; audited majors still staged) | ~88% | `6bf52321`, `(this)` |
 | P4 UX shell | **done** (P4.1 ⌘K palette + P4.2 Home/onboarding + P4.3 in-conversation find + P4.4 PDF export w/ citations + P4.5 notifications/Activity Center w/ SSE realtime + polling fallback) | ~95% | `e6f623e1e`→`2ec8ee600` |
-| P5 UX capability | partial (P5.3 Deep Research flow + P5.4 Data Lab charts + P5.5 offline drafts/queue shipped; P5.6 workflow engine shipped, builder UI pending; P5.1 Canvas + P5.2 realtime voice pending) | ~92% | `ae02d93dc`, `150cf602b` |
+| P5 UX capability | **done** (P5.1 Canvas workspace + P5.2 realtime voice + P5.3 Deep Research + P5.4 Data Lab + P5.5 offline queue + P5.6 workflow engine **and** builder UI, each with RTL coverage) | ~97% | `ae02d93dc`, `150cf602b`, `7b517d600` |
 | P6 Tests/CI-CD | partial (P6.1 coverage + P6.2/P6.2b/P6.2c tests + **P6.3 e2e/axe/Lighthouse lanes** + P6.4 integration CI + P6.5 CD all present; remaining: prove CI green on a real diff + enforce the coverage gate) | ~97% | `(this)` |
 | P7 Data/sandbox | partial (P7.1 pgvector + wired, P7.2 migration ledger, P7.3 **§45 entities complete** — batches 1–3 incl. devices, subscriptions, usage_records, feedback, P7.4 `managed` sandbox; remaining: org→workspace→project tenant hierarchy) | ~98% | `557a9c45d` |
 | P8 Validation | partial (local harness `scripts/validate.mjs` + `docs/validation.md` shipped; full matrix + final report pending) | — | `511bc7d0a` |
+
+**P5/P7/P8 evidence (2026-10-17, `7b517d600`):** entity routes/services (`devices`,
+`subscriptions`, `usage-records`, `feedback`) and workflow run routes wired; notification producers
++ workflow bridge added (`createWorkflowNotificationConsumer`); Canvas, Voice and Workflow Builder
+UIs completed with specs; dependency overrides + `scripts/validate.mjs` flag matrix + CI lane shipped.
+Green: `client` Canvas **56**, Voice **47**, Workflow **23**, Skills **50**, DataLab **5+6+charts/analysis/parse**,
+DeepResearch **73** (with DataLab pure), CommandPalette **8**, routes **30**; `packages/api`
+devices/subscriptions/usageRecords/feedback/workflows/notifications **129**; `packages/data-schemas`
+device/subscription/usageRecord/feedback **65**. `tsc --noEmit` clean in `client`, `packages/api`,
+`packages/data-schemas`; eslint clean; `sort-imports:check` + prettier clean; i18n gate green.
 
 **P1 evidence (2026-10-15):** `packages/api` RAG suite 690/690; knowledge route 26/26;
 `tsc --noEmit` clean in `packages/api`, `packages/data-provider`, `packages/data-schemas`;
