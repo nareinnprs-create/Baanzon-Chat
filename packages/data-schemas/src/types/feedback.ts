@@ -39,6 +39,7 @@ export interface CreateFeedbackInput {
   rating?: number;
   submittedAt?: Date;
   status?: FeedbackStatus;
+  tenantId?: string;
 }
 
 export interface UpdateFeedbackInput {
@@ -50,4 +51,5 @@ export interface ListFeedbackOptions {
   type?: FeedbackType;
   status?: FeedbackStatus;
   userId?: string;
+  tenantId?: string;
 }

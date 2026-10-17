@@ -80,6 +80,12 @@ export * from './schedules/service';
 export * from './skills';
 export * from './favorites';
 export * from './notifications';
+export * from './devices';
+export * from './subscriptions';
+export * from './usageRecords';
+export * from './feedback';
+/* Workflows */
+export * from './workflows';
 /* User */
 export * from './user';
 /* Agent Plugins */

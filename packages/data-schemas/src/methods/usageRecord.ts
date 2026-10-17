@@ -42,6 +42,7 @@ export function createUsageRecordMethods(mongoose: typeof import('mongoose')): U
       unit: input.unit,
       recordedAt: input.recordedAt ?? new Date(),
       metadata: input.metadata,
+      ...(input.tenantId ? { tenantId: input.tenantId } : {}),
     });
     return created.toObject() as IUsageRecord;
   }
@@ -88,6 +89,9 @@ export function createUsageRecordMethods(mongoose: typeof import('mongoose')): U
         range.$lte = options.to;
       }
       filter.recordedAt = range;
+    }
+    if (options?.tenantId) {
+      filter.tenantId = options.tenantId;
     }
     return await UsageRecord()
       .find(filter)

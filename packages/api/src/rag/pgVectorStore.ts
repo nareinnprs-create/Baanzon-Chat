@@ -89,9 +89,7 @@ function assertDimensions(dimensions: number): number {
 
 /** A configured ceiling that is absent, non-numeric or non-positive is unbounded. */
 function ceiling(value: number | undefined): number {
-  return typeof value === 'number' && Number.isFinite(value) && value > 0
-    ? Math.floor(value)
-    : 0;
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
 }
 
 function assertId(value: unknown, name: string): asserts value is string {
@@ -328,7 +326,11 @@ WHERE t.collection_id = $1`,
 
     upsertChunks,
 
-    async semanticSearch(collectionId: string, searchQuery: string, limit: number): Promise<VectorChunk[]> {
+    async semanticSearch(
+      collectionId: string,
+      searchQuery: string,
+      limit: number,
+    ): Promise<VectorChunk[]> {
       assertId(collectionId, 'collectionId');
       if (typeof searchQuery !== 'string') {
         throw new Error('PgVectorStore: query must be a string');

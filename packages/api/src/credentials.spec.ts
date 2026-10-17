@@ -196,9 +196,7 @@ describe('credentials', () => {
     it('throws when a production secret is missing', () => {
       process.env.NODE_ENV = 'production';
 
-      expect(() => assertProductionSecrets(process.env)).toThrow(
-        'Refusing to start in production',
-      );
+      expect(() => assertProductionSecrets(process.env)).toThrow('Refusing to start in production');
       expect(() => assertProductionSecrets(process.env)).toThrow('CREDS_KEY');
       expect(() => assertProductionSecrets(process.env)).toThrow(
         'BAANZON_ALLOW_EPHEMERAL_SECRETS=true',

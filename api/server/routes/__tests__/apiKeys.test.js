@@ -149,9 +149,7 @@ describe('agent API key routes', () => {
     it('answers 201 with the new key and passes the authenticated user through', async () => {
       mockAuthUser = { id: 'user-42', role: 'USER' };
 
-      const response = await request(buildApp())
-        .post('/api/api-keys')
-        .send({ name: '  ci-bot  ' });
+      const response = await request(buildApp()).post('/api/api-keys').send({ name: '  ci-bot  ' });
 
       expect(response.status).toBe(201);
       expect(response.body).toMatchObject({ name: 'ci-bot', keyPrefix: expect.any(String) });

@@ -49,6 +49,7 @@ export interface CreateSubscriptionInput {
   trialEndsAt?: Date;
   quantity?: number;
   metadata?: Record<string, unknown>;
+  tenantId?: string;
 }
 
 export interface UpdateSubscriptionInput {
@@ -68,4 +69,5 @@ export interface ListSubscriptionsOptions {
   userId?: string;
   plan?: SubscriptionPlan;
   status?: SubscriptionStatus;
+  tenantId?: string;
 }

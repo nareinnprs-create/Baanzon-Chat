@@ -54,14 +54,7 @@ describe('createPgVectorStore', () => {
       expect(sql).toMatch(/INSERT INTO rag_vectors/i);
       expect(sql).toMatch(/ON CONFLICT \(collection_id, document_id, chunk_index\)/i);
       expect(sql).toMatch(/DO UPDATE SET/i);
-      expect(params).toEqual([
-        'c-1',
-        'd-1',
-        0,
-        'alpha',
-        '[0.1,0.2]',
-        '{"source":"x.txt"}',
-      ]);
+      expect(params).toEqual(['c-1', 'd-1', 0, 'alpha', '[0.1,0.2]', '{"source":"x.txt"}']);
     });
 
     it('stores a chunk without an embedding or metadata as NULL', async () => {
@@ -192,7 +185,9 @@ describe('createPgVectorStore', () => {
 
       await store.deleteCollection('c-1');
 
-      expect(query).toHaveBeenCalledWith(expect.stringMatching(/DELETE FROM rag_vectors/i), ['c-1']);
+      expect(query).toHaveBeenCalledWith(expect.stringMatching(/DELETE FROM rag_vectors/i), [
+        'c-1',
+      ]);
     });
   });
 

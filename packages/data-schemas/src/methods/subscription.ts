@@ -46,6 +46,7 @@ export function createSubscriptionMethods(
       trialEndsAt: input.trialEndsAt,
       quantity: input.quantity,
       metadata: input.metadata,
+      ...(input.tenantId ? { tenantId: input.tenantId } : {}),
     });
     return created.toObject() as ISubscription;
   }
@@ -70,6 +71,9 @@ export function createSubscriptionMethods(
     }
     if (options?.status !== undefined) {
       filter.status = options.status;
+    }
+    if (options?.tenantId) {
+      filter.tenantId = options.tenantId;
     }
     return await Subscription()
       .find(filter)

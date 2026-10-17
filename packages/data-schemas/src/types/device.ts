@@ -41,6 +41,7 @@ export interface CreateDeviceInput {
   userAgent?: string;
   lastSeenAt?: Date;
   isActive?: boolean;
+  tenantId?: string;
 }
 
 export interface UpdateDeviceInput {
@@ -58,4 +59,5 @@ export interface UpdateDeviceInput {
 export interface ListDevicesOptions {
   userId?: string;
   isActive?: boolean;
+  tenantId?: string;
 }

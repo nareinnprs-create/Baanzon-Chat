@@ -191,7 +191,7 @@ describe('resolveRagConfig', () => {
       embeddingTimeoutMs: 1000,
       embeddingBatchSize: 8,
       embeddingConcurrency: 3,
-    semanticEnabled: false,
+      semanticEnabled: false,
     });
 
     expect(config).toEqual({
@@ -208,7 +208,7 @@ describe('resolveRagConfig', () => {
       embeddingTimeoutMs: 1000,
       embeddingBatchSize: 8,
       embeddingConcurrency: 3,
-    semanticEnabled: false,
+      semanticEnabled: false,
     });
   });
 
@@ -640,8 +640,7 @@ describe('createRagRuntimeResolver', () => {
       ['inMemoryMaxChunks', { ...BASE, inMemoryMaxChunks: 20_001 }],
       ['embeddingTimeoutMs', { ...BASE, embeddingTimeoutMs: 15_001 }],
       ['embeddingBatchSize', { ...BASE, embeddingBatchSize: 65 }],
-      ['embeddingConcurrency', { ...BASE, embeddingConcurrency: 3,
-    semanticEnabled: false }],
+      ['embeddingConcurrency', { ...BASE, embeddingConcurrency: 3, semanticEnabled: false }],
     ];
 
     const runtimes = variants.map(([field, config]) => {

@@ -54,6 +54,50 @@ describe('createSubscription', () => {
       runAs(TENANT_A, () => methods.createSubscription({ userId: 'nope', plan: 'free' })),
     ).rejects.toThrow('A valid userId is required');
   });
+
+  it('stores an explicit tenantId when no tenant context is active', async () => {
+    const subscription = await methods.createSubscription({
+      userId: user,
+      plan: 'pro',
+      tenantId: TENANT_A,
+    });
+
+    expect(subscription.tenantId).toBe(TENANT_A);
+    await expect(methods.listSubscriptions({ tenantId: TENANT_A })).resolves.toHaveLength(1);
+  });
+
+  it('stamps the active tenant when the input carries none', async () => {
+    const subscription = await runAs(TENANT_A, () =>
+      methods.createSubscription({ userId: user, plan: 'free' }),
+    );
+
+    expect(subscription.tenantId).toBe(TENANT_A);
+  });
+});
+
+describe('getSubscription', () => {
+  it('returns the subscription', async () => {
+    const created = await runAs(TENANT_A, () =>
+      methods.createSubscription({ userId: user, plan: 'pro' }),
+    );
+
+    const found = await runAs(TENANT_A, () => methods.getSubscription(created._id!.toString()));
+    expect(found).toMatchObject({ plan: 'pro' });
+  });
+
+  it('returns null for a malformed id', async () => {
+    await expect(methods.getSubscription('nope')).resolves.toBeNull();
+  });
+
+  it("does not return another tenant's subscription", async () => {
+    const created = await runAs(TENANT_A, () =>
+      methods.createSubscription({ userId: user, plan: 'pro' }),
+    );
+
+    await expect(
+      runAs(TENANT_B, () => methods.getSubscription(created._id!.toString())),
+    ).resolves.toBeNull();
+  });
 });
 
 describe('listSubscriptions', () => {
@@ -74,6 +118,28 @@ describe('listSubscriptions', () => {
     await runAs(TENANT_A, () => methods.createSubscription({ userId: user, plan: 'pro' }));
     await expect(runAs(TENANT_B, () => methods.listSubscriptions())).resolves.toHaveLength(0);
   });
+
+  it('returns no results for a malformed user id', async () => {
+    await expect(methods.listSubscriptions({ userId: 'not-an-id' })).resolves.toEqual([]);
+  });
+
+  it('filters by an explicit tenantId when no tenant context is active', async () => {
+    await runAs(TENANT_A, () => methods.createSubscription({ userId: user, plan: 'pro' }));
+    await runAs(TENANT_B, () => methods.createSubscription({ userId: user, plan: 'basic' }));
+
+    const scoped = await methods.listSubscriptions({ tenantId: TENANT_A });
+    expect(scoped).toHaveLength(1);
+    expect(scoped[0].tenantId).toBe(TENANT_A);
+  });
+
+  it('keeps the active tenant context authoritative over an explicit tenantId', async () => {
+    await runAs(TENANT_A, () => methods.createSubscription({ userId: user, plan: 'pro' }));
+    await runAs(TENANT_B, () => methods.createSubscription({ userId: user, plan: 'basic' }));
+
+    const listed = await runAs(TENANT_A, () => methods.listSubscriptions({ tenantId: TENANT_B }));
+    expect(listed).toHaveLength(1);
+    expect(listed[0].tenantId).toBe(TENANT_A);
+  });
 });
 
 describe('updateSubscription', () => {
@@ -86,6 +152,24 @@ describe('updateSubscription', () => {
     );
 
     expect(updated).toMatchObject({ plan: 'pro', status: 'active' });
+  });
+
+  it('returns null for a malformed id', async () => {
+    await expect(
+      runAs(TENANT_A, () => methods.updateSubscription('bad', { plan: 'pro' })),
+    ).resolves.toBeNull();
+  });
+
+  it("does not patch another tenant's subscription", async () => {
+    const subscription = await runAs(TENANT_A, () =>
+      methods.createSubscription({ userId: user, plan: 'free' }),
+    );
+
+    await expect(
+      runAs(TENANT_B, () =>
+        methods.updateSubscription(subscription._id!.toString(), { plan: 'pro' }),
+      ),
+    ).resolves.toBeNull();
   });
 });
 

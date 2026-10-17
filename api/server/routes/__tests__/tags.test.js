@@ -221,13 +221,15 @@ describe('conversation tag routes', () => {
         .send({ tags: ['a', 'b'] });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ conversationId: 'convo-9', tags: ['a', 'b'], userId: 'user-1' });
+      expect(response.body).toEqual({
+        conversationId: 'convo-9',
+        tags: ['a', 'b'],
+        userId: 'user-1',
+      });
     });
 
     it('does not mistake the convo route for a single tag', async () => {
-      const response = await request(buildApp())
-        .put('/api/tags/convo/convo-9')
-        .send({ tags: [] });
+      const response = await request(buildApp()).put('/api/tags/convo/convo-9').send({ tags: [] });
 
       expect(response.status).toBe(200);
       expect(response.body.conversationId).toBe('convo-9');

@@ -250,7 +250,10 @@ describe('skill tree handlers', () => {
     const body = await request(app)
       .get(`/skills/${skillId}/tree/${encodeURIComponent('SKILL.md')}/content`)
       .expect(200);
-    expect(body.body).toMatchObject({ content: '# Body\n\nInstructions', mimeType: 'text/markdown' });
+    expect(body.body).toMatchObject({
+      content: '# Body\n\nInstructions',
+      mimeType: 'text/markdown',
+    });
   });
 
   it('refuses to edit SKILL.md content through the tree route', async () => {

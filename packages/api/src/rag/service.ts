@@ -671,7 +671,11 @@ export function createRagService(deps: RagServiceDeps): RagService {
       let semantic: VectorChunk[] = [];
       if (deps.semantic) {
         try {
-          semantic = await deps.semantic.search(params.collectionId, params.query, deps.config.candidateK);
+          semantic = await deps.semantic.search(
+            params.collectionId,
+            params.query,
+            deps.config.candidateK,
+          );
         } catch (error) {
           semantic = [];
         }

@@ -38,6 +38,7 @@ export function createDeviceMethods(mongoose: typeof import('mongoose')): Device
       userAgent: input.userAgent,
       lastSeenAt: input.lastSeenAt,
       isActive: input.isActive ?? true,
+      ...(input.tenantId ? { tenantId: input.tenantId } : {}),
     });
     return created.toObject() as IDevice;
   }
@@ -59,6 +60,9 @@ export function createDeviceMethods(mongoose: typeof import('mongoose')): Device
     }
     if (options?.isActive !== undefined) {
       filter.isActive = options.isActive;
+    }
+    if (options?.tenantId) {
+      filter.tenantId = options.tenantId;
     }
     return await Device().find(filter).sort({ lastSeenAt: -1, _id: -1 }).lean<IDevice[]>();
   }

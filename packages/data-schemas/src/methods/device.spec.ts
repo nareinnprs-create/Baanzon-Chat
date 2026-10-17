@@ -54,11 +54,36 @@ describe('createDevice', () => {
       runAs(TENANT_A, () => methods.createDevice({ userId: 'not-an-id' })),
     ).rejects.toThrow('A valid userId is required');
   });
+
+  it('stores an explicit tenantId when no tenant context is active', async () => {
+    const device = await methods.createDevice({
+      userId: user,
+      deviceName: 'A',
+      tenantId: TENANT_A,
+    });
+
+    expect(device.tenantId).toBe(TENANT_A);
+    await expect(methods.listDevices({ tenantId: TENANT_A })).resolves.toHaveLength(1);
+  });
+
+  it('stamps the active tenant when the input carries none', async () => {
+    const device = await runAs(TENANT_A, () => methods.createDevice({ userId: user }));
+
+    expect(device.tenantId).toBe(TENANT_A);
+  });
 });
 
 describe('getDevice', () => {
   it('returns null for a malformed id', async () => {
     await expect(methods.getDevice('nope')).resolves.toBeNull();
+  });
+
+  it("does not return another tenant's device", async () => {
+    const device = await runAs(TENANT_A, () => methods.createDevice({ userId: user }));
+
+    await expect(
+      runAs(TENANT_B, () => methods.getDevice(device._id!.toString())),
+    ).resolves.toBeNull();
   });
 });
 
@@ -82,6 +107,28 @@ describe('listDevices', () => {
     const otherTenant = await runAs(TENANT_B, () => methods.listDevices());
     expect(otherTenant).toHaveLength(0);
   });
+
+  it('returns no results for a malformed user id', async () => {
+    await expect(methods.listDevices({ userId: 'not-an-id' })).resolves.toEqual([]);
+  });
+
+  it('filters by an explicit tenantId when no tenant context is active', async () => {
+    await runAs(TENANT_A, () => methods.createDevice({ userId: user, deviceName: 'A' }));
+    await runAs(TENANT_B, () => methods.createDevice({ userId: user, deviceName: 'B' }));
+
+    const scoped = await methods.listDevices({ tenantId: TENANT_A });
+    expect(scoped).toHaveLength(1);
+    expect(scoped[0].tenantId).toBe(TENANT_A);
+  });
+
+  it('keeps the active tenant context authoritative over an explicit tenantId', async () => {
+    await runAs(TENANT_A, () => methods.createDevice({ userId: user, deviceName: 'A' }));
+    await runAs(TENANT_B, () => methods.createDevice({ userId: user, deviceName: 'B' }));
+
+    const listed = await runAs(TENANT_A, () => methods.listDevices({ tenantId: TENANT_B }));
+    expect(listed).toHaveLength(1);
+    expect(listed[0].tenantId).toBe(TENANT_A);
+  });
 });
 
 describe('updateDevice', () => {
@@ -97,6 +144,14 @@ describe('updateDevice', () => {
   it('returns null for a malformed id', async () => {
     await expect(
       runAs(TENANT_A, () => methods.updateDevice('bad', { isActive: false })),
+    ).resolves.toBeNull();
+  });
+
+  it("does not patch another tenant's device", async () => {
+    const device = await runAs(TENANT_A, () => methods.createDevice({ userId: user }));
+
+    await expect(
+      runAs(TENANT_B, () => methods.updateDevice(device._id!.toString(), { deviceName: 'X' })),
     ).resolves.toBeNull();
   });
 });

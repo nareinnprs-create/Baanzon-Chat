@@ -1,10 +1,6 @@
 const { createSkillTreeHandlers } = require('@librechat/api');
 const { isValidObjectIdString } = require('@librechat/data-schemas');
-const {
-  listSkillTree,
-  renameSkillNode,
-  deleteSkillNode,
-} = require('~/models');
+const { listSkillTree, renameSkillNode, deleteSkillNode } = require('~/models');
 const {
   getSkillDbMethods,
   getSkillToolDeps,

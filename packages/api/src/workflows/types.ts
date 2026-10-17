@@ -104,6 +104,13 @@ export interface WorkflowEvent {
   data?: Record<string, unknown>;
 }
 
+/**
+ * Consumable lifecycle hook: the engine invokes it synchronously for every
+ * emitted {@link WorkflowEvent}, and swallows synchronous throws so an observer
+ * can never abort a run. Async observers must contain their own rejections.
+ */
+export type WorkflowEventHandler = (event: WorkflowEvent) => void;
+
 export interface WorkflowExecutionContext {
   runId: string;
   workflowId: string;
@@ -207,7 +214,7 @@ export interface WorkflowEngineDeps {
   sleep?: (ms: number, signal: AbortSignal) => Promise<void>;
   logger?: WorkflowLogger;
   /** Observes lifecycle events; never used for persistence. */
-  onEvent?: (event: WorkflowEvent) => void;
+  onEvent?: WorkflowEventHandler;
 }
 
 export interface WorkflowResumeState {

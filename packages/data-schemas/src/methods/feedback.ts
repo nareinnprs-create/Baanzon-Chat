@@ -36,6 +36,7 @@ export function createFeedbackMethods(mongoose: typeof import('mongoose')): Feed
       rating: input.rating,
       submittedAt: input.submittedAt ?? new Date(),
       status: input.status ?? 'open',
+      ...(input.tenantId ? { tenantId: input.tenantId } : {}),
     });
     return created.toObject() as IFeedback;
   }
@@ -60,6 +61,9 @@ export function createFeedbackMethods(mongoose: typeof import('mongoose')): Feed
         return [];
       }
       filter.userId = options.userId;
+    }
+    if (options?.tenantId) {
+      filter.tenantId = options.tenantId;
     }
     return await Feedback().find(filter).sort({ submittedAt: -1, _id: -1 }).lean<IFeedback[]>();
   }

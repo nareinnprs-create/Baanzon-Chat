@@ -5,7 +5,11 @@ const {
   InMemoryVectorStore,
   RAG_DEFAULTS,
 } = require('@librechat/api');
-const { requireJwtAuth, configMiddleware, createKnowledgeLimiters } = require('~/server/middleware');
+const {
+  requireJwtAuth,
+  configMiddleware,
+  createKnowledgeLimiters,
+} = require('~/server/middleware');
 
 const router = express.Router();
 const { knowledgeIpLimiter, knowledgeUserLimiter } = createKnowledgeLimiters();

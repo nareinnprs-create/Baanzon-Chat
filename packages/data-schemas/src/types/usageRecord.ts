@@ -37,6 +37,7 @@ export interface CreateUsageRecordInput {
   unit?: string;
   recordedAt?: Date;
   metadata?: Record<string, unknown>;
+  tenantId?: string;
 }
 
 export interface UpdateUsageRecordInput {
@@ -53,4 +54,5 @@ export interface ListUsageRecordsOptions {
   key?: string;
   from?: Date;
   to?: Date;
+  tenantId?: string;
 }

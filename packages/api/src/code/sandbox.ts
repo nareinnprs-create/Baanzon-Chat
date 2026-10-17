@@ -44,12 +44,7 @@ const MANAGED_WORKDIR_PREFIX = 'librechat-managed-sandbox-';
  * connection strings, provider keys — is withheld; the deployment binary may
  * set its own environment beyond this.
  */
-export const MANAGED_SANDBOX_ENV_ALLOWLIST: readonly string[] = [
-  'PATH',
-  'LANG',
-  'LC_ALL',
-  'TZ',
-];
+export const MANAGED_SANDBOX_ENV_ALLOWLIST: readonly string[] = ['PATH', 'LANG', 'LC_ALL', 'TZ'];
 
 /** Execution options passed to a {@link ManagedSandboxExecutor}. */
 export interface ManagedSandboxExecutorOptions {

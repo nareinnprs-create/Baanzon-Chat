@@ -134,15 +134,10 @@ export function createSkillTreeHandlers(deps: SkillTreeHandlersDeps): SkillTreeH
 
   /** Resolve the splat `nodePath` param to a validated skill-relative path. */
   function nodePathFromParam(req: TreeRequest): string | null {
-    return resolveSkillFilePathParam(
-      (req.params as { nodePath?: string | string[] }).nodePath,
-    );
+    return resolveSkillFilePathParam((req.params as { nodePath?: string | string[] }).nodePath);
   }
 
-  function cleanupBlobs(
-    req: TreeRequest,
-    files: DeleteSkillNodeResult['files'],
-  ): void {
+  function cleanupBlobs(req: TreeRequest, files: DeleteSkillNodeResult['files']): void {
     for (const file of files) {
       const { deleteFile: deleteBlob } = getStrategyFunctions(file.source);
       if (deleteBlob) {
@@ -403,7 +398,9 @@ export function createSkillTreeHandlers(deps: SkillTreeHandlersDeps): SkillTreeH
         return res.status(404).json({ error: 'Skill node not found' });
       }
       if (nodePath === BODY_SKILL_PATH) {
-        return res.status(400).json({ error: 'SKILL.md cannot be deleted; delete the skill instead' });
+        return res
+          .status(400)
+          .json({ error: 'SKILL.md cannot be deleted; delete the skill instead' });
       }
 
       const result = await deleteSkillNode({ skillId, path: nodePath });
@@ -508,8 +505,8 @@ export function createSkillTreeHandlers(deps: SkillTreeHandlersDeps): SkillTreeH
 
       const text = buffer.toString('utf-8');
       if (buffer.length <= MAX_TEXT_CACHE_BYTES) {
-        updateSkillFileContent(skillId, nodePath, { content: text, isBinary: false }).catch((error) =>
-          logger.error('[skill-tree] Cache write failed:', error),
+        updateSkillFileContent(skillId, nodePath, { content: text, isBinary: false }).catch(
+          (error) => logger.error('[skill-tree] Cache write failed:', error),
         );
       }
       return res.status(200).json({ content: text, mimeType: file.mimeType });

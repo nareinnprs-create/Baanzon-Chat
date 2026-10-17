@@ -42,7 +42,8 @@ jest.mock('~/server/middleware/requireJwtAuth', () => {
 });
 
 jest.mock('~/models', () => {
-  const owned = (userId) => [...mockProjectStore.rows.values()].filter((row) => row.userId === userId);
+  const owned = (userId) =>
+    [...mockProjectStore.rows.values()].filter((row) => row.userId === userId);
   // The route gates id-taking handlers on `isValidObjectIdString`, so the fake
   // must mint real 24-char hex ids or every read/update/delete would 404.
   let sequence = 0;
@@ -233,7 +234,11 @@ describe('project routes', () => {
         .send({ projectId: created.body.id });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ conversationId: 'convo-1', projectId: created.body.id, userId: 'user-1' });
+      expect(response.body).toEqual({
+        conversationId: 'convo-1',
+        projectId: created.body.id,
+        userId: 'user-1',
+      });
     });
   });
 

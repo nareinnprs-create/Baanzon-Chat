@@ -1,9 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import type {
-  ManagedSandboxExecutor,
-  SandboxResult,
-  SandboxRunOptions,
-} from './sandbox';
+import type { ManagedSandboxExecutor, SandboxResult, SandboxRunOptions } from './sandbox';
 import {
   createSandbox,
   DEFAULT_SANDBOX_MODE,
@@ -129,9 +125,9 @@ describe('sandbox', () => {
     expect(result.truncated).toBe(true);
     expect(result.stdout).toHaveLength(64);
     expect(result.stderr).toHaveLength(36);
-    expect(Buffer.byteLength(result.stdout, 'utf8') + Buffer.byteLength(result.stderr, 'utf8')).toBe(
-      100,
-    );
+    expect(
+      Buffer.byteLength(result.stdout, 'utf8') + Buffer.byteLength(result.stderr, 'utf8'),
+    ).toBe(100);
     expect(result.exitCode).toBe(0);
     expect(result.timedOut).toBe(false);
   });

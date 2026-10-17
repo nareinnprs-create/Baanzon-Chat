@@ -61,7 +61,7 @@ describe('createRagIntegration', () => {
 const retrieval = { candidateK: 32, topK: 6, minScore: 0.1 };
 
 describe('createRagIntegration vector store mode', () => {
-  it('defaults to inMemory and scores against the caller\'s store', () => {
+  it("defaults to inMemory and scores against the caller's store", () => {
     const spy = jest.spyOn(semanticSearch, 'createSemanticSearchService');
 
     const integration = createRagIntegration({
