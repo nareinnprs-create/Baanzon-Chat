@@ -76,7 +76,16 @@ function formatSteps(steps) {
     const actionInput = getString(step.action.toolInput);
     const observation = step.observation;
 
-    if (actionInput === 'N/A' || observation?.trim()?.length === 0) {
+    let obsStr;
+    if (typeof observation === 'string') {
+      obsStr = observation;
+    } else if (observation != null) {
+      obsStr = String(observation);
+    } else {
+      obsStr = '';
+    }
+
+    if (actionInput === 'N/A' || obsStr.trim().length === 0) {
       continue;
     }
 

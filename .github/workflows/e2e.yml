@@ -1,0 +1,211 @@
+# E2E, accessibility (axe) and Lighthouse — the P6.3 lanes.
+#
+# WHAT RUNS
+#   e2e job         Playwright smoke (`e2e/smoke.spec.ts`): loads the app's entry `/`,
+#                   asserts the unauthenticated visitor lands on the login surface and
+#                   that it renders, then runs axe and fails on any *critical* violation.
+#   lighthouse job  Lighthouse CI against the same `/login` surface, with the
+#                   performance/a11y budgets in `lighthouserc.json`.
+#
+# WHERE THE APP COMES FROM
+#   By default the client is built here (`npm run build:client`) and served by the
+#   repository's own stub server, `e2e/server.mjs` — a static SPA server for
+#   `client/dist` that also answers the two API calls the login surface needs, so this
+#   lane needs no database, no JWT secrets and no running backend. Set the repository
+#   variable `E2E_BASE_URL` to a deployed preview to run the same specs against it
+#   instead; the build and the stub server are then skipped.
+#
+# GRACEFUL DEGRADATION (why this lane cannot break CI)
+#   The environment may be unable to run a browser lane at all — a runner that blocks
+#   the Playwright browser download, or no build output. A probe step records
+#   `can_run`; when it is false the run step is skipped and the aggregate reports SKIP
+#   and exits 0. A *real* spec failure is still a failure: the run step carries
+#   `continue-on-error` only so the aggregate can report it, and the aggregate is what
+#   fails the job (the fail-closed contract test.yml/integration.yml/typecheck.yml use).
+#   The Lighthouse job is `continue-on-error` at the job level and never blocks: its
+#   scores are advisory until they prove deterministic in this repo.
+#
+# No secrets are referenced.
+
+name: E2E
+
+on:
+  pull_request:
+    # Every pull request, whatever the base: see the note in static-checks.yml.
+  push:
+    branches:
+      - b1
+      - dev
+      - main
+
+permissions:
+  contents: read # read-only; this lane deploys nothing
+
+concurrency:
+  group: e2e-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Playwright smoke + axe
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # `can_run` gates the Lighthouse job; `built` says whether `client/dist` exists
+    # (only when we built it ourselves rather than testing a remote preview).
+    outputs:
+      can_run: ${{ steps.probe.outputs.can_run }}
+      built: ${{ steps.probe.outputs.built }}
+    env:
+      CI: 'true'
+      E2E_BASE_URL: ${{ vars.E2E_BASE_URL }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc # 24.16.0
+          cache: npm
+          # package-lock.json is the lockfile of record (packageManager npm@11.13.0).
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the workspace packages and the client
+        # Skipped when E2E_BASE_URL points at a deployed preview. build:client is the
+        # artifact e2e/server.mjs serves; build:packages is its prerequisite, because
+        # client resolves the workspace packages through their dist .d.ts/bundles.
+        if: ${{ vars.E2E_BASE_URL == '' }}
+        run: npm run build:packages && npm run build:client
+
+      - name: Install the Playwright browser
+        id: browsers
+        # --with-deps pulls the system libraries too. If a runner blocks this download,
+        # the failure is recorded here and the probe below turns it into a skip rather
+        # than a red job.
+        continue-on-error: true
+        run: npx playwright install --with-deps chromium
+
+      - name: Probe whether the e2e environment can run
+        id: probe
+        shell: bash
+        run: |
+          can_run=true
+          built=true
+          if [ -n "$E2E_BASE_URL" ]; then
+            echo "E2E_BASE_URL is set ($E2E_BASE_URL) — running against the deployed preview."
+            built=false
+          else
+            if [ "${{ steps.browsers.outcome }}" != "success" ]; then
+              can_run=false
+              echo "::notice::Playwright browsers could not be installed here — skipping the e2e lane."
+            elif [ ! -f client/dist/index.html ]; then
+              can_run=false
+              echo "::notice::client/dist/index.html is missing — skipping the e2e lane."
+            fi
+          fi
+          echo "can_run=$can_run" >> "$GITHUB_OUTPUT"
+          echo "built=$built" >> "$GITHUB_OUTPUT"
+
+      - name: Run Playwright smoke + axe
+        id: playwright
+        if: ${{ steps.probe.outputs.can_run == 'true' }}
+        # continue-on-error records a failing run as this step's outcome; the aggregate
+        # below is what actually fails the job.
+        continue-on-error: true
+        env:
+          E2E_BASE_URL: ${{ vars.E2E_BASE_URL }}
+        run: npx playwright test --config e2e/playwright.config.ts
+
+      - name: Aggregate e2e result
+        # A skipped lane (environment cannot run it) is a success; only a spec that ran
+        # and failed turns the job red. Never skipped, hence always().
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          if [ "${{ steps.probe.outputs.can_run }}" != "true" ]; then
+            printf 'SKIP  Playwright smoke + axe (environment cannot run the lane)\n'
+            exit 0
+          fi
+          if [ "${{ steps.playwright.outcome }}" = "success" ]; then
+            printf 'PASS  Playwright smoke + axe\n'
+            exit 0
+          fi
+          printf 'FAIL  Playwright smoke + axe\n'
+          exit 1
+
+      - name: Upload the Playwright report and traces
+        # Traces/screenshots are captured on failure; the HTML report is written even on
+        # an environment skip, so this runs unconditionally.
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: playwright-report
+          path: |
+            e2e/playwright-report
+            e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload the built client for the Lighthouse job
+        # upload-artifact roots the artifact at the least common ancestor of the search
+        # paths, so `client/dist` contents land at the artifact root; the Lighthouse job
+        # downloads them straight back into `client/dist`.
+        if: ${{ success() && steps.probe.outputs.can_run == 'true' && steps.probe.outputs.built == 'true' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: client-dist
+          # Maps are irrelevant to the served page; dropping them keeps the artifact small.
+          path: |
+            client/dist
+            !client/dist/**/*.map
+          if-no-files-found: ignore
+          retention-days: 7
+
+  lighthouse:
+    name: Lighthouse CI (advisory)
+    needs: e2e
+    # Only when the client was built here (a remote E2E_BASE_URL leaves no dist to
+    # serve) and the e2e environment ran. `continue-on-error` at the job level keeps
+    # this lane advisory: it reports scores and budgets, it never blocks a merge.
+    if: ${{ vars.E2E_BASE_URL == '' && needs.e2e.outputs.can_run == 'true' }}
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc # 24.16.0
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        # @lhci/cli is a root devDependency; Lighthouse itself audits with the Chrome
+        # already on ubuntu-latest, so no browser download is needed here.
+        run: npm ci
+
+      - name: Download the built client
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: client-dist
+          path: client/dist
+
+      - name: Run Lighthouse CI
+        # lighthouserc.json starts e2e/server.mjs itself (startServerCommand) and asserts
+        # the performance/a11y budgets against http://127.0.0.1:3080/login.
+        run: npx lhci autorun
+
+      - name: Upload the Lighthouse report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: lighthouse-report
+          path: e2e/lighthouse-report
+          if-no-files-found: ignore
+          retention-days: 14

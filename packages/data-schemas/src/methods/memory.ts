@@ -31,6 +31,7 @@ export function createMemoryMethods(mongoose: typeof import('mongoose')): {
   }: t.SetMemoryParams) => Promise<t.MemoryResult>;
   deleteMemory: ({ userId, key, agentId }: t.DeleteMemoryParams) => Promise<t.MemoryResult>;
   setMemoryById: (params: t.SetMemoryByIdParams) => Promise<t.SetMemoryByIdResult>;
+  setMemoryEmbedding: (params: t.SetMemoryEmbeddingParams) => Promise<t.SetMemoryEmbeddingResult>;
   deleteMemoryById: (params: t.MemoryByIdParams) => Promise<t.MemoryResult>;
   getAllUserMemories: (userId: string | Types.ObjectId) => Promise<t.IMemoryEntryLean[]>;
   getUserMemories: ({ userId, agentId }: t.GetUserMemoriesParams) => Promise<t.IMemoryEntryLean[]>;
@@ -102,10 +103,14 @@ export function createMemoryMethods(mongoose: typeof import('mongoose')): {
       await MemoryEntry.findOneAndUpdate(
         { userId, key, ...partitionFilter(agentId) },
         {
-          value,
-          tokenCount,
-          ...(agentId ? { agentId } : {}),
-          updated_at: new Date(),
+          $set: {
+            value,
+            tokenCount,
+            ...(agentId ? { agentId } : {}),
+            updated_at: new Date(),
+          },
+          /** A changed value invalidates the stored vector. */
+          $unset: { embedding: '' },
         },
         {
           upsert: true,
@@ -182,10 +187,14 @@ export function createMemoryMethods(mongoose: typeof import('mongoose')): {
       const updatedMemory = (await MemoryEntry.findOneAndUpdate(
         recordFilter,
         {
-          ...(key != null ? { key } : {}),
-          value,
-          tokenCount,
-          updated_at: new Date(),
+          $set: {
+            ...(key != null ? { key } : {}),
+            value,
+            tokenCount,
+            updated_at: new Date(),
+          },
+          /** A changed value invalidates the stored vector. */
+          $unset: { embedding: '' },
         },
         { new: true, runValidators: true },
       ).lean()) as t.IMemoryEntryLean | null;
@@ -194,6 +203,46 @@ export function createMemoryMethods(mongoose: typeof import('mongoose')): {
     } catch (error) {
       throw new Error(
         `Failed to update memory: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  /**
+   * Records the durable vector-store pointer for an existing memory. The vector
+   * itself lives in the vector store (Decision A4); this keeps only its id on
+   * the memory row so it can be re-embedded or dropped independently.
+   */
+  async function setMemoryEmbedding({
+    userId,
+    id,
+    vectorId,
+    model,
+    dimensions,
+  }: t.SetMemoryEmbeddingParams): Promise<t.SetMemoryEmbeddingResult> {
+    try {
+      if (!mongoose.Types.ObjectId.isValid(id) || !vectorId) {
+        return { ok: false };
+      }
+
+      const embedding: t.MemoryEmbedding = { vectorId, embeddedAt: new Date() };
+      if (model !== undefined) {
+        embedding.model = model;
+      }
+      if (dimensions !== undefined) {
+        embedding.dimensions = dimensions;
+      }
+
+      const MemoryEntry = mongoose.models.MemoryEntry;
+      const updatedMemory = (await MemoryEntry.findOneAndUpdate(
+        { _id: id, userId },
+        { $set: { embedding } },
+        { new: true, runValidators: true },
+      ).lean()) as t.IMemoryEntryLean | null;
+
+      return updatedMemory ? { ok: true, memory: updatedMemory } : { ok: false };
+    } catch (error) {
+      throw new Error(
+        `Failed to set memory embedding: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
@@ -340,6 +389,7 @@ export function createMemoryMethods(mongoose: typeof import('mongoose')): {
     createMemory,
     deleteMemory,
     setMemoryById,
+    setMemoryEmbedding,
     deleteMemoryById,
     getAllUserMemories,
     getUserMemories,

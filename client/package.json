@@ -19,15 +19,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/danny-avila/LibreChat.git"
+    "url": "git+https://github.com/opraiz-technology/baanzon-chat.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/danny-avila/LibreChat/issues"
+    "url": "https://github.com/opraiz-technology/baanzon-chat/issues"
   },
-  "homepage": "https://librechat.ai",
+  "homepage": "https://baanzon.com",
   "dependencies": {
     "@ariakit/react": "^0.4.29",
     "@ariakit/react-components": "^0.1.2",
@@ -58,7 +58,7 @@
     "@radix-ui/react-switch": "^1.0.3",
     "@radix-ui/react-tabs": "^1.1.21",
     "@radix-ui/react-toast": "^1.2.23",
-    "@react-spring/web": "^9.7.5",
+    "@react-spring/web": "^10.0.1",
     "@tanstack/react-query": "^4.28.0",
     "@tanstack/react-table": "^8.11.7",
     "class-variance-authority": "^0.7.1",
@@ -105,7 +105,7 @@
     "react-dom": "^18.2.0",
     "react-flip-toolkit": "^7.1.0",
     "react-gtm-module": "^2.0.11",
-    "react-hook-form": "^7.43.9",
+    "react-hook-form": "^7.56.4",
     "react-i18next": "^15.4.0",
     "react-markdown": "^9.0.1",
     "react-resizable-panels": "^4.7.4",
@@ -140,7 +140,7 @@
     "@happy-dom/jest-environment": "^20.8.9",
     "@tanstack/react-query-devtools": "^4.29.0",
     "@testing-library/dom": "^9.3.0",
-    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
     "@types/jest": "^29.5.14",

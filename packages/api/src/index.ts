@@ -70,6 +70,8 @@ export * from './actions';
 export * from './prompts';
 /* Projects */
 export * from './projects';
+/* RAG / Knowledge */
+export * from './rag';
 /* Conversations */
 export * from './conversations';
 /* Skills */
@@ -77,6 +79,13 @@ export * from './schedules';
 export * from './schedules/service';
 export * from './skills';
 export * from './favorites';
+export * from './notifications';
+export * from './devices';
+export * from './subscriptions';
+export * from './usageRecords';
+export * from './feedback';
+/* Workflows */
+export * from './workflows';
 /* User */
 export * from './user';
 /* Agent Plugins */

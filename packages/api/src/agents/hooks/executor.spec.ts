@@ -13,6 +13,19 @@ import {
 let pluginRoot: string;
 let pluginData: string;
 
+const isWindows = process.platform === 'win32';
+/**
+ * The command executor runs POSIX handlers through bash and Windows handlers
+ * through PowerShell, and a handler is only runnable on one of them: a
+ * `commandWindows`-only handler is skipped on POSIX, and a `command`-only
+ * handler is skipped on Windows. Fixtures therefore carry both variants and
+ * each host runs the one written for it, while these guards scope the tests
+ * that assert a fixture was NOT run. `describe.skip` still declares the
+ * block, so the skipped coverage stays visible in the reporter.
+ */
+const describePosix = isWindows ? describe.skip : describe;
+const describeWindows = isWindows ? describe : describe.skip;
+
 const PRE_TOOL_INPUT: HookInput = {
   hook_event_name: 'PreToolUse',
   runId: 'run-1',
@@ -54,6 +67,22 @@ function execute(
 ) {
   const executor = createCommandExecutor({ pluginRoot, pluginData, env, ...executorOptions });
   return executor.execute(request(handler, overrides), new AbortController().signal);
+}
+
+/**
+ * Fixture for a test that must reach the executor's real host path. POSIX
+ * hosts run `command` through bash and Windows hosts run `commandWindows`
+ * through PowerShell — `buildInvocation` refuses a handler carrying neither,
+ * so a fixture with only one spelling resolves to no invocation and returns
+ * `{}` without spawning anything. Both spellings here produce the same
+ * observable outcome, so one fixture covers either host.
+ */
+function shellHandler(
+  command: string,
+  commandWindows: string,
+  extra: Omit<PluginHookHandler, 'type' | 'command' | 'commandWindows'> = {},
+): PluginHookHandler {
+  return { type: 'command', command, commandWindows, ...extra };
 }
 
 beforeEach(async () => {
@@ -219,12 +248,60 @@ describe('createCommandExecutor', () => {
     ).toBeUndefined();
   });
 
-  test('skips execution for PowerShell-only handlers on POSIX hosts', async () => {
-    const output = await execute({
-      type: 'command',
-      command: 'Write-Output should-not-run',
-      shell: 'powershell',
+  /**
+   * `buildInvocation` returns no invocation when a handler's only command is
+   * written for the other host's shell, so the two hosts are guarded in
+   * mirror image: POSIX skips a PowerShell-only command, Windows skips a
+   * portable bash command. Both resolve `{}` without spawning anything.
+   */
+  describePosix('on POSIX hosts', () => {
+    test('skips execution for PowerShell-only handlers', async () => {
+      const output = await execute({
+        type: 'command',
+        command: 'Write-Output should-not-run',
+        shell: 'powershell',
+      });
+      expect(output).toEqual({});
     });
+  });
+
+  describeWindows('on Windows hosts', () => {
+    test('skips execution for portable-only handlers', async () => {
+      const output = await execute({
+        type: 'command',
+        command: `printf '%s' '{"decision":"deny","reason":"should-not-run"}'`,
+      });
+      expect(output).toEqual({});
+    });
+
+    /**
+     * PowerShell resolves a bare `node` through `PATHEXT`, and a handler
+     * environment that omits it cannot launch the extensionless command at
+     * all — the child exits 1 with the error on stderr. The executor
+     * allowlists `PATHEXT` for exactly this reason, so reaching a successful
+     * result here depends on that passthrough.
+     */
+    test('forwards PATHEXT so PowerShell can resolve an extensionless command', async () => {
+      const pathExt = process.env.PATHEXT;
+      expect(pathExt).toBeTruthy();
+      const output = await execute(
+        shellHandler(
+          'printf \'{"reason":"%s"}\' "$PATHEXT"',
+          `Write-Output (ConvertTo-Json -Compress @{ reason = (node -p 'process.env.PATHEXT') })`,
+        ),
+        {},
+        { PATH: process.env.PATH, PATHEXT: pathExt },
+      );
+      expect(output).toEqual({ reason: pathExt });
+    });
+  });
+
+  /** A hook that fails without a decision is not a block; only the host's
+   *  stderr and exit status distinguish it from a hook that chose silence. */
+  test('ignores non-blocking failures', async () => {
+    const output = await execute(
+      shellHandler('echo oops >&2; exit 1', `[Console]::Error.WriteLine('oops'); exit 1`),
+    );
     expect(output).toEqual({});
   });
 
@@ -240,39 +317,45 @@ describe('createCommandExecutor', () => {
   });
 
   test('returns sanitized JSON stdout and drops host-only or invalid fields', async () => {
-    const output = await execute({
-      type: 'command',
-      command: `printf '%s' '{"decision":"deny","reason":"blocked","injectedMessages":[{"content":"x"}],"allowedDecisions":["approve"],"updatedInput":{"path":"/evil"},"extra":1}'`,
-    });
+    const json =
+      '{"decision":"deny","reason":"blocked","injectedMessages":[{"content":"x"}],"allowedDecisions":["approve"],"updatedInput":{"path":"/evil"},"extra":1}';
+    const output = await execute(shellHandler(`printf '%s' '${json}'`, `Write-Output '${json}'`));
     expect(output).toEqual({ decision: 'deny', reason: 'blocked' });
   });
 
   test('receives the Claude-shaped payload on stdin', async () => {
-    const output = await execute({
-      type: 'command',
-      command: `node -e 'let d="";process.stdin.on("data",(c)=>{d+=c;}).on("end",()=>{const p=JSON.parse(d);console.log(JSON.stringify({reason:p.tool_name+":"+p.session_id}));});'`,
-    });
+    const output = await execute(
+      shellHandler(
+        `node -e 'let d="";process.stdin.on("data",(c)=>{d+=c;}).on("end",()=>{const p=JSON.parse(d);console.log(JSON.stringify({reason:p.tool_name+":"+p.session_id}));});'`,
+        `$p = $input | ConvertFrom-Json; Write-Output (ConvertTo-Json -Compress @{reason=($p.tool_name + ':' + $p.session_id)})`,
+      ),
+    );
     expect(output).toEqual({ reason: 'write_file:conversation-1' });
   });
 
   test('maps exit code 2 to a blocking decision with stderr as the reason', async () => {
-    const output = await execute({
-      type: 'command',
-      command: `echo 'writes to protected paths are refused' >&2; exit 2`,
-    });
+    const output = await execute(
+      shellHandler(
+        `echo 'writes to protected paths are refused' >&2; exit 2`,
+        `[Console]::Error.WriteLine('writes to protected paths are refused'); exit 2`,
+      ),
+    );
     expect(output).toEqual({ decision: 'deny', reason: 'writes to protected paths are refused' });
   });
 
   test('maps exit code 2 on Stop to a block decision', async () => {
-    const output = await execute(
-      { type: 'command', command: 'exit 2' },
-      { sourceEvent: 'Stop', targetEvent: 'Stop' },
-    );
+    const output = await execute(shellHandler('exit 2', 'exit 2'), {
+      sourceEvent: 'Stop',
+      targetEvent: 'Stop',
+    });
     expect(output).toEqual({ decision: 'block' });
   });
 
   test('maps exit code 2 on events without a decision channel to preventContinuation', async () => {
-    const handler: PluginHookHandler = { type: 'command', command: 'echo halted >&2; exit 2' };
+    const handler = shellHandler(
+      'echo halted >&2; exit 2',
+      `[Console]::Error.WriteLine('halted'); exit 2`,
+    );
     await expect(
       execute(handler, { sourceEvent: 'UserPromptSubmit', targetEvent: 'UserPromptSubmit' }),
     ).resolves.toEqual({ decision: 'deny', reason: 'halted' });
@@ -285,10 +368,8 @@ describe('createCommandExecutor', () => {
   });
 
   test('tightens ask decisions to deny unless the run supports approvals', async () => {
-    const handler: PluginHookHandler = {
-      type: 'command',
-      command: `printf '%s' '{"decision":"ask","reason":"confirm"}'`,
-    };
+    const json = '{"decision":"ask","reason":"confirm"}';
+    const handler = shellHandler(`printf '%s' '${json}'`, `Write-Output '${json}'`);
     await expect(execute(handler)).resolves.toEqual({ decision: 'deny', reason: 'confirm' });
     await expect(
       execute(handler, {}, { PATH: process.env.PATH }, { allowAskDecision: true }),
@@ -296,34 +377,36 @@ describe('createCommandExecutor', () => {
   });
 
   test('returns an empty output when the payload cannot be serialized', async () => {
-    const output = await execute(
-      { type: 'command', command: 'echo unreachable' },
-      {
-        sourceEvent: 'PostToolUse',
-        targetEvent: 'PostToolUse',
-        payload: {
-          hook_event_name: 'PostToolUse',
-          session_id: 'conversation-1',
-          run_id: 'run-1',
-          tool_response: BigInt(1),
-        },
+    const output = await execute(shellHandler('echo unreachable', `Write-Output 'unreachable'`), {
+      sourceEvent: 'PostToolUse',
+      targetEvent: 'PostToolUse',
+      payload: {
+        hook_event_name: 'PostToolUse',
+        session_id: 'conversation-1',
+        run_id: 'run-1',
+        tool_response: BigInt(1),
       },
-    );
+    });
     expect(output).toEqual({});
   });
 
   test('maps Claude legacy decisions per event channel', async () => {
-    const handler: PluginHookHandler = {
-      type: 'command',
-      command: `printf '%s' '{"decision":"block"}'`,
-    };
+    const handler = shellHandler(
+      `printf '%s' '{"decision":"block"}'`,
+      `Write-Output '{"decision":"block"}'`,
+    );
     /** Claude's legacy PreToolUse "block" denies; on Stop it is the stop decision. */
     await expect(execute(handler)).resolves.toEqual({ decision: 'deny' });
     await expect(execute(handler, { sourceEvent: 'Stop', targetEvent: 'Stop' })).resolves.toEqual({
       decision: 'block',
     });
     await expect(
-      execute({ type: 'command', command: `printf '%s' '{"decision":"approve"}'` }),
+      execute(
+        shellHandler(
+          `printf '%s' '{"decision":"approve"}'`,
+          `Write-Output '{"decision":"approve"}'`,
+        ),
+      ),
     ).resolves.toEqual({ decision: 'allow' });
     /** "block" on events without a deny channel controls continuation instead. */
     await expect(
@@ -333,47 +416,55 @@ describe('createCommandExecutor', () => {
 
   test('translates Claude hookSpecificOutput into engine fields', async () => {
     await expect(
-      execute({
-        type: 'command',
-        command: `printf '%s' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"protected path"}}'`,
-      }),
+      execute(
+        shellHandler(
+          `printf '%s' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"protected path"}}'`,
+          `Write-Output '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"protected path"}}'`,
+        ),
+      ),
     ).resolves.toEqual({ decision: 'deny', reason: 'protected path' });
     /** The ask gate applies to the Claude dialect too. */
     await expect(
-      execute({
-        type: 'command',
-        command: `printf '%s' '{"hookSpecificOutput":{"permissionDecision":"ask","permissionDecisionReason":"confirm"}}'`,
-      }),
+      execute(
+        shellHandler(
+          `printf '%s' '{"hookSpecificOutput":{"permissionDecision":"ask","permissionDecisionReason":"confirm"}}'`,
+          `Write-Output '{"hookSpecificOutput":{"permissionDecision":"ask","permissionDecisionReason":"confirm"}}'`,
+        ),
+      ),
     ).resolves.toEqual({ decision: 'deny', reason: 'confirm' });
     await expect(
       execute(
-        {
-          type: 'command',
-          command: `printf '%s' '{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"project notes"}}'`,
-        },
+        shellHandler(
+          `printf '%s' '{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"project notes"}}'`,
+          `Write-Output '{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"project notes"}}'`,
+        ),
         { sourceEvent: 'UserPromptSubmit', targetEvent: 'UserPromptSubmit' },
       ),
     ).resolves.toEqual({ additionalContext: 'project notes' });
     await expect(
-      execute({
-        type: 'command',
-        command: `printf '%s' '{"continue":false,"stopReason":"manual halt"}'`,
-      }),
+      execute(
+        shellHandler(
+          `printf '%s' '{"continue":false,"stopReason":"manual halt"}'`,
+          `Write-Output '{"continue":false,"stopReason":"manual halt"}'`,
+        ),
+      ),
     ).resolves.toEqual({ preventContinuation: true, stopReason: 'manual halt' });
     /** Native fields win when both dialects appear. */
     await expect(
-      execute({
-        type: 'command',
-        command: `printf '%s' '{"decision":"allow","hookSpecificOutput":{"permissionDecision":"deny"}}'`,
-      }),
+      execute(
+        shellHandler(
+          `printf '%s' '{"decision":"allow","hookSpecificOutput":{"permissionDecision":"deny"}}'`,
+          `Write-Output '{"decision":"allow","hookSpecificOutput":{"permissionDecision":"deny"}}'`,
+        ),
+      ),
     ).resolves.toEqual({ decision: 'allow' });
   });
 
   test('translates a structured block into continuation control on post-tool events', async () => {
-    const handler: PluginHookHandler = {
-      type: 'command',
-      command: `printf '%s' '{"decision":"block","reason":"output leaked a secret"}'`,
-    };
+    const handler = shellHandler(
+      `printf '%s' '{"decision":"block","reason":"output leaked a secret"}'`,
+      `Write-Output '{"decision":"block","reason":"output leaked a secret"}'`,
+    );
     await expect(
       execute(handler, { sourceEvent: 'PostToolUse', targetEvent: 'PostToolUse' }),
     ).resolves.toEqual({
@@ -394,15 +485,17 @@ describe('createCommandExecutor', () => {
     /** `continue` belongs to the Stop vocabulary; on a tool event it must not
      *  shadow the Claude decision. */
     await expect(
-      execute({
-        type: 'command',
-        command: `printf '%s' '{"decision":"continue","hookSpecificOutput":{"permissionDecision":"deny","permissionDecisionReason":"blocked"}}'`,
-      }),
+      execute(
+        shellHandler(
+          `printf '%s' '{"decision":"continue","hookSpecificOutput":{"permissionDecision":"deny","permissionDecisionReason":"blocked"}}'`,
+          `Write-Output '{"decision":"continue","hookSpecificOutput":{"permissionDecision":"deny","permissionDecisionReason":"blocked"}}'`,
+        ),
+      ),
     ).resolves.toEqual({ decision: 'deny', reason: 'blocked' });
     /** `ask` belongs to the tool vocabulary and is dropped on Stop. */
     await expect(
       execute(
-        { type: 'command', command: `printf '%s' '{"decision":"ask"}'` },
+        shellHandler(`printf '%s' '{"decision":"ask"}'`, `Write-Output '{"decision":"ask"}'`),
         { sourceEvent: 'Stop', targetEvent: 'Stop' },
       ),
     ).resolves.toEqual({});
@@ -410,31 +503,30 @@ describe('createCommandExecutor', () => {
 
   test('falls back to the Claude decision when the native field is malformed', async () => {
     await expect(
-      execute({
-        type: 'command',
-        command: `printf '%s' '{"decision":null,"hookSpecificOutput":{"permissionDecision":"deny","permissionDecisionReason":"protected"}}'`,
-      }),
+      execute(
+        shellHandler(
+          `printf '%s' '{"decision":null,"hookSpecificOutput":{"permissionDecision":"deny","permissionDecisionReason":"protected"}}'`,
+          `Write-Output '{"decision":null,"hookSpecificOutput":{"permissionDecision":"deny","permissionDecisionReason":"protected"}}'`,
+        ),
+      ),
     ).resolves.toEqual({ decision: 'deny', reason: 'protected' });
     await expect(
-      execute({
-        type: 'command',
-        command: `printf '%s' '{"decision":"maybe","reason":42,"hookSpecificOutput":{"permissionDecision":"deny","permissionDecisionReason":"unrecognized native"}}'`,
-      }),
+      execute(
+        shellHandler(
+          `printf '%s' '{"decision":"maybe","reason":42,"hookSpecificOutput":{"permissionDecision":"deny","permissionDecisionReason":"unrecognized native"}}'`,
+          `Write-Output '{"decision":"maybe","reason":42,"hookSpecificOutput":{"permissionDecision":"deny","permissionDecisionReason":"unrecognized native"}}'`,
+        ),
+      ),
     ).resolves.toEqual({ decision: 'deny', reason: 'unrecognized native' });
-  });
-
-  test('ignores non-blocking failures', async () => {
-    const output = await execute({ type: 'command', command: 'echo oops >&2; exit 1' });
-    expect(output).toEqual({});
   });
 
   test('runs from the plugin root with PLUGIN_ROOT, PLUGIN_DATA, and only allowlisted vars', async () => {
     const output = await execute(
-      {
-        type: 'command',
-        command: `printf '{"reason":"%s|%s|%s|%s|%s"}' "$PWD" "$PLUGIN_ROOT" "$PLUGIN_DATA" "$ALLOWED_TOKEN" "\${SECRET_TOKEN:-absent}"`,
-        allowedEnvVars: ['ALLOWED_TOKEN', 'PLUGIN_ROOT'],
-      },
+      shellHandler(
+        `printf '{"reason":"%s|%s|%s|%s|%s"}' "$PWD" "$PLUGIN_ROOT" "$PLUGIN_DATA" "$ALLOWED_TOKEN" "\${SECRET_TOKEN:-absent}"`,
+        `$secret = if ($null -eq $env:SECRET_TOKEN) { 'absent' } else { 'present' }; Write-Output (ConvertTo-Json -Compress @{reason=((Get-Location).Path + '|' + $env:PLUGIN_ROOT + '|' + $env:PLUGIN_DATA + '|' + $env:ALLOWED_TOKEN + '|' + $secret)})`,
+        { allowedEnvVars: ['ALLOWED_TOKEN', 'PLUGIN_ROOT'] },
+      ),
       {},
       {
         PATH: process.env.PATH,
@@ -449,34 +541,46 @@ describe('createCommandExecutor', () => {
   });
 
   test('expands PLUGIN_ROOT/PLUGIN_DATA placeholders in the command and binds args to $1..$n', async () => {
-    const output = await execute({
-      type: 'command',
-      command: 'printf \'{"reason":"%s %s"}\' "$1" "${PLUGIN_DATA}"',
-      args: ['${PLUGIN_ROOT}/scripts/check.sh'],
-    });
+    /** The placeholder expands host-agnostically, so the fixture interpolates
+     *  the host separator and asserts the resolved native path either way. */
+    const script = `${'${PLUGIN_ROOT}'}${path.sep}scripts${path.sep}check.sh`;
+    const output = await execute(
+      shellHandler(
+        'printf \'{"reason":"%s %s"}\' "$1" "${PLUGIN_DATA}"',
+        `& { param($first) Write-Output (ConvertTo-Json -Compress @{reason=($first + ' ' + $env:PLUGIN_DATA)}) }`,
+        { args: [script] },
+      ),
+    );
     expect(output).toEqual({
       reason: `${path.join(pluginRoot, 'scripts/check.sh')} ${pluginData}`,
     });
   });
 
   test('expands the Claude plugin-root spelling in commands and the environment', async () => {
-    const output = await execute({
-      type: 'command',
-      command: `printf '{"reason":"%s|%s"}' "\${CLAUDE_PLUGIN_ROOT}/hooks/check.py" "$CLAUDE_PLUGIN_ROOT"`,
-    });
+    const output = await execute(
+      shellHandler(
+        `printf '{"reason":"%s|%s"}' "\${CLAUDE_PLUGIN_ROOT}/hooks/check.py" "$CLAUDE_PLUGIN_ROOT"`,
+        `Write-Output (ConvertTo-Json -Compress @{reason=('\${CLAUDE_PLUGIN_ROOT}${path.sep}hooks${path.sep}check.py' + '|' + $env:CLAUDE_PLUGIN_ROOT)})`,
+      ),
+    );
     expect(output).toEqual({
       reason: `${path.join(pluginRoot, 'hooks/check.py')}|${pluginRoot}`,
     });
   });
 
   test('treats non-JSON stdout as context for prompt-shaped events and ignores it elsewhere', async () => {
-    const handler: PluginHookHandler = { type: 'command', command: 'echo loaded project notes' };
+    const handler = shellHandler(
+      'echo loaded project notes',
+      `Write-Output 'loaded project notes'`,
+    );
     await expect(
       execute(handler, { sourceEvent: 'UserPromptSubmit', targetEvent: 'UserPromptSubmit' }),
     ).resolves.toEqual({ additionalContext: 'loaded project notes' });
     await expect(execute(handler)).resolves.toEqual({});
   });
 
+  /** POSIX only: a signalled process stays a zombie until reaped, and a zombie
+   *  still answers signal 0, so `/proc` is what tells the two apart. */
   const isGone = (pid: number): boolean => {
     try {
       process.kill(pid, 0);
@@ -497,91 +601,103 @@ describe('createCommandExecutor', () => {
     }
   };
 
-  test('escalates to a group SIGKILL when a descendant survives SIGTERM past the wrapper', async () => {
-    const pidFile = path.join(pluginData, 'survivor.pid');
-    const controller = new AbortController();
-    const executor = createCommandExecutor({
-      pluginRoot,
-      pluginData,
-      env: { PATH: process.env.PATH },
-      killGraceMs: 500,
+  /**
+   * These three tests are POSIX-scoped and cannot run on Windows. Each one
+   * depends on POSIX process-group semantics the Windows path does not have:
+   * `reaper.ts` terminates Windows trees with `taskkill /t` from the root, so
+   * (a) a descendant can never outlive the wrapper there, and (b)
+   * `escalationTargetAlive` reports a dead root immediately, so the exit-time
+   * sweep has nothing left to reap. The `isGone` helper they use also reads a
+   * process's state out of `/proc`, which has no Windows equivalent. The
+   * Windows reaping path is covered by `reaper.spec.ts`.
+   */
+  describePosix('POSIX process-group reaping', () => {
+    test('escalates to a group SIGKILL when a descendant survives SIGTERM past the wrapper', async () => {
+      const pidFile = path.join(pluginData, 'survivor.pid');
+      const controller = new AbortController();
+      const executor = createCommandExecutor({
+        pluginRoot,
+        pluginData,
+        env: { PATH: process.env.PATH },
+        killGraceMs: 500,
+      });
+      /**
+       * The descendant redirects its stdio away from the captured pipes so the
+       * wrapper's exit emits `close` while the descendant is still alive —
+       * exercising the window where a close-time cancellation would skip the
+       * group SIGKILL and leak the survivor.
+       */
+      const pending = executor.execute(
+        request({
+          type: 'command',
+          command: `bash -c 'trap "" TERM; echo $$ > "$PLUGIN_DATA/survivor.pid"; exec >/dev/null 2>&1; while true; do sleep 0.1; done' & wait`,
+        }),
+        controller.signal,
+      );
+      await waitFor(() => fs.existsSync(pidFile));
+      const survivorPid = Number((await fs.promises.readFile(pidFile, 'utf8')).trim());
+      expect(survivorPid).toBeGreaterThan(0);
+      controller.abort();
+      /** The wrapper exits on SIGTERM while the trap-protected descendant survives. */
+      await expect(pending).resolves.toEqual({});
+      expect(isGone(survivorPid)).toBe(false);
+      await waitFor(() => isGone(survivorPid));
+      expect(isGone(survivorPid)).toBe(true);
     });
-    /**
-     * The descendant redirects its stdio away from the captured pipes so the
-     * wrapper's exit emits `close` while the descendant is still alive —
-     * exercising the window where a close-time cancellation would skip the
-     * group SIGKILL and leak the survivor.
-     */
-    const pending = executor.execute(
-      request({
-        type: 'command',
-        command: `bash -c 'trap "" TERM; echo $$ > "$PLUGIN_DATA/survivor.pid"; exec >/dev/null 2>&1; while true; do sleep 0.1; done' & wait`,
-      }),
-      controller.signal,
-    );
-    await waitFor(() => fs.existsSync(pidFile));
-    const survivorPid = Number((await fs.promises.readFile(pidFile, 'utf8')).trim());
-    expect(survivorPid).toBeGreaterThan(0);
-    controller.abort();
-    /** The wrapper exits on SIGTERM while the trap-protected descendant survives. */
-    await expect(pending).resolves.toEqual({});
-    expect(isGone(survivorPid)).toBe(false);
-    await waitFor(() => isGone(survivorPid));
-    expect(isGone(survivorPid)).toBe(true);
-  });
 
-  test('reaps a pipe-holding worker at root exit instead of stalling until close', async () => {
-    const pidFile = path.join(pluginData, 'holder.pid');
-    const executor = createCommandExecutor({
-      pluginRoot,
-      pluginData,
-      env: { PATH: process.env.PATH },
-      killGraceMs: 250,
+    test('reaps a pipe-holding worker at root exit instead of stalling until close', async () => {
+      const pidFile = path.join(pluginData, 'holder.pid');
+      const executor = createCommandExecutor({
+        pluginRoot,
+        pluginData,
+        env: { PATH: process.env.PATH },
+        killGraceMs: 250,
+      });
+      /**
+       * The worker keeps the captured pipes open, so `close` cannot fire until
+       * it dies — without the exit-time sweep this execution would stall for
+       * the worker's full 30s lifetime.
+       */
+      const output = await executor.execute(
+        request({
+          type: 'command',
+          command: `bash -c 'trap "" TERM; echo $$ > "$PLUGIN_DATA/holder.pid"; sleep 30' & while [ ! -f "$PLUGIN_DATA/holder.pid" ]; do sleep 0.01; done; printf '%s' '{"reason":"scheduled"}'`,
+        }),
+        new AbortController().signal,
+      );
+      expect(output).toEqual({ reason: 'scheduled' });
+      const holderPid = Number((await fs.promises.readFile(pidFile, 'utf8')).trim());
+      expect(holderPid).toBeGreaterThan(0);
+      await waitFor(() => isGone(holderPid));
+      expect(isGone(holderPid)).toBe(true);
     });
-    /**
-     * The worker keeps the captured pipes open, so `close` cannot fire until
-     * it dies — without the exit-time sweep this execution would stall for
-     * the worker's full 30s lifetime.
-     */
-    const output = await executor.execute(
-      request({
-        type: 'command',
-        command: `bash -c 'trap "" TERM; echo $$ > "$PLUGIN_DATA/holder.pid"; sleep 30' & while [ ! -f "$PLUGIN_DATA/holder.pid" ]; do sleep 0.01; done; printf '%s' '{"reason":"scheduled"}'`,
-      }),
-      new AbortController().signal,
-    );
-    expect(output).toEqual({ reason: 'scheduled' });
-    const holderPid = Number((await fs.promises.readFile(pidFile, 'utf8')).trim());
-    expect(holderPid).toBeGreaterThan(0);
-    await waitFor(() => isGone(holderPid));
-    expect(isGone(holderPid)).toBe(true);
-  });
 
-  test('reaps a backgrounded worker that outlives a successful hook', async () => {
-    const pidFile = path.join(pluginData, 'worker.pid');
-    const executor = createCommandExecutor({
-      pluginRoot,
-      pluginData,
-      env: { PATH: process.env.PATH },
-      killGraceMs: 250,
+    test('reaps a backgrounded worker that outlives a successful hook', async () => {
+      const pidFile = path.join(pluginData, 'worker.pid');
+      const executor = createCommandExecutor({
+        pluginRoot,
+        pluginData,
+        env: { PATH: process.env.PATH },
+        killGraceMs: 250,
+      });
+      /**
+       * The wrapper waits for the pid file so the worker's trap is set before
+       * the exit-time sweep can deliver its SIGTERM.
+       */
+      const output = await executor.execute(
+        request({
+          type: 'command',
+          command: `bash -c 'trap "" TERM; echo $$ > "$PLUGIN_DATA/worker.pid"; exec >/dev/null 2>&1; while true; do sleep 0.1; done' & while [ ! -f "$PLUGIN_DATA/worker.pid" ]; do sleep 0.01; done; printf '%s' '{"reason":"scheduled"}'`,
+        }),
+        new AbortController().signal,
+      );
+      expect(output).toEqual({ reason: 'scheduled' });
+      await waitFor(() => fs.existsSync(pidFile));
+      const workerPid = Number((await fs.promises.readFile(pidFile, 'utf8')).trim());
+      expect(workerPid).toBeGreaterThan(0);
+      await waitFor(() => isGone(workerPid));
+      expect(isGone(workerPid)).toBe(true);
     });
-    /**
-     * The wrapper waits for the pid file so the worker's trap is set before
-     * the exit-time sweep can deliver its SIGTERM.
-     */
-    const output = await executor.execute(
-      request({
-        type: 'command',
-        command: `bash -c 'trap "" TERM; echo $$ > "$PLUGIN_DATA/worker.pid"; exec >/dev/null 2>&1; while true; do sleep 0.1; done' & while [ ! -f "$PLUGIN_DATA/worker.pid" ]; do sleep 0.01; done; printf '%s' '{"reason":"scheduled"}'`,
-      }),
-      new AbortController().signal,
-    );
-    expect(output).toEqual({ reason: 'scheduled' });
-    await waitFor(() => fs.existsSync(pidFile));
-    const workerPid = Number((await fs.promises.readFile(pidFile, 'utf8')).trim());
-    expect(workerPid).toBeGreaterThan(0);
-    await waitFor(() => isGone(workerPid));
-    expect(isGone(workerPid)).toBe(true);
   });
 
   test('returns an empty output when the signal aborts a running command', async () => {
@@ -590,9 +706,11 @@ describe('createCommandExecutor', () => {
       pluginRoot,
       pluginData,
       env: { PATH: process.env.PATH },
+      killGraceMs: 250,
     });
+    /** On Windows the abort reaches the whole tree through `taskkill /t`. */
     const pending = executor.execute(
-      request({ type: 'command', command: 'sleep 30 & wait' }),
+      request(shellHandler('sleep 30 & wait', 'Start-Sleep -Seconds 30')),
       controller.signal,
     );
     setTimeout(() => controller.abort(), 50);

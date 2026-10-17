@@ -42,6 +42,7 @@ export const credentialMetadataCollection = 'librechatCredentialMetadata';
 
 const credentialRuntimeKey = Symbol.for('librechat.credentials.runtime');
 const tempCredentialPathEnvironment = 'BAANZON_TEMP_CREDENTIALS_PATH';
+const allowEphemeralSecretsEnvironment = 'BAANZON_ALLOW_EPHEMERAL_SECRETS';
 
 const legacyCredentialFingerprints: Partial<Record<CredentialName, string[]>> = {
   CREDS_KEY: [
@@ -273,6 +274,68 @@ function adoptCredentialFile(
   return true;
 }
 
+export interface EphemeralCredentialState {
+  generated: CredentialName[];
+  loadedFromFile: CredentialName[];
+}
+
+function isEphemeralOverrideEnabled(env: NodeJS.ProcessEnv): boolean {
+  return env[allowEphemeralSecretsEnvironment]?.trim().toLowerCase() === 'true';
+}
+
+function collectEphemeralCredentials(
+  env: NodeJS.ProcessEnv,
+  state?: EphemeralCredentialState,
+): CredentialName[] {
+  const generated = new Set(state?.generated ?? []);
+  const loadedFromFile = new Set(state?.loadedFromFile ?? []);
+  return credentialNames.filter((name) => {
+    const value = env[name];
+    if (!isConfiguredCredential(value)) {
+      return true;
+    }
+    if (isLegacyCredential(name, value)) {
+      return true;
+    }
+    return generated.has(name) || loadedFromFile.has(name);
+  });
+}
+
+/**
+ * Refuses to boot a production instance when required credentials are missing, still set to a
+ * known retired default, or resolved from ephemeral/temporary values. Set
+ * `BAANZON_ALLOW_EPHEMERAL_SECRETS=true` to downgrade the failure to a warning. Secret values are
+ * never logged.
+ */
+export function assertProductionSecrets(
+  env: NodeJS.ProcessEnv = process.env,
+  state?: EphemeralCredentialState,
+): void {
+  if (env.NODE_ENV !== 'production') {
+    return;
+  }
+
+  const ephemeral = collectEphemeralCredentials(env, state);
+  if (ephemeral.length === 0) {
+    return;
+  }
+
+  if (isEphemeralOverrideEnabled(env)) {
+    console.warn(
+      `[credentials] ${allowEphemeralSecretsEnvironment} is enabled; bypassing the production ` +
+        `credential check. Missing, retired, or ephemeral values are in use for ` +
+        `${ephemeral.join(', ')}. Configure permanent credentials before exposing this instance.`,
+    );
+    return;
+  }
+
+  throw new Error(
+    `[credentials] Refusing to start in production with missing, retired, or ephemeral values for ` +
+      `${ephemeral.join(', ')}. Set permanent values for ${credentialNames.join(', ')}, or set ` +
+      `${allowEphemeralSecretsEnvironment}=true to bypass this check (not recommended).`,
+  );
+}
+
 export function bootstrapCredentials(): CredentialRuntimeState {
   const existingState = getRuntimeState();
   if (existingState) {
@@ -365,6 +428,8 @@ export function bootstrapCredentials(): CredentialRuntimeState {
         'The generated values will only remain valid for this process.',
     );
   }
+
+  assertProductionSecrets(process.env, state);
 
   return state;
 }

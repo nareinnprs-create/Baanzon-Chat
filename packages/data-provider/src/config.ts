@@ -41,8 +41,11 @@ export const defaultSocialLogins = ['google', 'facebook', 'openid', 'github', 'd
 
 export const BASE_ONLY_CONFIG_SECTIONS = ['filters'] as const;
 /** Sections that may be stored in the tenant's base config document but must
- * not be overridden or tombstoned by role, group, or user config documents. */
-export const BASE_PRINCIPAL_CONFIG_SECTIONS = ['langfuse'] as const;
+ *  not be overridden or tombstoned by role, group, or user config documents.
+ *  `rag` qualifies because its retrieval limits and its vector index are
+ *  process-wide, so a per-principal override would let one user's config move a
+ *  ceiling that every user shares — last request wins. */
+export const BASE_PRINCIPAL_CONFIG_SECTIONS = ['langfuse', 'rag'] as const;
 
 export const defaultRetrievalModels = [
   'gpt-4o',
@@ -2038,6 +2041,41 @@ export const turnstileSchema = z.object({
 
 export type TTurnstileConfig = z.infer<typeof turnstileSchema>;
 
+/**
+ * Registration and invite policy. Every field is optional at the YAML level and
+ * carries a default that reproduces the pre-existing behaviour, so omitting the
+ * whole `registration` block changes nothing.
+ */
+export const registrationConfigSchema = z
+  .object({
+    /** Social login providers offered on the registration screen. */
+    socialLogins: z.array(z.string()).optional(),
+    /**
+     * Email domains permitted to register and to sign in. Matches the part after
+     * `@`, case-insensitively; an omitted or empty list allows every domain.
+     */
+    allowedDomains: z.array(z.string()).optional(),
+    /**
+     * Reject registration that does not present a valid invite token. Defaults to
+     * `false`, preserving open registration (still gated by `ALLOW_REGISTRATION`).
+     */
+    inviteOnly: z.boolean().default(false),
+    /**
+     * Require a verified email address before a local account may authenticate.
+     * Defaults to `true`, matching the existing `ALLOW_UNVERIFIED_EMAIL_LOGIN` gate.
+     */
+    requireEmailVerification: z.boolean().default(true),
+    /**
+     * Regardless of `requireEmailVerification`, demand a verified email when
+     * `NODE_ENV=production`. Defaults to `true`, so a production deployment never
+     * authenticates an unverified local user.
+     */
+    emailVerificationRequiredInProduction: z.boolean().default(true),
+  })
+  .default({ socialLogins: defaultSocialLogins });
+
+export type TRegistrationConfig = z.infer<typeof registrationConfigSchema>;
+
 export type TRumConfig = {
   provider: 'hyperdx';
   enabled: boolean;
@@ -2644,6 +2682,86 @@ export const langfuseConfigSchema = z.object({
 
 export type LangfuseConfig = z.infer<typeof langfuseConfigSchema>;
 
+export const ragSchema = z.object({
+  /** Master switch: when true every knowledge route answers 503. The routes
+   *  stay mounted, because config is resolved per request and a route table
+   *  could not react to a later reload. Defaults to false — knowledge retrieval
+   *  is on by default, and the kill switch remains available with
+   *  `disabled: true`. */
+  disabled: z.boolean().optional().default(false),
+  /** External RAG API base URL. Only consulted once a semantic client is
+   *  actually injected; until then retrieval is keyword-only regardless of
+   *  this value. `RAG_API_URL` is used only when the key is absent, so an
+   *  explicit '' here keeps retrieval keyword-only. */
+  apiUrl: z.string().optional().default(''),
+  chunkSize: z.number().int().positive().optional().default(800),
+  chunkOverlap: z.number().int().min(0).optional().default(80),
+  /** Hybrid balance: 0.5 = equal semantic/keyword. */
+  hybridAlpha: z.number().min(0).max(1).optional().default(0.5),
+  candidateK: z.number().int().positive().optional().default(32),
+  topK: z.number().int().positive().optional().default(6),
+  minScore: z.number().min(0).max(1).optional().default(0.1),
+  /** Enables the semantic/hybrid retrieval path (keyword fallback is always
+   *  guaranteed). Defaults on, but only has an effect once an embeddings
+   *  provider is configured for the deployment. */
+  semanticEnabled: z.boolean().optional().default(true),
+  /** Vector backend the deployment runs: the process-scoped in-memory index
+   *  (default — applied by consumers from `RAG_DEFAULTS.vectorStore`) or the
+   *  durable PostgreSQL/pgvector store, which requires an injected executor at
+   *  startup; the wiring throws rather than falling back to memory. Optional
+   *  with no zod default on purpose: a `.default()` would make the key
+   *  required in `TRagConfig`, and `data-schemas`' `loadRagConfig` fills
+   *  required keys from its own `RAG_DEFAULTS`, which carries no
+   *  startup-only lever. */
+  vectorStore: z.enum(['inMemory', 'pg']).optional(),
+  inMemoryMaxCollections: z.number().int().positive().optional().default(200),
+  inMemoryMaxChunks: z.number().int().positive().optional().default(20000),
+  /** Milliseconds one ingest-side embedder call may take before its batch of
+   *  chunks is stored without vectors. Governs nothing until an embedder is
+   *  actually injected into the RAG runtime; no shipped wiring supplies one, and
+   *  these three levers are what bounds the write path on the day one does. */
+  embeddingTimeoutMs: z.number().int().positive().optional().default(15000),
+  /** Chunk texts per embedder call, so one large ingest is not one call per chunk. */
+  embeddingBatchSize: z.number().int().positive().optional().default(64),
+  /** Embedder calls in flight at once. */
+  embeddingConcurrency: z.number().int().positive().optional().default(2),
+});
+
+/**
+ * Code-execution sandbox levers. `mode` selects which execution capability
+ * backs code execution: `attached` (default) keeps the existing attached
+ * environment / Code API path, while `managed` runs code through the
+ * deployment-supplied kernel-isolated sandbox binary. `executable` names that
+ * binary; the deployment provides isolation, not this configuration.
+ */
+export const sandboxConfigSchema = z
+  .object({
+    mode: z.enum(['attached', 'managed']).optional().default('attached'),
+    /** Managed mode only: path to the deployment-supplied sandbox binary. */
+    executable: z.string().min(1).optional(),
+  })
+  .strict();
+
+export type SandboxConfig = z.infer<typeof sandboxConfigSchema>;
+
+export type TRagConfig = z.infer<typeof ragSchema>;
+
+/**
+ * Notifications / Activity Center levers. `enabled` is the master switch: when
+ * false the `/api/notifications` routes answer 404. `realtime` enables the SSE
+ * stream at `/api/notifications/stream`; when false (or when a client cannot
+ * hold a stream open) the client falls back to polling at `pollingIntervalMs`.
+ */
+export const notificationsConfigSchema = z
+  .object({
+    enabled: z.boolean().optional().default(true),
+    realtime: z.boolean().optional().default(true),
+    pollingIntervalMs: z.number().int().positive().optional().default(60000),
+  })
+  .strict();
+
+export type NotificationsConfig = z.infer<typeof notificationsConfigSchema>;
+
 export const configSchema = z.object({
   version: z.string(),
   cache: z.boolean().default(true),
@@ -2651,6 +2769,9 @@ export const configSchema = z.object({
   webSearch: webSearchSchema.optional(),
   langfuse: langfuseConfigSchema.optional(),
   memory: memorySchema.optional(),
+  rag: ragSchema.optional(),
+  sandbox: sandboxConfigSchema.optional(),
+  notifications: notificationsConfigSchema.optional(),
   summarization: summarizationConfigSchema.optional(),
   skillSync: skillSyncConfigSchema,
   secureImageLinks: z.boolean().optional(),
@@ -2675,12 +2796,7 @@ export const configSchema = z.object({
       allowedAddresses: allowedAddressesSchema,
     })
     .optional(),
-  registration: z
-    .object({
-      socialLogins: z.array(z.string()).optional(),
-      allowedDomains: z.array(z.string()).optional(),
-    })
-    .default({ socialLogins: defaultSocialLogins }),
+  registration: registrationConfigSchema,
   balance: balanceSchema.optional(),
   transactions: transactionsSchema.optional(),
   speech: z
@@ -3318,6 +3434,10 @@ export enum ViolationTypes {
    * Shared link retrieval limit violations.
    */
   SHARE_LIMIT = 'share_limit',
+  /**
+   * Knowledge retrieval / ingest limit violations.
+   */
+  KNOWLEDGE_LIMIT = 'knowledge_limit',
 }
 
 /**

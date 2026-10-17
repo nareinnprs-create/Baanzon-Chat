@@ -44,14 +44,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/danny-avila/LibreChat"
+    "url": "https://github.com/opraiz-technology/baanzon-chat"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/danny-avila/LibreChat/issues"
+    "url": "https://github.com/opraiz-technology/baanzon-chat/issues"
   },
-  "homepage": "https://librechat.ai",
+  "homepage": "https://baanzon.com",
   "dependencies": {
     "mdast-util-directive": "^3.0.0",
     "mdast-util-from-markdown": "^2.0.1",

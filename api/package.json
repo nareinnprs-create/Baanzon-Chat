@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/danny-avila/LibreChat.git"
+    "url": "git+https://github.com/opraiz-technology/baanzon-chat.git"
   },
   "keywords": [],
   "author": "",
@@ -30,9 +30,9 @@
     "~/*": "./*"
   },
   "bugs": {
-    "url": "https://github.com/danny-avila/LibreChat/issues"
+    "url": "https://github.com/opraiz-technology/baanzon-chat/issues"
   },
-  "homepage": "https://librechat.ai",
+  "homepage": "https://baanzon.com",
   "dependencies": {
     "@anthropic-ai/vertex-sdk": "^0.16.0",
     "@aws-sdk/client-bedrock-runtime": "^3.1013.0",
@@ -51,7 +51,7 @@
     "@librechat/data-schemas": "*",
     "@microsoft/microsoft-graph-client": "^3.0.7",
     "@modelcontextprotocol/sdk": "^1.30.0",
-    "@node-saml/passport-saml": "^5.1.0",
+    "@node-saml/passport-saml": "^5.1.1",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/instrumentation-express": "^0.56.0",
     "@opentelemetry/instrumentation-http": "^0.207.0",
@@ -107,13 +107,13 @@
     "module-alias": "^2.2.3",
     "mongodb": "^6.14.2",
     "mongoose": "^8.24.1",
-    "multer": "^2.3.0",
+    "multer": "^2.4.0",
     "nanoid": "^3.3.18",
     "node-fetch": "^2.7.0",
-    "nodemailer": "^10.0.1",
+    "nodemailer": "^10.0.13",
     "ollama": "^0.5.0",
     "openai": "5.8.2",
-    "openid-client": "^6.5.0",
+    "openid-client": "^6.8.8",
     "passport": "^0.6.0",
     "passport-apple": "^2.0.2",
     "passport-discord": "^0.1.4",

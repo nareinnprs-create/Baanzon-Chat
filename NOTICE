@@ -1,0 +1,12 @@
+Baanzon Chat
+============
+
+Baanzon Chat is a derivative work of LibreChat (https://github.com/danny-avila/LibreChat),
+which is licensed under the MIT License. The upstream copyright notice and the full MIT
+license text are retained in the LICENSE file at the root of this repository.
+
+Baanzon-original additions to this fork are proprietary to Baanzon / Opraiz Technology and
+may not be redistributed, sublicensed, or used to create derivative works without prior
+written permission.
+
+Third-party components remain under their own respective licenses; see ATTRIBUTION.md.

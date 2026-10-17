@@ -1,7 +1,7 @@
 export function isJson(str: string) {
   try {
     JSON.parse(str);
-  } catch (e) {
+  } catch {
     return false;
   }
   return true;
@@ -10,7 +10,7 @@ export function isJson(str: string) {
 export function formatJSON(json: string) {
   try {
     return JSON.stringify(JSON.parse(json), null, 2);
-  } catch (e) {
+  } catch {
     return json;
   }
 }

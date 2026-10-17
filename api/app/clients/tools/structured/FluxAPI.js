@@ -269,10 +269,22 @@ class FluxAPI extends Tool {
     // Polling for the result
     let status = 'Pending';
     let resultData = null;
+    const pollInterval = 2000; // 2 seconds between polls
+    const maxAttempts = 30; // 30 attempts -> 60 seconds
+    const timeoutMs = 120000; // 120 seconds deadline
+    const startTime = Date.now();
+    let attempts = 0;
     while (status !== 'Ready' && status !== 'Error') {
+      attempts++;
+      const elapsed = Date.now() - startTime;
+      if (attempts > maxAttempts || elapsed >= timeoutMs) {
+        const timeoutMsg = `Flux API polling timed out after ${Math.round(elapsed / 1000)}s (${attempts} attempts). Please try again or adjust your request.`;
+        logger.error('[FluxAPI] Polling timeout:', { attempts, elapsed, taskId });
+        throw new Error(timeoutMsg);
+      }
       try {
         // Wait 2 seconds between polls
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, pollInterval));
         const resultResponse = await axios.get(resultUrl, {
           headers: {
             'x-key': requestApiKey,
@@ -503,10 +515,22 @@ class FluxAPI extends Tool {
     // Polling for the result
     let status = 'Pending';
     let resultData = null;
+    const pollInterval = 2000; // 2 seconds between polls
+    const maxAttempts = 30; // 30 attempts -> 60 seconds
+    const timeoutMs = 120000; // 120 seconds deadline
+    const startTime = Date.now();
+    let attempts = 0;
     while (status !== 'Ready' && status !== 'Error') {
+      attempts++;
+      const elapsed = Date.now() - startTime;
+      if (attempts > maxAttempts || elapsed >= timeoutMs) {
+        const timeoutMsg = `Flux API polling timed out after ${Math.round(elapsed / 1000)}s (${attempts} attempts). Please try again or adjust your request.`;
+        logger.error('[FluxAPI] Polling timeout:', { attempts, elapsed, taskId });
+        throw new Error(timeoutMsg);
+      }
       try {
         // Wait 2 seconds between polls
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, pollInterval));
         const resultResponse = await axios.get(resultUrl, {
           headers: {
             'x-key': requestApiKey,

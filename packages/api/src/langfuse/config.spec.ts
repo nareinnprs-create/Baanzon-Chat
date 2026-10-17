@@ -3,11 +3,11 @@ import type { AppConfig } from '@librechat/data-schemas';
 process.env.CREDS_KEY =
   process.env.CREDS_KEY ?? '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
-const CENTRAL_EXPORT_ATTRIBUTE = 'librechat.langfuse.central_export.enabled';
+const CENTRAL_EXPORT_ATTRIBUTE = 'baanzon.langfuse.central_export.enabled';
 const exportTelemetry = (plan: string, reason: string) => ({
-  'librechat.langfuse.export_plan': plan,
-  'librechat.langfuse.export_reason': reason,
-  'librechat.tenant.id': 'tenant-1',
+  'baanzon.langfuse.export_plan': plan,
+  'baanzon.langfuse.export_reason': reason,
+  'baanzon.tenant.id': 'tenant-1',
 });
 const envKeys = [
   'LANGFUSE_PUBLIC_KEY',
@@ -110,12 +110,12 @@ describe('buildLangfuseConfig', () => {
       deterministicTraceId: true,
       userId: 'alice@example.com',
       metadata: {
-        'librechat.user.email': 'alice@example.com',
-        'librechat.user.role': 'USER',
-        'librechat.conversation.id': 'convo-1',
-        'librechat.model': 'gpt-5',
-        'librechat.spec': 'support',
-        'librechat.tenant.id': 'tenant-1',
+        'baanzon.user.email': 'alice@example.com',
+        'baanzon.user.role': 'USER',
+        'baanzon.conversation.id': 'convo-1',
+        'baanzon.model': 'gpt-5',
+        'baanzon.spec': 'support',
+        'baanzon.tenant.id': 'tenant-1',
       },
       tags: ['tenant:tenant-1'],
       publicKey: 'pk-env',
@@ -250,10 +250,10 @@ describe('buildLangfuseConfig', () => {
       publicKey: 'pk-tenant-1',
       secretKey: 'sk-tenant-1',
       baseUrl: 'http://langfuse-fanout-collector:4318/tenant/eu',
-      librechatTraceAttributes: {
+      baanzonTraceAttributes: {
         ...exportTelemetry('tenant_fanout', 'configured'),
-        'librechat.langfuse.tenant_export.enabled': 'true',
-        'librechat.langfuse.destination': 'eu',
+        'baanzon.langfuse.tenant_export.enabled': 'true',
+        'baanzon.langfuse.destination': 'eu',
       },
     });
     expect(config).not.toHaveProperty('mediaUploadEnabled');
@@ -279,8 +279,8 @@ describe('buildLangfuseConfig', () => {
     expect(config).toEqual({
       deterministicTraceId: true,
       baseUrl: 'http://langfuse-fanout-collector:4318',
-      librechatTraceAttributes: exportTelemetry('central_only', 'missing_credentials'),
-      metadata: { 'librechat.tenant.id': 'tenant-1' },
+      baanzonTraceAttributes: exportTelemetry('central_only', 'missing_credentials'),
+      metadata: { 'baanzon.tenant.id': 'tenant-1' },
       tags: ['tenant:tenant-1'],
     });
   });
@@ -305,8 +305,8 @@ describe('buildLangfuseConfig', () => {
     expect(config).toEqual({
       deterministicTraceId: true,
       baseUrl: 'http://langfuse-fanout-collector:4318',
-      librechatTraceAttributes: exportTelemetry('central_only', 'missing_credentials'),
-      metadata: { 'librechat.tenant.id': 'tenant-1' },
+      baanzonTraceAttributes: exportTelemetry('central_only', 'missing_credentials'),
+      metadata: { 'baanzon.tenant.id': 'tenant-1' },
       tags: ['tenant:tenant-1'],
     });
   });
@@ -322,8 +322,8 @@ describe('buildLangfuseConfig', () => {
       publicKey: 'pk-central',
       secretKey: 'sk-central',
       baseUrl: 'https://central.langfuse.example',
-      librechatTraceAttributes: exportTelemetry('central_only', 'fanout_disabled'),
-      metadata: { 'librechat.tenant.id': 'tenant-1' },
+      baanzonTraceAttributes: exportTelemetry('central_only', 'fanout_disabled'),
+      metadata: { 'baanzon.tenant.id': 'tenant-1' },
       tags: ['tenant:tenant-1'],
     });
   });
@@ -337,7 +337,7 @@ describe('buildLangfuseConfig', () => {
     expect(buildLangfuseConfig({ tenantId: 'tenant-1' })).toMatchObject({
       publicKey: 'pk-central',
       secretKey: 'sk-central',
-      librechatTraceAttributes: exportTelemetry('central_only', 'collector_unconfigured'),
+      baanzonTraceAttributes: exportTelemetry('central_only', 'collector_unconfigured'),
     });
   });
 
@@ -361,7 +361,7 @@ describe('buildLangfuseConfig', () => {
       }),
     ).toMatchObject({
       baseUrl: 'http://collector-from-env:4318',
-      librechatTraceAttributes: exportTelemetry('central_only', 'destination_unconfigured'),
+      baanzonTraceAttributes: exportTelemetry('central_only', 'destination_unconfigured'),
     });
   });
 
@@ -378,9 +378,9 @@ describe('buildLangfuseConfig', () => {
       }),
     ).toEqual({
       deterministicTraceId: true,
-      metadata: { 'librechat.tenant.id': 'tenant-1' },
+      metadata: { 'baanzon.tenant.id': 'tenant-1' },
       enabled: false,
-      librechatTraceAttributes: {
+      baanzonTraceAttributes: {
         [CENTRAL_EXPORT_ATTRIBUTE]: 'false',
         ...exportTelemetry('disabled', 'fanout_disabled'),
       },
@@ -402,9 +402,9 @@ describe('buildLangfuseConfig', () => {
       }),
     ).toEqual({
       deterministicTraceId: true,
-      metadata: { 'librechat.tenant.id': 'tenant-1' },
+      metadata: { 'baanzon.tenant.id': 'tenant-1' },
       enabled: false,
-      librechatTraceAttributes: {
+      baanzonTraceAttributes: {
         [CENTRAL_EXPORT_ATTRIBUTE]: 'false',
         ...exportTelemetry('disabled', 'tenant_disabled'),
       },
@@ -436,12 +436,12 @@ describe('buildLangfuseConfig', () => {
       publicKey: 'pk-tenant-1',
       secretKey: 'sk-tenant-1',
       baseUrl: 'http://collector-from-env:4318/tenant/us/central-media-disabled',
-      metadata: { 'librechat.tenant.id': 'tenant-1' },
-      librechatTraceAttributes: {
+      metadata: { 'baanzon.tenant.id': 'tenant-1' },
+      baanzonTraceAttributes: {
         [CENTRAL_EXPORT_ATTRIBUTE]: 'false',
         ...exportTelemetry('tenant_fanout', 'configured'),
-        'librechat.langfuse.tenant_export.enabled': 'true',
-        'librechat.langfuse.destination': 'us',
+        'baanzon.langfuse.tenant_export.enabled': 'true',
+        'baanzon.langfuse.destination': 'us',
       },
       tags: ['tenant:tenant-1'],
     });
@@ -469,9 +469,9 @@ describe('buildLangfuseConfig', () => {
       }),
     ).toEqual({
       deterministicTraceId: true,
-      metadata: { 'librechat.tenant.id': 'tenant-1' },
+      metadata: { 'baanzon.tenant.id': 'tenant-1' },
       enabled: false,
-      librechatTraceAttributes: {
+      baanzonTraceAttributes: {
         [CENTRAL_EXPORT_ATTRIBUTE]: 'false',
         ...exportTelemetry('disabled', 'emergency_disabled'),
       },
@@ -500,8 +500,8 @@ describe('buildLangfuseConfig', () => {
     ).toEqual({
       deterministicTraceId: true,
       baseUrl: 'http://collector-from-env:4318',
-      librechatTraceAttributes: exportTelemetry('central_only', 'tenant_disabled'),
-      metadata: { 'librechat.tenant.id': 'tenant-1' },
+      baanzonTraceAttributes: exportTelemetry('central_only', 'tenant_disabled'),
+      metadata: { 'baanzon.tenant.id': 'tenant-1' },
       tags: ['tenant:tenant-1'],
     });
   });
@@ -526,8 +526,8 @@ describe('buildLangfuseConfig', () => {
     ).toEqual({
       deterministicTraceId: true,
       baseUrl: 'http://collector-from-env:4318',
-      librechatTraceAttributes: exportTelemetry('central_only', 'tenant_disabled'),
-      metadata: { 'librechat.tenant.id': 'tenant-1' },
+      baanzonTraceAttributes: exportTelemetry('central_only', 'tenant_disabled'),
+      metadata: { 'baanzon.tenant.id': 'tenant-1' },
       tags: ['tenant:tenant-1'],
     });
   });
@@ -549,9 +549,9 @@ describe('buildLangfuseConfig', () => {
       }),
     ).toEqual({
       deterministicTraceId: true,
-      metadata: { 'librechat.tenant.id': 'tenant-1' },
+      metadata: { 'baanzon.tenant.id': 'tenant-1' },
       enabled: false,
-      librechatTraceAttributes: {
+      baanzonTraceAttributes: {
         [CENTRAL_EXPORT_ATTRIBUTE]: 'false',
         ...exportTelemetry('disabled', 'tenant_disabled'),
       },
@@ -571,8 +571,8 @@ describe('buildLangfuseConfig', () => {
         deterministicTraceId: true,
         baseUrl: 'http://collector-from-env:4318',
         mediaUploadEnabled: false,
-        librechatTraceAttributes: exportTelemetry('central_only', 'tenant_disabled'),
-        metadata: { 'librechat.tenant.id': 'tenant-1' },
+        baanzonTraceAttributes: exportTelemetry('central_only', 'tenant_disabled'),
+        metadata: { 'baanzon.tenant.id': 'tenant-1' },
         tags: ['tenant:tenant-1'],
       });
     },
@@ -589,8 +589,8 @@ describe('buildLangfuseConfig', () => {
       expect(buildLangfuseConfig({ tenantId: 'tenant-1' })).toEqual({
         deterministicTraceId: true,
         baseUrl: 'http://collector-from-env:4318',
-        librechatTraceAttributes: exportTelemetry('central_only', 'tenant_disabled'),
-        metadata: { 'librechat.tenant.id': 'tenant-1' },
+        baanzonTraceAttributes: exportTelemetry('central_only', 'tenant_disabled'),
+        metadata: { 'baanzon.tenant.id': 'tenant-1' },
         tags: ['tenant:tenant-1'],
       });
     },
@@ -864,7 +864,7 @@ describe('buildLangfuseConfig', () => {
     process.env.LANGFUSE_PUBLIC_KEY = 'pk-env';
     process.env.LANGFUSE_SECRET_KEY = 'sk-env';
     process.env.LANGFUSE_BASE_URL = 'https://langfuse.internal';
-    process.env.LANGFUSE_PROXY_TOKEN = 'abc{{LIBRECHAT_USER_ID}}ghi';
+    process.env.LANGFUSE_PROXY_TOKEN = 'abc{{BAANZON_USER_ID}}ghi';
     const { buildLangfuseConfig } = await import('./config');
 
     const built = buildLangfuseConfig({
@@ -873,7 +873,7 @@ describe('buildLangfuseConfig', () => {
         langfuse: {
           headers: {
             'X-Proxy-Token': '${LANGFUSE_PROXY_TOKEN}',
-            'X-Templated': 'keep{{LIBRECHAT_USER_ID}}me',
+            'X-Templated': 'keep{{BAANZON_USER_ID}}me',
           },
         },
       } as unknown as AppConfig,
@@ -882,7 +882,7 @@ describe('buildLangfuseConfig', () => {
     /** The placeholder in the *configured* value is stripped; an identical span
      *  that arrives inside the resolved credential is data, not syntax. */
     expect(built.additionalHeaders).toEqual({
-      'X-Proxy-Token': 'abc{{LIBRECHAT_USER_ID}}ghi',
+      'X-Proxy-Token': 'abc{{BAANZON_USER_ID}}ghi',
       'X-Templated': 'keepme',
     });
     delete process.env.LANGFUSE_PROXY_TOKEN;

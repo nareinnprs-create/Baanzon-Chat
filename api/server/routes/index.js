@@ -16,6 +16,13 @@ const endpoints = require('./endpoints');
 const staticRoute = require('./static');
 const messages = require('./messages');
 const memories = require('./memories');
+const knowledge = require('./knowledge');
+const notifications = require('./notifications');
+const devices = require('./devices');
+const subscriptions = require('./subscriptions');
+const usageRecords = require('./usage-records');
+const feedback = require('./feedback');
+const workflows = require('./workflows');
 const presets = require('./presets');
 const projects = require('./projects');
 const prompts = require('./prompts');
@@ -81,6 +88,13 @@ module.exports = {
   balance,
   messages,
   memories,
+  knowledge,
+  notifications,
+  devices,
+  subscriptions,
+  usageRecords,
+  feedback,
+  workflows,
   endpoints,
   assistants,
   categories,

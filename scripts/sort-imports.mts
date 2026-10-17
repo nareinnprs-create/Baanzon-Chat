@@ -38,15 +38,15 @@ const SOURCE_ROOTS = [
 
 const SOURCE_DIRS = SOURCE_ROOTS.map((rel) => resolve(ROOT, rel));
 const EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.mts', '.cts', '.mjs', '.cjs'];
-const SKIP_DIR_NAMES = new Set([
-  'node_modules',
-  'dist',
-  'types',
-  'coverage',
-  '.turbo',
-  'data',
-  'demo',
-]);
+/**
+ * Directory names pruned at any depth under every source root: dependency
+ * installs and build/test output. `types` is deliberately absent — `dist`
+ * already prunes `dist/types`, and skipping every directory named `types` hid
+ * legitimate source (`packages/api/src/types`, `client/src/theme/types`, ...).
+ * `data` and `demo` are absent for the same reason. `__tests__` is not pruned:
+ * test files are source too and are sorted like any other file.
+ */
+const SKIP_DIR_NAMES = new Set(['node_modules', 'dist', 'build', 'coverage', '.turbo']);
 
 const args = process.argv.slice(2);
 const CHECK = args.includes('--check');
@@ -91,15 +91,9 @@ function sortSegment(stmts: Stmt[]): string[] {
       if (aReact !== bReact) return aReact - bReact;
       return a.len - b.len;
     });
-  const g2 = stmts
-    .filter((s) => s.isType && !s.isLocal)
-    .sort((a, b) => b.len - a.len);
-  const g3 = stmts
-    .filter((s) => s.isType && s.isLocal)
-    .sort((a, b) => b.len - a.len);
-  const g4 = stmts
-    .filter((s) => !s.isType && s.isLocal)
-    .sort((a, b) => b.len - a.len);
+  const g2 = stmts.filter((s) => s.isType && !s.isLocal).sort((a, b) => b.len - a.len);
+  const g3 = stmts.filter((s) => s.isType && s.isLocal).sort((a, b) => b.len - a.len);
+  const g4 = stmts.filter((s) => !s.isType && s.isLocal).sort((a, b) => b.len - a.len);
   return [...g1, ...g2, ...g3, ...g4].map((s) => s.raw);
 }
 
@@ -119,7 +113,7 @@ function sortFileImports(content: string): string | null {
       t.startsWith('/*') ||
       t.startsWith('*') ||
       t.startsWith('*/') ||
-      t.startsWith('\'use ') ||
+      t.startsWith("'use ") ||
       t.startsWith('"use ')
     ) {
       i++;
@@ -184,11 +178,7 @@ function sortFileImports(content: string): string | null {
   if (originalRaws.length < 2) return null;
   if (originalRaws.join('\n') === emitted.join('\n')) return null;
 
-  return [
-    ...lines.slice(0, importStart),
-    ...emitted,
-    ...lines.slice(importEnd),
-  ].join('\n');
+  return [...lines.slice(0, importStart), ...emitted, ...lines.slice(importEnd)].join('\n');
 }
 
 /** Recursively yields absolute paths of every source file under `dir`. */

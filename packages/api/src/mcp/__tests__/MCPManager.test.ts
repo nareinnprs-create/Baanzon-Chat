@@ -5495,10 +5495,7 @@ describe('MCPManager', () => {
       mockProcessMCPEnv.mockImplementation(({ options, body }) => ({
         ...options,
         ...('url' in options && {
-          url: options.url?.replace(
-            '{{BAANZON_BODY_CONVERSATIONID}}',
-            body?.conversationId ?? '',
-          ),
+          url: options.url?.replace('{{BAANZON_BODY_CONVERSATIONID}}', body?.conversationId ?? ''),
         }),
       }));
       mockIsMCPDomainAllowed.mockResolvedValue(false);
@@ -5532,10 +5529,7 @@ describe('MCPManager', () => {
       mockProcessMCPEnv.mockImplementation(({ options, body }) => ({
         ...options,
         ...('url' in options && {
-          url: options.url?.replace(
-            '{{BAANZON_BODY_CONVERSATIONID}}',
-            body?.conversationId ?? '',
-          ),
+          url: options.url?.replace('{{BAANZON_BODY_CONVERSATIONID}}', body?.conversationId ?? ''),
         }),
       }));
       mockIsMCPDomainAllowed.mockResolvedValue(false);
@@ -5574,10 +5568,7 @@ describe('MCPManager', () => {
       mockProcessMCPEnv.mockImplementation(({ options, body }) => ({
         ...options,
         ...('url' in options && {
-          url: options.url?.replace(
-            '{{BAANZON_BODY_CONVERSATIONID}}',
-            body?.conversationId ?? '',
-          ),
+          url: options.url?.replace('{{BAANZON_BODY_CONVERSATIONID}}', body?.conversationId ?? ''),
         }),
       }));
       mockIsMCPDomainAllowed.mockResolvedValue(true);

@@ -13,16 +13,18 @@ module.exports = {
     '!src/**/*.d.ts',
   ],
   coveragePathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/test/setupTests.js'],
-  //  Todo: Add coverageThreshold once we have enough coverage
-  //  Note: eventually we want to have these values set to 80%
-  // coverageThreshold: {
-  //   global: {
-  //     functions: 9,
-  //     lines: 40,
-  //     statements: 40,
-  //     branches: 12,
-  //   },
-  // },
+  //  Note: eventually we want to have these values set to 80%.
+  //  Floors sit two points below the measured suite coverage
+  //  (statements 59.82 / branches 53.82 / functions 53.40 / lines 59.98), so a
+  //  normal run passes while CI still fails on a silent regression.
+  coverageThreshold: {
+    global: {
+      statements: 57,
+      branches: 51,
+      functions: 51,
+      lines: 57,
+    },
+  },
   moduleNameMapper: {
     '\\.(css)$': 'identity-obj-proxy',
     /** Mirror the vite resolve.alias so tests parse math with the same tokenizer as production. */
@@ -52,6 +54,6 @@ module.exports = {
     '/node_modules/(?!(@ariakit/react-components|@ariakit/react-utils|@ariakit/react-store|@ariakit/components|@ariakit/store|@ariakit/utils|@zattoo/use-double-click|@dicebear|@react-dnd|react-dnd.*|dnd-core|filenamify|filename-reserved-regex|heic-to|lowlight|highlight\\.js|fault|lucide-react|lucide|morphicons|react-markdown|unified|bail|trough|devlop|is-.*|parse-entities|stringify-entities|character-.*|trim-lines|style-to-object|inline-style-parser|html-url-attributes|escape-string-regexp|longest-streak|zwitch|ccount|markdown-table|comma-separated-tokens|space-separated-tokens|web-namespaces|property-information|remark-.*|rehype-.*|recma-.*|hast.*|mdast-.*|unist-.*|vfile.*|micromark.*|estree-util-.*|decode-named-character-reference)/)/',
   ],
   setupFiles: ['<rootDir>/test/polyfills.js'],
-  setupFilesAfterEnv: ['@testing-library/jest-dom/extend-expect', '<rootDir>/test/setupTests.js'],
+  setupFilesAfterEnv: ['<rootDir>/test/setupTests.js'],
   clearMocks: true,
 };

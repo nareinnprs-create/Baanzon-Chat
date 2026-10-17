@@ -586,3 +586,19 @@ export const getAllEffectivePermissions = (resourceType: ResourceType) =>
 // SharePoint Graph API Token
 export const graphToken = (scopes: string) =>
   `${BASE_URL}/api/auth/graph-token?scopes=${encodeURIComponent(scopes)}`;
+
+export const knowledgeRoot = `${BASE_URL}/api/knowledge`;
+
+/** The collection index lives on the root path — no query parameters. */
+export const knowledgeCollections = knowledgeRoot;
+
+export const knowledgeCollectionById = (id: string) => `${knowledgeRoot}/${encodeURIComponent(id)}`;
+
+export const knowledgeDocuments = (collectionId: string) =>
+  `${knowledgeCollectionById(collectionId)}/documents`;
+
+export const knowledgeDocumentById = (collectionId: string, documentId: string) =>
+  `${knowledgeDocuments(collectionId)}/${encodeURIComponent(documentId)}`;
+
+export const knowledgeRetrieve = (collectionId: string) =>
+  `${knowledgeCollectionById(collectionId)}/retrieve`;

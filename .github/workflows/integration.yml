@@ -1,0 +1,172 @@
+# Integration suites — the packages/api specs that plain `test:ci` excludes.
+#
+# `npm run test:packages:api` (test.yml) runs `cd packages/api && npm run test:ci`,
+# and that script passes `--testPathIgnorePatterns="\.*integration\."`. Every
+# `*.integration.spec.ts`, `*.cache_integration.spec.ts` and
+# `*.stream_integration.spec.ts` in the package is therefore skipped there and had
+# no CI home. This workflow is that home. It runs the package's own scripts, so
+# the suite selectors live in package.json and cannot drift from the command line:
+#
+#   test:cache-integration:core     src/cache/**/*.cache_integration.spec.ts
+#   test:cache-integration:cluster  src/cluster/**/*.cache_integration.spec.ts
+#   test:cache-integration:mcp      src/mcp/**/*.cache_integration.spec.ts
+#   test:cache-integration:stream   src/stream/**/*.stream_integration.spec.ts
+#   test:agents-integration         src/agents/**/*.integration.spec.ts
+#
+# The cache/stream/mcp suites talk to a real Redis through REDIS_URI, so a
+# single-node redis service supplies it. USE_REDIS_CLUSTER=false keeps the two
+# ServerConfigsCacheRedis specs - which otherwise default to a three-node
+# 7001-7003 topology - on that same single node; every other spec already hard-codes
+# `USE_REDIS_CLUSTER=false` and `redis://127.0.0.1:6379`. The agents suites bring
+# their own in-memory MongoDB (mongodb-memory-server); the one Redis-backed spec
+# among them (subagentCrossReplica) self-skips while REDIS_URI is unset, and here it
+# simply shares the service.
+#
+# test:s3-integration is deliberately NOT run here: it needs a real AWS bucket
+# (AWS_TEST_BUCKET_NAME) plus credentials, i.e. repository secrets, and self-skips
+# when they are absent - a step would only ever report green having run nothing.
+# That is the same "no secrets referenced" boundary test.yml draws.
+#
+# Same fail-closed contract as test.yml: one step per script with
+# continue-on-error, then an always() aggregate that turns any non-success outcome
+# into a non-zero exit, so the job reports every suite before it goes red.
+
+name: Integration
+
+on:
+  pull_request:
+    # Every pull request, whatever the base: see the note in static-checks.yml.
+  push:
+    branches:
+      - b1
+      - dev
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    name: packages/api integration suites (5)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    # Every spec defaults these to the same values, but the two
+    # ServerConfigsCacheRedis specs prefer a cluster topology (`?? 'true'`), so the
+    # job pins them explicitly instead of relying on each spec's fallback.
+    env:
+      REDIS_URI: redis://127.0.0.1:6379
+      USE_REDIS_CLUSTER: 'false'
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        # The suites connect in beforeAll, so gate the steps on the ping.
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc # 24.16.0
+          cache: npm
+          # package-lock.json is the lockfile of record (packageManager npm@11.13.0).
+          # bun.lock is tracked but bun is not a supported or gated path (P1-10).
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the workspace packages
+        # The suites import each other through the npm workspace symlinks, which
+        # point at `dist`, so the packages must be built first. Prerequisite, not a check.
+        run: npm run build:packages
+
+      - name: test:cache-integration:core
+        id: integ_cache_core
+        continue-on-error: true
+        working-directory: packages/api
+        env:
+          JEST_JUNIT_OUTPUT_NAME: junit-integration-cache-core.xml
+        run: npm run test:cache-integration:core
+
+      - name: test:cache-integration:cluster
+        id: integ_cache_cluster
+        continue-on-error: true
+        working-directory: packages/api
+        env:
+          JEST_JUNIT_OUTPUT_NAME: junit-integration-cache-cluster.xml
+        run: npm run test:cache-integration:cluster
+
+      - name: test:cache-integration:mcp
+        id: integ_cache_mcp
+        continue-on-error: true
+        working-directory: packages/api
+        env:
+          JEST_JUNIT_OUTPUT_NAME: junit-integration-cache-mcp.xml
+        run: npm run test:cache-integration:mcp
+
+      - name: test:cache-integration:stream
+        id: integ_cache_stream
+        continue-on-error: true
+        working-directory: packages/api
+        env:
+          JEST_JUNIT_OUTPUT_NAME: junit-integration-cache-stream.xml
+        run: npm run test:cache-integration:stream
+
+      - name: test:agents-integration
+        id: integ_agents
+        continue-on-error: true
+        working-directory: packages/api
+        env:
+          JEST_JUNIT_OUTPUT_NAME: junit-integration-agents.xml
+        run: npm run test:agents-integration
+
+      - name: Aggregate suite results (fails the job if any suite failed)
+        # This is what restores fail-closed behaviour after continue-on-error.
+        # `always()` so it also runs when a suite step failed hard.
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          failed=0
+          report() {
+            local suite="$1" outcome="$2"
+            if [ "$outcome" = "success" ]; then
+              printf 'PASS  %s\n' "$suite"
+            elif [ "$outcome" = "skipped" ]; then
+              printf 'SKIP  %s\n' "$suite"
+            else
+              printf 'FAIL  %s\n' "$suite"
+              failed=1
+            fi
+          }
+          report 'test:cache-integration:core'    '${{ steps.integ_cache_core.outcome }}'
+          report 'test:cache-integration:cluster' '${{ steps.integ_cache_cluster.outcome }}'
+          report 'test:cache-integration:mcp'     '${{ steps.integ_cache_mcp.outcome }}'
+          report 'test:cache-integration:stream'  '${{ steps.integ_cache_stream.outcome }}'
+          report 'test:agents-integration'        '${{ steps.integ_agents.outcome }}'
+          exit "$failed"
+
+      - name: Upload integration test reports
+        # jest-junit is the testResultsProcessor in packages/api/jest.config.mjs;
+        # each step names its own report so the five runs do not overwrite one file.
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: junit-integration-reports
+          path: packages/api/junit-integration-*.xml
+          if-no-files-found: ignore
+          retention-days: 14
