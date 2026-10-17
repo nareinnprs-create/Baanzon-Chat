@@ -27,7 +27,9 @@ export default function SkillFilePreview({
     skillId,
   )}/files/${encodeURIComponent(nodeId)}`;
   const message =
-    reason === 'binary' ? localize('com_ui_skill_file_binary') : SKILL_TREE_LABELS.tooLarge;
+    reason === 'binary'
+      ? localize('com_ui_skill_file_binary')
+      : localize(SKILL_TREE_LABELS.tooLarge);
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center text-text-secondary">

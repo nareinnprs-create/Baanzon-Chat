@@ -15,11 +15,7 @@ export type CommandPaletteItem = {
 };
 
 /** Case-insensitive match against the localized label and the item's keywords. */
-export function matchesCommandQuery(
-  label: string,
-  keywords: string[],
-  query: string,
-): boolean {
+export function matchesCommandQuery(label: string, keywords: string[], query: string): boolean {
   const normalized = query.trim().toLowerCase();
   if (normalized === '') {
     return true;

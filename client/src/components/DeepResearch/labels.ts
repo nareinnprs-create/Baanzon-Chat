@@ -1,83 +1,66 @@
 /**
- * Feature-local English labels for the Deep Research flow.
+ * i18n key registry for the Deep Research flow. Every value is a
+ * `com_ui_deep_research_*` key in `client/src/locales/en/translation.json`;
+ * render them through `useLocalize()` as `localize(DEEP_RESEARCH_LABELS.name)`,
+ * passing `{ name: value }` for keys whose copy contains a `{{name}}`
+ * placeholder.
  *
- * These are the gaps that have no shared `com_ui_*` key yet; the intent is that
- * every one is promoted into `client/src/locales/en/translation.json` and this
- * map is deleted in favour of `useLocalize()`. The suggested `translation.json`
- * key for each entry is the `i18n` name in the doc comment.
- *
- * TODO(i18n): promote every key below into client/src/locales/en/translation.json
- * and replace this map with `useLocalize()` calls.
+ * Keeping the key literals here (rather than inline in each component) lets the
+ * unused-i18n-keys check see them, and gives the feature one place to look up
+ * the name of a label.
  */
 export const DEEP_RESEARCH_LABELS = {
-  featureTitle: 'Deep Research',
-  featureDescription: 'Turn a question into a plan, run it step by step, and read the report.',
-  topicLabel: 'Research topic',
-  topicPlaceholder: 'What should the research investigate?',
-  generatePlan: 'Generate plan',
-  planning: 'Building a research plan…',
-  planHeading: 'Research plan',
-  planDescription: 'Edit the steps, then run the plan. Order matters.',
-  planTopicLabel: 'Topic',
-  runPlan: 'Run plan',
-  planEmptyTitle: 'No steps yet',
-  planEmptyDescription: 'Add at least one step to run this research.',
-  addStep: 'Add step',
-  removeStep: 'Remove step',
-  moveStepUp: 'Move step up',
-  moveStepDown: 'Move step down',
-  stepTitleLabel: 'Step title',
-  stepTitlePlaceholder: 'Describe this step',
-  stepTitleRequired: 'Every step needs a title before you can run the plan.',
-  planInvalid: 'Fix the highlighted steps to run the plan.',
-  progressHeading: 'Progress',
-  progressSummary: '{completed} of {total} steps complete',
-  stepStatusPending: 'Pending',
-  stepStatusRunning: 'Running',
-  stepStatusPaused: 'Paused',
-  stepStatusCompleted: 'Completed',
-  stepStatusFailed: 'Failed',
-  stepStatusSkipped: 'Skipped',
-  pause: 'Pause',
-  resume: 'Resume',
-  cancel: 'Cancel',
-  runningAnnouncement: 'Running step {current} of {total}: {title} ({progress}% complete).',
-  pausedAnnouncement: 'Research paused at step {current} of {total}: {title}.',
-  completedAnnouncement: 'Research complete. {completed} of {total} steps finished.',
-  cancelledAnnouncement: 'Research cancelled.',
-  failedAnnouncement: 'Research failed: {reason}',
-  reportHeading: 'Report',
-  reportSummary: 'Summary',
-  reportSources: 'Sources',
-  reportCitationPlaceholder: 'No source details available for this citation.',
-  reportEmpty: 'The report contains no sections yet.',
-  copyReport: 'Copy report',
-  copiedReport: 'Copied',
-  retry: 'Retry',
-  startOver: 'Start over',
-  failureTitle: 'Research failed',
-  failureDescription: 'The run stopped before it produced a report.',
-  cancelledTitle: 'Research cancelled',
-  cancelledDescription: 'This run was cancelled. Retry to run the plan again.',
-  noStepsError: 'This plan has no steps to run.',
-  noPlanError: 'There is no plan to run.',
+  featureTitle: 'com_ui_deep_research_feature_title',
+  featureDescription: 'com_ui_deep_research_feature_description',
+  topicLabel: 'com_ui_deep_research_topic_label',
+  topicPlaceholder: 'com_ui_deep_research_topic_placeholder',
+  generatePlan: 'com_ui_deep_research_generate_plan',
+  planning: 'com_ui_deep_research_planning',
+  planHeading: 'com_ui_deep_research_plan_heading',
+  planDescription: 'com_ui_deep_research_plan_description',
+  planTopicLabel: 'com_ui_deep_research_plan_topic_label',
+  runPlan: 'com_ui_deep_research_run_plan',
+  planEmptyTitle: 'com_ui_deep_research_plan_empty_title',
+  planEmptyDescription: 'com_ui_deep_research_plan_empty_description',
+  addStep: 'com_ui_deep_research_add_step',
+  removeStep: 'com_ui_deep_research_remove_step',
+  moveStepUp: 'com_ui_deep_research_move_step_up',
+  moveStepDown: 'com_ui_deep_research_move_step_down',
+  stepTitleLabel: 'com_ui_deep_research_step_title_label',
+  stepTitlePlaceholder: 'com_ui_deep_research_step_title_placeholder',
+  stepTitleRequired: 'com_ui_deep_research_step_title_required',
+  planInvalid: 'com_ui_deep_research_plan_invalid',
+  progressHeading: 'com_ui_deep_research_progress_heading',
+  progressSummary: 'com_ui_deep_research_progress_summary',
+  stepStatusPending: 'com_ui_deep_research_step_status_pending',
+  stepStatusRunning: 'com_ui_deep_research_step_status_running',
+  stepStatusPaused: 'com_ui_deep_research_step_status_paused',
+  stepStatusCompleted: 'com_ui_deep_research_step_status_completed',
+  stepStatusFailed: 'com_ui_deep_research_step_status_failed',
+  stepStatusSkipped: 'com_ui_deep_research_step_status_skipped',
+  pause: 'com_ui_deep_research_pause',
+  resume: 'com_ui_deep_research_resume',
+  cancel: 'com_ui_deep_research_cancel',
+  runningAnnouncement: 'com_ui_deep_research_running_announcement',
+  pausedAnnouncement: 'com_ui_deep_research_paused_announcement',
+  completedAnnouncement: 'com_ui_deep_research_completed_announcement',
+  cancelledAnnouncement: 'com_ui_deep_research_cancelled_announcement',
+  failedAnnouncement: 'com_ui_deep_research_failed_announcement',
+  reportHeading: 'com_ui_deep_research_report_heading',
+  reportSummary: 'com_ui_deep_research_report_summary',
+  reportSources: 'com_ui_deep_research_report_sources',
+  reportCitationPlaceholder: 'com_ui_deep_research_report_citation_placeholder',
+  reportEmpty: 'com_ui_deep_research_report_empty',
+  copyReport: 'com_ui_deep_research_copy_report',
+  copiedReport: 'com_ui_deep_research_copied_report',
+  retry: 'com_ui_deep_research_retry',
+  startOver: 'com_ui_deep_research_start_over',
+  failureTitle: 'com_ui_deep_research_failure_title',
+  failureDescription: 'com_ui_deep_research_failure_description',
+  cancelledTitle: 'com_ui_deep_research_cancelled_title',
+  cancelledDescription: 'com_ui_deep_research_cancelled_description',
+  noStepsError: 'com_ui_deep_research_no_steps_error',
+  noPlanError: 'com_ui_deep_research_no_plan_error',
 } as const;
 
 export type DeepResearchLabelKey = keyof typeof DEEP_RESEARCH_LABELS;
-
-/**
- * Interpolates `{token}` placeholders in a label. Kept intentionally small: a
- * drop-in `useLocalize()` accepts the same shape, so migration is mechanical.
- */
-export function formatDeepResearchLabel(
-  key: DeepResearchLabelKey,
-  values?: Record<string, string | number>,
-): string {
-  const template: string = DEEP_RESEARCH_LABELS[key];
-  if (!values) {
-    return template;
-  }
-  return template.replace(/\{(\w+)\}/g, (match, token: string) =>
-    values[token] === undefined ? match : String(values[token]),
-  );
-}

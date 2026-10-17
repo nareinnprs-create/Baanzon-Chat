@@ -1,9 +1,18 @@
 import { useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { BarChart3, LibraryBig, MessagesSquare } from 'lucide-react';
 import { useUserKeyQuery } from 'librechat-data-provider/react-query';
 import { getConfigDefaults, getEndpointField } from 'librechat-data-provider';
+import {
+  BarChart3,
+  LibraryBig,
+  Mic,
+  Microscope,
+  MessagesSquare,
+  PanelsTopLeft,
+  Table2,
+  Workflow,
+} from 'lucide-react';
 import type { TEndpointsConfig } from 'librechat-data-provider';
 import type { NavLink } from '~/common';
 import { useGetEndpointsQuery, useGetStartupConfig, useInsightsAccessQuery } from '~/data-provider';
@@ -54,6 +63,11 @@ export default function useUnifiedSidebarLinks() {
   );
   const insightsFeatureEnabled = startupConfig?.insightsEnabled === true;
   const isInsightsRoute = location.pathname.startsWith('/insights');
+  const isDataLabRoute = location.pathname.startsWith('/data-lab');
+  const isDeepResearchRoute = location.pathname.startsWith('/deep-research');
+  const isCanvasRoute = location.pathname.startsWith('/canvas');
+  const isVoiceRoute = location.pathname.startsWith('/voice');
+  const isWorkflowRoute = location.pathname.startsWith('/workflow');
   const { data: insightsAccess, isLoading: isInsightsAccessLoading } = useInsightsAccessQuery(
     user?.id,
     {
@@ -166,15 +180,70 @@ export default function useUnifiedSidebarLinks() {
       });
     }
 
+    if (!isDataLabRoute) {
+      insertAfterMcpBuilder({
+        title: 'com_ui_data_lab_title',
+        label: '',
+        icon: Table2,
+        id: 'data-lab',
+        onClick: () => navigate('/data-lab'),
+      });
+    }
+
+    if (!isDeepResearchRoute) {
+      insertAfterMcpBuilder({
+        title: 'com_ui_deep_research_feature_title',
+        label: '',
+        icon: Microscope,
+        id: 'deep-research',
+        onClick: () => navigate('/deep-research'),
+      });
+    }
+
+    if (!isCanvasRoute) {
+      insertAfterMcpBuilder({
+        title: 'com_ui_canvas_title',
+        label: '',
+        icon: PanelsTopLeft,
+        id: 'canvas',
+        onClick: () => navigate('/canvas'),
+      });
+    }
+
+    if (!isVoiceRoute) {
+      insertAfterMcpBuilder({
+        title: 'com_ui_voice_title',
+        label: '',
+        icon: Mic,
+        id: 'voice',
+        onClick: () => navigate('/voice'),
+      });
+    }
+
+    if (!isWorkflowRoute) {
+      insertAfterMcpBuilder({
+        title: 'com_ui_workflow_title',
+        label: '',
+        icon: Workflow,
+        id: 'workflow',
+        onClick: () => navigate('/workflow'),
+      });
+    }
+
     return [conversationLink, ...nextLinks];
   }, [
     insightsAccess?.access,
     insightsFeatureEnabled,
+    isCanvasRoute,
+    isDataLabRoute,
+    isDeepResearchRoute,
     isInsightsAccessLoading,
     isInsightsRoute,
     isKnowledgeDisabled,
     isKnowledgeProbeLoading,
     isKnowledgeRoute,
+    isVoiceRoute,
+    isWorkflowRoute,
     navigate,
     sideNavLinks,
   ]);

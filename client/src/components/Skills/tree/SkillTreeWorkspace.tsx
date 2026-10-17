@@ -161,22 +161,22 @@ export default function SkillTreeWorkspace({ skillId }: SkillTreeWorkspaceProps)
 
   const createNode = useCreateSkillNodeMutation(skillId, {
     onSuccess: (node) => {
-      showToast({ status: 'success', message: SKILL_TREE_LABELS.created });
+      showToast({ status: 'success', message: localize(SKILL_TREE_LABELS.created) });
       invalidateSkill();
       revealNode(node._id);
       closeDialog();
     },
-    onError: (error) => setDialogError(messageOf(error, SKILL_TREE_LABELS.createFailed)),
+    onError: (error) => setDialogError(messageOf(error, localize(SKILL_TREE_LABELS.createFailed))),
   });
 
   const uploadFile = useUploadSkillFileMutation({
     onSuccess: (file: TSkillFile) => {
-      showToast({ status: 'success', message: SKILL_TREE_LABELS.uploaded });
+      showToast({ status: 'success', message: localize(SKILL_TREE_LABELS.uploaded) });
       invalidateSkill();
       revealNode(file.relativePath);
       closeDialog();
     },
-    onError: (error) => setDialogError(messageOf(error, SKILL_TREE_LABELS.createFailed)),
+    onError: (error) => setDialogError(messageOf(error, localize(SKILL_TREE_LABELS.createFailed))),
   });
 
   const updateNode = useUpdateSkillNodeMutation(skillId, {
@@ -195,11 +195,11 @@ export default function SkillTreeWorkspace({ skillId }: SkillTreeWorkspaceProps)
           return next;
         });
       }
-      showToast({ status: 'success', message: SKILL_TREE_LABELS.renamed });
+      showToast({ status: 'success', message: localize(SKILL_TREE_LABELS.renamed) });
       invalidateSkill();
       closeDialog();
     },
-    onError: (error) => setDialogError(messageOf(error, SKILL_TREE_LABELS.renameFailed)),
+    onError: (error) => setDialogError(messageOf(error, localize(SKILL_TREE_LABELS.renameFailed))),
   });
 
   const deleteNode = useDeleteSkillNodeMutation(skillId, {
@@ -215,11 +215,11 @@ export default function SkillTreeWorkspace({ skillId }: SkillTreeWorkspaceProps)
         });
         return next;
       });
-      showToast({ status: 'success', message: SKILL_TREE_LABELS.deleted });
+      showToast({ status: 'success', message: localize(SKILL_TREE_LABELS.deleted) });
       invalidateSkill();
       closeDialog();
     },
-    onError: (error) => setDialogError(messageOf(error, SKILL_TREE_LABELS.deleteFailed)),
+    onError: (error) => setDialogError(messageOf(error, localize(SKILL_TREE_LABELS.deleteFailed))),
   });
 
   const handleCreateFile = useCallback(
@@ -297,7 +297,7 @@ export default function SkillTreeWorkspace({ skillId }: SkillTreeWorkspaceProps)
     treeBody = (
       <div className="flex flex-col items-center gap-2 p-4 text-center text-xs text-text-secondary">
         <AlertTriangle className="size-5 text-text-destructive" aria-hidden="true" />
-        <p>{SKILL_TREE_LABELS.treeLoadError}</p>
+        <p>{localize(SKILL_TREE_LABELS.treeLoadError)}</p>
         <Button
           type="button"
           variant="outline"
@@ -315,7 +315,9 @@ export default function SkillTreeWorkspace({ skillId }: SkillTreeWorkspaceProps)
       </div>
     );
   } else if (nodes.length === 0) {
-    treeBody = <p className="p-4 text-xs text-text-secondary">{SKILL_TREE_LABELS.noFiles}</p>;
+    treeBody = (
+      <p className="p-4 text-xs text-text-secondary">{localize(SKILL_TREE_LABELS.noFiles)}</p>
+    );
   } else {
     treeBody = (
       <SkillTreeView
@@ -355,7 +357,7 @@ export default function SkillTreeWorkspace({ skillId }: SkillTreeWorkspaceProps)
           />
         ) : (
           <div className="flex h-full items-center justify-center bg-presentation p-8 text-center text-sm text-text-secondary">
-            {SKILL_TREE_LABELS.selectHint}
+            {localize(SKILL_TREE_LABELS.selectHint)}
           </div>
         )}
       </div>

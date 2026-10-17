@@ -1,7 +1,16 @@
 import { render, screen, within, fireEvent } from '@testing-library/react';
+import type { TOptions } from 'i18next';
 import type { DataTable } from '../types';
-import { DATA_LAB_LABELS, formatDataLabLabel } from '../labels';
+import { DATA_LAB_LABELS } from '../labels';
 import DataLabTable from '../DataLabTable';
+import i18n from '~/locales/i18n';
+
+const t = i18n.t.bind(i18n) as (key: string, options?: TOptions) => string;
+const L = Object.fromEntries(
+  Object.entries(DATA_LAB_LABELS).map(([name, key]) => [name, t(key)]),
+) as Record<keyof typeof DATA_LAB_LABELS, string>;
+const fmt = (name: keyof typeof DATA_LAB_LABELS, values?: TOptions) =>
+  t(DATA_LAB_LABELS[name], values);
 
 const table: DataTable = {
   columns: [
@@ -46,9 +55,7 @@ describe('DataLabTable', () => {
     const onSortChange = jest.fn();
     render(<DataLabTable table={table} sort={null} onSortChange={onSortChange} />);
 
-    fireEvent.click(
-      screen.getByRole('button', { name: formatDataLabLabel('sortBy', { 0: 'Score' }) }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: fmt('sortBy', { 0: 'Score' }) }));
 
     expect(onSortChange).toHaveBeenCalledWith({ key: 'score', direction: 'asc' });
   });
@@ -63,9 +70,7 @@ describe('DataLabTable', () => {
       />,
     );
 
-    fireEvent.click(
-      screen.getByRole('button', { name: formatDataLabLabel('sortBy', { 0: 'Score' }) }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: fmt('sortBy', { 0: 'Score' }) }));
 
     expect(onSortChange).toHaveBeenCalledWith({ key: 'score', direction: 'desc' });
   });
@@ -79,7 +84,7 @@ describe('DataLabTable', () => {
       />,
     );
 
-    expect(screen.getByText(DATA_LAB_LABELS.tableEmpty)).toBeInTheDocument();
+    expect(screen.getByText(L.tableEmpty)).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 });

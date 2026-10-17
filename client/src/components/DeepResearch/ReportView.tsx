@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { Button } from '@librechat/client';
 import { Check, Copy, RotateCcw } from 'lucide-react';
 import type { ResearchCitation, ResearchReport } from './types';
-import { DEEP_RESEARCH_LABELS as L } from './labels';
+import { DEEP_RESEARCH_LABELS } from './labels';
+import { useLocalize } from '~/hooks';
+
+type Localize = ReturnType<typeof useLocalize>;
 
 export type ReportViewProps = {
   report: ResearchReport;
@@ -13,7 +16,7 @@ export type ReportViewProps = {
 };
 
 /** Flattens a report into the plain text the copy action writes. */
-export function reportToPlainText(report: ResearchReport): string {
+export function reportToPlainText(report: ResearchReport, localize: Localize): string {
   const lines: string[] = [report.title, ''];
   if (report.summary) {
     lines.push(report.summary, '');
@@ -23,7 +26,7 @@ export function reportToPlainText(report: ResearchReport): string {
     lines.push(section.body, '');
   }
   if (report.citations.length > 0) {
-    lines.push(`## ${L.reportSources}`);
+    lines.push(`## ${localize(DEEP_RESEARCH_LABELS.reportSources)}`);
     report.citations.forEach((citation, index) => {
       lines.push(`[${index + 1}] ${citation.title}${citation.url ? ` — ${citation.url}` : ''}`);
     });
@@ -69,9 +72,10 @@ function CitationItem({ citation, index }: { citation: ResearchCitation; index: 
  */
 export default function ReportView({ report, onCopy, onRetry }: ReportViewProps) {
   const [copied, setCopied] = useState(false);
+  const localize = useLocalize();
 
   const handleCopy = () => {
-    const text = reportToPlainText(report);
+    const text = reportToPlainText(report, localize);
     setCopied(true);
     onCopy?.(text);
     void writeToClipboard(text);
@@ -81,7 +85,9 @@ export default function ReportView({ report, onCopy, onRetry }: ReportViewProps)
     <article className="flex flex-col gap-4 rounded-xl border border-border-light bg-surface-secondary p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="text-base font-semibold text-text-primary">{L.reportHeading}</h3>
+          <h3 className="text-base font-semibold text-text-primary">
+            {localize(DEEP_RESEARCH_LABELS.reportHeading)}
+          </h3>
           <p className="text-sm text-text-secondary">{report.title}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -91,12 +97,14 @@ export default function ReportView({ report, onCopy, onRetry }: ReportViewProps)
             ) : (
               <Copy className="size-4" aria-hidden="true" />
             )}
-            {copied ? L.copiedReport : L.copyReport}
+            {copied
+              ? localize(DEEP_RESEARCH_LABELS.copiedReport)
+              : localize(DEEP_RESEARCH_LABELS.copyReport)}
           </Button>
           {onRetry ? (
             <Button type="button" variant="ghost" size="sm" onClick={onRetry}>
               <RotateCcw className="size-4" aria-hidden="true" />
-              {L.retry}
+              {localize(DEEP_RESEARCH_LABELS.retry)}
             </Button>
           ) : null}
         </div>
@@ -105,14 +113,14 @@ export default function ReportView({ report, onCopy, onRetry }: ReportViewProps)
       {report.summary ? (
         <section className="flex flex-col gap-1">
           <h4 className="text-xs font-medium uppercase tracking-wide text-text-secondary">
-            {L.reportSummary}
+            {localize(DEEP_RESEARCH_LABELS.reportSummary)}
           </h4>
           <p className="text-sm leading-relaxed text-text-primary">{report.summary}</p>
         </section>
       ) : null}
 
       {report.sections.length === 0 ? (
-        <p className="text-sm text-text-secondary">{L.reportEmpty}</p>
+        <p className="text-sm text-text-secondary">{localize(DEEP_RESEARCH_LABELS.reportEmpty)}</p>
       ) : (
         report.sections.map((section) => (
           <section key={section.id} className="flex flex-col gap-1">
@@ -131,10 +139,12 @@ export default function ReportView({ report, onCopy, onRetry }: ReportViewProps)
 
       <section className="flex flex-col gap-1">
         <h4 className="text-xs font-medium uppercase tracking-wide text-text-secondary">
-          {L.reportSources}
+          {localize(DEEP_RESEARCH_LABELS.reportSources)}
         </h4>
         {report.citations.length === 0 ? (
-          <p className="text-xs text-text-secondary">{L.reportCitationPlaceholder}</p>
+          <p className="text-xs text-text-secondary">
+            {localize(DEEP_RESEARCH_LABELS.reportCitationPlaceholder)}
+          </p>
         ) : (
           <ul className="flex list-none flex-col gap-1 p-0">
             {report.citations.map((citation, index) => (

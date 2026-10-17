@@ -8,7 +8,7 @@ import {
   OGDialogTitle,
   Spinner,
 } from '@librechat/client';
-import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
 import type { CommandPaletteGroupId, CommandPaletteItem } from './types';
 import type { TranslationKeys } from '~/hooks';
 import { COMMAND_PALETTE_GROUPS, matchesCommandQuery } from './types';
@@ -178,6 +178,61 @@ export default function CommandPalette({ items, isLoading = false }: CommandPale
   const showNoResults = query.trim() !== '' && filtered.length === 0;
   const showEmpty = query.trim() === '' && items.length === 0;
 
+  let resultsContent: ReactNode = null;
+  if (isLoading) {
+    resultsContent = (
+      <div
+        role="status"
+        className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-text-secondary"
+      >
+        <Spinner className="h-4 w-4" />
+        {localize('com_ui_loading')}
+      </div>
+    );
+  } else if (filtered.length > 0) {
+    resultsContent = (
+      <ul
+        ref={listRef}
+        id={listboxId}
+        role="listbox"
+        aria-label={localize('com_ui_command_palette_title')}
+        className="max-h-[320px] overflow-y-auto p-2"
+      >
+        {groups.map((entry) => (
+          <Fragment key={entry.group}>
+            <li
+              role="presentation"
+              className="px-2 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wide text-text-tertiary"
+            >
+              {localize(GROUP_LABEL_KEYS[entry.group])}
+            </li>
+            {entry.items.map((item) => {
+              const index = flatIndex.get(item.id) ?? -1;
+              const isActive = index === safeIndex;
+              return (
+                <li
+                  key={item.id}
+                  id={`${baseId}-option-${item.id}`}
+                  role="option"
+                  aria-selected={isActive}
+                  data-active={isActive}
+                  onMouseMove={() => setActiveIndex(index)}
+                  onClick={() => runItem(item)}
+                  className={cn(
+                    'cursor-pointer rounded-lg px-3 py-2 text-sm text-text-primary',
+                    isActive ? 'bg-surface-hover' : 'bg-transparent',
+                  )}
+                >
+                  {localize(item.labelKey)}
+                </li>
+              );
+            })}
+          </Fragment>
+        ))}
+      </ul>
+    );
+  }
+
   return (
     <OGDialog open={open} onOpenChange={setOpen}>
       <OGDialogContent
@@ -192,7 +247,9 @@ export default function CommandPalette({ items, isLoading = false }: CommandPale
           openerRef.current?.focus?.();
         }}
       >
-        <OGDialogTitle className="sr-only">{localize('com_ui_command_palette_title')}</OGDialogTitle>
+        <OGDialogTitle className="sr-only">
+          {localize('com_ui_command_palette_title')}
+        </OGDialogTitle>
         <OGDialogDescription className="sr-only">
           {localize('com_ui_command_palette_description')}
         </OGDialogDescription>
@@ -217,55 +274,7 @@ export default function CommandPalette({ items, isLoading = false }: CommandPale
           />
         </div>
 
-        {isLoading ? (
-          <div
-            role="status"
-            className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-text-secondary"
-          >
-            <Spinner className="h-4 w-4" />
-            {localize('com_ui_loading')}
-          </div>
-        ) : filtered.length > 0 ? (
-          <ul
-            ref={listRef}
-            id={listboxId}
-            role="listbox"
-            aria-label={localize('com_ui_command_palette_title')}
-            className="max-h-[320px] overflow-y-auto p-2"
-          >
-            {groups.map((entry) => (
-              <Fragment key={entry.group}>
-                <li
-                  role="presentation"
-                  className="px-2 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wide text-text-tertiary"
-                >
-                  {localize(GROUP_LABEL_KEYS[entry.group])}
-                </li>
-                {entry.items.map((item) => {
-                  const index = flatIndex.get(item.id) ?? -1;
-                  const isActive = index === safeIndex;
-                  return (
-                    <li
-                      key={item.id}
-                      id={`${baseId}-option-${item.id}`}
-                      role="option"
-                      aria-selected={isActive}
-                      data-active={isActive}
-                      onMouseMove={() => setActiveIndex(index)}
-                      onClick={() => runItem(item)}
-                      className={cn(
-                        'cursor-pointer rounded-lg px-3 py-2 text-sm text-text-primary',
-                        isActive ? 'bg-surface-hover' : 'bg-transparent',
-                      )}
-                    >
-                      {localize(item.labelKey)}
-                    </li>
-                  );
-                })}
-              </Fragment>
-            ))}
-          </ul>
-        ) : null}
+        {resultsContent}
 
         {!isLoading && (showNoResults || showEmpty) && (
           <div className="px-4 py-8 text-center text-sm text-text-secondary">

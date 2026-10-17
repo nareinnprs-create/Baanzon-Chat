@@ -3,7 +3,7 @@ import { Upload, AlertTriangle } from 'lucide-react';
 import { Button, Input, Label, OGDialog, OGDialogContent, Spinner } from '@librechat/client';
 import type { TSkillNode } from 'librechat-data-provider';
 import { splitNodePath, isValidNodeName, isSelfOrDescendantPath } from './tree';
-import { SKILL_TREE_LABELS, formatSkillTreeLabel } from './labels';
+import { SKILL_TREE_LABELS } from './labels';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
@@ -99,20 +99,20 @@ function FolderField({
   return (
     <div className="flex flex-col gap-1">
       <Label htmlFor={id} className="text-xs font-medium text-text-secondary">
-        {SKILL_TREE_LABELS.parentFolder}
+        {localize(SKILL_TREE_LABELS.parentFolder)}
       </Label>
       <Input
         id={id}
         type="text"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder={SKILL_TREE_LABELS.root}
+        placeholder={localize(SKILL_TREE_LABELS.root)}
         list={`${id}-options`}
         className="w-full text-sm"
         autoComplete="off"
       />
       <datalist id={`${id}-options`}>
-        <option value="" label={SKILL_TREE_LABELS.root} />
+        <option value="" label={localize(SKILL_TREE_LABELS.root)} />
         {folderPaths
           .filter((path) => !excluded?.has(path))
           .map((path) => (
@@ -120,7 +120,8 @@ function FolderField({
           ))}
       </datalist>
       <p className="text-[11px] text-text-secondary">
-        {localize('com_ui_path')}: {value.trim() === '' ? SKILL_TREE_LABELS.root : value.trim()}
+        {localize('com_ui_path')}:{' '}
+        {value.trim() === '' ? localize(SKILL_TREE_LABELS.root) : value.trim()}
       </p>
     </div>
   );
@@ -164,7 +165,9 @@ export function NewNodeDialog({
             <h2 className="text-lg font-bold text-text-primary">
               {localize('com_ui_skill_new_file')}
             </h2>
-            <p className="text-xs text-text-secondary">{SKILL_TREE_LABELS.newFileSubtitle}</p>
+            <p className="text-xs text-text-secondary">
+              {localize(SKILL_TREE_LABELS.newFileSubtitle)}
+            </p>
           </div>
           <FolderField
             id="new-node-parent"
@@ -192,7 +195,7 @@ export function NewNodeDialog({
             />
             {name.length > 0 && !nameValid && (
               <p className="text-[11px] text-text-destructive" role="alert">
-                {SKILL_TREE_LABELS.invalidPath}
+                {localize(SKILL_TREE_LABELS.invalidPath)}
               </p>
             )}
           </div>
@@ -255,7 +258,9 @@ export function UploadNodeDialog({
             <h2 className="text-lg font-bold text-text-primary">
               {localize('com_ui_skill_upload_file')}
             </h2>
-            <p className="text-xs text-text-secondary">{SKILL_TREE_LABELS.uploadSubtitle}</p>
+            <p className="text-xs text-text-secondary">
+              {localize(SKILL_TREE_LABELS.uploadSubtitle)}
+            </p>
           </div>
           <FolderField
             id="upload-node-parent"
@@ -352,7 +357,9 @@ export function RenameNodeDialog({
     <OGDialog open onOpenChange={onOpenChange}>
       <OGDialogContent className="w-11/12 max-w-md" showCloseButton={!isSubmitting}>
         <div className="flex flex-col gap-4">
-          <h2 className="text-lg font-bold text-text-primary">{SKILL_TREE_LABELS.moveTitle}</h2>
+          <h2 className="text-lg font-bold text-text-primary">
+            {localize(SKILL_TREE_LABELS.moveTitle)}
+          </h2>
           <FolderField
             id="rename-node-parent"
             value={parent}
@@ -380,7 +387,7 @@ export function RenameNodeDialog({
             />
             {(!nameValid || movesIntoDescendant) && (
               <p className="text-[11px] text-text-destructive" role="alert">
-                {SKILL_TREE_LABELS.invalidPath}
+                {localize(SKILL_TREE_LABELS.invalidPath)}
               </p>
             )}
           </div>
@@ -419,12 +426,13 @@ export function DeleteNodeDialog({
       <OGDialogContent className="w-11/12 max-w-md" showCloseButton={!isSubmitting}>
         <div className="flex flex-col gap-4">
           <h2 className="text-lg font-bold text-text-primary">
-            {isFolder ? localize('com_ui_delete') : SKILL_TREE_LABELS.deleteTitle}
+            {isFolder ? localize('com_ui_delete') : localize(SKILL_TREE_LABELS.deleteTitle)}
           </h2>
           <p className="text-sm text-text-primary">
-            {formatSkillTreeLabel(isFolder ? 'deleteFolderConfirm' : 'deleteConfirm', {
-              '0': node.name,
-            })}
+            {localize(
+              isFolder ? SKILL_TREE_LABELS.deleteFolderConfirm : SKILL_TREE_LABELS.deleteConfirm,
+              { 0: node.name },
+            )}
           </p>
           <ErrorBanner message={error} />
           <DialogFooter

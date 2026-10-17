@@ -1,9 +1,16 @@
 import { createStore, Provider as JotaiProvider } from 'jotai';
 import { act, render, screen, fireEvent } from '@testing-library/react';
+import type { TOptions } from 'i18next';
 import type { ResearchPlan, ResearchReport, ResearchStep } from '../types';
 import type { DeepResearchExecutor } from '../api';
-import { DEEP_RESEARCH_LABELS as L } from '../labels';
 import DeepResearchView from '../DeepResearchView';
+import { DEEP_RESEARCH_LABELS } from '../labels';
+import i18n from '~/locales/i18n';
+
+const t = i18n.t.bind(i18n) as (key: string, options?: TOptions) => string;
+const L = Object.fromEntries(
+  Object.entries(DEEP_RESEARCH_LABELS).map(([name, key]) => [name, t(key)]),
+) as Record<keyof typeof DEEP_RESEARCH_LABELS, string>;
 
 function makeStep(id: string, title: string): ResearchStep {
   return { id, title, query: title, status: 'pending', progress: 0 };

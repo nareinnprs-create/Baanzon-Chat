@@ -37,8 +37,8 @@
  *
  * A top-level route or command entry point can render `<DataLabView />` after
  * wrapping it in a Jotai `<Provider>` (or omitting the provider to share the
- * default store). All user-facing strings come from `labels.ts`; follow the
- * `TODO(i18n)` note there to promote them into `translation.json`.
+ * default store). All user-facing strings are localized through `useLocalize`;
+ * the key registry in `labels.ts` names each one.
  */
 export { default as DataLabView } from './DataLabView';
 export { default as DataLabTable } from './DataLabTable';
@@ -69,7 +69,7 @@ export {
   dataLabFiltersAtom,
   dataLabDerivedSeriesAtom,
 } from './atoms';
-export { DATA_LAB_LABELS, formatDataLabLabel } from './labels';
+export { DATA_LAB_LABELS } from './labels';
 export type { DataLabLabelKey } from './labels';
 export type {
   BarChartProps,

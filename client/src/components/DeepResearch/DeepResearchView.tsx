@@ -6,10 +6,13 @@ import type { DeepResearchExecutor } from './api';
 import { deepResearchStateAtom, dispatchDeepResearchAtom } from './atoms';
 import { RESEARCH_ERROR_NO_PLAN, RESEARCH_ERROR_NO_STEPS } from './state';
 import PlanEditor, { isPlanValid } from './PlanEditor';
-import { DEEP_RESEARCH_LABELS as L } from './labels';
 import ProgressTimeline from './ProgressTimeline';
+import { DEEP_RESEARCH_LABELS } from './labels';
 import ReportView from './ReportView';
+import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
+
+type Localize = ReturnType<typeof useLocalize>;
 
 export type DeepResearchViewProps = {
   /**
@@ -22,23 +25,23 @@ export type DeepResearchViewProps = {
   className?: string;
 };
 
-function toErrorMessage(error: unknown): string {
+function toErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof Error && error.message) {
     return error.message;
   }
   if (typeof error === 'string' && error) {
     return error;
   }
-  return L.failureDescription;
+  return fallback;
 }
 
 /** Maps the machine's symbolic error codes to copy; everything else passes through. */
-function resolveErrorMessage(error: string): string {
+function resolveErrorMessage(error: string, localize: Localize): string {
   if (error === RESEARCH_ERROR_NO_STEPS) {
-    return L.noStepsError;
+    return localize(DEEP_RESEARCH_LABELS.noStepsError);
   }
   if (error === RESEARCH_ERROR_NO_PLAN) {
-    return L.noPlanError;
+    return localize(DEEP_RESEARCH_LABELS.noPlanError);
   }
   return error;
 }
@@ -54,6 +57,7 @@ export default function DeepResearchView({
   initialTopic = '',
   className,
 }: DeepResearchViewProps) {
+  const localize = useLocalize();
   const state = useAtomValue(deepResearchStateAtom);
   const dispatch = useSetAtom(dispatchDeepResearchAtom);
   const store = useStore();
@@ -93,9 +97,12 @@ export default function DeepResearchView({
         if (controller.signal.aborted) {
           return;
         }
-        dispatch({ type: 'fail', error: toErrorMessage(caught) });
+        dispatch({
+          type: 'fail',
+          error: toErrorMessage(caught, localize(DEEP_RESEARCH_LABELS.failureDescription)),
+        });
       });
-  }, [dispatch, topic]);
+  }, [dispatch, localize, topic]);
 
   /**
    * The run engine. It re-runs whenever the flow is `running` and the active
@@ -126,7 +133,10 @@ export default function DeepResearchView({
         })
         .catch((caught: unknown) => {
           if (live) {
-            dispatch({ type: 'fail', error: toErrorMessage(caught) });
+            dispatch({
+              type: 'fail',
+              error: toErrorMessage(caught, localize(DEEP_RESEARCH_LABELS.failureDescription)),
+            });
           }
         });
       return () => {
@@ -151,29 +161,35 @@ export default function DeepResearchView({
         if (!live || controller.signal.aborted) {
           return;
         }
-        dispatch({ type: 'step_failed', stepId: step.id, error: toErrorMessage(caught) });
+        dispatch({
+          type: 'step_failed',
+          stepId: step.id,
+          error: toErrorMessage(caught, localize(DEEP_RESEARCH_LABELS.failureDescription)),
+        });
       });
 
     return () => {
       live = false;
       controller.abort();
     };
-  }, [activeStepId, dispatch, status, store]);
+  }, [activeStepId, dispatch, localize, status, store]);
 
   const topicFieldId = 'deep-research-topic';
   const planIsValid = plan ? isPlanValid(plan) : false;
 
   return (
     <section
-      aria-label={L.featureTitle}
+      aria-label={localize(DEEP_RESEARCH_LABELS.featureTitle)}
       className={cn('flex h-full min-h-0 flex-col gap-4 overflow-auto p-4', className)}
     >
       <header className="flex flex-col gap-1">
         <h2 className="flex items-center gap-2 text-base font-semibold text-text-primary">
           <Microscope className="size-4 text-text-secondary" aria-hidden="true" />
-          {L.featureTitle}
+          {localize(DEEP_RESEARCH_LABELS.featureTitle)}
         </h2>
-        <p className="text-sm text-text-secondary">{L.featureDescription}</p>
+        <p className="text-sm text-text-secondary">
+          {localize(DEEP_RESEARCH_LABELS.featureDescription)}
+        </p>
       </header>
 
       {status === 'idle' ? (
@@ -184,16 +200,16 @@ export default function DeepResearchView({
             handleGeneratePlan();
           }}
         >
-          <Label htmlFor={topicFieldId}>{L.topicLabel}</Label>
+          <Label htmlFor={topicFieldId}>{localize(DEEP_RESEARCH_LABELS.topicLabel)}</Label>
           <Input
             id={topicFieldId}
             value={topic}
-            placeholder={L.topicPlaceholder}
+            placeholder={localize(DEEP_RESEARCH_LABELS.topicPlaceholder)}
             onChange={(event) => setTopic(event.target.value)}
           />
           <div>
             <Button type="submit" variant="default" size="sm" disabled={topic.trim().length === 0}>
-              {L.generatePlan}
+              {localize(DEEP_RESEARCH_LABELS.generatePlan)}
             </Button>
           </div>
         </form>
@@ -202,7 +218,7 @@ export default function DeepResearchView({
       {status === 'planning' ? (
         <div role="status" className="flex items-center gap-2 text-sm text-text-secondary">
           <Spinner className="size-4" aria-hidden="true" />
-          {L.planning}
+          {localize(DEEP_RESEARCH_LABELS.planning)}
         </div>
       ) : null}
 
@@ -224,9 +240,13 @@ export default function DeepResearchView({
               disabled={!planIsValid}
               onClick={() => dispatch({ type: 'run' })}
             >
-              {L.runPlan}
+              {localize(DEEP_RESEARCH_LABELS.runPlan)}
             </Button>
-            {!planIsValid ? <p className="text-xs text-text-destructive">{L.planInvalid}</p> : null}
+            {!planIsValid ? (
+              <p className="text-xs text-text-destructive">
+                {localize(DEEP_RESEARCH_LABELS.planInvalid)}
+              </p>
+            ) : null}
           </div>
         </div>
       ) : null}
@@ -254,8 +274,12 @@ export default function DeepResearchView({
         <div role="alert">
           <EmptyState
             icon={TriangleAlert}
-            title={L.failureTitle}
-            description={error ? resolveErrorMessage(error) : L.failureDescription}
+            title={localize(DEEP_RESEARCH_LABELS.failureTitle)}
+            description={
+              error
+                ? resolveErrorMessage(error, localize)
+                : localize(DEEP_RESEARCH_LABELS.failureDescription)
+            }
             action={
               <Button
                 type="button"
@@ -263,7 +287,7 @@ export default function DeepResearchView({
                 size="sm"
                 onClick={() => dispatch({ type: 'retry' })}
               >
-                {L.retry}
+                {localize(DEEP_RESEARCH_LABELS.retry)}
               </Button>
             }
           />
@@ -274,8 +298,8 @@ export default function DeepResearchView({
         <div role="status">
           <EmptyState
             icon={Ban}
-            title={L.cancelledTitle}
-            description={L.cancelledDescription}
+            title={localize(DEEP_RESEARCH_LABELS.cancelledTitle)}
+            description={localize(DEEP_RESEARCH_LABELS.cancelledDescription)}
             action={
               <div className="flex items-center gap-2">
                 <Button
@@ -284,7 +308,7 @@ export default function DeepResearchView({
                   size="sm"
                   onClick={() => dispatch({ type: 'retry' })}
                 >
-                  {L.retry}
+                  {localize(DEEP_RESEARCH_LABELS.retry)}
                 </Button>
                 <Button
                   type="button"
@@ -292,7 +316,7 @@ export default function DeepResearchView({
                   size="sm"
                   onClick={() => dispatch({ type: 'reset' })}
                 >
-                  {L.startOver}
+                  {localize(DEEP_RESEARCH_LABELS.startOver)}
                 </Button>
               </div>
             }

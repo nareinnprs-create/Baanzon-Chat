@@ -1,9 +1,18 @@
 import { Provider } from 'jotai';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { ReactElement } from 'react';
+import type { TOptions } from 'i18next';
 import type { DataTable } from '../types';
-import { DATA_LAB_LABELS, formatDataLabLabel } from '../labels';
+import { DATA_LAB_LABELS } from '../labels';
 import DataLabView from '../DataLabView';
+import i18n from '~/locales/i18n';
+
+const t = i18n.t.bind(i18n) as (key: string, options?: TOptions) => string;
+const L = Object.fromEntries(
+  Object.entries(DATA_LAB_LABELS).map(([name, key]) => [name, t(key)]),
+) as Record<keyof typeof DATA_LAB_LABELS, string>;
+const fmt = (name: keyof typeof DATA_LAB_LABELS, values?: TOptions) =>
+  t(DATA_LAB_LABELS[name], values);
 
 const dataset: DataTable = {
   columns: [
@@ -25,13 +34,13 @@ describe('DataLabView', () => {
   it('shows a loading state', () => {
     renderView(<DataLabView isLoading />);
 
-    expect(screen.getByText(DATA_LAB_LABELS.loading)).toBeInTheDocument();
+    expect(screen.getByText(L.loading)).toBeInTheDocument();
   });
 
   it('shows an empty state when there is no data', () => {
     renderView(<DataLabView dataset={{ columns: [], rows: [] }} />);
 
-    expect(screen.getByText(DATA_LAB_LABELS.emptyTitle)).toBeInTheDocument();
+    expect(screen.getByText(L.emptyTitle)).toBeInTheDocument();
   });
 
   it('renders the chart, analysis actions and table on success', () => {
@@ -39,21 +48,21 @@ describe('DataLabView', () => {
 
     expect(
       screen.getByRole('img', {
-        name: formatDataLabLabel('chartAria', { 0: DATA_LAB_LABELS.chartLine }),
+        name: fmt('chartAria', { 0: L.chartLine }),
       }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('group', { name: DATA_LAB_LABELS.actions })).toBeInTheDocument();
-    expect(screen.getByText(DATA_LAB_LABELS.tableCaption)).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: L.actions })).toBeInTheDocument();
+    expect(screen.getByText(L.tableCaption)).toBeInTheDocument();
   });
 
   it('switches the active chart', () => {
     renderView(<DataLabView dataset={dataset} />);
 
-    fireEvent.click(screen.getByRole('button', { name: DATA_LAB_LABELS.chartBar }));
+    fireEvent.click(screen.getByRole('button', { name: L.chartBar }));
 
     expect(
       screen.getByRole('img', {
-        name: formatDataLabLabel('chartAria', { 0: DATA_LAB_LABELS.chartBar }),
+        name: fmt('chartAria', { 0: L.chartBar }),
       }),
     ).toBeInTheDocument();
   });
@@ -62,10 +71,10 @@ describe('DataLabView', () => {
     const onRetry = jest.fn();
     renderView(<DataLabView error="Boom" onRetry={onRetry} />);
 
-    expect(screen.getByText(DATA_LAB_LABELS.failureTitle)).toBeInTheDocument();
+    expect(screen.getByText(L.failureTitle)).toBeInTheDocument();
     expect(screen.getByText('Boom')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: DATA_LAB_LABELS.retry }));
+    fireEvent.click(screen.getByRole('button', { name: L.retry }));
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
@@ -75,7 +84,7 @@ describe('DataLabView', () => {
 
     await waitFor(() => expect(loadData).toHaveBeenCalledTimes(1));
     await screen.findByRole('img', {
-      name: formatDataLabLabel('chartAria', { 0: DATA_LAB_LABELS.chartLine }),
+      name: fmt('chartAria', { 0: L.chartLine }),
     });
   });
 });

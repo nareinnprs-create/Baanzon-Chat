@@ -31,10 +31,7 @@ function makeItems(): CommandPaletteItem[] {
   ];
 }
 
-function renderPalette(
-  props: { items: CommandPaletteItem[]; isLoading?: boolean },
-  open = true,
-) {
+function renderPalette(props: { items: CommandPaletteItem[]; isLoading?: boolean }, open = true) {
   const store = createStore();
   store.set(commandPaletteOpenAtom, open);
   return render(

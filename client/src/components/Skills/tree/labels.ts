@@ -1,45 +1,36 @@
 /**
- * Feature-local English labels for skill-tree controls that have no shared
- * `com_ui_*` key yet. Prefer an existing key (`useLocalize`) whenever one
- * exists; these are the gaps.
+ * i18n key registry for the skill tree. Every value is a `com_ui_skill_*` key in
+ * `client/src/locales/en/translation.json`; render them through `useLocalize()`
+ * as `localize(SKILL_TREE_LABELS.name)`, passing `{ 0: value }` for keys whose
+ * copy contains a `{{0}}` placeholder.
  *
- * TODO(i18n): promote these into client/src/locales/en/translation.json and
- * replace this map with `useLocalize()` calls.
+ * Keeping the key literals here (rather than inline in each component) lets the
+ * unused-i18n-keys check see them, and gives the feature one place to look up
+ * the name of a label.
  */
 export const SKILL_TREE_LABELS = {
-  parentFolder: 'Parent folder',
-  root: 'Root',
-  moveTitle: 'Rename or move',
-  deleteTitle: 'Delete file',
-  deleteConfirm: 'Delete “{0}”? This cannot be undone.',
-  deleteFolderConfirm: 'Delete “{0}” and everything inside it? This cannot be undone.',
-  noFiles: 'No supporting files yet',
-  selectHint: 'Select a file to view or edit it.',
-  treeLoadError: 'Failed to load skill files',
-  saveFailed: 'Failed to save file',
-  createFailed: 'Failed to create file',
-  renameFailed: 'Failed to rename file',
-  deleteFailed: 'Failed to delete file',
-  created: 'File created',
-  renamed: 'File renamed',
-  deleted: 'File deleted',
-  uploaded: 'File uploaded',
-  tooLarge: 'File is too large to edit inline',
-  skillMdReadonly: 'SKILL.md is edited in the Details tab',
-  invalidPath: 'Enter a valid file path',
-  newFileSubtitle: 'Create a text file inside this skill.',
-  uploadSubtitle: 'Upload a file into this skill.',
+  parentFolder: 'com_ui_skill_parent_folder',
+  root: 'com_ui_skill_root',
+  moveTitle: 'com_ui_skill_rename_or_move',
+  deleteTitle: 'com_ui_skill_delete_file_title',
+  deleteConfirm: 'com_ui_skill_delete_file_confirm',
+  deleteFolderConfirm: 'com_ui_skill_delete_folder_confirm',
+  noFiles: 'com_ui_skill_no_files',
+  selectHint: 'com_ui_skill_select_file_hint',
+  treeLoadError: 'com_ui_skill_tree_load_error',
+  saveFailed: 'com_ui_skill_file_save_error',
+  createFailed: 'com_ui_skill_file_create_error',
+  renameFailed: 'com_ui_skill_file_rename_error',
+  deleteFailed: 'com_ui_skill_file_delete_error',
+  created: 'com_ui_skill_file_created',
+  renamed: 'com_ui_skill_file_renamed',
+  deleted: 'com_ui_skill_file_deleted',
+  uploaded: 'com_ui_skill_file_uploaded',
+  tooLarge: 'com_ui_skill_file_too_large',
+  skillMdReadonly: 'com_ui_skill_md_readonly',
+  invalidPath: 'com_ui_skill_invalid_path',
+  newFileSubtitle: 'com_ui_skill_new_file_subtitle',
+  uploadSubtitle: 'com_ui_skill_upload_subtitle',
 } as const;
 
 export type SkillTreeLabelKey = keyof typeof SKILL_TREE_LABELS;
-
-export function formatSkillTreeLabel(
-  key: SkillTreeLabelKey,
-  values?: Record<string, string>,
-): string {
-  const template = SKILL_TREE_LABELS[key];
-  if (!values) {
-    return template;
-  }
-  return template.replace(/\{(\w+)\}/g, (match, token: string) => values[token] ?? match);
-}

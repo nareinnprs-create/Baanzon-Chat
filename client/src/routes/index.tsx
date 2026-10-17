@@ -46,6 +46,31 @@ const loadInsightsView = () =>
     Component: m.default,
   }));
 
+const loadDataLabRoute = () =>
+  import('./DataLabRoute').then((m) => ({
+    Component: m.default,
+  }));
+
+const loadDeepResearchRoute = () =>
+  import('./DeepResearchRoute').then((m) => ({
+    Component: m.default,
+  }));
+
+const loadCanvasRoute = () =>
+  import('./CanvasRoute').then((m) => ({
+    Component: m.default,
+  }));
+
+const loadVoiceRoute = () =>
+  import('./VoiceRoute').then((m) => ({
+    Component: m.default,
+  }));
+
+const loadWorkflowRoute = () =>
+  import('./WorkflowRoute').then((m) => ({
+    Component: m.default,
+  }));
+
 const loadProjectsView = () =>
   import('~/components/Projects').then((m) => ({
     Component: m.ProjectsView,
@@ -179,6 +204,26 @@ export const router = createBrowserRouter(
             {
               path: 'insights',
               lazy: loadInsightsView,
+            },
+            {
+              path: 'data-lab',
+              lazy: loadDataLabRoute,
+            },
+            {
+              path: 'deep-research',
+              lazy: loadDeepResearchRoute,
+            },
+            {
+              path: 'canvas',
+              lazy: loadCanvasRoute,
+            },
+            {
+              path: 'voice',
+              lazy: loadVoiceRoute,
+            },
+            {
+              path: 'workflow',
+              lazy: loadWorkflowRoute,
             },
             {
               path: 'skills/new',

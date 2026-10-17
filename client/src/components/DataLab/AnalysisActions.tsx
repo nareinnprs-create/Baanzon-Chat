@@ -3,6 +3,7 @@ import { Plus, X } from 'lucide-react';
 import { Button, Dropdown, Input } from '@librechat/client';
 import type { DataColumn, DataFilter, DeriveMode, DerivedSeries, FilterOperator } from './types';
 import { DATA_LAB_LABELS } from './labels';
+import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
 interface AnalysisActionsProps {
@@ -19,21 +20,25 @@ interface AnalysisActionsProps {
 
 const OPERATORS: FilterOperator[] = ['contains', 'equals', 'greaterThan', 'lessThan'];
 
-function operatorLabel(operator: FilterOperator): string {
+type Localize = ReturnType<typeof useLocalize>;
+
+function operatorLabel(operator: FilterOperator, localize: Localize): string {
   if (operator === 'equals') {
-    return DATA_LAB_LABELS.operatorEquals;
+    return localize(DATA_LAB_LABELS.operatorEquals);
   }
   if (operator === 'greaterThan') {
-    return DATA_LAB_LABELS.operatorGreaterThan;
+    return localize(DATA_LAB_LABELS.operatorGreaterThan);
   }
   if (operator === 'lessThan') {
-    return DATA_LAB_LABELS.operatorLessThan;
+    return localize(DATA_LAB_LABELS.operatorLessThan);
   }
-  return DATA_LAB_LABELS.operatorContains;
+  return localize(DATA_LAB_LABELS.operatorContains);
 }
 
-function modeLabel(mode: DeriveMode): string {
-  return mode === 'percent' ? DATA_LAB_LABELS.modePercent : DATA_LAB_LABELS.modeCumulative;
+function modeLabel(mode: DeriveMode, localize: Localize): string {
+  return mode === 'percent'
+    ? localize(DATA_LAB_LABELS.modePercent)
+    : localize(DATA_LAB_LABELS.modeCumulative);
 }
 
 /**
@@ -52,6 +57,7 @@ export default function AnalysisActions({
   describeActive = false,
   className,
 }: AnalysisActionsProps) {
+  const localize = useLocalize();
   const [filterColumn, setFilterColumn] = useState('');
   const [operator, setOperator] = useState<FilterOperator>('contains');
   const [filterValue, setFilterValue] = useState('');
@@ -70,14 +76,17 @@ export default function AnalysisActions({
     value: column.key,
     label: column.label,
   }));
-  const operatorOptions = OPERATORS.map((item) => ({ value: item, label: operatorLabel(item) }));
+  const operatorOptions = OPERATORS.map((item) => ({
+    value: item,
+    label: operatorLabel(item, localize),
+  }));
   const numericOptions = numericColumns.map((column) => ({
     value: column.key,
     label: column.label,
   }));
   const modeOptions: Array<{ value: DeriveMode; label: string }> = [
-    { value: 'cumulative', label: modeLabel('cumulative') },
-    { value: 'percent', label: modeLabel('percent') },
+    { value: 'cumulative', label: modeLabel('cumulative', localize) },
+    { value: 'percent', label: modeLabel('percent', localize) },
   ];
 
   const handleAddFilter = () => {
@@ -97,7 +106,7 @@ export default function AnalysisActions({
       activeDeriveColumn;
     onDerive({
       key: `derived_${activeDeriveColumn}_${deriveMode}`,
-      label: `${columnLabel} (${modeLabel(deriveMode)})`,
+      label: `${columnLabel} (${modeLabel(deriveMode, localize)})`,
       column: activeDeriveColumn,
       mode: deriveMode,
     });
@@ -105,13 +114,13 @@ export default function AnalysisActions({
 
   const describeFilter = (filter: DataFilter): string => {
     const column = columns.find((item) => item.key === filter.column);
-    return `${column?.label ?? filter.column} ${operatorLabel(filter.operator)} ${filter.value}`;
+    return `${column?.label ?? filter.column} ${operatorLabel(filter.operator, localize)} ${filter.value}`;
   };
 
   return (
     <div
       role="group"
-      aria-label={DATA_LAB_LABELS.actions}
+      aria-label={localize(DATA_LAB_LABELS.actions)}
       className={cn('flex flex-col gap-3', className)}
     >
       <div className="flex flex-wrap items-end gap-2">
@@ -122,10 +131,10 @@ export default function AnalysisActions({
           aria-pressed={describeActive}
           onClick={onDescribe}
         >
-          {DATA_LAB_LABELS.describe}
+          {localize(DATA_LAB_LABELS.describe)}
         </Button>
         <Dropdown
-          ariaLabel={DATA_LAB_LABELS.filterColumn}
+          ariaLabel={localize(DATA_LAB_LABELS.filterColumn)}
           value={activeColumn}
           onChange={setFilterColumn}
           options={columnOptions}
@@ -133,7 +142,7 @@ export default function AnalysisActions({
           testId="datalab-filter-column"
         />
         <Dropdown
-          ariaLabel={DATA_LAB_LABELS.filterOperator}
+          ariaLabel={localize(DATA_LAB_LABELS.filterOperator)}
           value={operator}
           onChange={(value) => setOperator(value as FilterOperator)}
           options={operatorOptions}
@@ -141,8 +150,8 @@ export default function AnalysisActions({
           testId="datalab-filter-operator"
         />
         <Input
-          aria-label={DATA_LAB_LABELS.filterValue}
-          placeholder={DATA_LAB_LABELS.filterValue}
+          aria-label={localize(DATA_LAB_LABELS.filterValue)}
+          placeholder={localize(DATA_LAB_LABELS.filterValue)}
           value={filterValue}
           onChange={(event) => setFilterValue(event.target.value)}
           className="w-40"
@@ -155,12 +164,12 @@ export default function AnalysisActions({
           onClick={handleAddFilter}
         >
           <Plus className="size-4" aria-hidden="true" />
-          {DATA_LAB_LABELS.filterAdd}
+          {localize(DATA_LAB_LABELS.filterAdd)}
         </Button>
       </div>
 
       {filters.length === 0 ? (
-        <p className="text-xs text-text-secondary">{DATA_LAB_LABELS.filterEmpty}</p>
+        <p className="text-xs text-text-secondary">{localize(DATA_LAB_LABELS.filterEmpty)}</p>
       ) : (
         <ul className="flex flex-wrap items-center gap-2">
           {filters.map((filter, index) => (
@@ -171,7 +180,7 @@ export default function AnalysisActions({
               <span>{describeFilter(filter)}</span>
               <button
                 type="button"
-                aria-label={DATA_LAB_LABELS.filterRemove}
+                aria-label={localize(DATA_LAB_LABELS.filterRemove)}
                 onClick={() => onRemoveFilter(index)}
                 className="rounded-full p-0.5 hover:bg-surface-hover"
               >
@@ -181,7 +190,7 @@ export default function AnalysisActions({
           ))}
           <li>
             <Button type="button" variant="ghost" size="sm" onClick={onClearFilters}>
-              {DATA_LAB_LABELS.filterClear}
+              {localize(DATA_LAB_LABELS.filterClear)}
             </Button>
           </li>
         </ul>
@@ -189,7 +198,7 @@ export default function AnalysisActions({
 
       <div className="flex flex-wrap items-end gap-2">
         <Dropdown
-          ariaLabel={DATA_LAB_LABELS.deriveColumn}
+          ariaLabel={localize(DATA_LAB_LABELS.deriveColumn)}
           value={activeDeriveColumn}
           onChange={setDeriveColumn}
           options={numericOptions}
@@ -198,7 +207,7 @@ export default function AnalysisActions({
           testId="datalab-derive-column"
         />
         <Dropdown
-          ariaLabel={DATA_LAB_LABELS.deriveMode}
+          ariaLabel={localize(DATA_LAB_LABELS.deriveMode)}
           value={deriveMode}
           onChange={(value) => setDeriveMode(value as DeriveMode)}
           options={modeOptions}
@@ -212,7 +221,7 @@ export default function AnalysisActions({
           disabled={!activeDeriveColumn}
           onClick={handleDerive}
         >
-          {DATA_LAB_LABELS.deriveAdd}
+          {localize(DATA_LAB_LABELS.deriveAdd)}
         </Button>
       </div>
     </div>

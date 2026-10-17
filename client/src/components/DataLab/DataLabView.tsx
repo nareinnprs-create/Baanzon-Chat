@@ -21,13 +21,14 @@ import {
   dataLabFiltersAtom,
   dataLabSortAtom,
 } from './atoms';
-import { DATA_LAB_LABELS, formatDataLabLabel, type DataLabLabelKey } from './labels';
+import { DATA_LAB_LABELS, type DataLabLabelKey } from './labels';
 import AnalysisActions from './AnalysisActions';
 import { coerceNumber, toText } from './parse';
 import LineChart from './charts/LineChart';
 import DataLabTable from './DataLabTable';
 import BarChart from './charts/BarChart';
 import PieChart from './charts/PieChart';
+import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
 type RemoteState =
@@ -51,16 +52,16 @@ export interface DataLabViewProps {
   className?: string;
 }
 
-const CHART_TABS: Array<{ kind: ChartKind; label: string; Icon: LucideIcon }> = [
-  { kind: 'line', label: DATA_LAB_LABELS.chartLine, Icon: ChartLine },
-  { kind: 'bar', label: DATA_LAB_LABELS.chartBar, Icon: ChartBar },
-  { kind: 'pie', label: DATA_LAB_LABELS.chartPie, Icon: ChartPie },
+const CHART_TABS: Array<{ kind: ChartKind; labelKey: DataLabLabelKey; Icon: LucideIcon }> = [
+  { kind: 'line', labelKey: 'chartLine', Icon: ChartLine },
+  { kind: 'bar', labelKey: 'chartBar', Icon: ChartBar },
+  { kind: 'pie', labelKey: 'chartPie', Icon: ChartPie },
 ];
 
-const TYPE_LABELS: Record<DataColumnType, string> = {
-  number: DATA_LAB_LABELS.typeNumber,
-  date: DATA_LAB_LABELS.typeDate,
-  string: DATA_LAB_LABELS.typeString,
+const TYPE_LABELS: Record<DataColumnType, DataLabLabelKey> = {
+  number: 'typeNumber',
+  date: 'typeDate',
+  string: 'typeString',
 };
 
 const STAT_HEADERS: DataLabLabelKey[] = [
@@ -94,10 +95,12 @@ export default function DataLabView({
   title,
   className,
 }: DataLabViewProps) {
+  const localize = useLocalize();
   const [remote, setRemote] = useState<RemoteState>(() => ({
     status: loadData ? 'loading' : 'idle',
   }));
   const loadRef = useRef(loadData);
+  const localizeRef = useRef(localize);
   const [chartKind, setChartKind] = useAtom(dataLabChartKindAtom);
   const [sort, setSort] = useAtom(dataLabSortAtom);
   const [filters, setFilters] = useAtom(dataLabFiltersAtom);
@@ -107,6 +110,10 @@ export default function DataLabView({
   useEffect(() => {
     loadRef.current = loadData;
   }, [loadData]);
+
+  useEffect(() => {
+    localizeRef.current = localize;
+  }, [localize]);
 
   const load = useCallback(async () => {
     const loader = loadRef.current;
@@ -120,7 +127,10 @@ export default function DataLabView({
     } catch (caught) {
       setRemote({
         status: 'error',
-        error: caught instanceof Error ? caught.message : DATA_LAB_LABELS.failureDescription,
+        error:
+          caught instanceof Error
+            ? caught.message
+            : localizeRef.current(DATA_LAB_LABELS.failureDescription),
       });
     }
   }, []);
@@ -131,7 +141,7 @@ export default function DataLabView({
     if (usingRemote) {
       void load();
     }
-  }, [usingRemote, load, loadData]);
+  }, [usingRemote, load]);
 
   const table = dataset ?? (usingRemote && remote.status === 'success' ? remote.data : null);
   const loading = isLoading ?? (usingRemote && remote.status === 'loading');
@@ -208,9 +218,10 @@ export default function DataLabView({
   }, [onRetry, usingRemote, load]);
 
   const chartTab = CHART_TABS.find((tab) => tab.kind === chartKind) ?? CHART_TABS[0];
-  const chartAriaLabel = formatDataLabLabel('chartAria', { 0: chartTab.label });
-  const chartDescription = formatDataLabLabel('chartDescription', {
-    0: chartTab.label,
+  const chartTabLabel = localize(DATA_LAB_LABELS[chartTab.labelKey]);
+  const chartAriaLabel = localize(DATA_LAB_LABELS.chartAria, { 0: chartTabLabel });
+  const chartDescription = localize(DATA_LAB_LABELS.chartDescription, {
+    0: chartTabLabel,
     1: rows.length,
   });
 
@@ -223,7 +234,7 @@ export default function DataLabView({
         value={(row) => coerceNumber(row.value ?? null) ?? 0}
         ariaLabel={chartAriaLabel}
         description={chartDescription}
-        emptyLabel={DATA_LAB_LABELS.chartNoData}
+        emptyLabel={localize(DATA_LAB_LABELS.chartNoData)}
       />
     );
   } else if (chartKind === 'bar') {
@@ -235,7 +246,7 @@ export default function DataLabView({
         series={series}
         ariaLabel={chartAriaLabel}
         description={chartDescription}
-        emptyLabel={DATA_LAB_LABELS.chartNoData}
+        emptyLabel={localize(DATA_LAB_LABELS.chartNoData)}
       />
     );
   } else {
@@ -247,7 +258,7 @@ export default function DataLabView({
         series={series}
         ariaLabel={chartAriaLabel}
         description={chartDescription}
-        emptyLabel={DATA_LAB_LABELS.chartNoData}
+        emptyLabel={localize(DATA_LAB_LABELS.chartNoData)}
       />
     );
   }
@@ -261,18 +272,18 @@ export default function DataLabView({
         data-testid="datalab-status"
       >
         <Spinner className="size-4" aria-hidden="true" />
-        {DATA_LAB_LABELS.loading}
+        {localize(DATA_LAB_LABELS.loading)}
       </p>
     );
   } else if (failure) {
     body = (
       <Alert variant="error" data-testid="datalab-status">
         <div className="flex flex-col gap-2">
-          <span className="font-medium">{DATA_LAB_LABELS.failureTitle}</span>
+          <span className="font-medium">{localize(DATA_LAB_LABELS.failureTitle)}</span>
           <span>{failure}</span>
           <div>
             <Button type="button" variant="outline" size="sm" onClick={handleRetry}>
-              {DATA_LAB_LABELS.retry}
+              {localize(DATA_LAB_LABELS.retry)}
             </Button>
           </div>
         </div>
@@ -282,8 +293,8 @@ export default function DataLabView({
     body = (
       <EmptyState
         icon={Table2}
-        title={DATA_LAB_LABELS.emptyTitle}
-        description={DATA_LAB_LABELS.emptyDescription}
+        title={localize(DATA_LAB_LABELS.emptyTitle)}
+        description={localize(DATA_LAB_LABELS.emptyDescription)}
       />
     );
   } else {
@@ -305,7 +316,7 @@ export default function DataLabView({
         {stats.length > 0 ? (
           <section className="rounded-lg border border-border-light p-4">
             <h3 className="mb-2 text-sm font-semibold text-text-primary">
-              {DATA_LAB_LABELS.describeTitle}
+              {localize(DATA_LAB_LABELS.describeTitle)}
             </h3>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
@@ -317,7 +328,7 @@ export default function DataLabView({
                         scope="col"
                         className="whitespace-nowrap px-2 py-2 font-medium"
                       >
-                        {formatDataLabLabel(header)}
+                        {localize(DATA_LAB_LABELS[header])}
                       </th>
                     ))}
                   </tr>
@@ -329,7 +340,7 @@ export default function DataLabView({
                         {stat.label}
                       </td>
                       <td className="whitespace-nowrap px-2 py-2 text-text-secondary">
-                        {TYPE_LABELS[stat.type]}
+                        {localize(DATA_LAB_LABELS[TYPE_LABELS[stat.type]])}
                       </td>
                       <td className="px-2 py-2 text-right tabular-nums">{stat.count}</td>
                       <td className="px-2 py-2 text-right tabular-nums">{stat.missing}</td>
@@ -349,11 +360,11 @@ export default function DataLabView({
         <section className="rounded-lg border border-border-light p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-semibold text-text-primary">
-              {DATA_LAB_LABELS.chartSectionTitle}
+              {localize(DATA_LAB_LABELS.chartSectionTitle)}
             </h3>
             <div
               role="group"
-              aria-label={DATA_LAB_LABELS.chartSectionTitle}
+              aria-label={localize(DATA_LAB_LABELS.chartSectionTitle)}
               className="inline-flex rounded-lg border border-border-light p-0.5"
             >
               {CHART_TABS.map((tab) => (
@@ -367,7 +378,7 @@ export default function DataLabView({
                   onClick={() => setChartKind(tab.kind)}
                 >
                   <tab.Icon className="size-4" aria-hidden="true" />
-                  {tab.label}
+                  {localize(DATA_LAB_LABELS[tab.labelKey])}
                 </Button>
               ))}
             </div>
@@ -377,7 +388,7 @@ export default function DataLabView({
 
         <section className="rounded-lg border border-border-light p-4">
           <h3 className="mb-3 text-sm font-semibold text-text-primary">
-            {DATA_LAB_LABELS.tableSectionTitle}
+            {localize(DATA_LAB_LABELS.tableSectionTitle)}
           </h3>
           <DataLabTable
             table={{ columns: table.columns, rows }}
@@ -393,11 +404,11 @@ export default function DataLabView({
     <section className={cn('flex h-full w-full flex-col gap-4 p-4', className)}>
       <header className="flex flex-col gap-1">
         <h2 className="text-base font-semibold text-text-primary">
-          {title ?? DATA_LAB_LABELS.title}
+          {title ?? localize(DATA_LAB_LABELS.title)}
         </h2>
         {table ? (
           <p className="text-xs text-text-secondary">
-            {formatDataLabLabel('summaryRows', {
+            {localize(DATA_LAB_LABELS.summaryRows, {
               0: table.rows.length,
               1: table.columns.length,
             })}

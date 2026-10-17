@@ -1,7 +1,10 @@
 import { Button, Chip, Progress } from '@librechat/client';
 import { AlertTriangle, Check, Circle, Loader2, Pause, Play, X } from 'lucide-react';
 import type { ResearchPlan, ResearchStatus, StepStatus } from './types';
-import { DEEP_RESEARCH_LABELS as L, formatDeepResearchLabel } from './labels';
+import { DEEP_RESEARCH_LABELS, type DeepResearchLabelKey } from './labels';
+import { useLocalize } from '~/hooks';
+
+type Localize = ReturnType<typeof useLocalize>;
 
 export type ProgressTimelineProps = {
   plan: ResearchPlan;
@@ -23,13 +26,13 @@ const STEP_TONE: Record<StepStatus, ChipTone> = {
   skipped: 'neutral',
 };
 
-const STEP_LABEL: Record<StepStatus, string> = {
-  pending: L.stepStatusPending,
-  running: L.stepStatusRunning,
-  paused: L.stepStatusPaused,
-  completed: L.stepStatusCompleted,
-  failed: L.stepStatusFailed,
-  skipped: L.stepStatusSkipped,
+const STEP_LABEL: Record<StepStatus, DeepResearchLabelKey> = {
+  pending: 'stepStatusPending',
+  running: 'stepStatusRunning',
+  paused: 'stepStatusPaused',
+  completed: 'stepStatusCompleted',
+  failed: 'stepStatusFailed',
+  skipped: 'stepStatusSkipped',
 };
 
 function StepIcon({ status }: { status: StepStatus }) {
@@ -57,33 +60,34 @@ function buildAnnouncement(
   plan: ResearchPlan,
   status: ResearchStatus,
   activeStepId: string | null,
+  localize: Localize,
 ): string {
   const total = plan.steps.length;
   const completed = plan.steps.filter((step) => step.status === 'completed').length;
   if (status === 'completed') {
-    return formatDeepResearchLabel('completedAnnouncement', { completed, total });
+    return localize(DEEP_RESEARCH_LABELS.completedAnnouncement, { completed, total });
   }
   if (status === 'cancelled') {
-    return L.cancelledAnnouncement;
+    return localize(DEEP_RESEARCH_LABELS.cancelledAnnouncement);
   }
   const index = plan.steps.findIndex((step) => step.id === activeStepId);
   const step = index >= 0 ? plan.steps[index] : undefined;
   if (status === 'paused' && step) {
-    return formatDeepResearchLabel('pausedAnnouncement', {
+    return localize(DEEP_RESEARCH_LABELS.pausedAnnouncement, {
       current: index + 1,
       total,
       title: step.title,
     });
   }
   if (status === 'running' && step) {
-    return formatDeepResearchLabel('runningAnnouncement', {
+    return localize(DEEP_RESEARCH_LABELS.runningAnnouncement, {
       current: index + 1,
       total,
       title: step.title,
       progress: Math.round(step.progress * 100),
     });
   }
-  return formatDeepResearchLabel('progressSummary', { completed, total });
+  return localize(DEEP_RESEARCH_LABELS.progressSummary, { completed, total });
 }
 
 /**
@@ -100,16 +104,19 @@ export default function ProgressTimeline({
   onResume,
   onCancel,
 }: ProgressTimelineProps) {
+  const localize = useLocalize();
   const completed = plan.steps.filter((step) => step.status === 'completed').length;
   const total = plan.steps.length;
-  const announcement = buildAnnouncement(plan, status, activeStepId);
+  const announcement = buildAnnouncement(plan, status, activeStepId, localize);
 
   return (
     <div className="flex flex-col gap-3" data-testid="deep-research-progress">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-text-primary">{L.progressHeading}</h3>
+        <h3 className="text-sm font-semibold text-text-primary">
+          {localize(DEEP_RESEARCH_LABELS.progressHeading)}
+        </h3>
         <p className="text-xs tabular-nums text-text-secondary">
-          {formatDeepResearchLabel('progressSummary', { completed, total })}
+          {localize(DEEP_RESEARCH_LABELS.progressSummary, { completed, total })}
         </p>
       </div>
 
@@ -117,7 +124,10 @@ export default function ProgressTimeline({
         {announcement}
       </p>
 
-      <ol aria-label={L.progressHeading} className="flex list-none flex-col gap-2 p-0">
+      <ol
+        aria-label={localize(DEEP_RESEARCH_LABELS.progressHeading)}
+        className="flex list-none flex-col gap-2 p-0"
+      >
         {plan.steps.map((step, index) => {
           const isActive = step.id === activeStepId;
           return (
@@ -132,13 +142,13 @@ export default function ProgressTimeline({
                   {step.title}
                 </span>
                 <Chip tone={STEP_TONE[step.status]} size="sm">
-                  {STEP_LABEL[step.status]}
+                  {localize(DEEP_RESEARCH_LABELS[STEP_LABEL[step.status]])}
                 </Chip>
               </div>
               {isActive || step.status === 'running' || step.status === 'paused' ? (
                 <Progress
                   value={Math.round(step.progress * 100)}
-                  aria-label={`${L.stepTitleLabel} ${index + 1}`}
+                  aria-label={`${localize(DEEP_RESEARCH_LABELS.stepTitleLabel)} ${index + 1}`}
                 />
               ) : null}
               {step.detail ? <p className="text-xs text-text-secondary">{step.detail}</p> : null}
@@ -154,19 +164,19 @@ export default function ProgressTimeline({
         {status === 'running' ? (
           <Button type="button" variant="outline" size="sm" onClick={onPause}>
             <Pause className="size-4" aria-hidden="true" />
-            {L.pause}
+            {localize(DEEP_RESEARCH_LABELS.pause)}
           </Button>
         ) : null}
         {status === 'paused' ? (
           <Button type="button" variant="default" size="sm" onClick={onResume}>
             <Play className="size-4" aria-hidden="true" />
-            {L.resume}
+            {localize(DEEP_RESEARCH_LABELS.resume)}
           </Button>
         ) : null}
         {status === 'running' || status === 'paused' ? (
           <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
             <X className="size-4" aria-hidden="true" />
-            {L.cancel}
+            {localize(DEEP_RESEARCH_LABELS.cancel)}
           </Button>
         ) : null}
       </div>

@@ -3,15 +3,21 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, within, fireEvent } from '@testing-library/react';
 import type { TSkillNode } from 'librechat-data-provider';
 import SkillTreeWorkspace from '../SkillTreeWorkspace';
+import { SKILL_TREE_LABELS } from '../labels';
+import i18n from '~/locales/i18n';
+
+const t = i18n.t.bind(i18n) as (k: string, o?: import('i18next').TOptions) => string;
+const mockT = t;
 
 const mockTreeQuery = jest.fn();
 const mockSkillQuery = jest.fn();
 const mockContentQuery = jest.fn();
 
 jest.mock('@librechat/client', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const ReactMock = require('react');
   const passthrough =
-    (tag: string, displayName: string) =>
+    (tag: string, _displayName: string) =>
     ({ children, asChild: _a, variant: _v, size: _s, shape: _sh, ...rest }: any) => {
       const { ...props } = rest;
       return ReactMock.createElement(tag, props, children);
@@ -62,7 +68,7 @@ jest.mock('~/data-provider', () => ({
 
 jest.mock('~/hooks', () => ({
   __esModule: true,
-  useLocalize: () => (key: string) => key,
+  useLocalize: () => (key: string, options?: import('i18next').TOptions) => mockT(key, options),
   useSkillPermissions: () => ({ canEdit: true, isLoading: false }),
 }));
 
@@ -100,7 +106,10 @@ function renderWorkspace() {
 
 describe('SkillTreeWorkspace', () => {
   beforeEach(() => {
-    mockSkillQuery.mockReturnValue({ isLoading: false, data: { _id: 'skill-1', author: 'user-1' } });
+    mockSkillQuery.mockReturnValue({
+      isLoading: false,
+      data: { _id: 'skill-1', author: 'user-1' },
+    });
     mockContentQuery.mockReturnValue({
       isLoading: false,
       isError: false,
@@ -129,7 +138,7 @@ describe('SkillTreeWorkspace', () => {
 
     renderWorkspace();
 
-    expect(screen.getByText('No supporting files yet')).toBeInTheDocument();
+    expect(screen.getByText(t(SKILL_TREE_LABELS.noFiles))).toBeInTheDocument();
   });
 
   it('renders nodes in server order with folders first', () => {
@@ -174,15 +183,13 @@ describe('SkillTreeWorkspace', () => {
 
     renderWorkspace();
 
-    expect(screen.getByText('Failed to load skill files')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'com_ui_retry' }));
+    expect(screen.getByText(t(SKILL_TREE_LABELS.treeLoadError))).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: t('com_ui_retry') }));
     expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   it('loads node content when a file is selected', () => {
-    mockTreeQuery.mockReturnValue(
-      loadedTree([node({ _id: 'notes.txt', name: 'notes.txt' })]),
-    );
+    mockTreeQuery.mockReturnValue(loadedTree([node({ _id: 'notes.txt', name: 'notes.txt' })]));
 
     renderWorkspace();
 

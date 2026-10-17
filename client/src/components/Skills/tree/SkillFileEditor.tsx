@@ -63,7 +63,7 @@ export default function SkillFileEditor({
     onError: (mutationError) => {
       showToast({
         status: 'error',
-        message: messageOf(mutationError, SKILL_TREE_LABELS.saveFailed),
+        message: messageOf(mutationError, localize(SKILL_TREE_LABELS.saveFailed)),
       });
     },
   });
@@ -81,7 +81,7 @@ export default function SkillFileEditor({
   const isDirty = localContent !== null && localContent !== serverContent;
   const saveError =
     updateContent.isError && updateContent.variables?.nodeId === nodeId
-      ? messageOf(updateContent.error, SKILL_TREE_LABELS.saveFailed)
+      ? messageOf(updateContent.error, localize(SKILL_TREE_LABELS.saveFailed))
       : null;
 
   const handleChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -174,7 +174,7 @@ export default function SkillFileEditor({
   const lineCount = displayContent.split('\n').length;
   let readOnlyNote: string | null = null;
   if (isBody) {
-    readOnlyNote = SKILL_TREE_LABELS.skillMdReadonly;
+    readOnlyNote = localize(SKILL_TREE_LABELS.skillMdReadonly);
   } else if (!canEdit) {
     readOnlyNote = localize('com_ui_skill_no_edit_permission');
   }

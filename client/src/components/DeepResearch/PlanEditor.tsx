@@ -2,7 +2,8 @@ import { useId } from 'react';
 import { Button, EmptyState, FieldMessage, Input } from '@librechat/client';
 import { ArrowDown, ArrowUp, ListChecks, Plus, Trash2 } from 'lucide-react';
 import type { ResearchPlan } from './types';
-import { DEEP_RESEARCH_LABELS as L } from './labels';
+import { DEEP_RESEARCH_LABELS } from './labels';
+import { useLocalize } from '~/hooks';
 
 export type PlanEditorProps = {
   plan: ResearchPlan;
@@ -38,6 +39,7 @@ export default function PlanEditor({
   onRenameStep,
   onMoveStep,
 }: PlanEditorProps) {
+  const localize = useLocalize();
   const baseId = useId();
   const emptyStepIds = findEmptyStepIds(plan);
 
@@ -45,7 +47,7 @@ export default function PlanEditor({
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1.5 rounded-xl border border-border-light bg-surface-secondary p-4">
         <label htmlFor={`${baseId}-topic`} className="text-sm font-medium text-text-primary">
-          {L.planTopicLabel}
+          {localize(DEEP_RESEARCH_LABELS.planTopicLabel)}
         </label>
         <Input
           id={`${baseId}-topic`}
@@ -58,18 +60,21 @@ export default function PlanEditor({
       {plan.steps.length === 0 ? (
         <EmptyState
           icon={ListChecks}
-          title={L.planEmptyTitle}
-          description={L.planEmptyDescription}
+          title={localize(DEEP_RESEARCH_LABELS.planEmptyTitle)}
+          description={localize(DEEP_RESEARCH_LABELS.planEmptyDescription)}
           action={
             <Button type="button" variant="outline" size="sm" onClick={onAddStep}>
               <Plus className="size-4" aria-hidden="true" />
-              {L.addStep}
+              {localize(DEEP_RESEARCH_LABELS.addStep)}
             </Button>
           }
         />
       ) : (
         <>
-          <ol aria-label={L.planHeading} className="flex list-none flex-col gap-2 p-0">
+          <ol
+            aria-label={localize(DEEP_RESEARCH_LABELS.planHeading)}
+            className="flex list-none flex-col gap-2 p-0"
+          >
             {plan.steps.map((step, index) => {
               const isEmpty = emptyStepIds.includes(step.id);
               const inputId = `${baseId}-step-${step.id}`;
@@ -90,25 +95,28 @@ export default function PlanEditor({
                     </span>
                     <div className="flex min-w-0 flex-1 flex-col gap-1">
                       <label htmlFor={inputId} className="sr-only">
-                        {`${L.stepTitleLabel} ${index + 1}`}
+                        {`${localize(DEEP_RESEARCH_LABELS.stepTitleLabel)} ${index + 1}`}
                       </label>
                       <Input
                         id={inputId}
                         value={step.title}
                         disabled={disabled}
-                        placeholder={L.stepTitlePlaceholder}
+                        placeholder={localize(DEEP_RESEARCH_LABELS.stepTitlePlaceholder)}
                         aria-invalid={isEmpty || undefined}
                         aria-describedby={isEmpty ? messageId : undefined}
                         onChange={(event) => onRenameStep(step.id, event.target.value)}
                       />
-                      <FieldMessage id={messageId} message={isEmpty ? L.stepTitleRequired : null} />
+                      <FieldMessage
+                        id={messageId}
+                        message={isEmpty ? localize(DEEP_RESEARCH_LABELS.stepTitleRequired) : null}
+                      />
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon-sm"
-                        aria-label={L.moveStepUp}
+                        aria-label={localize(DEEP_RESEARCH_LABELS.moveStepUp)}
                         disabled={disabled || isFirst}
                         onClick={() => onMoveStep(step.id, 'up')}
                       >
@@ -118,7 +126,7 @@ export default function PlanEditor({
                         type="button"
                         variant="ghost"
                         size="icon-sm"
-                        aria-label={L.moveStepDown}
+                        aria-label={localize(DEEP_RESEARCH_LABELS.moveStepDown)}
                         disabled={disabled || isLast}
                         onClick={() => onMoveStep(step.id, 'down')}
                       >
@@ -128,7 +136,7 @@ export default function PlanEditor({
                         type="button"
                         variant="ghost"
                         size="icon-sm"
-                        aria-label={L.removeStep}
+                        aria-label={localize(DEEP_RESEARCH_LABELS.removeStep)}
                         disabled={disabled}
                         onClick={() => onRemoveStep(step.id)}
                       >
@@ -150,7 +158,7 @@ export default function PlanEditor({
               disabled={disabled}
             >
               <Plus className="size-4" aria-hidden="true" />
-              {L.addStep}
+              {localize(DEEP_RESEARCH_LABELS.addStep)}
             </Button>
           </div>
         </>

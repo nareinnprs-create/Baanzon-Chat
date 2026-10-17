@@ -2,8 +2,9 @@ import { useMemo } from 'react';
 import { EmptyState } from '@librechat/client';
 import { ArrowDown, ArrowUp, ArrowUpDown, Table2 } from 'lucide-react';
 import type { DataTable, SortState } from './types';
-import { DATA_LAB_LABELS, formatDataLabLabel } from './labels';
 import { formatCell, sortRows } from './analysis';
+import { DATA_LAB_LABELS } from './labels';
+import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
 interface DataLabTableProps {
@@ -55,8 +56,9 @@ export default function DataLabTable({
   emptyLabel,
   className,
 }: DataLabTableProps) {
+  const localize = useLocalize();
   const rows = useMemo(() => sortRows(table.rows, sort, table.columns), [table, sort]);
-  const message = emptyLabel ?? DATA_LAB_LABELS.tableEmpty;
+  const message = emptyLabel ?? localize(DATA_LAB_LABELS.tableEmpty);
 
   if (table.columns.length === 0 || rows.length === 0) {
     return <EmptyState icon={Table2} title={message} className={className} />;
@@ -65,7 +67,7 @@ export default function DataLabTable({
   return (
     <div className={cn('w-full overflow-x-auto', className)}>
       <table className="w-full border-collapse text-left text-sm">
-        <caption className="sr-only">{caption ?? DATA_LAB_LABELS.tableCaption}</caption>
+        <caption className="sr-only">{caption ?? localize(DATA_LAB_LABELS.tableCaption)}</caption>
         <thead className="border-b border-border-medium text-xs text-text-secondary">
           <tr>
             {table.columns.map((column) => (
@@ -78,7 +80,7 @@ export default function DataLabTable({
                 <button
                   type="button"
                   onClick={() => onSortChange(nextSort(sort, column.key))}
-                  aria-label={formatDataLabLabel('sortBy', { 0: column.label })}
+                  aria-label={localize(DATA_LAB_LABELS.sortBy, { 0: column.label })}
                   className="inline-flex items-center gap-1 rounded px-1 py-0.5 hover:bg-surface-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring-primary"
                 >
                   <span>{column.label}</span>
