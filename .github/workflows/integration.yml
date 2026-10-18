@@ -25,7 +25,36 @@
 # test:s3-integration is deliberately NOT run here: it needs a real AWS bucket
 # (AWS_TEST_BUCKET_NAME) plus credentials, i.e. repository secrets, and self-skips
 # when they are absent - a step would only ever report green having run nothing.
-# That is the same "no secrets referenced" boundary test.yml draws.
+# That is the same "no secrets referenced" boundary test.yml draws. For the same
+# reason no `src/admin`, `src/code`, `src/middleware`, `src/storage` or `src/utils`
+# integration spec is selected here: those suites would need their own service or
+# secret matrix, and a selector that matches nothing is a step that only ever reports
+# green having run nothing.
+#
+# NO `api/data/auth.json` / `api/test/.env.test` PREP HERE — DELIBERATE
+# test.yml, release.yml and validate.yml all prepare those two files before running
+# jest. This job does not need them and the step is deliberately absent rather than
+# copied: the suites here run against `packages/api/jest.config.mjs`, whose
+# setupFiles are `<rootDir>/jest.setup.cjs` (a `globalThis.File` polyfill) and
+# `config/jest.setup.logging.cjs` — neither reads a repo-root env file, and
+# `api/test/.env.test` is loaded by `api/jest.config.js`, which this job never loads.
+# The agents suites bring their own in-memory MongoDB; the Redis-backed ones read the
+# job env below. Add the prep only if a spec here starts needing it.
+#
+# SELECTORS VERIFIED AGAINST THE TREE (not assumed)
+# Each selector was resolved with `npm run <script> -- --listTests` from
+# packages/api; a selector matching no file would make jest exit 1 with
+# "No tests found" and take the aggregate red, so the counts below are the floor:
+#   cache   src/cache/...    -> 6 spec files
+#   cluster src/cluster/...  -> 1 spec file
+#   mcp     src/mcp/...      -> 7 spec files
+#   stream  src/stream/...   -> 8 spec files
+#   agents  src/agents/...   -> 6 spec files
+# `mongodb-memory-server` is not a dependency of packages/api — it is declared by
+# `api/package.json` and `packages/data-schemas/package.json` and reaches these specs
+# through npm's hoisting into the workspace root. That works, and it is the reason the
+# agents suite can run at all; a manifest change that stops hoisting it turns these
+# six files into "Cannot find module 'mongodb-memory-server'".
 #
 # Same fail-closed contract as test.yml: one step per script with
 # continue-on-error, then an always() aggregate that turns any non-success outcome

@@ -1,8 +1,16 @@
 export default {
-  collectCoverage: true,
+  /**
+   * Coverage is on by default and enforced by the `coverageThreshold` below;
+   * `scripts/validate.mjs` re-checks the floor from
+   * `coverage/coverage-summary.json` and fails the run on a miss.
+   * `VALIDATE_NO_COVERAGE=1` (`validate.mjs --no-coverage`) turns it off — the
+   * root `test:*` script delegates through a nested `npm run` that rejects
+   * forwarded flags, so `--coverage=false` cannot be forwarded to jest.
+   */
+  collectCoverage: process.env.VALIDATE_NO_COVERAGE !== '1',
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}', '!<rootDir>/node_modules/'],
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/'],
-  coverageReporters: ['text', 'cobertura'],
+  coverageReporters: ['text', 'cobertura', 'json-summary'],
   /**
    * Floors sit two points below the measured suite coverage
    * (statements 57.17 / branches 50.98 / functions 49.67 / lines 56.77), so a

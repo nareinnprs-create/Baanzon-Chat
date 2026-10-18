@@ -19,11 +19,17 @@
 #   The environment may be unable to run a browser lane at all — a runner that blocks
 #   the Playwright browser download, or no build output. A probe step records
 #   `can_run`; when it is false the run step is skipped and the aggregate reports SKIP
-#   and exits 0. A *real* spec failure is still a failure: the run step carries
-#   `continue-on-error` only so the aggregate can report it, and the aggregate is what
-#   fails the job (the fail-closed contract test.yml/integration.yml/typecheck.yml use).
+#   and exits 0, with a `[!WARNING]` block in the job summary so a lane that ran
+#   nothing is never mistaken for a lane that passed. A *real* spec failure is still a
+#   failure: the run step carries `continue-on-error` only so the aggregate can report
+#   it, and the aggregate is what fails the job (the fail-closed contract
+#   test.yml/integration.yml/typecheck.yml use).
+#   A client build that emits an empty shell (index.html with no script entry) is NOT
+#   one of those skips — the probe fails the job on it, so a broken build can never be
+#   laundered into a green SKIP.
 #   The Lighthouse job is `continue-on-error` at the job level and never blocks: its
-#   scores are advisory until they prove deterministic in this repo.
+#   scores are advisory until they prove deterministic in this repo (see the job's
+#   comment for the exact reason).
 #
 # No secrets are referenced.
 
@@ -104,6 +110,15 @@ jobs:
             elif [ ! -f client/dist/index.html ]; then
               can_run=false
               echo "::notice::client/dist/index.html is missing — skipping the e2e lane."
+            elif ! grep -q '<script' client/dist/index.html; then
+              # Not a skip and not a "the lane cannot run here" case: a client build
+              # that emits an index.html with no script entry produced an empty shell
+              # (observed when `vite build` fails at the bundle stage but still
+              # writes the HTML shell). The specs would then fail on `toHaveURL`
+              # with a bare "never navigated to /login", hiding the real cause, so
+              # fail the job here and name the build as the culprit.
+              echo "::error::client/dist/index.html has no <script> entry — the client build produced an empty shell. Read the 'Build the workspace packages and the client' step above."
+              exit 1
             fi
           fi
           echo "can_run=$can_run" >> "$GITHUB_OUTPUT"
@@ -127,13 +142,23 @@ jobs:
         run: |
           if [ "${{ steps.probe.outputs.can_run }}" != "true" ]; then
             printf 'SKIP  Playwright smoke + axe (environment cannot run the lane)\n'
+            # A skip is a green job, so it must be loud here or it is invisible in
+            # the checks list: the run log is the only place the reason survives.
+            {
+              echo '> [!WARNING]'
+              echo '> **Playwright smoke + axe did not run** — this job is green without'
+              echo '> having executed a single spec. Check the probe step for the reason'
+              echo '> (Playwright browser download blocked, or no client build output).'
+            } >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           if [ "${{ steps.playwright.outcome }}" = "success" ]; then
             printf 'PASS  Playwright smoke + axe\n'
+            echo 'Playwright smoke + axe: **PASS**' >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           printf 'FAIL  Playwright smoke + axe\n'
+          echo 'Playwright smoke + axe: **FAIL** (see the run step and the uploaded report)' >> "$GITHUB_STEP_SUMMARY"
           exit 1
 
       - name: Upload the Playwright report and traces
@@ -170,6 +195,22 @@ jobs:
     # Only when the client was built here (a remote E2E_BASE_URL leaves no dist to
     # serve) and the e2e environment ran. `continue-on-error` at the job level keeps
     # this lane advisory: it reports scores and budgets, it never blocks a merge.
+    #
+    # WHY ADVISORY, EXACTLY (continue-on-error is a statement about the environment,
+    # not a way to make a red build green):
+    #   1. It needs two things a bare `npm ci` checkout does not provide: the Chrome
+    #      binary that ubuntu-latest preinstalls (lhci audits with it; no Playwright
+    #      download happens here), and the `client-dist` artifact produced by the e2e
+    #      job above. Remove either and the run fails for a reason that says nothing
+    #      about this repository's performance or accessibility.
+    #   2. Scores from a static stub server are not a budget gate: numberOfRuns is 2,
+    #      the budgets in lighthouserc.json are deliberately loose
+    #      (a11y 0.9 error, perf 0.3 warn), and the served page is an unauthenticated
+    #      login surface, not a product page. Treat the numbers as a trend, not a gate.
+    #   The signal is NOT dropped: the job still runs, still logs every assertion, and
+    #   `npx lhci autorun` writes its full report to e2e/lighthouse-report, uploaded
+    #   below with the scores. GitHub renders the check as non-blocking rather than
+    #   hiding it. Promote it to gating once the scores are stable across runs.
     if: ${{ vars.E2E_BASE_URL == '' && needs.e2e.outputs.can_run == 'true' }}
     continue-on-error: true
     runs-on: ubuntu-latest

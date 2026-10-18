@@ -4,13 +4,25 @@
 # The harness orders steps, stops at the first gating failure, reports pass/fail
 # per step, and treats `audit` as non-gating unless `--strict` is passed.
 #
+# Every lane passes `--coverage` explicitly. It is the harness default today, but
+# a gate that only holds because of a default is a gate nobody can see; naming
+# it in the workflow makes the intent reviewable here. Each of the seven unit
+# suites leaves `coverage/coverage-summary.json` behind, and the harness
+# re-checks it against the `coverageThreshold` in that workspace's jest config,
+# so a regression under the floor fails the run rather than being reported.
+#
 # Lanes:
 # - validate-static: fast gate on PRs/pushes (build + typecheck + static-checks).
-#   Maps to `npm run validate:static` (which passes `--only build,typecheck,static-checks`).
+#   Maps to `npm run validate:static` (which passes `--only build,typecheck,static-checks`),
+#   plus a `node scripts/validate.mjs --only coverage --audit-thresholds` step so
+#   the lane fails a threshold that rotted to 0/0. It runs no suites, so it
+#   cannot compare coverage numbers: that is validate-changed's and
+#   validate-full's job.
 # - validate-changed: diff-scoped validation on PRs to avoid full-suite cost.
-#   Maps to `npm run validate:changed` (`--changed`).
-# - validate-full: full matrix on the default branch and on a weekly schedule.
-#   Maps to `npm run validate` (no flags). This runs all suites in order.
+#   Maps to `npm run validate:changed` (`--changed`). Runs the suites the diff
+#   touched, with coverage, so the gate is enforced per pull request.
+# - validate-full: full matrix on the default branches and on a weekly schedule.
+#   Maps to `npm run validate -- --coverage`. Runs all suites in order.
 
 name: Validate
 
@@ -70,6 +82,14 @@ jobs:
       - name: Run static validation
         run: npm run validate:static
 
+      - name: Audit coverage thresholds
+        # Cheap half of the coverage gate, in the lane that cannot run suites:
+        # reads all seven jest configs and fails if one lost its threshold or
+        # dropped it to 0 on every metric. Without this the static lane would
+        # skip coverage silently. Invoked directly rather than through
+        # validate:static, which would re-run build + typecheck + static-checks.
+        run: node scripts/validate.mjs --only coverage --audit-thresholds
+
   validate-changed:
     name: Changed validation
     if: github.event_name == 'pull_request'
@@ -103,11 +123,14 @@ jobs:
         run: npm install -g depcheck@1.4.7
 
       - name: Run changed validation against base
-        run: npm run validate:changed -- --against ${{ github.base_ref }}
+        run: npm run validate:changed -- --against ${{ github.base_ref }} --coverage
 
   validate-full:
     name: Full validation matrix
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev') || github.event_name == 'schedule'
+    # The default branches this fork cuts from, plus the weekly drift run. b1 is
+    # the integration branch NEXTROUND.md plans against, and a coverage gate that
+    # only ever ran weekly would let a regression sit for days.
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/b1' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev') || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -138,4 +161,4 @@ jobs:
         run: npm install -g depcheck@1.4.7
 
       - name: Run full validation
-        run: npm run validate
+        run: npm run validate -- --coverage

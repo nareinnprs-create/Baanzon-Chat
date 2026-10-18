@@ -15,7 +15,9 @@ module.exports = {
   roots: ['<rootDir>'],
   setupFiles: apiConfig.setupFiles.map((f) => path.resolve(apiDir, f)),
   moduleNameMapper: resolvedMapper,
-  /** collectCoverage is inherited from apiConfig; the source set is this
+  /** collectCoverage, coverageReporters (including json-summary) and
+   * coverageDirectory are inherited from apiConfig, so the env-aware
+   * `VALIDATE_NO_COVERAGE` switch applies here too; the source set is this
    * directory's maintenance scripts only. */
   collectCoverageFrom: ['*.js', '!jest.config.js'],
   /**
