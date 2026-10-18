@@ -136,12 +136,12 @@ Each phase: implement with ≥7 agents/subagents in parallel → typecheck → f
 |-------|--------|--------------------|--------|
 | P1 RAG completion | **done** | ~76% | `267d683` |
 | P2 Hardening | **done** (branding/docker/engines/license/cleanup + secrets fail-fast P2.2, CSP/CORS P2.5, registration/email policy A14) | ~86% | `6bf52321`, `(this)` |
-| P3 Security/deps | partial (overrides `fast-uri`/`brace-expansion` fixed, P0/P1 bumps, dead nested override removed, lockfile synced; audited majors still staged) | ~88% | `6bf52321`, `(this)` |
+| P3 Security/deps | partial (overrides `fast-uri`/`brace-expansion` fixed, P0/P1 bumps, dead nested override removed, lockfile synced; **audited audit re-run: 0 critical / 21 high (5 prod), `tmp` pinned via override, jest/dompurify bumped**; still staged: React 19, Tailwind 4, zod 4, react-query 5, i18next 25, and the ineffective `monaco-editor`→`dompurify` override — see `docs/launch-readiness.md`) | ~88% | `6bf52321`, `5760eddc9` |
 | P4 UX shell | **done** (P4.1 ⌘K palette + P4.2 Home/onboarding + P4.3 in-conversation find + P4.4 PDF export w/ citations + P4.5 notifications/Activity Center w/ SSE realtime + polling fallback) | ~95% | `e6f623e1e`→`2ec8ee600` |
 | P5 UX capability | **done** (P5.1 Canvas workspace + P5.2 realtime voice + P5.3 Deep Research + P5.4 Data Lab + P5.5 offline queue + P5.6 workflow engine **and** builder UI, each with RTL coverage) | ~97% | `ae02d93dc`, `150cf602b`, `7b517d600` |
-| P6 Tests/CI-CD | partial (P6.1 coverage + P6.2/P6.2b/P6.2c tests + **P6.3 e2e/axe/Lighthouse lanes** + P6.4 integration CI + P6.5 CD all present; remaining: prove CI green on a real diff + enforce the coverage gate) | ~97% | `(this)` |
-| P7 Data/sandbox | partial (P7.1 pgvector + wired, P7.2 migration ledger, P7.3 **§45 entities complete** — batches 1–3 incl. devices, subscriptions, usage_records, feedback, P7.4 `managed` sandbox; remaining: org→workspace→project tenant hierarchy) | ~98% | `557a9c45d` |
-| P8 Validation | partial (local harness `scripts/validate.mjs` + `docs/validation.md` shipped; full matrix + final report pending) | — | `511bc7d0a` |
+| P6 Tests/CI-CD | partial (P6.1 coverage + P6.2 tests + **P6.3 e2e/axe/Lighthouse lanes audited: 51/51 referenced commands exist, all action SHAs pinned and verified** + P6.4 integration CI runnable + P6.5 CD consistent; **coverage gate now gating in `scripts/validate.mjs`** — remaining: prove CI green on a real diff, execute the gate with suites behind it) | ~98% | `5760eddc9` |
+| P7 Data/sandbox | partial (P7.1 pgvector + wired, P7.2 migration ledger, P7.3 **§45 entities complete**, P7.4 `managed` sandbox; **org + workspace handlers/routes/client Tenant feature shipped**; remaining: the project→workspace link — `schema/chatProject.ts` has no `workspace` field, so a project cannot be scoped to a workspace) | ~99% | `557a9c45d`, `eab9420f7`, `a8c20cbc7` |
+| P8 Validation | partial (harness + `docs/validation.md` + **gating coverage step** + **per-dimension readiness report `docs/launch-readiness.md`**; remaining: one end-to-end matrix run on a real diff) | — | `511bc7d0a`, `5760eddc9`, `46f38689e` |
 
 **P5/P7/P8 evidence (2026-10-17, `7b517d600`):** entity routes/services (`devices`,
 `subscriptions`, `usage-records`, `feedback`) and workflow run routes wired; notification producers
@@ -152,6 +152,22 @@ DeepResearch **73** (with DataLab pure), CommandPalette **8**, routes **30**; `p
 devices/subscriptions/usageRecords/feedback/workflows/notifications **129**; `packages/data-schemas`
 device/subscription/usageRecord/feedback **65**. `tsc --noEmit` clean in `client`, `packages/api`,
 `packages/data-schemas`; eslint clean; `sort-imports:check` + prettier clean; i18n gate green.
+
+**P6/P7/P8 evidence (2026-10-18, `eab9420f7`→`5760eddc9`):** tenant hierarchy first two links —
+`packages/api/src/{organizations,workspaces}` handlers + specs, `api/server/routes/{organizations,workspaces}.js`,
+and the client Tenant feature (feature-owned Jotai atoms, `TenantSwitcher`, `useTenantDirectory`, 16 localized keys).
+Coverage gate is now a gating step in `scripts/validate.mjs` (fails on a missing summary, a NaN metric, a metric under
+floor, or an all-zero threshold); all seven Jest configs emit `json-summary`, and the `packages/client` thresholds an
+earlier pass had zeroed were restored. CI audit: 10 workflows, **51/51 referenced commands exist**, every action pinned
+to a verified 40-hex SHA. Green: `packages/api` organizations/workspaces/projects/notifications/workflows **124**;
+`client` routes + Tenant + DataLab **123**; `tsc --noEmit` clean in `packages/api` + `packages/data-schemas`; eslint
+clean; `sort-imports:check` (4794 files) + prettier clean; i18n gate green. Fixed: the Data Lab root section now carries
+an `aria-label` so `/data-lab` exposes a `region` landmark, regression-locked in `featureRoutes.spec.tsx`.
+
+**Environment caveat:** `client` typecheck and `build:client` fail on this machine because of a stray
+`C:\Users\manag\node_modules` outside the repo (its `@types/react@19.3.0` collides with the repo's `18.2.53`, and
+rolldown resolves `@emotion` from a half-finished install there). Proven environmental — the compiler names the
+path. The owner elected to leave that folder untouched; full detail in `docs/launch-readiness.md`.
 
 **P1 evidence (2026-10-15):** `packages/api` RAG suite 690/690; knowledge route 26/26;
 `tsc --noEmit` clean in `packages/api`, `packages/data-provider`, `packages/data-schemas`;
