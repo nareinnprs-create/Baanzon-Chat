@@ -8,7 +8,7 @@ and launch-ready.
 | Field                       | Value                                                                             |
 | --------------------------- | --------------------------------------------------------------------------------- |
 | Branch                      | `b1`                                                                              |
-| Head at report time         | `5760eddc9` (`eab9420f7`, `a8c20cbc7`, `5760eddc9` are this wave)                  |
+| Head at report time         | `5760eddc9` (`eab9420f7`, `a8c20cbc7`, `5760eddc9` are this wave)                 |
 | Report date                 | 2026-10-18                                                                        |
 | Source of truth for history | [`NEXTROUND.md`](../NEXTROUND.md) (phases P1–P8, decisions A1–A15, status ledger) |
 | Harness                     | [`scripts/validate.mjs`](validation.md)                                           |
