@@ -5,7 +5,15 @@ module.exports = {
   testEnvironmentOptions: {
     url: 'http://localhost:3080',
   },
-  collectCoverage: true,
+  /**
+   * Coverage is on by default and its `coverageThreshold` below is enforced —
+   * `scripts/validate.mjs` re-checks the floor from
+   * `coverage/coverage-summary.json` and fails the run on a miss. The root
+   * `test:*` script delegates through a nested `npm run` that rejects forwarded
+   * flags, so the harness cannot pass `--coverage=false` down to jest; it sets
+   * `VALIDATE_NO_COVERAGE=1` (`validate.mjs --no-coverage`) instead.
+   */
+  collectCoverage: process.env.VALIDATE_NO_COVERAGE !== '1',
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!<rootDir>/node_modules/',
@@ -43,7 +51,7 @@ module.exports = {
   workerIdleMemoryLimit: '800MB',
   restoreMocks: true,
   testResultsProcessor: 'jest-junit',
-  coverageReporters: ['text', 'cobertura', 'lcov'],
+  coverageReporters: ['text', 'cobertura', 'lcov', 'json-summary'],
   resolver: '<rootDir>/jest.resolver.cjs',
   transform: {
     '\\.[jt]sx?$': 'babel-jest',

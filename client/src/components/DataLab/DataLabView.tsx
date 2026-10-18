@@ -400,12 +400,15 @@ export default function DataLabView({
     );
   }
 
+  const heading = title ?? localize(DATA_LAB_LABELS.title);
+
   return (
-    <section className={cn('flex h-full w-full flex-col gap-4 p-4', className)}>
+    <section
+      aria-label={heading}
+      className={cn('flex h-full w-full flex-col gap-4 p-4', className)}
+    >
       <header className="flex flex-col gap-1">
-        <h2 className="text-base font-semibold text-text-primary">
-          {title ?? localize(DATA_LAB_LABELS.title)}
-        </h2>
+        <h2 className="text-base font-semibold text-text-primary">{heading}</h2>
         {table ? (
           <p className="text-xs text-text-secondary">
             {localize(DATA_LAB_LABELS.summaryRows, {

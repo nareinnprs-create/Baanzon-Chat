@@ -2977,5 +2977,21 @@
   "com_insights_invalid_date_range": "Choose an end date after the start date, within {{days}} days.",
   "com_insights_sparkline_accessibility": "{{label}} over time",
   "com_nav_mobile_drawer_strip": "Show chat beside the sidebar on mobile",
-  "com_nav_mobile_drawer_strip_info": "The sidebar stops short of the edge so a strip of the conversation stays visible. Tapping it closes the sidebar."
+  "com_nav_mobile_drawer_strip_info": "The sidebar stops short of the edge so a strip of the conversation stays visible. Tapping it closes the sidebar.",
+  "com_ui_tenant_organization": "Organization",
+  "com_ui_tenant_workspace": "Workspace",
+  "com_ui_tenant_project": "Project",
+  "com_ui_tenant_all_organizations": "All organizations",
+  "com_ui_tenant_all_workspaces": "All workspaces",
+  "com_ui_tenant_all_projects": "All projects",
+  "com_ui_tenant_scope_group": "Tenant scope",
+  "com_ui_tenant_loading": "Loading organizations, workspaces and projects...",
+  "com_ui_tenant_no_organizations_title": "No organizations",
+  "com_ui_tenant_no_organizations_description": "You are not a member of any organization yet.",
+  "com_ui_tenant_no_workspaces": "This organization has no workspaces you can access.",
+  "com_ui_tenant_no_projects": "This workspace has no projects you can access.",
+  "com_ui_tenant_select_organization_hint": "Select an organization to see its workspaces.",
+  "com_ui_tenant_select_workspace_hint": "Select a workspace to see its projects.",
+  "com_ui_tenant_load_error_title": "Could not load the tenant hierarchy",
+  "com_ui_tenant_load_error_description": "Organizations, workspaces and projects could not be loaded."
 }
