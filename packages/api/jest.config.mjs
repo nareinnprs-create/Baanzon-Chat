@@ -14,6 +14,15 @@ const esModules = [
 ].join('|');
 
 export default {
+  /**
+   * Coverage is on by default and enforced by the `coverageThreshold` below.
+   * `scripts/validate.mjs` reads `coverage/coverage-summary.json` back after the
+   * suite and fails the run on a missed floor. `VALIDATE_NO_COVERAGE=1`
+   * (`validate.mjs --no-coverage`) is the only way to turn it off, because the
+   * root `test:*` script delegates through a nested `npm run` that swallows
+   * appended flags.
+   */
+  collectCoverage: process.env.VALIDATE_NO_COVERAGE !== '1',
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}', '!<rootDir>/node_modules/'],
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/'],
   testPathIgnorePatterns: [
@@ -25,7 +34,7 @@ export default {
     '/__tests__/helpers/',
     '\\.manual\\.spec\\.[jt]sx?$',
   ],
-  coverageReporters: ['text', 'cobertura'],
+  coverageReporters: ['text', 'cobertura', 'json-summary'],
   testResultsProcessor: 'jest-junit',
   transform: {
     '\\.[jt]sx?$': [

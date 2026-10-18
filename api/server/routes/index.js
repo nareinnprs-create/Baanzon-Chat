@@ -25,6 +25,8 @@ const feedback = require('./feedback');
 const workflows = require('./workflows');
 const presets = require('./presets');
 const projects = require('./projects');
+const organizations = require('./organizations');
+const workspaces = require('./workspaces');
 const prompts = require('./prompts');
 const schedules = require('./schedules');
 const skills = require('./skills');
@@ -81,6 +83,8 @@ module.exports = {
   models,
   prompts,
   projects,
+  organizations,
+  workspaces,
   schedules,
   skills,
   actions,

@@ -70,6 +70,9 @@ export * from './actions';
 export * from './prompts';
 /* Projects */
 export * from './projects';
+/* Tenant hierarchy: organization -> workspace */
+export * from './organizations';
+export * from './workspaces';
 /* RAG / Knowledge */
 export * from './rag';
 /* Conversations */
