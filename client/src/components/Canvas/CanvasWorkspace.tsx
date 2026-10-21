@@ -9,6 +9,7 @@ import type {
   CanvasSelection,
   CanvasVersion,
 } from './types';
+import type { CanvasLabelKey } from './labels';
 import type { MoveBlockDirection } from './state';
 import type { EditSelectionFn } from './api';
 import {
@@ -25,6 +26,7 @@ import {
 } from './atoms';
 import VersionHistory from './VersionHistory';
 import { CANVAS_LABELS as L } from './labels';
+import { useLocalize } from '~/hooks';
 import CommentsPanel from './CommentsPanel';
 import CanvasEditor from './CanvasEditor';
 import SplitView from './SplitView';
@@ -49,20 +51,20 @@ export type CanvasWorkspaceProps = {
   className?: string;
 };
 
-function toErrorMessage(caught: unknown): string {
+function toErrorMessage(caught: unknown, fallback: string): string {
   if (caught instanceof Error && caught.message) {
     return caught.message;
   }
   if (typeof caught === 'string' && caught) {
     return caught;
   }
-  return L.failureDescription;
+  return fallback;
 }
 
-const RIGHT_TABS: ReadonlyArray<{ id: RightTab; label: string }> = [
-  { id: 'preview', label: L.previewTab },
-  { id: 'comments', label: L.commentsTab },
-  { id: 'versions', label: L.versionsTab },
+const RIGHT_TABS: ReadonlyArray<{ id: RightTab; labelKey: CanvasLabelKey }> = [
+  { id: 'preview', labelKey: L.previewTab },
+  { id: 'comments', labelKey: L.commentsTab },
+  { id: 'versions', labelKey: L.versionsTab },
 ];
 
 /**
@@ -81,6 +83,7 @@ export default function CanvasWorkspace({
   title,
   className,
 }: CanvasWorkspaceProps) {
+  const localize = useLocalize();
   const state = useAtomValue(canvasStateAtom);
   const document = useAtomValue(canvasDocumentAtom);
   const selection = useAtomValue(canvasSelectionAtom);
@@ -136,10 +139,13 @@ export default function CanvasWorkspace({
         if (controller.signal.aborted) {
           return;
         }
-        dispatch({ type: 'load_failure', error: toErrorMessage(caught) });
+        dispatch({
+          type: 'load_failure',
+          error: toErrorMessage(caught, localize(L.failureDescription)),
+        });
       });
     return () => controller.abort();
-  }, [dispatch, documentProp, reloadKey]);
+  }, [dispatch, documentProp, localize, reloadKey]);
 
   const handleSelectionChange = useCallback(
     (next: CanvasSelection | null) => dispatch({ type: 'set_selection', selection: next }),
@@ -162,25 +168,29 @@ export default function CanvasWorkspace({
         blockId,
         anchor: anchor ? { start: anchor.start, end: anchor.end, text: anchor.text } : null,
         body,
-        author: L.commentAuthorYou,
+        author: localize(L.commentAuthorYou),
         at: new Date().toISOString(),
       });
-      setAnnouncement(L.commentAdded);
+      setAnnouncement(localize(L.commentAdded));
     },
-    [dispatch, state.document],
+    [dispatch, localize, state.document],
   );
 
   const handleCreateVersion = useCallback(() => {
-    dispatch({ type: 'create_version', label: L.createVersion, at: new Date().toISOString() });
-    setAnnouncement(L.versionCreated);
-  }, [dispatch]);
+    dispatch({
+      type: 'create_version',
+      label: localize(L.createVersion),
+      at: new Date().toISOString(),
+    });
+    setAnnouncement(localize(L.versionCreated));
+  }, [dispatch, localize]);
 
   const handleRestoreVersion = useCallback(
     (versionId: string) => {
       dispatch({ type: 'restore_version', versionId });
-      setAnnouncement(L.versionRestored);
+      setAnnouncement(localize(L.versionRestored));
     },
-    [dispatch],
+    [dispatch, localize],
   );
 
   const handleMoveBlock = useCallback(
@@ -192,9 +202,9 @@ export default function CanvasWorkspace({
   const handleRemoveBlock = useCallback(
     (blockId: string) => {
       dispatch({ type: 'remove_block', blockId });
-      setAnnouncement(L.blockRemoved);
+      setAnnouncement(localize(L.blockRemoved));
     },
-    [dispatch],
+    [dispatch, localize],
   );
 
   let body;
@@ -202,7 +212,7 @@ export default function CanvasWorkspace({
     body = (
       <p role="status" className="flex items-center gap-2 p-6 text-sm text-text-secondary">
         <Spinner className="size-4" aria-hidden="true" />
-        {L.loading}
+        {localize(L.loading)}
       </p>
     );
   } else if (status === 'error') {
@@ -210,8 +220,8 @@ export default function CanvasWorkspace({
       <div role="alert" className="p-4">
         <EmptyState
           icon={TriangleAlert}
-          title={L.failureTitle}
-          description={error ?? L.failureDescription}
+          title={localize(L.failureTitle)}
+          description={error ?? localize(L.failureDescription)}
           action={
             <Button
               type="button"
@@ -219,7 +229,7 @@ export default function CanvasWorkspace({
               size="sm"
               onClick={() => setReloadKey((key) => key + 1)}
             >
-              {L.retry}
+              {localize(L.retry)}
             </Button>
           }
         />
@@ -230,8 +240,8 @@ export default function CanvasWorkspace({
       <div className="p-4">
         <EmptyState
           icon={Layers}
-          title={L.emptyTitle}
-          description={L.emptyDescription}
+          title={localize(L.emptyTitle)}
+          description={localize(L.emptyDescription)}
           action={
             <Button
               type="button"
@@ -240,7 +250,7 @@ export default function CanvasWorkspace({
               onClick={() => dispatch({ type: 'insert_block' })}
             >
               <Plus className="size-4" aria-hidden="true" />
-              {L.addFirstBlock}
+              {localize(L.addFirstBlock)}
             </Button>
           }
         />
@@ -249,8 +259,8 @@ export default function CanvasWorkspace({
   } else {
     body = (
       <SplitView
-        leftLabel={L.leftPane}
-        rightLabel={L.rightPane}
+        leftLabel={localize(L.leftPane)}
+        rightLabel={localize(L.rightPane)}
         left={
           <CanvasEditor
             document={document}
@@ -270,7 +280,7 @@ export default function CanvasWorkspace({
           <div className="flex h-full min-h-0 flex-col">
             <div
               role="tablist"
-              aria-label={L.sidePanelLabel}
+              aria-label={localize(L.sidePanelLabel)}
               className="flex shrink-0 items-center gap-1 border-b border-border-light p-2"
             >
               {RIGHT_TABS.map((entry) => (
@@ -287,7 +297,7 @@ export default function CanvasWorkspace({
                   className={cn(tab === entry.id && 'bg-surface-active-alt')}
                   onClick={() => setTab(entry.id)}
                 >
-                  {entry.label}
+                  {localize(entry.labelKey)}
                 </Button>
               ))}
             </div>
@@ -299,9 +309,11 @@ export default function CanvasWorkspace({
             >
               {tab === 'preview' ? (
                 <div className="flex h-full flex-col gap-3 overflow-auto p-4">
-                  <h3 className="text-sm font-semibold text-text-primary">{L.previewHeading}</h3>
+                  <h3 className="text-sm font-semibold text-text-primary">
+                    {localize(L.previewHeading)}
+                  </h3>
                   {document.blocks.length === 0 ? (
-                    <p className="text-sm text-text-secondary">{L.previewEmpty}</p>
+                    <p className="text-sm text-text-secondary">{localize(L.previewEmpty)}</p>
                   ) : (
                     document.blocks.map((block) => (
                       <p
@@ -350,16 +362,16 @@ export default function CanvasWorkspace({
 
   return (
     <section
-      aria-label={title ?? L.featureTitle}
+      aria-label={title ?? localize(L.featureTitle)}
       className={cn('flex h-full min-h-0 flex-col gap-4 p-4', className)}
     >
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <h2 className="flex items-center gap-2 text-base font-semibold text-text-primary">
             <Layers className="size-4 text-text-secondary" aria-hidden="true" />
-            {title ?? L.featureTitle}
+            {title ?? localize(L.featureTitle)}
           </h2>
-          <p className="text-sm text-text-secondary">{L.featureDescription}</p>
+          <p className="text-sm text-text-secondary">{localize(L.featureDescription)}</p>
         </div>
 
         {document ? (
@@ -368,7 +380,7 @@ export default function CanvasWorkspace({
               type="button"
               variant="ghost"
               size="icon-sm"
-              aria-label={L.undo}
+              aria-label={localize(L.undo)}
               disabled={!canUndo}
               onClick={() => dispatch({ type: 'undo' })}
             >
@@ -378,7 +390,7 @@ export default function CanvasWorkspace({
               type="button"
               variant="ghost"
               size="icon-sm"
-              aria-label={L.redo}
+              aria-label={localize(L.redo)}
               disabled={!canRedo}
               onClick={() => dispatch({ type: 'redo' })}
             >
@@ -391,10 +403,10 @@ export default function CanvasWorkspace({
               onClick={() => dispatch({ type: 'insert_block' })}
             >
               <Plus className="size-4" aria-hidden="true" />
-              {L.addBlock}
+              {localize(L.addBlock)}
             </Button>
             <Button type="button" variant="default" size="sm" onClick={handleCreateVersion}>
-              {L.createVersion}
+              {localize(L.createVersion)}
             </Button>
           </div>
         ) : null}

@@ -1,7 +1,15 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { CanvasComment, CanvasSelection } from '../types';
-import { CANVAS_LABELS as L } from '../labels';
+import type { TOptions } from 'i18next';
+import { CANVAS_LABELS } from '../labels';
 import CommentsPanel from '../CommentsPanel';
+import i18n from '~/locales/i18n';
+
+const t = i18n.t.bind(i18n) as (key: string, options?: TOptions) => string;
+const L = Object.fromEntries(
+  Object.entries(CANVAS_LABELS).map(([name, key]) => [name, t(key)]),
+) as Record<keyof typeof CANVAS_LABELS, string>;
+const anchored = (quote: string) => t(CANVAS_LABELS.commentAnchored, { quote });
 
 function makeComment(overrides: Partial<CanvasComment> = {}): CanvasComment {
   return {
@@ -43,7 +51,7 @@ describe('CommentsPanel', () => {
     };
     const handlers = renderPanel([], selection);
 
-    expect(screen.getByText('On “Hello”')).toBeInTheDocument();
+    expect(screen.getByText(anchored('Hello'))).toBeInTheDocument();
     const addButton = screen.getByRole('button', { name: L.addComment });
     expect(addButton).toBeDisabled();
 
@@ -80,6 +88,6 @@ describe('CommentsPanel', () => {
     const selection: CanvasSelection = { blockId: 'block-1', start: 0, end: 5, text: 'Hello' };
     renderPanel([makeComment({ anchor: null })], selection);
     expect(screen.getByText(L.commentNoAnchor)).toBeInTheDocument();
-    expect(screen.getByText('On “Hello”')).toBeInTheDocument();
+    expect(screen.getByText(anchored('Hello'))).toBeInTheDocument();
   });
 });

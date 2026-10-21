@@ -5,6 +5,12 @@ export interface IChatProject {
   name: string;
   description?: string;
   user: string;
+  /**
+   * Owning workspace as its ObjectId hex string, mirroring how
+   * `workspace.organizationId` is passed between the storage and API layers.
+   * Optional: pre-workspace projects and personal projects carry none.
+   */
+  workspaceId?: string;
   conversationCount: number;
   lastConversationAt?: Date | null;
   lastConversationId?: string | null;

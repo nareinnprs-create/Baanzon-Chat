@@ -36,8 +36,9 @@
  *
  * Mount it under a fresh Jotai `Provider` when you want isolated state per
  * mount (recommended in tests and for multiple concurrent instances); without
- * one it uses Jotai's default store. User-facing copy currently comes from
- * `./labels`; see the TODO(i18n) there.
+ * one it uses Jotai's default store. User-facing copy comes from
+ * `com_ui_canvas_*` keys in `client/src/locales/en/translation.json`, rendered
+ * through `useLocalize()`.
  */
 
 export { default as CanvasWorkspace } from './CanvasWorkspace';
@@ -60,7 +61,7 @@ export {
   describeVersionDiff,
   selectVersion,
 } from './state';
-export { CANVAS_LABELS, formatCanvasLabel } from './labels';
+export { CANVAS_LABELS } from './labels';
 export type { CanvasLabelKey } from './labels';
 export type { CanvasWorkspaceProps } from './CanvasWorkspace';
 export type { CanvasEditorProps } from './CanvasEditor';

@@ -177,14 +177,15 @@ describe('feature route shells mount', () => {
   it('mounts /canvas with its heading, landmark and the sample document', () => {
     render(<CanvasRoute />);
 
-    expect(screen.getByRole('region', { name: CANVAS_LABELS.featureTitle })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: CANVAS_LABELS.featureTitle })).toBeInTheDocument();
+    const title = t(CANVAS_LABELS.featureTitle);
+    expect(screen.getByRole('region', { name: title })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: title })).toBeInTheDocument();
 
     /* The route owns the injected document: with none, the workspace renders its
      * empty state instead, and this sample text is what proves the prop arrived. */
     expect(screen.getAllByText('Canvas workspace').length).toBeGreaterThan(0);
-    expect(screen.queryByText(CANVAS_LABELS.emptyTitle)).not.toBeInTheDocument();
-    expect(screen.queryByText(CANVAS_LABELS.loading)).not.toBeInTheDocument();
+    expect(screen.queryByText(t(CANVAS_LABELS.emptyTitle))).not.toBeInTheDocument();
+    expect(screen.queryByText(t(CANVAS_LABELS.loading))).not.toBeInTheDocument();
   });
 
   it('mounts /voice with its heading and the state for a browser without WebRTC', () => {

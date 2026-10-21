@@ -2,6 +2,7 @@ import { useCallback, useId, useRef, useState } from 'react';
 import type { KeyboardEvent, PointerEvent, ReactNode } from 'react';
 import { CANVAS_LABELS as L } from './labels';
 import { clamp } from '~/utils/canvas';
+import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
 export type SplitViewProps = {
@@ -41,6 +42,7 @@ export default function SplitView({
   stepPercent = 5,
   className,
 }: SplitViewProps) {
+  const localize = useLocalize();
   const baseId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
@@ -129,7 +131,7 @@ export default function SplitView({
       <div
         role="separator"
         aria-orientation="vertical"
-        aria-label={L.splitResize}
+        aria-label={localize(L.splitResize)}
         aria-valuenow={Math.round(leftPercent)}
         aria-valuemin={minLeftPercent}
         aria-valuemax={maxLeftPercent}

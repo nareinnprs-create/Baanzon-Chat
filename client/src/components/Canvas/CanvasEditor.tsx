@@ -5,7 +5,8 @@ import type { ChangeEvent, SyntheticEvent } from 'react';
 import type { CanvasBlock, CanvasDocument, CanvasEditOperation, CanvasSelection } from './types';
 import type { MoveBlockDirection } from './state';
 import type { EditSelectionFn } from './api';
-import { CANVAS_LABELS as L, formatCanvasLabel } from './labels';
+import { CANVAS_LABELS as L } from './labels';
+import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
 export type CanvasEditorProps = {
@@ -31,14 +32,14 @@ export type CanvasEditorProps = {
   onOperations: (operations: CanvasEditOperation[]) => void;
 };
 
-function toErrorMessage(caught: unknown): string {
+function toErrorMessage(caught: unknown, fallback: string): string {
   if (caught instanceof Error && caught.message) {
     return caught.message;
   }
   if (typeof caught === 'string' && caught) {
     return caught;
   }
-  return L.failureDescription;
+  return fallback;
 }
 
 /**
@@ -61,6 +62,7 @@ export default function CanvasEditor({
   editSelection,
   onOperations,
 }: CanvasEditorProps) {
+  const localize = useLocalize();
   const baseId = useId();
   const [instruction, setInstruction] = useState('');
   const [pending, setPending] = useState(false);
@@ -104,7 +106,7 @@ export default function CanvasEditor({
     controllerRef.current = controller;
     setPending(true);
     setError(null);
-    setStatus(L.aiEditBusy);
+    setStatus(localize(L.aiEditBusy));
     try {
       const operations = await editSelection(activeSelection, instruction, controller.signal);
       if (controller.signal.aborted) {
@@ -113,16 +115,20 @@ export default function CanvasEditor({
       onOperations(operations);
       setInstruction('');
       setPending(false);
-      setStatus(L.aiEditSuccess);
+      setStatus(localize(L.aiEditSuccess));
     } catch (caught) {
       if (controller.signal.aborted) {
         return;
       }
       setPending(false);
-      setError(formatCanvasLabel('aiEditFailure', { reason: toErrorMessage(caught) }));
+      setError(
+        localize(L.aiEditFailure, {
+          reason: toErrorMessage(caught, localize(L.failureDescription)),
+        }),
+      );
       setStatus(null);
     }
-  }, [activeSelection, editSelection, instruction, onOperations, pending]);
+  }, [activeSelection, editSelection, instruction, localize, onOperations, pending]);
 
   const cancelEdit = useCallback(() => {
     controllerRef.current?.abort();
@@ -136,33 +142,33 @@ export default function CanvasEditor({
   const liveMessage =
     status ??
     (activeSelection
-      ? formatCanvasLabel('selectionAnnouncement', { length: activeSelection.text.length })
+      ? localize(L.selectionAnnouncement, { length: activeSelection.text.length })
       : '');
 
   return (
     <div
       role="group"
-      aria-label={L.editorLabel}
+      aria-label={localize(L.editorLabel)}
       className={cn('flex h-full min-h-0 flex-col gap-3 overflow-auto p-4', className)}
     >
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor={`${baseId}-title`}>{L.titleLabel}</Label>
+        <Label htmlFor={`${baseId}-title`}>{localize(L.titleLabel)}</Label>
         <Input
           id={`${baseId}-title`}
           value={document.title}
-          placeholder={L.titlePlaceholder}
+          placeholder={localize(L.titlePlaceholder)}
           disabled={busy}
           onChange={(event: ChangeEvent<HTMLInputElement>) => onTitleChange(event.target.value)}
         />
       </div>
 
-      <ol aria-label={L.editorLabel} className="flex list-none flex-col gap-3 p-0">
+      <ol aria-label={localize(L.editorLabel)} className="flex list-none flex-col gap-3 p-0">
         {document.blocks.map((block, index) => {
           const blockSelection = activeSelection?.blockId === block.id ? activeSelection : null;
           return (
             <li key={block.id} className="flex flex-col gap-2">
               <Textarea
-                aria-label={formatCanvasLabel('blockLabel', { index: index + 1 })}
+                aria-label={localize(L.blockLabel, { index: index + 1 })}
                 value={block.text}
                 disabled={busy}
                 rows={3}
@@ -178,7 +184,7 @@ export default function CanvasEditor({
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    aria-label={formatCanvasLabel('moveBlockUp', { index: index + 1 })}
+                    aria-label={localize(L.moveBlockUp, { index: index + 1 })}
                     disabled={busy || index === 0 || onMoveBlock == null}
                     onClick={() => onMoveBlock?.(block.id, 'up')}
                   >
@@ -188,7 +194,7 @@ export default function CanvasEditor({
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    aria-label={formatCanvasLabel('moveBlockDown', { index: index + 1 })}
+                    aria-label={localize(L.moveBlockDown, { index: index + 1 })}
                     disabled={busy || index === document.blocks.length - 1 || onMoveBlock == null}
                     onClick={() => onMoveBlock?.(block.id, 'down')}
                   >
@@ -198,7 +204,7 @@ export default function CanvasEditor({
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    aria-label={formatCanvasLabel('removeBlock', { index: index + 1 })}
+                    aria-label={localize(L.removeBlock, { index: index + 1 })}
                     disabled={busy || onRemoveBlock == null}
                     onClick={() => onRemoveBlock?.(block.id)}
                   >
@@ -210,20 +216,20 @@ export default function CanvasEditor({
               {blockSelection ? (
                 <div
                   role="group"
-                  aria-label={L.aiEdit}
+                  aria-label={localize(L.aiEdit)}
                   className="flex flex-col gap-2 rounded-xl border border-border-light bg-surface-secondary p-3"
                 >
                   <div className="flex items-center gap-2 text-sm font-medium text-text-primary">
                     <Sparkles className="size-4 text-text-secondary" aria-hidden="true" />
-                    {L.aiEdit}
+                    {localize(L.aiEdit)}
                   </div>
                   <Label htmlFor={`${baseId}-instruction-${block.id}`}>
-                    {L.aiEditInstructionLabel}
+                    {localize(L.aiEditInstructionLabel)}
                   </Label>
                   <Input
                     id={`${baseId}-instruction-${block.id}`}
                     value={instruction}
-                    placeholder={L.aiEditInstructionPlaceholder}
+                    placeholder={localize(L.aiEditInstructionPlaceholder)}
                     disabled={pending || busy}
                     onChange={(event: ChangeEvent<HTMLInputElement>) =>
                       setInstruction(event.target.value)
@@ -244,10 +250,10 @@ export default function CanvasEditor({
                         void runEdit();
                       }}
                     >
-                      {pending ? L.aiEditBusy : L.aiEditApply}
+                      {pending ? localize(L.aiEditBusy) : localize(L.aiEditApply)}
                     </Button>
                     <Button type="button" variant="outline" size="sm" onClick={cancelEdit}>
-                      {L.aiEditCancel}
+                      {localize(L.aiEditCancel)}
                     </Button>
                   </div>
                 </div>

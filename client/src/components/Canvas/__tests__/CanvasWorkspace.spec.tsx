@@ -1,10 +1,18 @@
 import { createStore, Provider as JotaiProvider } from 'jotai';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { CanvasWorkspaceProps } from '../CanvasWorkspace';
+import type { TOptions } from 'i18next';
 import type { CanvasBlock, CanvasDocument } from '../types';
 import type { EditSelectionFn } from '../api';
 import CanvasWorkspace from '../CanvasWorkspace';
-import { CANVAS_LABELS as L } from '../labels';
+import { CANVAS_LABELS } from '../labels';
+import i18n from '~/locales/i18n';
+
+const t = i18n.t.bind(i18n) as (key: string, options?: TOptions) => string;
+const L = Object.fromEntries(
+  Object.entries(CANVAS_LABELS).map(([name, key]) => [name, t(key)]),
+) as Record<keyof typeof CANVAS_LABELS, string>;
+const blockName = (index: number) => t(CANVAS_LABELS.blockLabel, { index });
 
 function makeBlock(id: string, text: string): CanvasBlock {
   return { id, kind: 'paragraph', text };
@@ -45,13 +53,13 @@ describe('CanvasWorkspace', () => {
     expect(screen.getByRole('heading', { name: L.featureTitle })).toBeInTheDocument();
     expect(screen.getByText(L.emptyTitle)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: L.addFirstBlock })).toBeInTheDocument();
-    expect(screen.queryByLabelText('Block 1')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(blockName(1))).not.toBeInTheDocument();
   });
 
   it('creates a document from the empty state', () => {
     renderWorkspace();
     fireEvent.click(screen.getByRole('button', { name: L.addFirstBlock }));
-    expect(screen.getByLabelText('Block 1')).toBeInTheDocument();
+    expect(screen.getByLabelText(blockName(1))).toBeInTheDocument();
     expect(screen.getByRole('button', { name: L.addBlock })).toBeInTheDocument();
   });
 
@@ -60,20 +68,20 @@ describe('CanvasWorkspace', () => {
     renderWorkspace({ loadDocument: () => gate.promise });
 
     expect(screen.getByRole('status')).toHaveTextContent(L.loading);
-    expect(screen.queryByLabelText('Block 1')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(blockName(1))).not.toBeInTheDocument();
   });
 
   it('renders the editing state and reflects typed block text', () => {
     renderWorkspace({ document: makeDocument([makeBlock('block-1', 'Hello')]) });
 
-    const block = screen.getByLabelText('Block 1');
+    const block = screen.getByLabelText(blockName(1));
     expect(block).toHaveValue('Hello');
 
     fireEvent.change(block, { target: { value: 'Hello world' } });
-    expect(screen.getByLabelText('Block 1')).toHaveValue('Hello world');
+    expect(screen.getByLabelText(blockName(1))).toHaveValue('Hello world');
 
     fireEvent.click(screen.getByRole('button', { name: L.addBlock }));
-    expect(screen.getByLabelText('Block 2')).toBeInTheDocument();
+    expect(screen.getByLabelText(blockName(2))).toBeInTheDocument();
   });
 
   it('enables undo after an edit and reverts it', () => {
@@ -81,11 +89,11 @@ describe('CanvasWorkspace', () => {
 
     expect(screen.getByRole('button', { name: L.undo })).toBeDisabled();
 
-    fireEvent.change(screen.getByLabelText('Block 1'), { target: { value: 'Changed' } });
+    fireEvent.change(screen.getByLabelText(blockName(1)), { target: { value: 'Changed' } });
     expect(screen.getByRole('button', { name: L.undo })).toBeEnabled();
 
     fireEvent.click(screen.getByRole('button', { name: L.undo }));
-    expect(screen.getByLabelText('Block 1')).toHaveValue('Hello');
+    expect(screen.getByLabelText(blockName(1))).toHaveValue('Hello');
   });
 
   it('surfaces a load failure and recovers through retry', async () => {
@@ -99,7 +107,7 @@ describe('CanvasWorkspace', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Broken');
     fireEvent.click(screen.getByRole('button', { name: L.retry }));
 
-    expect(await screen.findByLabelText('Block 1')).toHaveValue('Recovered');
+    expect(await screen.findByLabelText(blockName(1))).toHaveValue('Recovered');
     expect(loadDocument).toHaveBeenCalledTimes(2);
   });
 

@@ -1,8 +1,16 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { CanvasDocument, CanvasEditOperation, CanvasSelection } from '../types';
+import type { TOptions } from 'i18next';
 import type { EditSelectionFn } from '../api';
-import { CANVAS_LABELS as L } from '../labels';
+import { CANVAS_LABELS } from '../labels';
 import CanvasEditor from '../CanvasEditor';
+import i18n from '~/locales/i18n';
+
+const t = i18n.t.bind(i18n) as (key: string, options?: TOptions) => string;
+const L = Object.fromEntries(
+  Object.entries(CANVAS_LABELS).map(([name, key]) => [name, t(key)]),
+) as Record<keyof typeof CANVAS_LABELS, string>;
+const blockName = (index: number) => t(CANVAS_LABELS.blockLabel, { index });
 
 function makeDocument(): CanvasDocument {
   return {
@@ -46,7 +54,7 @@ function renderEditor(editSelection: EditSelectionFn, current: CanvasSelection |
 describe('CanvasEditor', () => {
   it('reports the selected range from a block textarea', () => {
     const handlers = renderEditor(jest.fn());
-    const textarea = screen.getByLabelText('Block 1');
+    const textarea = screen.getByLabelText(blockName(1));
     (textarea as HTMLTextAreaElement).setSelectionRange(0, 5);
     fireEvent.select(textarea);
     expect(handlers.onSelectionChange).toHaveBeenCalledWith(selection);
@@ -54,7 +62,7 @@ describe('CanvasEditor', () => {
 
   it('reports block text changes', () => {
     const handlers = renderEditor(jest.fn());
-    fireEvent.change(screen.getByLabelText('Block 1'), { target: { value: 'Changed' } });
+    fireEvent.change(screen.getByLabelText(blockName(1)), { target: { value: 'Changed' } });
     expect(handlers.onBlockTextChange).toHaveBeenCalledWith('block-1', 'Changed');
   });
 

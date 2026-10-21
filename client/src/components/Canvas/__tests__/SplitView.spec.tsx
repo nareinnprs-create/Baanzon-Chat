@@ -1,6 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { CANVAS_LABELS as L } from '../labels';
+import type { TOptions } from 'i18next';
+import { CANVAS_LABELS } from '../labels';
 import SplitView from '../SplitView';
+import i18n from '~/locales/i18n';
+
+const t = i18n.t.bind(i18n) as (key: string, options?: TOptions) => string;
+const L = Object.fromEntries(
+  Object.entries(CANVAS_LABELS).map(([name, key]) => [name, t(key)]),
+) as Record<keyof typeof CANVAS_LABELS, string>;
 
 const LEFT_TEXT = 'Document body';
 const RIGHT_TEXT = 'Assistant body';

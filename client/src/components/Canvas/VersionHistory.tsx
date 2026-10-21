@@ -1,8 +1,9 @@
 import { Button, EmptyState } from '@librechat/client';
 import { History, RotateCcw, Save, Trash2 } from 'lucide-react';
 import type { CanvasDocument, CanvasVersion } from './types';
-import { CANVAS_LABELS as L, formatCanvasLabel } from './labels';
+import { CANVAS_LABELS as L } from './labels';
 import { formatTimestamp } from '~/utils/canvas';
+import { useLocalize } from '~/hooks';
 import { describeVersionDiff } from './state';
 import { cn } from '~/utils';
 
@@ -30,16 +31,17 @@ export default function VersionHistory({
   onRestore,
   onDelete,
 }: VersionHistoryProps) {
+  const localize = useLocalize();
   const ordered = [...versions].reverse();
 
   return (
     <div className={cn('flex h-full min-h-0 flex-col gap-4 overflow-auto p-4', className)}>
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-text-primary">{L.versionsHeading}</h3>
+        <h3 className="text-sm font-semibold text-text-primary">{localize(L.versionsHeading)}</h3>
         {onCreate ? (
           <Button type="button" variant="outline" size="sm" onClick={onCreate}>
             <Save className="size-4" aria-hidden="true" />
-            {L.createVersion}
+            {localize(L.createVersion)}
           </Button>
         ) : null}
       </div>
@@ -47,11 +49,11 @@ export default function VersionHistory({
       {versions.length === 0 ? (
         <EmptyState
           icon={History}
-          title={L.versionsEmptyTitle}
-          description={L.versionsEmptyDescription}
+          title={localize(L.versionsEmptyTitle)}
+          description={localize(L.versionsEmptyDescription)}
         />
       ) : (
-        <ul aria-label={L.versionsHeading} className="flex list-none flex-col gap-2 p-0">
+        <ul aria-label={localize(L.versionsHeading)} className="flex list-none flex-col gap-2 p-0">
           {ordered.map((version) => {
             const diff = describeVersionDiff(version.document, currentDocument);
             const changed = diff.added + diff.removed + diff.changed > 0;
@@ -67,23 +69,21 @@ export default function VersionHistory({
                   </span>
                   {isCurrent ? (
                     <span className="shrink-0 rounded-full bg-surface-tertiary px-2 py-0.5 text-xs text-text-secondary">
-                      {L.versionCurrent}
+                      {localize(L.versionCurrent)}
                     </span>
                   ) : null}
                 </div>
                 <p className="text-xs text-text-secondary">
-                  {formatCanvasLabel('versionCreatedAt', {
-                    at: formatTimestamp(version.createdAt),
-                  })}
+                  {localize(L.versionCreatedAt, { at: formatTimestamp(version.createdAt) })}
                 </p>
                 <p className="text-xs text-text-secondary" data-testid="canvas-version-diff">
                   {changed
-                    ? formatCanvasLabel('versionDiffSummary', {
+                    ? localize(L.versionDiffSummary, {
                         added: diff.added,
                         removed: diff.removed,
                         changed: diff.changed,
                       })
-                    : L.versionDiffUnchanged}
+                    : localize(L.versionDiffUnchanged)}
                 </p>
                 <div className="flex items-center gap-1">
                   <Button
@@ -94,14 +94,14 @@ export default function VersionHistory({
                     onClick={() => onRestore(version.id)}
                   >
                     <RotateCcw className="size-4" aria-hidden="true" />
-                    {L.restoreVersion}
+                    {localize(L.restoreVersion)}
                   </Button>
                   {onDelete ? (
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={L.deleteVersion}
+                      aria-label={localize(L.deleteVersion)}
                       onClick={() => onDelete(version.id)}
                     >
                       <Trash2 className="size-4" aria-hidden="true" />

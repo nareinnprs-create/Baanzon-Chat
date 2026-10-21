@@ -1,7 +1,14 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { CanvasDocument, CanvasVersion } from '../types';
-import { CANVAS_LABELS as L } from '../labels';
+import type { TOptions } from 'i18next';
+import { CANVAS_LABELS } from '../labels';
 import VersionHistory from '../VersionHistory';
+import i18n from '~/locales/i18n';
+
+const t = i18n.t.bind(i18n) as (key: string, options?: TOptions) => string;
+const L = Object.fromEntries(
+  Object.entries(CANVAS_LABELS).map(([name, key]) => [name, t(key)]),
+) as Record<keyof typeof CANVAS_LABELS, string>;
 
 function makeDocument(text: string): CanvasDocument {
   return { id: 'document-1', title: 'Doc', blocks: [{ id: 'block-1', kind: 'paragraph', text }] };
@@ -38,7 +45,9 @@ describe('VersionHistory', () => {
     expect(items[1]).toHaveTextContent('First');
     const diffs = screen.getAllByTestId('canvas-version-diff');
     expect(diffs[0]).toHaveTextContent(L.versionDiffUnchanged);
-    expect(diffs[1]).toHaveTextContent('+0 blocks, -0 blocks, ~1 changed');
+    expect(diffs[1]).toHaveTextContent(
+      t(CANVAS_LABELS.versionDiffSummary, { added: 0, removed: 0, changed: 1 }),
+    );
   });
 
   it('restores a version by id', () => {
