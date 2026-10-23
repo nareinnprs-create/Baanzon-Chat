@@ -6,6 +6,7 @@ export * from './config';
 export * from './langchain';
 export * from './filters';
 export * from './file-config';
+export * from './flags';
 export * from './resolve-llm-delivery-path';
 /* messages  */
 export * from './messages';
@@ -40,6 +41,9 @@ export * from './types/graph';
 export * from './types/insights';
 export * from './types/subagents';
 export * from './types/queuedTurns';
+export * from './types/knowledge';
+export * from './types/notifications';
+export * from './types/deepResearch';
 /* access permissions */
 export * from './accessPermissions';
 /* query/mutation keys */

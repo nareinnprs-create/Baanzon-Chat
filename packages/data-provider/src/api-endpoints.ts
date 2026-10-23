@@ -1,5 +1,6 @@
 import type { StartupConfigContext } from './config';
 import type { AssistantsEndpoint } from './schemas';
+import type * as dr from './types/deepResearch';
 import { ResourceType } from './accessPermissions';
 import * as q from './types/queries';
 
@@ -168,6 +169,10 @@ export const projectById = (id: string) => `${projectsRoot}/${encodeURIComponent
 
 export const projectConversation = (conversationId: string) =>
   `${projectsRoot}/conversations/${encodeURIComponent(conversationId)}`;
+
+const flagsRoot = `${BASE_URL}/api/flags`;
+
+export const flags = () => flagsRoot;
 
 export const search = (q: string, cursor?: string | null) =>
   `${BASE_URL}/api/search?q=${q}${cursor ? `&cursor=${cursor}` : ''}`;
@@ -586,3 +591,26 @@ export const getAllEffectivePermissions = (resourceType: ResourceType) =>
 // SharePoint Graph API Token
 export const graphToken = (scopes: string) =>
   `${BASE_URL}/api/auth/graph-token?scopes=${encodeURIComponent(scopes)}`;
+
+export const knowledgeRoot = `${BASE_URL}/api/knowledge`;
+
+/** The collection index lives on the root path — no query parameters. */
+export const knowledgeCollections = knowledgeRoot;
+
+export const knowledgeCollectionById = (id: string) => `${knowledgeRoot}/${encodeURIComponent(id)}`;
+
+export const knowledgeDocuments = (collectionId: string) =>
+  `${knowledgeCollectionById(collectionId)}/documents`;
+
+export const knowledgeDocumentById = (collectionId: string, documentId: string) =>
+  `${knowledgeDocuments(collectionId)}/${encodeURIComponent(documentId)}`;
+
+export const knowledgeRetrieve = (collectionId: string) =>
+  `${knowledgeCollectionById(collectionId)}/retrieve`;
+
+const deepResearchRoot = `${BASE_URL}/api/deep-research`;
+export const deepResearchPlan = () => `${deepResearchRoot}/plan`;
+export const deepResearchReport = () => `${deepResearchRoot}/report`;
+/** The step run is an SSE stream consumed through `EventSource`, so it is a GET. */
+export const deepResearchStepRun = (params: dr.TDeepResearchStepRunParams) =>
+  `${deepResearchRoot}/run${buildQuery(params)}`;

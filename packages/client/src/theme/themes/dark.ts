@@ -8,9 +8,9 @@ export const darkTheme: IThemeRGB = {
   // Text colors
   'rgb-text-primary': '243 248 246', // #F3F8F6 (Primary Text)
   'rgb-text-secondary': '169 192 189', // #A9C0BD (Secondary Text)
-  'rgb-text-secondary-alt': '110 137 135', // #6E8987 (Muted Text)
-  'rgb-text-tertiary': '110 137 135', // #6E8987 (Muted Text)
-  'rgb-text-muted': '110 137 135', // #6E8987 (Muted Text)
+  'rgb-text-secondary-alt': '127 154 152', // #7F9A98 (Muted Text, WCAG AA)
+  'rgb-text-tertiary': '127 154 152', // #7F9A98 (Muted Text, WCAG AA)
+  'rgb-text-muted': '127 154 152', // #7F9A98 (Muted Text, WCAG AA)
   'rgb-text-warning': '252 211 77', // #fcd34d (amber-300)
   'rgb-text-destructive': '248 113 113', // #f87171 (red-400)
   'rgb-shimmer-base': '243 248 246', // #F3F8F6, carried at 0.8 alpha
@@ -105,16 +105,16 @@ export const darkTheme: IThemeRGB = {
   'rgb-syntax-title': '252 165 165', // #fca5a5 (red-300)
 
   /** Categorical series scale — Baanzon Aurora-stepped for dark surface. */
-  'rgb-series-1': '70 226 210', // #46E2D2 (Luminous Aqua)
+  'rgb-series-1': '56 189 248', // #38BDF8 (Sky)
   'rgb-series-2': '233 86 13', // #e9560d (orange)
   'rgb-series-3': '53 214 199', // #35D6C7 (Luminous Aqua)
   'rgb-series-4': '216 194 157', // #D8C29D (Champagne)
   'rgb-series-5': '169 152 255', // #A998FF (Orchid)
   'rgb-series-6': '19 166 160', // #13A6A0 (Dark Teal)
-  'rgb-series-7': '70 226 210', // #46E2D2 (Luminous Aqua)
+  'rgb-series-7': '163 230 53', // #A3E635 (Lime)
 
-  /** Unchecked switch track. 3.38:1 against the page. */
-  'rgb-switch-unchecked': '53 83 87', // #355357
+  /** Unchecked switch track. 4.04:1 against background (#061316). */
+  'rgb-switch-unchecked': '81 123 127', // #517B7F
 
   // Presentation
   'rgb-presentation': '10 28 32', // #0A1C20 (Surface)

@@ -151,35 +151,35 @@ html {
   --presentation: var(--white);
   --text-primary: var(--gray-800);
   --text-secondary: var(--gray-600);
-  --text-secondary-alt: var(--gray-500);
-  --text-tertiary: var(--gray-500);
-  --text-muted: 105 110 121; /* Click UI global.color.text.muted #696e79 */
-  --shimmer-dip: 129 130 134;
+  --text-secondary-alt: 95 112 113; /* #5F7071 (Muted Text, WCAG AA) */
+  --text-tertiary: 95 112 113;
+  --text-muted: 95 112 113;
+  --shimmer-dip: var(--gray-500);
   --shimmer-dip-alpha: 0.18;
   --text-warning: var(--amber-700);
   --text-destructive: var(--red-600);
-  --link: var(--blue-600);
-  --link-hover: var(--blue-700);
-  --link-visited: 147 51 234;
+  --link: var(--green-700);
+  --link-hover: var(--green-800);
+  --link-visited: 155 138 251;
   --accent-primary: 8 127 131; /* #087F83 Baanzon Teal */
   --accent-primary-hover: 6 107 111;
   --ring-primary: 8 127 131;
   --header-primary: var(--white);
   --header-hover: var(--gray-50);
   --header-button-hover: var(--gray-50);
-  --surface-active: var(--gray-100);
+  --surface-active: 232 243 240;
   --surface-active-alt: var(--gray-200);
-  --surface-hover: var(--gray-200);
-  --surface-hover-alt: var(--gray-300);
-  --surface-composer-hover: var(--gray-200);
+  --surface-hover: 232 243 240;
+  --surface-hover-alt: var(--gray-200);
+  --surface-composer-hover: 232 243 240;
   --surface-primary: var(--white);
   --chart-widget-surface: 255 255 255; /* Click UI dashboards.chartWidget.color.background.default #ffffff */
-  --chart-widget-stroke: 230 231 233; /* Click UI dashboards.chartWidget.color.stroke.default #e6e7e9 */
+  --chart-widget-stroke: var(--gray-200);
   --surface-primary-alt: var(--gray-50);
-  --surface-primary-contrast: var(--gray-100);
+  --surface-primary-contrast: 232 243 240;
   --surface-secondary: var(--gray-50);
-  --surface-secondary-alt: var(--gray-200);
-  --surface-tertiary: var(--gray-100);
+  --surface-secondary-alt: var(--gray-100);
+  --surface-tertiary: 232 243 240;
   --surface-tertiary-alt: var(--white);
   --surface-dialog: var(--white);
   --surface-overlay: 16 42 45;
@@ -200,14 +200,14 @@ html {
   --border-xheavy: var(--gray-500);
   --border-xheavy-alpha: 1;
   --border-destructive: var(--red-600);
-  --status-success: var(--green-700);
-  --status-success-subtle: var(--green-50);
-  --status-success-border: var(--green-300);
+  --status-success: 4 120 87;
+  --status-success-subtle: 236 253 245;
+  --status-success-border: 110 231 183;
   --status-success-strong: 2 133 94;
-  --status-info: var(--blue-600);
-  --status-info-subtle: var(--blue-50);
-  --status-info-border: var(--blue-300);
-  --status-info-strong: var(--gray-500);
+  --status-info: 7 121 125; /* #07797D (Baanzon Teal, stepped for the Mist fill) */
+  --status-info-subtle: 232 243 240;
+  --status-info-border: var(--green-500);
+  --status-info-strong: var(--green-700);
   --status-warning: var(--amber-700);
   --status-warning-subtle: var(--amber-50);
   --status-warning-border: var(--amber-300);
@@ -217,34 +217,34 @@ html {
   --status-error-border: var(--red-300);
   --status-error-strong: 224 47 31;
   --status-neutral: var(--gray-600);
-  --status-neutral-subtle: var(--gray-100);
+  --status-neutral-subtle: 232 243 240;
   --status-neutral-border: var(--gray-300);
   --text-on-status: var(--white);
 
   /* Categorical series scale — slot order is the CVD-safety mechanism */
-  --series-1: 5 110 189;
+  --series-1: 8 127 131;
   --series-2: 233 86 13;
-  --series-3: 0 148 142;
+  --series-3: 30 145 124;
   --series-4: 182 123 5;
-  --series-5: 216 90 142;
-  --series-6: 126 35 205;
-  --series-7: 1 131 1;
+  --series-5: 118 101 251;
+  --series-6: 140 106 47;
+  --series-7: 162 28 175;
 
   /* Code syntax highlighting */
   --syntax-text: var(--gray-800);
   --syntax-comment: var(--gray-500);
   --syntax-meta: var(--gray-600);
   --syntax-builtin: 154 103 0;
-  --syntax-keyword: 5 80 174;
+  --syntax-keyword: 8 127 131;
   --syntax-string: 10 123 98;
-  --syntax-attr: 154 47 106;
+  --syntax-attr: 155 138 251;
   --syntax-title: 180 35 24;
 
-  --surface-inverted: var(--gray-850);
-  --surface-inverted-hover: var(--gray-700);
+  --surface-inverted: var(--green-950);
+  --surface-inverted-hover: var(--green-700);
   --text-inverted: var(--white);
   --surface-fixed: var(--white);
-  --surface-fixed-hover: var(--gray-100);
+  --surface-fixed-hover: 232 243 240;
   --text-fixed: var(--gray-800);
   --radius: 0.75rem; /* 12px - MD */
   --theme-control-radius: 0.75rem; /* 12px - MD */
@@ -259,7 +259,7 @@ html {
   --theme-elevation-surface: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --theme-motion-fast: 150ms;
   --theme-motion-normal: 200ms;
-  --switch-unchecked: 148 148 148;
+  --switch-unchecked: 113 142 137; /* #718E89 (Unchecked switch track) */
   --provider-openai: #19c37d;
   --provider-openai-gpt4: #ab68ff;
   --provider-openai-reasoning: #000000;
@@ -270,103 +270,103 @@ html {
 }
 .dark {
   --brand-purple: 169 152 255; /* #A998FF Orchid */
-  --presentation: var(--gray-800);
-  --text-primary: var(--gray-100);
-  --text-secondary: var(--gray-300);
-  --text-secondary-alt: var(--gray-400);
-  --text-tertiary: var(--gray-400);
-  --text-muted: 179 182 189; /* Click UI global.color.text.muted #b3b6bd */
-  --shimmer-base: 255 255 255;
+  --presentation: var(--gray-850);
+  --text-primary: 243 248 246;
+  --text-secondary: 169 192 189;
+  --text-secondary-alt: 127 154 152; /* #7F9A98 (Muted Text, WCAG AA) */
+  --text-tertiary: 127 154 152;
+  --text-muted: 127 154 152;
+  --shimmer-base: 243 248 246;
   --shimmer-base-alpha: 0.8;
-  --shimmer-dip: 179 179 179;
+  --shimmer-dip: 110 137 135;
   --shimmer-dip-alpha: 0.25;
-  --text-warning: var(--amber-500);
+  --text-warning: var(--amber-300);
   --text-destructive: var(--red-400);
-  --link: var(--blue-400);
-  --link-hover: var(--blue-300);
-  --link-visited: 192 132 252;
+  --link: var(--green-400);
+  --link-hover: var(--green-500);
+  --link-visited: 169 152 255;
   --accent-primary: 19 166 160; /* #13A6A0 Baanzon Dark Teal */
   --accent-primary-hover: 70 226 210; /* #46E2D2 Luminous Aqua */
-  --header-primary: var(--gray-700);
-  --header-hover: var(--gray-600);
-  --header-button-hover: var(--gray-700);
-  --surface-active: var(--gray-500);
-  --surface-active-alt: var(--gray-700);
-  --surface-hover: var(--gray-650);
-  --surface-hover-alt: var(--gray-600);
-  --surface-composer-hover: var(--gray-600);
+  --ring-primary: 19 166 160; /* #13A6A0 Baanzon Dark Teal */
+  --header-primary: var(--gray-850);
+  --header-hover: 16 39 43;
+  --header-button-hover: var(--gray-850);
+  --surface-active: 29 58 61;
+  --surface-active-alt: 16 39 43;
+  --surface-hover: 16 39 43;
+  --surface-hover-alt: 29 58 61;
+  --surface-composer-hover: 16 39 43;
   --surface-primary: var(--gray-900);
-  --chart-widget-surface: 40 40 40; /* Click UI dashboards.chartWidget.color.background.default #282828 */
-  --chart-widget-stroke: 50 50 50; /* Click UI dashboards.chartWidget.color.stroke.default #323232 */
+  --chart-widget-surface: var(--gray-850);
+  --chart-widget-stroke: 29 58 61;
   --surface-primary-alt: var(--gray-850);
-  --surface-primary-contrast: var(--gray-850);
-  --surface-secondary: var(--gray-800);
-  --surface-secondary-alt: var(--gray-800);
-  --surface-tertiary: var(--gray-700);
-  --surface-tertiary-alt: var(--gray-700);
-  --surface-dialog: var(--gray-875);
+  --surface-primary-contrast: 16 39 43;
+  --surface-secondary: var(--gray-850);
+  --surface-secondary-alt: 16 39 43;
+  --surface-tertiary: 16 39 43;
+  --surface-tertiary-alt: 16 39 43;
+  --surface-dialog: var(--gray-850);
   --surface-overlay: 0 0 0;
   --surface-submit: 19 166 160; /* #13A6A0 Baanzon Dark Teal */
   --surface-submit-hover: 70 226 210; /* #46E2D2 Luminous Aqua */
   --surface-destructive: var(--red-800);
   --surface-destructive-hover: var(--red-900);
-  --surface-chat: var(--gray-700);
+  --surface-chat: var(--gray-850);
   --surface-code: var(--presentation);
   --surface-qr: var(--white);
-  --border-light: var(--gray-700);
-  --border-medium-alt: var(--gray-600);
-  --border-medium: var(--gray-600);
-  --border-heavy: var(--gray-500);
-  --border-xheavy: var(--gray-400);
+  --border-light: 29 58 61;
+  --border-medium-alt: 29 58 61;
+  --border-medium: 29 58 61;
+  --border-heavy: 53 83 87;
+  --border-xheavy: 110 137 135;
   --border-destructive: var(--red-500);
-  --status-success: var(--green-300);
+  --status-success: var(--green-400);
   --status-success-subtle: var(--green-950);
   --status-success-border: var(--green-800);
-  --status-success-strong: 8 135 89;
-  --status-info: var(--blue-300);
-  --status-info-subtle: var(--blue-950);
-  --status-info-border: var(--blue-800);
-  --status-info-strong: var(--gray-600);
+  --status-success-strong: 19 166 160;
+  --status-info: var(--green-400);
+  --status-info-subtle: var(--green-950);
+  --status-info-border: var(--green-600);
+  --status-info-strong: var(--green-600);
   --status-warning: var(--amber-300);
-  --status-warning-subtle: var(--amber-950);
+  --status-warning-subtle: 42 28 3;
   --status-warning-border: var(--amber-800);
   --status-warning-strong: var(--amber-800);
   --status-error: var(--red-300);
-  --status-error-subtle: var(--red-950);
+  --status-error-subtle: 42 6 6;
   --status-error-border: var(--red-800);
   --status-error-strong: var(--red-800);
-  --status-neutral: var(--gray-300);
-  --status-neutral-subtle: var(--gray-800);
-  --status-neutral-border: var(--gray-700);
-  --text-on-status: var(--white);
+  --status-neutral: 169 192 189;
+  --status-neutral-subtle: var(--gray-850);
+  --status-neutral-border: 29 58 61;
+  --text-on-status: var(--gray-900);
 
   /* Categorical series scale — same hues, stepped for the dark surface */
-  --series-1: 9 140 238;
-  --series-2: 217 87 35;
-  --series-3: 6 158 152;
-  --series-4: 200 133 12;
-  --series-5: 213 82 130;
-  --series-6: 171 104 254;
-  --series-7: 80 167 49;
+  --series-1: 56 189 248;
+  --series-2: 233 86 13;
+  --series-3: 53 214 199;
+  --series-4: 216 194 157;
+  --series-5: 169 152 255;
+  --series-6: 19 166 160;
+  --series-7: 163 230 53;
 
-  /* Code syntax highlighting. Comment and meta are the flattened equivalents of
-     the 50% and 60% alpha whites this palette used before it was tokenized. */
-  --syntax-text: var(--white);
-  --syntax-comment: 144 144 144;
-  --syntax-meta: 166 166 166;
-  --syntax-builtin: 233 149 12;
-  --syntax-keyword: 46 149 211;
-  --syntax-string: 0 166 125;
-  --syntax-attr: 223 48 121;
-  --syntax-title: 242 44 61;
+  /* Code syntax highlighting, restated from the registry (see semanticTokens.spec.ts). */
+  --syntax-text: 243 248 246;
+  --syntax-comment: 110 137 135;
+  --syntax-meta: 169 192 189;
+  --syntax-builtin: 216 194 157;
+  --syntax-keyword: 70 226 210;
+  --syntax-string: 53 214 199;
+  --syntax-attr: 169 152 255;
+  --syntax-title: 252 165 165;
 
-  --surface-inverted: var(--white);
-  --surface-inverted-hover: var(--gray-100);
-  --text-inverted: var(--gray-850);
-  --surface-fixed: var(--white);
-  --surface-fixed-hover: var(--gray-100);
-  --text-fixed: var(--gray-800);
-  --switch-unchecked: 102 102 102;
+  --surface-inverted: 243 248 246;
+  --surface-inverted-hover: 169 192 189;
+  --text-inverted: var(--gray-900);
+  --surface-fixed: 243 248 246;
+  --surface-fixed-hover: 169 192 189;
+  --text-fixed: var(--gray-900);
+  --switch-unchecked: 81 123 127; /* #517B7F */
   --provider-openai: #19c37d;
   --provider-openai-gpt4: #ab68ff;
   --provider-openai-reasoning: #000000;

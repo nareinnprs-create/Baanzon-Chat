@@ -5,11 +5,14 @@ export * from './Skills';
 export * from './Files';
 export * from './Langfuse';
 export * from './Insights';
+export * from './Knowledge';
 /* Memories */
 export * from './Memories';
 export * from './Messages';
 export * from './Misc';
 export * from './Projects';
+/* Deep Research */
+export * from './DeepResearch';
 /* Scheduled chats */
 export * from './Schedules';
 export * from './Subagents';

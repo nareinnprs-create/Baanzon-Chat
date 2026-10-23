@@ -8,6 +8,13 @@
 
 # Specific patterns to ignore
 data-node
+uploads
+logs
+api/uploads
+api/logs
+.env
+*.env.temp
+api/.env.temp
 meili_data*
 librechat*
 Dockerfile*

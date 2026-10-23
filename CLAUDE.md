@@ -67,8 +67,8 @@ The source code for `@librechat/agents` (major backend dependency, same team) li
   next sync; a second pull request for the same change is redundant.
 - **The repository's default branch is `main`**, so `gh pr create` and the GitHub UI target it
   unless told otherwise — always pass `--base dev` explicitly.
-- Pull requests opened against `main` are retargeted to `dev` automatically by
-  `.github/workflows/pr-retarget-dev.yml`. The `target: main` label exempts one, as do release-bound
+- Pull requests opened against `main` expect to be retargeted to `dev` — retargeting is
+  manual/from-policy (there is no automation workflow for it). The `target: main` label exempts one, as do release-bound
   upstream branches (`dev`, `release/*`, `hotfix/*`). Backport branches are deliberately not exempt —
   a backport merged straight to `main` is what breaks the fast-forward invariant.
 - **`Fixes #N` does not close the issue.** GitHub honors closing keywords only when a pull request
@@ -349,8 +349,10 @@ Without it, OpenID JWT request burst caching can serve a stale `req.user` until 
   `tsc` as part of its build.
 - Run `npx tsc --noEmit` in the workspace you changed before calling it done. `client` also exposes
   it as `npm run typecheck`.
-- `packages/client/tsconfig.json` excludes `*.spec.ts(x)` and `*.test.ts(x)`, so test files there are
-  never typechecked — a type error in a spec surfaces only when the test runs.
+- `packages/client/tsconfig.json` excludes `*.spec.ts(x)` and `*.test.ts(x)`, so its specs are
+  outside that program. They are covered by the sibling `tsconfig.test.json` instead — run it as
+  `npm run typecheck:spec` in that package, or through the slow tier of `scripts/static-checks.mts`,
+  which lists it alongside the other five projects. Change a spec and this is the gate that sees it.
 - `npm run static-checks` runs the Static Checks CI job locally against your staged files;
   `npm run static-checks -- --against origin/dev` reproduces what CI sees for a pull request, and
   `npm run static-checks:full` adds the slow gates (TypeScript, config migration tests, unused i18n

@@ -30,6 +30,10 @@ export { default as toolCallSchema } from './toolCall';
 export { default as transactionSchema } from './transaction';
 export { default as userSchema } from './user';
 export { default as memorySchema, isValidMemoryKey } from './memory';
+export {
+  default as knowledgeCollectionSchema,
+  KNOWLEDGE_COLLECTION_NAME,
+} from './knowledgeCollection';
 export { default as toolFavoriteSchema } from './favorite';
 export { default as groupSchema } from './group';
 export { default as systemGrantSchema } from './systemGrant';
@@ -42,3 +46,23 @@ export { default as queuedTurnSchema } from './queuedTurn';
 export { default as queuedTurnSequenceSchema } from './queuedTurnSequence';
 export { default as scheduleSchema } from './schedule';
 export { default as scheduleRunSchema } from './scheduleRun';
+export { default as organizationSchema } from './organization';
+export { default as membershipSchema } from './membership';
+export { default as workspaceSchema } from './workspace';
+export { default as messagePartSchema } from './messagePart';
+export { default as agentRunSchema } from './agentRun';
+export { default as notificationSchema } from './notification';
+export { default as toolSchema } from './tool';
+export { default as toolVersionSchema } from './toolVersion';
+export { default as toolPermissionSchema } from './toolPermission';
+export { default as sourceSchema } from './source';
+export { default as citationSchema } from './citation';
+export { default as artifactSchema } from './artifact';
+export { default as artifactVersionSchema } from './artifactVersion';
+export { default as workflowSchema } from './workflow';
+export { default as workflowRunSchema } from './workflowRun';
+export { default as deviceSchema } from './device';
+export { default as subscriptionSchema } from './subscription';
+export { default as usageRecordSchema } from './usageRecord';
+export { default as feedbackSchema } from './feedback';
+export { default as flagOverrideSchema } from './flagOverride';

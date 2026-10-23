@@ -28,6 +28,7 @@ export * from './share';
 export * from './pluginAuth';
 /* Memories */
 export * from './memory';
+export * from './knowledge';
 export * from './favorite';
 /* Prompts */
 export * from './prompts';
@@ -45,6 +46,39 @@ export * from './auditLog';
 export * from './group';
 /* Config */
 export * from './config';
+/* Org hierarchy (§45) */
+export * from './organization';
+export * from './membership';
+export * from './workspace';
+/* Message parts (§45) */
+export * from './messagePart';
+/* Agent runs (§45) */
+export * from './agentRun';
+/* Notifications (§45) */
+export * from './notification';
+/* Tools (§45) */
+export * from './tool';
+export * from './toolVersion';
+export * from './toolPermission';
+/* Retrieval provenance (§45) */
+export * from './source';
+export * from './citation';
+/* Artifacts (§45) */
+export * from './artifact';
+export * from './artifactVersion';
+/* Workflows (§45) */
+export * from './workflow';
+export * from './workflowRun';
+/* Devices (§45) */
+export * from './device';
+/* Subscriptions (§45) */
+export * from './subscription';
+/* Usage Records (§45) */
+export * from './usageRecord';
+/* Feedback (§45) */
+export * from './feedback';
+/* Feature flags (B23/W15) */
+export * from './flagOverride';
 /* Admin */
 export * from './admin';
 /* Web */

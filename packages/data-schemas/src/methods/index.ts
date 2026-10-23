@@ -77,6 +77,10 @@ import {
   type ParentSubagentThreadRecord,
 } from './conversation';
 import { createChatProjectMethods, type ChatProjectMethods } from './chatProject';
+import {
+  createKnowledgeCollectionMethods,
+  type KnowledgeCollectionMethods,
+} from './knowledgeCollection';
 export type {
   AssignConversationToProjectResult,
   ChatProjectSortBy,
@@ -87,6 +91,76 @@ export type {
   ListChatProjectsResult,
   UpdateChatProjectInput,
 } from './chatProject';
+/* Org hierarchy, message parts, agent runs, notifications (§45) */
+import {
+  createOrganizationMethods,
+  ORGANIZATION_SLUG_MAX_LENGTH,
+  slugifyOrganizationName,
+  type OrganizationMethods,
+} from './organization';
+import { createMembershipMethods, type MembershipMethods } from './membership';
+import {
+  createWorkspaceMethods,
+  WORKSPACE_SLUG_MAX_LENGTH,
+  slugifyWorkspaceName,
+  type WorkspaceMethods,
+} from './workspace';
+import { createMessagePartMethods, type MessagePartMethods } from './messagePart';
+import {
+  createAgentRunMethods,
+  AGENT_RUN_LIST_DEFAULT_LIMIT,
+  AGENT_RUN_LIST_MAX_LIMIT,
+  type AgentRunMethods,
+} from './agentRun';
+import {
+  createNotificationMethods,
+  NOTIFICATION_LIST_DEFAULT_LIMIT,
+  NOTIFICATION_LIST_MAX_LIMIT,
+  type NotificationMethods,
+} from './notification';
+/* Tools, sources, citations, artifacts, workflows (§45) */
+import { createToolMethods, TOOL_NAME_MAX_LENGTH, type ToolMethods } from './tool';
+import {
+  createToolVersionMethods,
+  TOOL_VERSION_LIST_MAX_LIMIT,
+  type ToolVersionMethods,
+} from './toolVersion';
+import { createToolPermissionMethods, type ToolPermissionMethods } from './toolPermission';
+import {
+  createSourceMethods,
+  SOURCE_LIST_DEFAULT_LIMIT,
+  SOURCE_LIST_MAX_LIMIT,
+  type SourceMethods,
+} from './source';
+import { createCitationMethods, type CitationMethods } from './citation';
+import {
+  createArtifactMethods,
+  ARTIFACT_LIST_DEFAULT_LIMIT,
+  ARTIFACT_LIST_MAX_LIMIT,
+  type ArtifactMethods,
+} from './artifact';
+import {
+  createArtifactVersionMethods,
+  ARTIFACT_VERSION_LIST_MAX_LIMIT,
+  type ArtifactVersionMethods,
+} from './artifactVersion';
+import {
+  createWorkflowMethods,
+  WORKFLOW_SLUG_MAX_LENGTH,
+  slugifyWorkflowName,
+  type WorkflowMethods,
+} from './workflow';
+import {
+  createWorkflowRunMethods,
+  WORKFLOW_RUN_LIST_DEFAULT_LIMIT,
+  WORKFLOW_RUN_LIST_MAX_LIMIT,
+  type WorkflowRunMethods,
+} from './workflowRun';
+import { createDeviceMethods, type DeviceMethods } from './device';
+import { createSubscriptionMethods, type SubscriptionMethods } from './subscription';
+import { createFlagOverrideMethods, type FlagOverrideMethods } from './flagOverride';
+import { createUsageRecordMethods, type UsageRecordMethods } from './usageRecord';
+import { createFeedbackMethods, type FeedbackMethods } from './feedback';
 /* Tier 3 — Complex (heavier injection) */
 import {
   createTxMethods,
@@ -122,6 +196,12 @@ import {
   type ListSkillsByAccessResult,
   type UpdateSkillResult,
   type ValidationIssue,
+  type SkillTreeNode,
+  type RenameSkillNodeParams,
+  type RenameSkillNodeResult,
+  type DeletedSkillFileRef,
+  type DeleteSkillNodeParams,
+  type DeleteSkillNodeResult,
 } from './skill';
 import { createScheduleMethods, type ScheduleMethods } from './schedule';
 import {
@@ -214,6 +294,7 @@ export type AllMethods = UserMethods &
   KeyMethods &
   FileMethods &
   MemoryMethods &
+  KnowledgeCollectionMethods &
   ToolFavoriteMethods &
   AgentCategoryMethods &
   AgentApiKeyMethods &
@@ -237,6 +318,25 @@ export type AllMethods = UserMethods &
   MessageMethods &
   ConversationMethods &
   ChatProjectMethods &
+  OrganizationMethods &
+  MembershipMethods &
+  WorkspaceMethods &
+  MessagePartMethods &
+  AgentRunMethods &
+  NotificationMethods &
+  ToolMethods &
+  ToolVersionMethods &
+  ToolPermissionMethods &
+  SourceMethods &
+  CitationMethods &
+  ArtifactMethods &
+  ArtifactVersionMethods &
+  WorkflowMethods &
+  WorkflowRunMethods &
+  DeviceMethods &
+  SubscriptionMethods &
+  UsageRecordMethods &
+  FeedbackMethods &
   TxMethods &
   TransactionMethods &
   SpendTokensMethods &
@@ -460,6 +560,26 @@ export function createMethods(
     ...messageMethods,
     ...conversationMethods,
     ...createChatProjectMethods(mongoose),
+    ...createKnowledgeCollectionMethods(mongoose),
+    ...createOrganizationMethods(mongoose),
+    ...createMembershipMethods(mongoose),
+    ...createWorkspaceMethods(mongoose),
+    ...createMessagePartMethods(mongoose),
+    ...createAgentRunMethods(mongoose),
+    ...createNotificationMethods(mongoose),
+    ...createToolMethods(mongoose),
+    ...createToolVersionMethods(mongoose),
+    ...createToolPermissionMethods(mongoose),
+    ...createSourceMethods(mongoose),
+    ...createCitationMethods(mongoose),
+    ...createArtifactMethods(mongoose),
+    ...createArtifactVersionMethods(mongoose),
+    ...createWorkflowMethods(mongoose),
+    ...createWorkflowRunMethods(mongoose),
+    ...createDeviceMethods(mongoose),
+    ...createSubscriptionMethods(mongoose),
+    ...createUsageRecordMethods(mongoose),
+    ...createFeedbackMethods(mongoose),
     /* Tier 3 */
     ...txMethods,
     ...transactionMethods,
@@ -522,6 +642,26 @@ export type {
   ConversationMethods,
   AgentEventActorReconciliationStorageMetrics,
   ChatProjectMethods,
+  KnowledgeCollectionMethods,
+  OrganizationMethods,
+  MembershipMethods,
+  WorkspaceMethods,
+  MessagePartMethods,
+  AgentRunMethods,
+  NotificationMethods,
+  ToolMethods,
+  ToolVersionMethods,
+  ToolPermissionMethods,
+  SourceMethods,
+  CitationMethods,
+  ArtifactMethods,
+  ArtifactVersionMethods,
+  WorkflowMethods,
+  WorkflowRunMethods,
+  DeviceMethods,
+  SubscriptionMethods,
+  UsageRecordMethods,
+  FeedbackMethods,
   TxMethods,
   TransactionMethods,
   SpendTokensMethods,
@@ -536,6 +676,12 @@ export type {
   ListSkillsByAccessResult,
   UpdateSkillResult,
   ValidationIssue,
+  SkillTreeNode,
+  RenameSkillNodeParams,
+  RenameSkillNodeResult,
+  DeletedSkillFileRef,
+  DeleteSkillNodeParams,
+  DeleteSkillNodeResult,
   SkillSyncStatusInput,
   SkillSyncCredentialSummary,
   UpsertSkillSyncCredentialInput,
@@ -556,3 +702,24 @@ export type {
 };
 
 export { recordAgentEventActorReceiptMetric, setAgentEventActorReceiptMetricObserver };
+export {
+  ORGANIZATION_SLUG_MAX_LENGTH,
+  slugifyOrganizationName,
+  WORKSPACE_SLUG_MAX_LENGTH,
+  slugifyWorkspaceName,
+  AGENT_RUN_LIST_DEFAULT_LIMIT,
+  AGENT_RUN_LIST_MAX_LIMIT,
+  NOTIFICATION_LIST_DEFAULT_LIMIT,
+  NOTIFICATION_LIST_MAX_LIMIT,
+  TOOL_NAME_MAX_LENGTH,
+  TOOL_VERSION_LIST_MAX_LIMIT,
+  SOURCE_LIST_DEFAULT_LIMIT,
+  SOURCE_LIST_MAX_LIMIT,
+  ARTIFACT_LIST_DEFAULT_LIMIT,
+  ARTIFACT_LIST_MAX_LIMIT,
+  ARTIFACT_VERSION_LIST_MAX_LIMIT,
+  WORKFLOW_SLUG_MAX_LENGTH,
+  slugifyWorkflowName,
+  WORKFLOW_RUN_LIST_DEFAULT_LIMIT,
+  WORKFLOW_RUN_LIST_MAX_LIMIT,
+};

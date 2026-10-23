@@ -38,6 +38,7 @@ export * from './mcp/context';
 export * from './utils';
 export { default as Tokenizer, countTokens } from './utils/tokenizer';
 export type { EncodingName } from './utils/tokenizer';
+export * from './db/migrations';
 export * from './db/utils';
 /* HTML */
 export * from './html';
@@ -70,6 +71,13 @@ export * from './actions';
 export * from './prompts';
 /* Projects */
 export * from './projects';
+/* Deep Research */
+export * from './deepResearch';
+/* Tenant hierarchy: organization -> workspace */
+export * from './organizations';
+export * from './workspaces';
+/* RAG / Knowledge */
+export * from './rag';
 /* Conversations */
 export * from './conversations';
 /* Skills */
@@ -77,6 +85,13 @@ export * from './schedules';
 export * from './schedules/service';
 export * from './skills';
 export * from './favorites';
+export * from './notifications';
+export * from './devices';
+export * from './subscriptions';
+export * from './usageRecords';
+export * from './feedback';
+/* Workflows */
+export * from './workflows';
 /* User */
 export * from './user';
 /* Agent Plugins */

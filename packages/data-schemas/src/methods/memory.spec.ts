@@ -269,3 +269,62 @@ describe('memory partitions', () => {
     expect(await MemoryEntry.countDocuments({ userId: otherUserId })).toBe(1);
   });
 });
+
+describe('memory embeddings', () => {
+  it('records a durable vector pointer for an owned memory', async () => {
+    await methods.setMemory({ userId, key: 'context', value: 'to embed', tokenCount: 2 });
+    const [stored] = await methods.getUserMemories({ userId });
+
+    const result = await methods.setMemoryEmbedding({
+      userId,
+      id: stored._id.toString(),
+      vectorId: 'vec-1',
+      model: 'text-embedding-3-small',
+      dimensions: 1536,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      memory: {
+        embedding: { vectorId: 'vec-1', model: 'text-embedding-3-small', dimensions: 1536 },
+      },
+    });
+    expect(result.memory?.embedding?.embeddedAt).toBeInstanceOf(Date);
+  });
+
+  it('refuses to embed another user’s memory or an unknown id', async () => {
+    await methods.setMemory({ userId, key: 'context', value: 'to embed' });
+    const [stored] = await methods.getUserMemories({ userId });
+
+    await expect(
+      methods.setMemoryEmbedding({
+        userId: otherUserId,
+        id: stored._id.toString(),
+        vectorId: 'vec-1',
+      }),
+    ).resolves.toEqual({ ok: false });
+    await expect(
+      methods.setMemoryEmbedding({ userId, id: 'not-an-id', vectorId: 'vec-1' }),
+    ).resolves.toEqual({ ok: false });
+    await expect(
+      methods.setMemoryEmbedding({
+        userId,
+        id: new mongoose.Types.ObjectId().toString(),
+        vectorId: 'vec-1',
+      }),
+    ).resolves.toEqual({ ok: false });
+    await expect(
+      methods.setMemoryEmbedding({ userId, id: stored._id.toString(), vectorId: '' }),
+    ).resolves.toEqual({ ok: false });
+  });
+
+  it('clears a stale embedding when the memory value changes', async () => {
+    await methods.setMemory({ userId, key: 'context', value: 'v1' });
+    const [stored] = await methods.getUserMemories({ userId });
+    await methods.setMemoryEmbedding({ userId, id: stored._id.toString(), vectorId: 'vec-1' });
+    expect((await methods.getUserMemories({ userId }))[0].embedding?.vectorId).toBe('vec-1');
+
+    await methods.setMemory({ userId, key: 'context', value: 'v2' });
+    expect((await methods.getUserMemories({ userId }))[0].embedding).toBeUndefined();
+  });
+});

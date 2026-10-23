@@ -1,5 +1,20 @@
 import type { Types, Document } from 'mongoose';
 
+/**
+ * Pointer from a memory row to its vector in the durable vector store
+ * (Decision A4: Mongo stays primary, pgvector holds the embeddings). Storing
+ * only the pointer keeps this package free of any vector-store dependency while
+ * letting a memory be re-embedded or dropped without a cross-store join.
+ */
+export interface MemoryEmbedding {
+  /** Identifier of the vector in the durable store. */
+  vectorId: string;
+  /** Embedding model that produced the vector, for re-embedding decisions. */
+  model?: string;
+  dimensions?: number;
+  embeddedAt?: Date;
+}
+
 // Base memory interfaces
 export interface IMemoryEntry extends Document {
   userId: Types.ObjectId;
@@ -10,6 +25,8 @@ export interface IMemoryEntry extends Document {
   tokenCount?: number;
   updated_at?: Date;
   tenantId?: string;
+  /** Durable vector-store pointer; absent until the memory has been embedded. */
+  embedding?: MemoryEmbedding;
 }
 
 export interface IMemoryEntryLean {
@@ -21,6 +38,7 @@ export interface IMemoryEntryLean {
   tokenCount?: number;
   updated_at?: Date;
   __v?: number;
+  embedding?: MemoryEmbedding;
 }
 
 // Method parameter interfaces
@@ -62,6 +80,16 @@ export interface GetFormattedMemoriesParams {
   agentId?: string;
 }
 
+export interface SetMemoryEmbeddingParams {
+  userId: string | Types.ObjectId;
+  /** The memory's `_id`. */
+  id: string;
+  /** Identifier of the vector in the durable vector store. */
+  vectorId: string;
+  model?: string;
+  dimensions?: number;
+}
+
 // Result interfaces
 export interface MemoryResult {
   ok: boolean;
@@ -69,6 +97,10 @@ export interface MemoryResult {
 
 export interface SetMemoryByIdResult extends MemoryResult {
   conflict?: boolean;
+  memory?: IMemoryEntryLean;
+}
+
+export interface SetMemoryEmbeddingResult extends MemoryResult {
   memory?: IMemoryEntryLean;
 }
 

@@ -12,7 +12,7 @@ import {
 import { agentStartupMilestones, agentStartupResults } from './phases';
 import { getSafeSpanException } from '~/telemetry/safeException';
 
-const SPAN_NAME = 'librechat.agent.startup';
+const SPAN_NAME = 'baanzon.agent.startup';
 const MILESTONES = new Set<string>(agentStartupMilestones);
 const RESULTS = new Set<string>(agentStartupResults);
 const RESPONSE_EVENTS = new Set<string>([
@@ -111,7 +111,7 @@ export function createAgentStartupTelemetry(
     ...(options.spanStartedAt != null && { startTime: options.spanStartedAt }),
   };
   const span = trace
-    .getTracer('librechat.telemetry')
+    .getTracer('baanzon.telemetry')
     .startSpan(SPAN_NAME, spanOptions, context.active());
   const tracingEnabled = span.isRecording();
   const metricsEnabled = isMetricsConfigured();
@@ -135,7 +135,7 @@ export function createAgentStartupTelemetry(
     const elapsedMs = elapsedMilliseconds();
     if (tracingEnabled) {
       span.addEvent(milestone, {
-        'librechat.agent.startup.elapsed_ms': elapsedMs,
+        'baanzon.agent.startup.elapsed_ms': elapsedMs,
       });
     }
     if (metricsEnabled) {
@@ -148,7 +148,7 @@ export function createAgentStartupTelemetry(
       return;
     }
     if (tracingEnabled) {
-      span.setAttribute('librechat.stream.id', streamId);
+      span.setAttribute('baanzon.stream.id', streamId);
     }
   };
 
@@ -161,9 +161,9 @@ export function createAgentStartupTelemetry(
     const normalizedResult: AgentStartupResult = RESULTS.has(result) ? result : 'error';
     if (tracingEnabled) {
       span.setAttributes({
-        'librechat.agent.startup.duration_ms': elapsedMilliseconds(),
-        'librechat.agent.startup.milestones.count': milestones.size,
-        'librechat.agent.startup.result': normalizedResult,
+        'baanzon.agent.startup.duration_ms': elapsedMilliseconds(),
+        'baanzon.agent.startup.milestones.count': milestones.size,
+        'baanzon.agent.startup.result': normalizedResult,
       });
     }
     if (metricsEnabled) {

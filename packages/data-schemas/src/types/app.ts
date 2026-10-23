@@ -5,6 +5,7 @@ import type {
   TAzureConfig,
   TCustomConfig,
   TMemoryConfig,
+  TRagConfig,
   EModelEndpoint,
   TVertexAIConfig,
   TAgentsEndpoint,
@@ -60,6 +61,8 @@ export interface AppConfig {
   };
   /** Memory configuration */
   memory?: TMemoryConfig;
+  /** RAG / knowledge retrieval configuration */
+  rag?: TRagConfig;
   /** Summarization configuration */
   summarization?: SummarizationConfig;
   /** Web search configuration */

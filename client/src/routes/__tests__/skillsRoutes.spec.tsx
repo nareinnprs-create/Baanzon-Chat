@@ -67,4 +67,24 @@ describe('skills routes', () => {
 
     expect(paths).toContain('skills/new');
   });
+
+  it('registers the /data-lab and /deep-research routes', () => {
+    const paths = flattenPaths((router as unknown as { routes: RouteNode[] }).routes);
+
+    expect(paths).toContain('data-lab');
+    expect(paths).toContain('deep-research');
+  });
+
+  it('registers the /canvas and /voice routes', () => {
+    const paths = flattenPaths((router as unknown as { routes: RouteNode[] }).routes);
+
+    expect(paths).toContain('canvas');
+    expect(paths).toContain('voice');
+  });
+
+  it('registers the /workflow route', () => {
+    const paths = flattenPaths((router as unknown as { routes: RouteNode[] }).routes);
+
+    expect(paths).toContain('workflow');
+  });
 });

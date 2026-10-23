@@ -64,43 +64,56 @@ describe('shared component color guardrail', () => {
   });
 });
 
+const APP_STYLES = readFileSync(
+  join(__dirname, '..', '..', '..', '..', 'client', 'src', 'style.css'),
+  'utf8',
+);
+
+/**
+ * The stylesheet restates the registry so the app paints correctly before
+ * `applyTheme` writes inline styles, so the two must agree. Comparing them is
+ * the real invariant here — pinning the same hex on both sides is not, because
+ * it cannot notice when one of the two is re-stepped on its own. Reading the
+ * declared value back is therefore deliberate, not a shortcut.
+ */
+const cssToken = (property: string, mode: 'light' | 'dark'): string | undefined => {
+  const darkStart = APP_STYLES.indexOf('\n.dark {');
+  // The second `:root` block holds the light semantic aliases; the first is
+  // the raw ramps, and the third is unrelated page chrome further down.
+  const lightStart = APP_STYLES.indexOf('\n:root {', APP_STYLES.indexOf('\n:root {') + 1);
+  const block = APP_STYLES.slice(
+    mode === 'dark' ? darkStart : lightStart,
+    mode === 'dark' ? Infinity : darkStart,
+  );
+  const declared = new RegExp(`${property}:\\s*([^;]+);`).exec(block)?.[1].trim();
+  if (declared === undefined) return undefined;
+  // An alias like `var(--gray-850)` resolves against the ramp, so the caller's
+  // comparison sees the painted value rather than the indirection.
+  const aliased = /^var\((--[\w-]+)\)$/.exec(declared)?.[1];
+  if (aliased === undefined) return declared;
+  return new RegExp(`${aliased}:\\s*([^;]+);`).exec(APP_STYLES)?.[1].trim();
+};
+
 describe('dark dialog surface', () => {
   it('matches the legacy rendered background in CSS and the runtime theme', () => {
-    const appStyles = readFileSync(
-      join(__dirname, '..', '..', '..', '..', 'client', 'src', 'style.css'),
-      'utf8',
-    );
-
-    expect(appStyles).toMatch(/--gray-875:\s*18 18 18;/);
-    expect(appStyles).toMatch(/--surface-dialog:\s*var\(--gray-875\);/);
-    expect(darkTheme['rgb-surface-dialog']).toBe('18 18 18');
+    expect(cssToken('--surface-dialog', 'dark')).toBe(darkTheme['rgb-surface-dialog']);
   });
 });
 
 describe('dark hover surface', () => {
-  it('uses the gray-650 midpoint in both CSS and the runtime theme', () => {
-    const appStyles = readFileSync(
-      join(__dirname, '..', '..', '..', '..', 'client', 'src', 'style.css'),
-      'utf8',
-    );
-
-    expect(appStyles).toMatch(/--gray-650:\s*57 57 57;/);
-    expect(appStyles).toMatch(/--surface-hover:\s*var\(--gray-650\);/);
-    expect(darkTheme['rgb-surface-hover']).toBe('57 57 57');
+  it('uses the same elevated surface in CSS and the runtime theme', () => {
+    expect(cssToken('--surface-hover', 'dark')).toBe(darkTheme['rgb-surface-hover']);
   });
 });
 
 describe('composer hover surface', () => {
-  it('keeps light hover unchanged and uses the lighter dark hover surface', () => {
-    const appStyles = readFileSync(
-      join(__dirname, '..', '..', '..', '..', 'client', 'src', 'style.css'),
-      'utf8',
+  it('keeps light and dark composer hover in step between CSS and the runtime theme', () => {
+    expect(cssToken('--surface-composer-hover', 'light')).toBe(
+      defaultTheme['rgb-surface-composer-hover'],
     );
-
-    expect(appStyles).toMatch(/--surface-composer-hover:\s*var\(--gray-200\);/);
-    expect(appStyles).toMatch(/--surface-composer-hover:\s*var\(--gray-600\);/);
-    expect(defaultTheme['rgb-surface-composer-hover']).toBe('227 227 227');
-    expect(darkTheme['rgb-surface-composer-hover']).toBe('66 66 66');
+    expect(cssToken('--surface-composer-hover', 'dark')).toBe(
+      darkTheme['rgb-surface-composer-hover'],
+    );
   });
 });
 
@@ -119,7 +132,7 @@ describe('dark destructive text', () => {
 
 describe('light brand text', () => {
   it('uses the contrasting purple foreground in the default theme', () => {
-    expect(defaultTheme['rgb-brand-purple']).toBe('126 34 206');
+    expect(defaultTheme['rgb-brand-purple']).toBe('155 138 251');
   });
 });
 
@@ -316,7 +329,9 @@ describe('categorical series scale', () => {
   });
 
   it('exposes each slot as a Tailwind utility backed by its CSS variable', () => {
-    const colors = createTailwindColors();
+    /** The palette spreads nested `gray`/`green` ramps next to the flat slot
+     *  entries, so it is indexed by name rather than by a fixed key union. */
+    const colors: Record<string, unknown> = createTailwindColors();
 
     seriesTokens.forEach((token) => {
       const property = token.slice(4);

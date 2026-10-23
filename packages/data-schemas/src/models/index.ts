@@ -3,32 +3,52 @@ import { createAgentTriggerLaneSequenceModel } from './triggerLaneSequence';
 import { createScheduleModel, createScheduleRunModel } from './schedule';
 import { createSkillSyncCredentialModel } from './skillSyncCredential';
 import { createOpenIDRefreshFlightModel } from './openidRefreshFlight';
+import { createKnowledgeCollectionModel } from './knowledgeCollection';
 import { createAgentTriggerUserPurgeModel } from './triggerUserPurge';
 import { createRefreshTokenBridgeModel } from './refreshTokenBridge';
 import { createAgentTriggerDeliveryModel } from './triggerDelivery';
+import { createArtifactVersionModel } from './artifactVersion';
 import { createSkillSyncStatusModel } from './skillSyncStatus';
 import { createConversationTagModel } from './conversationTag';
 import { createCodeEnvironmentModel } from './codeEnvironment';
+import { createToolPermissionModel } from './toolPermission';
 import { createAgentCategoryModel } from './agentCategory';
+import { createOrganizationModel } from './organization';
+import { createNotificationModel } from './notification';
+import { createSubscriptionModel } from './subscription';
+import { createToolVersionModel } from './toolVersion';
+import { createWorkflowRunModel } from './workflowRun';
+import { createUsageRecordModel } from './usageRecord';
 import { createChatProjectModel } from './chatProject';
+import { createFlagOverrideModel } from './flagOverride';
 import { createAgentApiKeyModel } from './agentApiKey';
 import { createTransactionModel } from './transaction';
 import { createPromptGroupModel } from './promptGroup';
 import { createSystemGrantModel } from './systemGrant';
+import { createMessagePartModel } from './messagePart';
 import { createPluginAuthModel } from './pluginAuth';
 import { createSharedLinkModel } from './sharedLink';
 import { createAccessRoleModel } from './accessRole';
 import { createToolFavoriteModel } from './favorite';
+import { createMembershipModel } from './membership';
 import { createMCPServerModel } from './mcpServer';
 import { createAssistantModel } from './assistant';
 import { createSkillFileModel } from './skillFile';
+import { createWorkspaceModel } from './workspace';
 import { createConversationModel } from './convo';
+import { createFeedbackModel } from './feedback';
+import { createWorkflowModel } from './workflow';
+import { createArtifactModel } from './artifact';
+import { createCitationModel } from './citation';
 import { createToolCallModel } from './toolCall';
 import { createAclEntryModel } from './aclEntry';
 import { createAuditLogModel } from './auditLog';
+import { createAgentRunModel } from './agentRun';
 import { createSessionModel } from './session';
 import { createBalanceModel } from './balance';
 import { createMessageModel } from './message';
+import { createDeviceModel } from './device';
+import { createSourceModel } from './source';
 import { createActionModel } from './action';
 import { createBannerModel } from './banner';
 import { createPresetModel } from './preset';
@@ -39,6 +59,7 @@ import { createTokenModel } from './token';
 import { createAgentModel } from './agent';
 import { createSkillModel } from './skill';
 import { createGroupModel } from './group';
+import { createToolModel } from './tool';
 import { createUserModel } from './user';
 import { createRoleModel } from './role';
 import { createFileModel } from './file';
@@ -80,6 +101,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
   SharedLink: ReturnType<typeof createSharedLinkModel>;
   ToolCall: ReturnType<typeof createToolCallModel>;
   MemoryEntry: ReturnType<typeof createMemoryModel>;
+  KnowledgeCollection: ReturnType<typeof createKnowledgeCollectionModel>;
   ToolFavorite: ReturnType<typeof createToolFavoriteModel>;
   AccessRole: ReturnType<typeof createAccessRoleModel>;
   AclEntry: ReturnType<typeof createAclEntryModel>;
@@ -96,6 +118,26 @@ export function createModels(mongoose: typeof import('mongoose')): {
   ScheduleRun: ReturnType<typeof createScheduleRunModel>;
   RefreshTokenBridge: ReturnType<typeof createRefreshTokenBridgeModel>;
   OpenIDRefreshFlight: ReturnType<typeof createOpenIDRefreshFlightModel>;
+  Organization: ReturnType<typeof createOrganizationModel>;
+  Membership: ReturnType<typeof createMembershipModel>;
+  Workspace: ReturnType<typeof createWorkspaceModel>;
+  MessagePart: ReturnType<typeof createMessagePartModel>;
+  AgentRun: ReturnType<typeof createAgentRunModel>;
+  Notification: ReturnType<typeof createNotificationModel>;
+  Tool: ReturnType<typeof createToolModel>;
+  ToolVersion: ReturnType<typeof createToolVersionModel>;
+  ToolPermission: ReturnType<typeof createToolPermissionModel>;
+  Source: ReturnType<typeof createSourceModel>;
+  Citation: ReturnType<typeof createCitationModel>;
+  Artifact: ReturnType<typeof createArtifactModel>;
+  ArtifactVersion: ReturnType<typeof createArtifactVersionModel>;
+  Workflow: ReturnType<typeof createWorkflowModel>;
+  WorkflowRun: ReturnType<typeof createWorkflowRunModel>;
+  Device: ReturnType<typeof createDeviceModel>;
+  Subscription: ReturnType<typeof createSubscriptionModel>;
+  UsageRecord: ReturnType<typeof createUsageRecordModel>;
+  FlagOverride: ReturnType<typeof createFlagOverrideModel>;
+  Feedback: ReturnType<typeof createFeedbackModel>;
 } {
   const models = {
     User: createUserModel(mongoose),
@@ -129,6 +171,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
     SharedLink: createSharedLinkModel(mongoose),
     ToolCall: createToolCallModel(mongoose),
     MemoryEntry: createMemoryModel(mongoose),
+    KnowledgeCollection: createKnowledgeCollectionModel(mongoose),
     ToolFavorite: createToolFavoriteModel(mongoose),
     AccessRole: createAccessRoleModel(mongoose),
     AclEntry: createAclEntryModel(mongoose),
@@ -145,6 +188,26 @@ export function createModels(mongoose: typeof import('mongoose')): {
     ScheduleRun: createScheduleRunModel(mongoose),
     RefreshTokenBridge: createRefreshTokenBridgeModel(mongoose),
     OpenIDRefreshFlight: createOpenIDRefreshFlightModel(mongoose),
+    Organization: createOrganizationModel(mongoose),
+    Membership: createMembershipModel(mongoose),
+    Workspace: createWorkspaceModel(mongoose),
+    MessagePart: createMessagePartModel(mongoose),
+    AgentRun: createAgentRunModel(mongoose),
+    Notification: createNotificationModel(mongoose),
+    Tool: createToolModel(mongoose),
+    ToolVersion: createToolVersionModel(mongoose),
+    ToolPermission: createToolPermissionModel(mongoose),
+    Source: createSourceModel(mongoose),
+    Citation: createCitationModel(mongoose),
+    Artifact: createArtifactModel(mongoose),
+    ArtifactVersion: createArtifactVersionModel(mongoose),
+    Workflow: createWorkflowModel(mongoose),
+    WorkflowRun: createWorkflowRunModel(mongoose),
+    Device: createDeviceModel(mongoose),
+    Subscription: createSubscriptionModel(mongoose),
+    UsageRecord: createUsageRecordModel(mongoose),
+    FlagOverride: createFlagOverrideModel(mongoose),
+    Feedback: createFeedbackModel(mongoose),
   };
   /**
    * Background index builds fail silently unless an 'index' listener is

@@ -16,8 +16,18 @@ const endpoints = require('./endpoints');
 const staticRoute = require('./static');
 const messages = require('./messages');
 const memories = require('./memories');
+const knowledge = require('./knowledge');
+const notifications = require('./notifications');
+const devices = require('./devices');
+const subscriptions = require('./subscriptions');
+const usageRecords = require('./usage-records');
+const feedback = require('./feedback');
+const workflows = require('./workflows');
 const presets = require('./presets');
 const projects = require('./projects');
+const deepResearch = require('./deepResearch');
+const organizations = require('./organizations');
+const workspaces = require('./workspaces');
 const prompts = require('./prompts');
 const schedules = require('./schedules');
 const skills = require('./skills');
@@ -74,6 +84,9 @@ module.exports = {
   models,
   prompts,
   projects,
+  deepResearch,
+  organizations,
+  workspaces,
   schedules,
   skills,
   actions,
@@ -81,6 +94,13 @@ module.exports = {
   balance,
   messages,
   memories,
+  knowledge,
+  notifications,
+  devices,
+  subscriptions,
+  usageRecords,
+  feedback,
+  workflows,
   endpoints,
   assistants,
   categories,

@@ -1,8 +1,11 @@
 import React from 'react';
-import '@testing-library/jest-dom/extend-expect';
 import { MemoryRouter } from 'react-router-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import SkillsSidePanel from '../SkillsSidePanel';
+import i18n from '~/locales/i18n';
+
+const t = i18n.t.bind(i18n) as (key: string, options?: import('i18next').TOptions) => string;
+const mockT = t;
 
 const mockFetchNextPage = jest.fn();
 const mockUseNavScrolling = jest.fn((_options?: object) => ({
@@ -27,7 +30,7 @@ jest.mock('~/store', () => ({
 }));
 
 jest.mock('~/hooks', () => ({
-  useLocalize: () => (key: string) => key,
+  useLocalize: () => (key: string, options?: import('i18next').TOptions) => mockT(key, options),
   useDebounce: (value: string) => value,
   useNavScrolling: (options: object) => mockUseNavScrolling(options),
 }));
@@ -71,7 +74,7 @@ describe('SkillsSidePanel', () => {
       </MemoryRouter>,
     );
 
-    const toggle = screen.getByRole('button', { name: 'com_ui_my_skills' });
+    const toggle = screen.getByRole('button', { name: t('com_ui_my_skills') });
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(mockUseNavScrolling).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: true }),
