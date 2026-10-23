@@ -36,6 +36,11 @@ jest.mock('@librechat/api', () => ({
   applyAxiosProxyConfig: jest.fn((config) => config),
   createMinimalRetentionRequest: jest.fn(() => ({})),
   getHttpsProxyAgent: jest.fn(() => null),
+  getBalanceConfig: jest.fn(() => ({ enabled: false })),
+  getTransactionsConfig: jest.fn(() => ({ enabled: false })),
+}));
+jest.mock('~/models', () => ({
+  createTransaction: jest.fn(),
 }));
 
 const FluxAPI = require('../FluxAPI');

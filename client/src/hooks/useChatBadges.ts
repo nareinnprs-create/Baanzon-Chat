@@ -13,15 +13,7 @@ interface ChatBadgeConfig {
   atom?: any;
 }
 
-const badgeConfig: ReadonlyArray<ChatBadgeConfig> = [
-  // {
-  //   id: '1',
-  //   icon: Box,
-  //   label: 'com_ui_artifacts',
-  //   atom: store.codeArtifacts,
-  // },
-  // TODO: add more badges here (missing store atoms)
-];
+const badgeConfig: ReadonlyArray<ChatBadgeConfig> = [];
 
 export default function useChatBadges(): BadgeItem[] {
   const localize = useLocalize();

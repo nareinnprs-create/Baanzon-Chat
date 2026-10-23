@@ -37,7 +37,6 @@ jobs:
           node-version-file: .nvmrc # 24.16.0
           cache: npm
           # package-lock.json is the lockfile of record (packageManager npm@11.13.0).
-          # bun.lock is tracked but bun is not a supported or gated path (P1-10).
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies

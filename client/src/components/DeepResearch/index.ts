@@ -36,6 +36,7 @@ export { default as PlanEditor } from './PlanEditor';
 export { default as ProgressTimeline } from './ProgressTimeline';
 export { default as ReportView } from './ReportView';
 export { createInMemoryExecutor } from './api';
+export { createBackendDeepResearchExecutor } from './backend';
 export {
   createInitialState,
   deepResearchReducer,

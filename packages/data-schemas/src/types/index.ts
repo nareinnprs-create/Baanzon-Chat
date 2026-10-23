@@ -77,6 +77,8 @@ export * from './subscription';
 export * from './usageRecord';
 /* Feedback (§45) */
 export * from './feedback';
+/* Feature flags (B23/W15) */
+export * from './flagOverride';
 /* Admin */
 export * from './admin';
 /* Web */

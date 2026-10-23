@@ -6,6 +6,7 @@ import type { CanvasBlock, CanvasDocument, CanvasEditOperation, CanvasSelection 
 import type { MoveBlockDirection } from './state';
 import type { EditSelectionFn } from './api';
 import { CANVAS_LABELS as L } from './labels';
+import { toErrorMessage } from './utils';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
@@ -31,16 +32,6 @@ export type CanvasEditorProps = {
   editSelection: EditSelectionFn;
   onOperations: (operations: CanvasEditOperation[]) => void;
 };
-
-function toErrorMessage(caught: unknown, fallback: string): string {
-  if (caught instanceof Error && caught.message) {
-    return caught.message;
-  }
-  if (typeof caught === 'string' && caught) {
-    return caught;
-  }
-  return fallback;
-}
 
 /**
  * The editable text surface: one textarea per block, selection tracking per

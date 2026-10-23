@@ -67,8 +67,8 @@ The source code for `@librechat/agents` (major backend dependency, same team) li
   next sync; a second pull request for the same change is redundant.
 - **The repository's default branch is `main`**, so `gh pr create` and the GitHub UI target it
   unless told otherwise — always pass `--base dev` explicitly.
-- Pull requests opened against `main` are retargeted to `dev` automatically by
-  `.github/workflows/pr-retarget-dev.yml`. The `target: main` label exempts one, as do release-bound
+- Pull requests opened against `main` expect to be retargeted to `dev` — retargeting is
+  manual/from-policy (there is no automation workflow for it). The `target: main` label exempts one, as do release-bound
   upstream branches (`dev`, `release/*`, `hotfix/*`). Backport branches are deliberately not exempt —
   a backport merged straight to `main` is what breaks the fast-forward invariant.
 - **`Fixes #N` does not close the issue.** GitHub honors closing keywords only when a pull request

@@ -52,6 +52,7 @@ export enum QueryKeys {
   projects = 'projects',
   project = 'project',
   projectConversations = 'projectConversations',
+  flags = 'flags',
   categories = 'categories',
   randomPrompts = 'randomPrompts',
   agentCategories = 'agentCategories',
@@ -107,6 +108,9 @@ export enum QueryKeys {
   /* Notifications / Activity Center */
   notifications = 'notifications',
   notificationsUnreadCount = 'notificationsUnreadCount',
+  /* Deep Research */
+  deepResearchPlan = 'deepResearchPlan',
+  deepResearchReport = 'deepResearchReport',
 }
 
 // Dynamic query keys that require parameters

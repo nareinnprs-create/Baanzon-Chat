@@ -11,6 +11,8 @@ export * from './Memories';
 export * from './Messages';
 export * from './Misc';
 export * from './Projects';
+/* Deep Research */
+export * from './DeepResearch';
 /* Scheduled chats */
 export * from './Schedules';
 export * from './Subagents';

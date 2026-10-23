@@ -65,3 +65,4 @@ export { default as deviceSchema } from './device';
 export { default as subscriptionSchema } from './subscription';
 export { default as usageRecordSchema } from './usageRecord';
 export { default as feedbackSchema } from './feedback';
+export { default as flagOverrideSchema } from './flagOverride';

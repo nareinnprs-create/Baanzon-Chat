@@ -50,7 +50,7 @@ jest.mock('~/models', () => {
   const nextId = () => (++sequence).toString(16).padStart(24, '0');
 
   return {
-    listChatProjects: jest.fn(async (userId) => ({ projects: owned(userId), hasMore: false })),
+    listChatProjects: jest.fn(async (userId) => ({ projects: owned(userId), nextCursor: null })),
     createChatProject: jest.fn(async (userId, input) => {
       const project = {
         id: nextId(),

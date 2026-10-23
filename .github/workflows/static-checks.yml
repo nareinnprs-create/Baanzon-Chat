@@ -58,8 +58,7 @@ jobs:
         with:
           node-version-file: .nvmrc # 24.16.0, matches Dockerfile and Dockerfile.multi
           # package-lock.json is the lockfile of record: packageManager npm@11.13.0
-          # and config/update.js plus both Dockerfiles use `npm ci`. bun.lock is
-          # tracked but bun is not a supported or gated path (P1-10).
+          # and config/update.js plus both Dockerfiles use `npm ci`.
           cache: npm
           cache-dependency-path: package-lock.json
 

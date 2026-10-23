@@ -42,6 +42,7 @@ const {
   setPluginHookSource,
   loadToolApprovalHooks,
   maybeInjectQueryDevtoolsBootstrap,
+  runBootMigrations,
   preAuthTenantMiddleware,
   requestContextMiddleware,
   registerShutdownTask,
@@ -214,6 +215,7 @@ const startServer = async () => {
   await connectDb();
 
   logger.info('Connected to MongoDB');
+  await runBootMigrations(mongoose.connection);
   startCodeEnvironmentLifecycleReconciler({ mongoose });
   indexSync().catch((err) => {
     logger.error('[indexSync] Background sync failed:', err);
@@ -424,6 +426,7 @@ const startServer = async () => {
   app.use('/api/convos', routes.convos);
   app.use('/api/presets', routes.presets);
   app.use('/api/projects', routes.projects);
+  app.use('/api/deep-research', routes.deepResearch);
   app.use('/api/organizations', routes.organizations);
   app.use('/api/workspaces', routes.workspaces);
   app.use('/api/prompts', routes.prompts);

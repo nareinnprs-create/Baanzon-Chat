@@ -20,6 +20,7 @@ import { createToolVersionModel } from './toolVersion';
 import { createWorkflowRunModel } from './workflowRun';
 import { createUsageRecordModel } from './usageRecord';
 import { createChatProjectModel } from './chatProject';
+import { createFlagOverrideModel } from './flagOverride';
 import { createAgentApiKeyModel } from './agentApiKey';
 import { createTransactionModel } from './transaction';
 import { createPromptGroupModel } from './promptGroup';
@@ -135,6 +136,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
   Device: ReturnType<typeof createDeviceModel>;
   Subscription: ReturnType<typeof createSubscriptionModel>;
   UsageRecord: ReturnType<typeof createUsageRecordModel>;
+  FlagOverride: ReturnType<typeof createFlagOverrideModel>;
   Feedback: ReturnType<typeof createFeedbackModel>;
 } {
   const models = {
@@ -204,6 +206,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
     Device: createDeviceModel(mongoose),
     Subscription: createSubscriptionModel(mongoose),
     UsageRecord: createUsageRecordModel(mongoose),
+    FlagOverride: createFlagOverrideModel(mongoose),
     Feedback: createFeedbackModel(mongoose),
   };
   /**

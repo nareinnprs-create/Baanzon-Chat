@@ -27,6 +27,7 @@ import { fileConfigSchema } from './file-config';
 import { apiBaseUrl } from './api-endpoints';
 import { FileSources } from './types/files';
 import { MCPServersSchema } from './mcp';
+import { featureFlagsConfigSchema } from './flags';
 export {
   MAX_SUBAGENTS,
   MAX_SUBAGENTS_CEILING,
@@ -2762,6 +2763,19 @@ export const notificationsConfigSchema = z
 
 export type NotificationsConfig = z.infer<typeof notificationsConfigSchema>;
 
+/**
+ * Deep Research backend levers. `enabled` is the master switch: when false the
+ * `/api/deep-research` routes answer 503 with `deep_research_unavailable`, and
+ * the client falls back to its in-memory executor. Default enabled.
+ */
+export const deepResearchConfigSchema = z
+  .object({
+    enabled: z.boolean().optional().default(true),
+  })
+  .strict();
+
+export type DeepResearchConfig = z.infer<typeof deepResearchConfigSchema>;
+
 export const configSchema = z.object({
   version: z.string(),
   cache: z.boolean().default(true),
@@ -2772,6 +2786,8 @@ export const configSchema = z.object({
   rag: ragSchema.optional(),
   sandbox: sandboxConfigSchema.optional(),
   notifications: notificationsConfigSchema.optional(),
+  deepResearch: deepResearchConfigSchema.optional(),
+  featureFlags: featureFlagsConfigSchema,
   summarization: summarizationConfigSchema.optional(),
   skillSync: skillSyncConfigSchema,
   secureImageLinks: z.boolean().optional(),

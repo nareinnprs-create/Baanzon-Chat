@@ -1,5 +1,6 @@
 import type { ChatProjectSortBy, ChatProjectSortDirection } from '@librechat/data-schemas';
 import type { Request, Response } from 'express';
+import type { WorkspaceAccessGuard } from '../workspaces/types';
 
 /**
  * Storage-shaped project row. Kept Mongoose-free and declared here rather than
@@ -63,7 +64,8 @@ export interface ProjectCreateInput {
 export interface ProjectUpdateInput {
   name?: string;
   description?: string;
-  workspaceId?: string;
+  /** A string moves the project; `null` detaches it (storage `$unset`s the field). */
+  workspaceId?: string | null;
 }
 
 export interface ProjectDeleteResult {
@@ -98,6 +100,12 @@ export interface ProjectDataSource {
     conversationId: string,
     projectId: string | null,
   ): Promise<ProjectAssignment | null>;
+  /**
+   * The workspace authority check the mount site wires. Its absence denies:
+   * the workspace checks here validate only a value's shape, never the
+   * caller's membership, so no wired guard must fail closed.
+   */
+  assertWorkspaceAccess?: WorkspaceAccessGuard;
 }
 
 export interface ProjectRequestUser {

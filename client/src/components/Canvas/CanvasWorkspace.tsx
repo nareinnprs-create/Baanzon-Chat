@@ -26,6 +26,7 @@ import {
 } from './atoms';
 import VersionHistory from './VersionHistory';
 import { CANVAS_LABELS as L } from './labels';
+import { toErrorMessage } from './utils';
 import { useLocalize } from '~/hooks';
 import CommentsPanel from './CommentsPanel';
 import CanvasEditor from './CanvasEditor';
@@ -50,16 +51,6 @@ export type CanvasWorkspaceProps = {
   title?: string;
   className?: string;
 };
-
-function toErrorMessage(caught: unknown, fallback: string): string {
-  if (caught instanceof Error && caught.message) {
-    return caught.message;
-  }
-  if (typeof caught === 'string' && caught) {
-    return caught;
-  }
-  return fallback;
-}
 
 const RIGHT_TABS: ReadonlyArray<{ id: RightTab; labelKey: CanvasLabelKey }> = [
   { id: 'preview', labelKey: L.previewTab },
@@ -104,6 +95,10 @@ export default function CanvasWorkspace({
   useEffect(() => {
     loadRef.current = loadDocument;
   }, [loadDocument]);
+  const localizeRef = useRef(localize);
+  useEffect(() => {
+    localizeRef.current = localize;
+  }, [localize]);
   const initialVersionsRef = useRef(initialVersions);
   const initialCommentsRef = useRef(initialComments);
 
@@ -141,11 +136,11 @@ export default function CanvasWorkspace({
         }
         dispatch({
           type: 'load_failure',
-          error: toErrorMessage(caught, localize(L.failureDescription)),
+          error: toErrorMessage(caught, localizeRef.current(L.failureDescription)),
         });
       });
     return () => controller.abort();
-  }, [dispatch, documentProp, localize, reloadKey]);
+  }, [dispatch, documentProp, reloadKey]);
 
   const handleSelectionChange = useCallback(
     (next: CanvasSelection | null) => dispatch({ type: 'set_selection', selection: next }),

@@ -397,6 +397,7 @@ export type TChatProject = {
   name: string;
   description?: string;
   user?: string;
+  workspaceId: string | null;
   conversationCount: number;
   lastConversationAt?: string | null;
   lastConversationId?: string | null;
@@ -407,10 +408,14 @@ export type TChatProject = {
 export type TCreateChatProjectRequest = {
   name: string;
   description?: string;
+  workspaceId?: string;
 };
 
-export type TUpdateChatProjectRequest = Partial<TCreateChatProjectRequest> & {
+export type TUpdateChatProjectRequest = Partial<
+  Omit<TCreateChatProjectRequest, 'workspaceId'>
+> & {
   projectId: string;
+  workspaceId?: string | null;
 };
 
 export type TDeleteChatProjectResponse = {

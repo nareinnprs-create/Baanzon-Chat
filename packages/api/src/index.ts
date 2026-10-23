@@ -38,6 +38,7 @@ export * from './mcp/context';
 export * from './utils';
 export { default as Tokenizer, countTokens } from './utils/tokenizer';
 export type { EncodingName } from './utils/tokenizer';
+export * from './db/migrations';
 export * from './db/utils';
 /* HTML */
 export * from './html';
@@ -70,6 +71,8 @@ export * from './actions';
 export * from './prompts';
 /* Projects */
 export * from './projects';
+/* Deep Research */
+export * from './deepResearch';
 /* Tenant hierarchy: organization -> workspace */
 export * from './organizations';
 export * from './workspaces';

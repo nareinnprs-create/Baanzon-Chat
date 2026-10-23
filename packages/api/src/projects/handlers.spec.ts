@@ -54,6 +54,7 @@ function projectRequest(overrides: Record<string, unknown> = {}): ProjectRequest
 }
 
 function dataSource(): jest.Mocked<ProjectDataSource> {
+  /** The default mount wires an access gate; absent means deny. */
   return {
     listChatProjects: jest.fn(),
     createChatProject: jest.fn(),
@@ -61,6 +62,7 @@ function dataSource(): jest.Mocked<ProjectDataSource> {
     updateChatProject: jest.fn(),
     deleteChatProject: jest.fn(),
     assignConversationToProject: jest.fn(),
+    assertWorkspaceAccess: jest.fn(),
   } as unknown as jest.Mocked<ProjectDataSource>;
 }
 
@@ -328,6 +330,103 @@ describe('createProjectHandlers', () => {
 
       expect(response.statusCode).toBe(500);
       expect(response.body).toEqual({ error: 'Error creating project' });
+    });
+  });
+
+  describe('workspace access', () => {
+    it('consults the access guard with the caller and the named workspace before creating', async () => {
+      const createChatProject = jest.fn().mockResolvedValue(project({ workspaceId: WORKSPACE_ID }));
+      const assertWorkspaceAccess = jest.fn();
+      const handlers = createProjectHandlers({ ...dataSource(), createChatProject, assertWorkspaceAccess });
+      const response = mockResponse();
+
+      await handlers.createProject(
+        projectRequest({ body: { name: 'Roadmap', workspaceId: WORKSPACE_ID } }),
+        response.res,
+      );
+
+      expect(assertWorkspaceAccess).toHaveBeenCalledWith(WORKSPACE_ID, USER_ID);
+      expect(response.statusCode).toBe(201);
+    });
+
+    it('refuses a create into a workspace the guard denies, writing nothing', async () => {
+      const createChatProject = jest.fn();
+      const assertWorkspaceAccess = jest.fn().mockRejectedValue(new Error('denied'));
+      const handlers = createProjectHandlers({ ...dataSource(), createChatProject, assertWorkspaceAccess });
+      const response = mockResponse();
+
+      await handlers.createProject(
+        projectRequest({ body: { name: 'Roadmap', workspaceId: WORKSPACE_ID } }),
+        response.res,
+      );
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body).toEqual({ error: 'Insufficient workspace permissions' });
+      expect(createChatProject).not.toHaveBeenCalled();
+    });
+
+    it('creates an unscoped project without consulting the guard', async () => {
+      const createChatProject = jest.fn().mockResolvedValue(project());
+      const assertWorkspaceAccess = jest.fn();
+      const handlers = createProjectHandlers({ ...dataSource(), createChatProject, assertWorkspaceAccess });
+
+      const response = mockResponse();
+      await handlers.createProject(projectRequest({ body: { name: 'Roadmap' } }), response.res);
+
+      expect(assertWorkspaceAccess).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(201);
+    });
+
+    it('refuses a create when no access check is wired', async () => {
+      const createChatProject = jest.fn().mockResolvedValue(project({ workspaceId: WORKSPACE_ID }));
+      const deps = dataSource();
+      delete (deps as Partial<ProjectDataSource>).assertWorkspaceAccess;
+      const handlers = createProjectHandlers({ ...deps, createChatProject });
+      const response = mockResponse();
+
+      await handlers.createProject(
+        projectRequest({ body: { name: 'Roadmap', workspaceId: WORKSPACE_ID } }),
+        response.res,
+      );
+
+      expect(response.statusCode).toBe(403);
+      expect(createChatProject).not.toHaveBeenCalled();
+    });
+
+    it('refuses an update into a workspace the guard denies, writing nothing', async () => {
+      const updateChatProject = jest.fn();
+      const assertWorkspaceAccess = jest.fn().mockRejectedValue(new Error('denied'));
+      const handlers = createProjectHandlers({ ...dataSource(), updateChatProject, assertWorkspaceAccess });
+      const response = mockResponse();
+
+      await handlers.updateProject(
+        projectRequest({
+          params: { projectId: PROJECT_ID },
+          body: { workspaceId: WORKSPACE_ID },
+        }),
+        response.res,
+      );
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body).toEqual({ error: 'Insufficient workspace permissions' });
+      expect(updateChatProject).not.toHaveBeenCalled();
+    });
+
+    it('detaches the workspace when an update sends null', async () => {
+      const updateChatProject = jest.fn().mockResolvedValue(project());
+      const handlers = createProjectHandlers({ ...dataSource(), updateChatProject });
+      const response = mockResponse();
+
+      await handlers.updateProject(
+        projectRequest({
+          params: { projectId: PROJECT_ID },
+          body: { workspaceId: null },
+        }),
+        response.res,
+      );
+
+      expect(updateChatProject).toHaveBeenCalledWith(USER_ID, PROJECT_ID, { workspaceId: null });
+      expect(response.statusCode).toBe(200);
     });
   });
 

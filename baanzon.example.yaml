@@ -1252,9 +1252,11 @@ endpoints:
 #     #   temperature: 0.1
 
 # Knowledge retrieval — document collections behind `/api/knowledge`, used to
-# ground answers in your own documents. OPT-IN: this is off on a fresh install,
-# and until you turn it on every knowledge route answers 503.
-# To turn it on: uncomment the `rag:` block below and set `disabled: false`.
+# ground answers in your own documents. ON by default in this fork: the schema
+# ships `disabled: false` (packages/data-schemas/src/app/rag.ts), so the
+# knowledge routes answer out of the box. The kill switch stays per-domain —
+# `rag.disabled: true` in baanzon.yaml turns retrieval off. Uncomment the
+# `rag:` block below to override any defaults.
 # The default vector index is in-memory and lives in the API process, so it is
 # not durable: chunks are lost on restart or deploy, and each replica indexes
 # only what it ingested. Point `apiUrl` at a durable RAG service, or plan to
@@ -1263,10 +1265,10 @@ endpoints:
 # for individual users, groups, or roles, because the vector index and the
 # limits below are shared by the whole process.
 # rag:
-#   # (optional) Master switch, default true. When true, every knowledge route
-#   # answers 503 with { error: 'Knowledge retrieval is disabled' }. The routes
-#   # stay mounted because config is resolved per request. Set this to false to
-#   # turn the feature on.
+#   # (optional) Kill switch, default false — retrieval is enabled out of the
+#   # box. Set to true to make every knowledge route answer 503 with
+#   # { error: 'Knowledge retrieval is disabled' }. The routes stay mounted
+#   # because config is resolved per request.
 #   disabled: false
 #   # (optional) External RAG API base URL. Only consulted once a semantic client
 #   # is actually injected into the domain; until then retrieval is keyword-only

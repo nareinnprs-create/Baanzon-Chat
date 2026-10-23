@@ -55,6 +55,7 @@ export type ProjectListParams = {
   sortBy?: 'name' | 'createdAt' | 'lastConversationAt';
   sortDirection?: 'asc' | 'desc';
   search?: string;
+  workspaceId?: string;
 };
 
 export type ProjectListResponse = {

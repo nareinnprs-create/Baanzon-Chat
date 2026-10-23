@@ -255,6 +255,9 @@ export function canvasReducer(state: CanvasState, action: CanvasAction): CanvasS
     }
 
     case 'load_success': {
+      if (state.status === 'ready' && state.document === action.document) {
+        return state;
+      }
       return {
         status: 'ready',
         document: action.document,

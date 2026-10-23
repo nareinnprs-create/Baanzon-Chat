@@ -74,6 +74,14 @@ export interface WorkspaceDataSource {
   getMembership(organizationId: string, userId: string): Promise<MembershipRecord | null>;
 }
 
+/**
+ * The gate every workspace write must pass: confirms the user belongs to the
+ * workspace's organization — and, for a `private` workspace, may see it —
+ * before anything persists into it. Deny is a throw, so a guard that cannot
+ * answer refuses the write rather than admitting it.
+ */
+export type WorkspaceAccessGuard = (workspaceId: string, userId: string) => Promise<void>;
+
 export interface WorkspaceHandlers {
   list: (req: ServerRequest, res: Response) => Promise<Response>;
   create: (req: ServerRequest, res: Response) => Promise<Response>;

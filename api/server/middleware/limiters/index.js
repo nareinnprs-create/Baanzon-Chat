@@ -7,6 +7,7 @@ const uploadLimiters = require('./uploadLimiters');
 const forkLimiters = require('./forkLimiters');
 const shareLimiters = require('./shareLimiters');
 const knowledgeLimiters = require('./knowledgeLimiters');
+const projectsLimiter = require('./projectsLimiter');
 const registerLimiter = require('./registerLimiter');
 const toolCallLimiter = require('./toolCallLimiter');
 const messageLimiters = require('./messageLimiters');
@@ -24,6 +25,7 @@ module.exports = {
   ...forkLimiters,
   ...shareLimiters,
   ...knowledgeLimiters,
+  ...projectsLimiter,
   ...promptUsageLimiter,
   loginLimiter,
   registerLimiter,

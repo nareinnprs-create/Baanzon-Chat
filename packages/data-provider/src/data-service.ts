@@ -4,8 +4,10 @@ import type { TFileConfig } from './file-config';
 import type * as t from './types';
 import * as permissions from './accessPermissions';
 import * as endpoints from './api-endpoints';
+import * as fl from './flags';
 import { uploadEventStream } from './upload';
 import * as nt from './types/notifications';
+import * as dr from './types/deepResearch';
 import * as mcp from './types/mcpServers';
 import * as qt from './types/queuedTurns';
 import * as sch from './types/schedules';
@@ -992,6 +994,11 @@ export function assignConversationToProject(
   });
 }
 
+export function getFlags(organizationId?: string): Promise<fl.TFeatureFlagsResponse> {
+  const query = organizationId ? `?organizationId=${encodeURIComponent(organizationId)}` : '';
+  return request.get(`${endpoints.flags()}${query}`);
+}
+
 export function pinConversation(
   payload: t.TPinConversationRequest,
 ): Promise<t.TPinConversationResponse> {
@@ -1693,4 +1700,21 @@ export function createNotification(
 
 export function notificationStreamUrl(): string {
   return `${endpoints.apiBaseUrl()}/api/notifications/stream`;
+}
+
+/* Deep Research */
+export function createDeepResearchPlan(
+  payload: dr.TDeepResearchPlanRequest,
+): Promise<dr.TDeepResearchPlan> {
+  return request.post(endpoints.deepResearchPlan(), payload);
+}
+
+export function deepResearchStepRunUrl(params: dr.TDeepResearchStepRunParams): string {
+  return endpoints.deepResearchStepRun(params);
+}
+
+export function buildDeepResearchReport(
+  payload: dr.TDeepResearchReportRequest,
+): Promise<dr.TDeepResearchReport> {
+  return request.post(endpoints.deepResearchReport(), payload);
 }

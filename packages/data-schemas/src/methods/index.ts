@@ -158,6 +158,7 @@ import {
 } from './workflowRun';
 import { createDeviceMethods, type DeviceMethods } from './device';
 import { createSubscriptionMethods, type SubscriptionMethods } from './subscription';
+import { createFlagOverrideMethods, type FlagOverrideMethods } from './flagOverride';
 import { createUsageRecordMethods, type UsageRecordMethods } from './usageRecord';
 import { createFeedbackMethods, type FeedbackMethods } from './feedback';
 /* Tier 3 — Complex (heavier injection) */

@@ -80,7 +80,7 @@
     "validate:changed": "node scripts/validate.mjs --changed",
     "validate:static": "node scripts/validate.mjs --only build,typecheck,static-checks",
     "format": "npx prettier --write \"{,!(node_modules|venv)/**/}*.{js,jsx,ts,tsx}\"",
-    "//": "DECISION NEEDED (P1-10): npm is the install of record; bun is an unsupported, ungated path. Rationale: packageManager is npm@11.13.0 and npm ci + package-lock.json are used everywhere, while the tracked bun.lock diverges (REMEDIATION-PLAN.md §P1-10). No bun CI gate should be added until bun support is deliberate; removing bun.lock and these b:* scripts is tracked as follow-up. See .github/workflows/lint.yml.",
+    "//": "DECISION NEEDED (P1-10): npm is the install of record; bun is an unsupported, ungated path. Rationale: packageManager is npm@11.13.0 and npm ci + package-lock.json are used everywhere. No bun CI gate should be added until bun support is deliberate; removing the b:* scripts is tracked as follow-up. See .github/workflows/lint.yml.",
     "reset-terms": "node config/reset-terms.js",
     "migrate:tenant-indexes": "node config/migrate-tenant-indexes.js",
     "migrate:tenant-indexes:dry-run": "node config/migrate-tenant-indexes.js --dry-run",
@@ -119,7 +119,9 @@
     "@eslint/eslintrc": "^3.3.4",
     "@eslint/js": "^9.20.0",
     "@lhci/cli": "^0.15.1",
+    "@opentelemetry/sdk-node": "^0.218.0",
     "@playwright/test": "^1.62.1",
+    "@radix-ui/react-slot": "^1.0.0",
     "@types/react-virtualized": "^9.22.0",
     "brace-expansion": "^2.1.2",
     "caniuse-lite": "^1.0.30001741",
@@ -144,7 +146,9 @@
     "prettier": "^3.5.0",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "turbo": "^2.10.5",
-    "typescript-eslint": "^8.60.1"
+    "typescript-eslint": "^8.60.1",
+    "winston-daily-rotate-file": "^5.0.0",
+    "@tanstack/react-query": "^4.28.0"
   },
   "overrides": {
     "minimatch@3": {
@@ -218,7 +222,8 @@
     "undici": "^7.29.1",
     "moment": "^2.31.0",
     "ip-address": "^10.7.4",
-    "pbkdf2": "^3.1.7"
+    "pbkdf2": "^3.1.7",
+    "zod": "^3.25.76"
   },
   "nodemonConfig": {
     "ignore": [

@@ -16,6 +16,7 @@ import { normalizeLimit, queryString } from '~/utils';
 const PROJECT_NOT_FOUND = 'Project not found';
 const CONVERSATION_NOT_FOUND = 'Conversation not found';
 const WORKSPACE_ID_INVALID = 'workspaceId must be a string';
+const WORKSPACE_ACCESS_DENIED = 'Insufficient workspace permissions';
 
 const PROJECT_SORT_FIELDS = new Set<ChatProjectSortBy>(['name', 'createdAt', 'lastConversationAt']);
 
@@ -105,6 +106,33 @@ export function createProjectHandlers(deps: ProjectDataSource): ProjectHandlers 
     return matchesTenant(project.workspaceId, workspaceId);
   }
 
+  /**
+   * Exercises the workspace authority check before any persist names a
+   * workspace. A refusal — no guard wired, or the wired guard throwing —
+   * answers 403 without confirming that the workspace exists, and nothing
+   * has been written at that point.
+   */
+  async function requireWorkspaceAccess(
+    req: ProjectRequest,
+    res: Response,
+    workspaceId: string,
+  ): Promise<boolean> {
+    const assertWorkspaceAccess = deps.assertWorkspaceAccess;
+    if (assertWorkspaceAccess == null) {
+      logger.error('[projects] No workspace access check is wired; refusing the write');
+      res.status(403).json({ error: WORKSPACE_ACCESS_DENIED });
+      return false;
+    }
+    try {
+      await assertWorkspaceAccess(workspaceId, getUserId(req));
+      return true;
+    } catch (error) {
+      logger.error('[projects] Error checking workspace access', error);
+      res.status(403).json({ error: WORKSPACE_ACCESS_DENIED });
+      return false;
+    }
+  }
+
   async function listProjects(req: ProjectRequest, res: Response): Promise<Response> {
     const scope = resolveWorkspaceScope(req.query.workspaceId);
     if (!scope.valid) {
@@ -142,6 +170,13 @@ export function createProjectHandlers(deps: ProjectDataSource): ProjectHandlers 
     const scope = resolveWorkspaceScope(req.body?.workspaceId);
     if (!scope.valid) {
       return res.status(400).json({ error: WORKSPACE_ID_INVALID });
+    }
+
+    if (scope.workspaceId) {
+      const allowed = await requireWorkspaceAccess(req, res, scope.workspaceId);
+      if (!allowed) {
+        return res;
+      }
     }
 
     try {
@@ -233,11 +268,20 @@ export function createProjectHandlers(deps: ProjectDataSource): ProjectHandlers 
       return res.status(400).json({ error: WORKSPACE_ID_INVALID });
     }
     /**
-     * A blank or null `workspaceId` leaves the project where it is: clearing the
-     * field would need storage to accept `null`, which the contract does not.
+     * `null` detaches the project from its workspace — storage `$unset`s the
+     * field — while a blank value leaves the project where it is. A named
+     * workspace passes the authority check before the patch is written.
      */
-    if (req.body?.workspaceId !== undefined && scope.workspaceId !== undefined) {
-      input.workspaceId = scope.workspaceId;
+    if (req.body?.workspaceId !== undefined) {
+      if (scope.workspaceId) {
+        const allowed = await requireWorkspaceAccess(req, res, scope.workspaceId);
+        if (!allowed) {
+          return res;
+        }
+        input.workspaceId = scope.workspaceId;
+      } else if (req.body.workspaceId === null) {
+        input.workspaceId = null;
+      }
     }
 
     try {

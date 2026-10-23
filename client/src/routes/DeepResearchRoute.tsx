@@ -1,14 +1,15 @@
 import { Provider } from 'jotai';
-import { createInMemoryExecutor, DeepResearchView } from '~/components/DeepResearch';
+import { createBackendDeepResearchExecutor, DeepResearchView } from '~/components/DeepResearch';
 
 /**
- * Route shell for Deep Research. `createInMemoryExecutor` is the feature's
- * dependency-free reference executor, used as the placeholder executor until a
- * backend `DeepResearchExecutor` is injected; it runs the whole plan → progress
- * → report flow without a transport. The per-mount Jotai store isolates the
- * flow's state from the rest of the app.
+ * Route shell for Deep Research. `createBackendDeepResearchExecutor` talks to
+ * the backend `/api/deep-research` endpoints and falls back to the feature's
+ * in-memory executor when the backend is unavailable (`deepResearch.enabled`
+ * off, the origins' server missing, or the stream lost), so the flow always
+ * works. The per-mount Jotai store isolates the flow's state from the rest of
+ * the app.
  */
-const executor = createInMemoryExecutor();
+const executor = createBackendDeepResearchExecutor();
 
 export default function DeepResearchRoute() {
   return (

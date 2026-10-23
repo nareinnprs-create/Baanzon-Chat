@@ -49,9 +49,7 @@ jobs:
         # LOCKFILE DECISION (P1-10, resolved): npm is the install of record, so
         # this gate audits package-lock.json. `packageManager` is npm@11.13.0,
         # config/update.js runs `npm ci`, and both Dockerfiles copy package.json +
-        # package-lock.json and never invoke bun. `bun.lock` is still tracked but
-        # bun is not a supported or gated path, so its resolution is intentionally
-        # NOT audited here; supporting bun would add a second audit run.
+        # package-lock.json; supporting bun would add a second audit run.
         run: npm audit --level=high
 
   secret-scan:
