@@ -170,6 +170,15 @@ export const projectById = (id: string) => `${projectsRoot}/${encodeURIComponent
 export const projectConversation = (conversationId: string) =>
   `${projectsRoot}/conversations/${encodeURIComponent(conversationId)}`;
 
+const organizationsRoot = `${BASE_URL}/api/organizations`;
+
+export const organizations = () => organizationsRoot;
+
+const workspacesRoot = `${BASE_URL}/api/workspaces`;
+
+export const workspaces = (organizationId: string) =>
+  `${workspacesRoot}${buildQuery({ organizationId })}`;
+
 const flagsRoot = `${BASE_URL}/api/flags`;
 
 export const flags = () => flagsRoot;

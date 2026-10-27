@@ -18,10 +18,10 @@ import * as q from './types/queries';
 import * as sk from './types/skills';
 import * as f from './types/files';
 import * as config from './config';
+import * as sa from './searchAll';
 import request from './request';
 import * as s from './schemas';
 import * as fl from './flags';
-import * as sa from './searchAll';
 import * as tr from './trust';
 import * as r from './roles';
 
@@ -994,6 +994,14 @@ export function assignConversationToProject(
   return request.put(endpoints.projectConversation(conversationId), {
     projectId,
   });
+}
+
+export function listOrganizations(): Promise<q.OrganizationListResponse> {
+  return request.get(endpoints.organizations());
+}
+
+export function listWorkspaces(organizationId: string): Promise<q.WorkspaceListResponse> {
+  return request.get(endpoints.workspaces(organizationId));
 }
 
 export function getFlags(organizationId?: string): Promise<fl.TFeatureFlagsResponse> {

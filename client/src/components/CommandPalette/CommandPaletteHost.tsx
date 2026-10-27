@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import useCommandPaletteActions from './useCommandPaletteActions';
 import CommandPalette from './CommandPalette';
 
@@ -8,5 +9,6 @@ import CommandPalette from './CommandPalette';
  */
 export default function CommandPaletteHost() {
   const items = useCommandPaletteActions();
-  return <CommandPalette items={items} />;
+  const navigate = useNavigate();
+  return <CommandPalette items={items} onNavigate={navigate} />;
 }

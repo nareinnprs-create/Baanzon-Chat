@@ -1,9 +1,45 @@
 import { createStore, Provider } from 'jotai';
 import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
+import type { TSearchAllResponse } from 'librechat-data-provider';
 import type { CommandPaletteItem } from './types';
+import { useCrossEntitySearch } from '~/data-provider/CrossSearch/queries';
 import { commandPaletteOpenAtom } from './state';
 import CommandPalette from './CommandPalette';
+
+jest.mock('~/data-provider/CrossSearch/queries', () => ({
+  ...jest.requireActual('~/data-provider/CrossSearch/queries'),
+  useCrossEntitySearch: jest.fn(),
+}));
+
+const mockedUseCrossEntitySearch = jest.mocked(useCrossEntitySearch);
+
+/** Controls what the mocked cross-entity hook reports to the palette. */
+function mockSearchResult(data?: TSearchAllResponse, isFetching = false) {
+  mockedUseCrossEntitySearch.mockReturnValue({
+    data,
+    isFetching,
+  } as unknown as ReturnType<typeof useCrossEntitySearch>);
+}
+
+function makeRecords(): TSearchAllResponse['results'] {
+  return [
+    {
+      type: 'conversation',
+      id: 'conv-1',
+      title: 'Retro planning doc',
+      updatedAt: '2026-10-27T10:00:00Z',
+      href: '/c/conv-1',
+    },
+    {
+      type: 'project',
+      id: 'proj-1',
+      title: 'Launch project',
+      updatedAt: '2026-10-26T10:00:00Z',
+      href: '/projects/proj-1',
+    },
+  ];
+}
 
 function makeItems(): CommandPaletteItem[] {
   return [
@@ -31,7 +67,14 @@ function makeItems(): CommandPaletteItem[] {
   ];
 }
 
-function renderPalette(props: { items: CommandPaletteItem[]; isLoading?: boolean }, open = true) {
+function renderPalette(
+  props: {
+    items: CommandPaletteItem[];
+    isLoading?: boolean;
+    onNavigate?: (href: string) => void;
+  },
+  open = true,
+) {
   const store = createStore();
   store.set(commandPaletteOpenAtom, open);
   return render(
@@ -40,6 +83,10 @@ function renderPalette(props: { items: CommandPaletteItem[]; isLoading?: boolean
     </Provider>,
   );
 }
+
+beforeEach(() => {
+  mockSearchResult(undefined);
+});
 
 describe('CommandPalette', () => {
   it('opens on the global Ctrl/Cmd+K binding', async () => {
@@ -135,5 +182,99 @@ describe('CommandPalette', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     await waitFor(() => expect(opener).toHaveFocus());
     opener.remove();
+  });
+
+  describe('cross-entity search results', () => {
+    it('renders hits as a Results group once the query reaches two characters', async () => {
+      const user = userEvent.setup();
+      mockSearchResult({ results: makeRecords() });
+      renderPalette({ items: makeItems() });
+
+      await user.type(screen.getByRole('combobox'), 'ret');
+
+      expect(mockedUseCrossEntitySearch).toHaveBeenCalledWith('ret');
+      expect(screen.getByText('Results')).toBeInTheDocument();
+      /** 'ret' matches no static command, so the two hits are the only options. */
+      expect(screen.getAllByRole('option')).toHaveLength(2);
+      /** The first row starts active, like every other palette row. */
+      expect(screen.getByRole('option', { name: 'Retro planning doc' })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      expect(screen.getByRole('option', { name: 'Launch project' })).toBeInTheDocument();
+    });
+
+    it('renders no results group below two characters and lets the hook gate the fetch', async () => {
+      const user = userEvent.setup();
+      /** Cached data on purpose: the palette must hide it while the query is short. */
+      mockSearchResult({ results: makeRecords() });
+      renderPalette({ items: makeItems() });
+
+      await user.type(screen.getByRole('combobox'), 'q');
+
+      expect(mockedUseCrossEntitySearch).toHaveBeenCalledWith('q');
+      expect(screen.queryByText('Results')).not.toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'Retro planning doc' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'Launch project' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('option')).not.toBeInTheDocument();
+    });
+
+    it('navigates to a hit href on Enter and closes the palette', async () => {
+      const user = userEvent.setup();
+      const items = makeItems();
+      const onNavigate = jest.fn();
+      mockSearchResult({ results: makeRecords() });
+      renderPalette({ items, onNavigate });
+
+      const combobox = screen.getByRole('combobox');
+      await user.type(combobox, 'ret');
+      await user.type(combobox, '{End}{Enter}');
+
+      expect(onNavigate).toHaveBeenCalledTimes(1);
+      expect(onNavigate).toHaveBeenCalledWith('/projects/proj-1');
+      expect(items[0].run).not.toHaveBeenCalled();
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    });
+
+    it('keeps hits inside the arrow-key flow before running them', async () => {
+      const user = userEvent.setup();
+      const onNavigate = jest.fn();
+      mockSearchResult({ results: makeRecords() });
+      renderPalette({ items: makeItems(), onNavigate });
+
+      const combobox = screen.getByRole('combobox');
+      await user.type(combobox, 'chat');
+
+      /** The matching command first, then the two hits. */
+      expect(screen.getAllByRole('option')).toHaveLength(3);
+      await user.type(combobox, '{ArrowDown}{Enter}');
+
+      expect(onNavigate).toHaveBeenCalledTimes(1);
+      expect(onNavigate).toHaveBeenCalledWith('/c/conv-1');
+    });
+
+    it('shows a subtle searching row while the query is in flight', async () => {
+      const user = userEvent.setup();
+      mockSearchResult(undefined, true);
+      renderPalette({ items: makeItems() });
+
+      await user.type(screen.getByRole('combobox'), 'ret');
+
+      expect(screen.getByText('Searching…')).toBeInTheDocument();
+      expect(screen.queryByRole('option')).not.toBeInTheDocument();
+    });
+
+    it('reports an empty search inline while commands still match', async () => {
+      const user = userEvent.setup();
+      mockSearchResult({ results: [] });
+      renderPalette({ items: makeItems() });
+
+      await user.type(screen.getByRole('combobox'), 'chat');
+
+      expect(screen.getByText('Results')).toBeInTheDocument();
+      expect(screen.getByText('No results found')).toBeInTheDocument();
+      /** Only 'New chat' matches among the static commands. */
+      expect(screen.getAllByRole('option')).toHaveLength(1);
+    });
   });
 });

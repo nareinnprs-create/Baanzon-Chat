@@ -1,9 +1,9 @@
 import type { TranslationKeys } from '~/hooks';
 
 /** Sections the palette renders. Order here is the render order. */
-export type CommandPaletteGroupId = 'actions' | 'navigation';
+export type CommandPaletteGroupId = 'actions' | 'navigation' | 'results';
 
-export const COMMAND_PALETTE_GROUPS: CommandPaletteGroupId[] = ['actions', 'navigation'];
+export const COMMAND_PALETTE_GROUPS: CommandPaletteGroupId[] = ['actions', 'navigation', 'results'];
 
 export type CommandPaletteItem = {
   id: string;

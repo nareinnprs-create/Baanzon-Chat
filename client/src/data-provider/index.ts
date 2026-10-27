@@ -11,6 +11,8 @@ export * from './Memories';
 export * from './Messages';
 export * from './Misc';
 export * from './Projects';
+/* Tenancy lists the project workspace picker reads */
+export * from './Workspaces';
 /* Deep Research */
 export * from './DeepResearch';
 /* Feature flags */

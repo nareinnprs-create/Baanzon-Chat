@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useAtom } from 'jotai';
-import { Search } from 'lucide-react';
+import { Folder, MessageSquare, Search } from 'lucide-react';
 import {
   OGDialog,
   OGDialogContent,
@@ -9,8 +9,13 @@ import {
   Spinner,
 } from '@librechat/client';
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
+import type { TSearchAllRecord } from 'librechat-data-provider';
 import type { CommandPaletteGroupId, CommandPaletteItem } from './types';
 import type { TranslationKeys } from '~/hooks';
+import {
+  CROSS_SEARCH_MIN_QUERY_LENGTH,
+  useCrossEntitySearch,
+} from '~/data-provider/CrossSearch/queries';
 import { COMMAND_PALETTE_GROUPS, matchesCommandQuery } from './types';
 import { commandPaletteOpenAtom } from './state';
 import { useLocalize } from '~/hooks';
@@ -19,19 +24,31 @@ import { cn } from '~/utils';
 const GROUP_LABEL_KEYS: Record<CommandPaletteGroupId, TranslationKeys> = {
   actions: 'com_ui_command_palette_group_actions',
   navigation: 'com_ui_command_palette_group_navigation',
+  results: 'com_ui_command_palette_group_results',
 };
 
 type CommandPaletteProps = {
   items: CommandPaletteItem[];
   isLoading?: boolean;
+  /** Client navigation for cross-entity search rows; the host supplies `useNavigate`. */
+  onNavigate?: (href: string) => void;
 };
+
+/** One selectable row in the listbox: a host action or a cross-entity hit. */
+type PaletteRow =
+  | { kind: 'command'; id: string; item: CommandPaletteItem }
+  | { kind: 'result'; id: string; record: TSearchAllRecord };
 
 /**
  * Presentational command palette. The host owns the action list, so this
  * component keeps the dialog/listbox behavior and its open state only — no
  * routing, theme or chat wiring leaks in.
  */
-export default function CommandPalette({ items, isLoading = false }: CommandPaletteProps) {
+export default function CommandPalette({
+  items,
+  isLoading = false,
+  onNavigate,
+}: CommandPaletteProps) {
   const localize = useLocalize();
   const [open, setOpen] = useAtom(commandPaletteOpenAtom);
   const [query, setQuery] = useState('');
@@ -41,6 +58,22 @@ export default function CommandPalette({ items, isLoading = false }: CommandPale
   const openerRef = useRef<HTMLElement | null>(null);
   const baseId = useId();
   const listboxId = `${baseId}-listbox`;
+
+  /** Component-local react-query over the shipped hook; the hook gates the
+   *  request at two characters, and the gate below keeps a stale cached
+   *  response from rendering for a shorter query. */
+  const crossSearch = useCrossEntitySearch(query);
+  const searchActive = query.trim().length >= CROSS_SEARCH_MIN_QUERY_LENGTH;
+  const resultRecords = useMemo(
+    () => (searchActive ? (crossSearch.data?.results ?? []) : []),
+    [crossSearch.data, searchActive],
+  );
+  const searchFetching = searchActive && crossSearch.isFetching;
+  const searchEmpty =
+    searchActive &&
+    !crossSearch.isFetching &&
+    crossSearch.data != null &&
+    resultRecords.length === 0;
 
   const filtered = useMemo(
     () =>
@@ -57,15 +90,19 @@ export default function CommandPalette({ items, isLoading = false }: CommandPale
     [filtered],
   );
 
-  const flatIndex = useMemo(() => {
-    const map = new Map<string, number>();
-    filtered.forEach((item, index) => map.set(item.id, index));
-    return map;
-  }, [filtered]);
+  const rows = useMemo<PaletteRow[]>(
+    () => [
+      ...filtered.map((item): PaletteRow => ({ kind: 'command', id: item.id, item })),
+      ...resultRecords.map(
+        (record): PaletteRow => ({ kind: 'result', id: `${record.type}-${record.id}`, record }),
+      ),
+    ],
+    [filtered, resultRecords],
+  );
 
-  const safeIndex = filtered.length === 0 ? -1 : Math.min(activeIndex, filtered.length - 1);
-  const activeItem = safeIndex >= 0 ? filtered[safeIndex] : undefined;
-  const activeOptionId = activeItem != null ? `${baseId}-option-${activeItem.id}` : undefined;
+  const safeIndex = rows.length === 0 ? -1 : Math.min(activeIndex, rows.length - 1);
+  const activeRow = safeIndex >= 0 ? rows[safeIndex] : undefined;
+  const activeOptionId = activeRow != null ? `${baseId}-option-${activeRow.id}` : undefined;
 
   useEffect(() => {
     if (open) {
@@ -81,7 +118,7 @@ export default function CommandPalette({ items, isLoading = false }: CommandPale
   useEffect(() => {
     const active = listRef.current?.querySelector<HTMLElement>('[data-active="true"]');
     active?.scrollIntoView?.({ block: 'nearest' });
-  }, [activeIndex, filtered, open]);
+  }, [activeIndex, rows, open]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -110,12 +147,16 @@ export default function CommandPalette({ items, isLoading = false }: CommandPale
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, setOpen]);
 
-  const runItem = useCallback(
-    (item: CommandPaletteItem) => {
+  const runRow = useCallback(
+    (row: PaletteRow) => {
       setOpen(false);
-      item.run();
+      if (row.kind === 'command') {
+        row.item.run();
+      } else {
+        onNavigate?.(row.record.href);
+      }
     },
-    [setOpen],
+    [onNavigate, setOpen],
   );
 
   const handleInputKeyDown = useCallback(
@@ -125,33 +166,33 @@ export default function CommandPalette({ items, isLoading = false }: CommandPale
       }
       switch (event.key) {
         case 'ArrowDown': {
-          if (filtered.length === 0) return;
+          if (rows.length === 0) return;
           event.preventDefault();
-          setActiveIndex((index) => (index + 1) % filtered.length);
+          setActiveIndex((index) => (index + 1) % rows.length);
           break;
         }
         case 'ArrowUp': {
-          if (filtered.length === 0) return;
+          if (rows.length === 0) return;
           event.preventDefault();
-          setActiveIndex((index) => (index - 1 + filtered.length) % filtered.length);
+          setActiveIndex((index) => (index - 1 + rows.length) % rows.length);
           break;
         }
         case 'Home': {
-          if (filtered.length === 0) return;
+          if (rows.length === 0) return;
           event.preventDefault();
           setActiveIndex(0);
           break;
         }
         case 'End': {
-          if (filtered.length === 0) return;
+          if (rows.length === 0) return;
           event.preventDefault();
-          setActiveIndex(filtered.length - 1);
+          setActiveIndex(rows.length - 1);
           break;
         }
         case 'Enter': {
-          if (activeItem == null) return;
+          if (activeRow == null) return;
           event.preventDefault();
-          runItem(activeItem);
+          runRow(activeRow);
           break;
         }
         case 'Escape': {
@@ -172,10 +213,15 @@ export default function CommandPalette({ items, isLoading = false }: CommandPale
           break;
       }
     },
-    [activeItem, filtered, query, runItem, setOpen],
+    [activeRow, rows, query, runRow, setOpen],
   );
 
-  const showNoResults = query.trim() !== '' && filtered.length === 0;
+  const showNoResults =
+    query.trim() !== '' &&
+    !searchFetching &&
+    !searchEmpty &&
+    filtered.length === 0 &&
+    resultRecords.length === 0;
   const showEmpty = query.trim() === '' && items.length === 0;
 
   let resultsContent: ReactNode = null;
@@ -189,7 +235,7 @@ export default function CommandPalette({ items, isLoading = false }: CommandPale
         {localize('com_ui_loading')}
       </div>
     );
-  } else if (filtered.length > 0) {
+  } else if (filtered.length > 0 || resultRecords.length > 0 || searchFetching || searchEmpty) {
     resultsContent = (
       <ul
         ref={listRef}
@@ -207,7 +253,8 @@ export default function CommandPalette({ items, isLoading = false }: CommandPale
               {localize(GROUP_LABEL_KEYS[entry.group])}
             </li>
             {entry.items.map((item) => {
-              const index = flatIndex.get(item.id) ?? -1;
+              /** Commands occupy `rows` in `filtered` order before any results. */
+              const index = filtered.indexOf(item);
               const isActive = index === safeIndex;
               return (
                 <li
@@ -217,7 +264,7 @@ export default function CommandPalette({ items, isLoading = false }: CommandPale
                   aria-selected={isActive}
                   data-active={isActive}
                   onMouseMove={() => setActiveIndex(index)}
-                  onClick={() => runItem(item)}
+                  onClick={() => runRow({ kind: 'command', id: item.id, item })}
                   className={cn(
                     'cursor-pointer rounded-lg px-3 py-2 text-sm text-text-primary',
                     isActive ? 'bg-surface-hover' : 'bg-transparent',
@@ -229,6 +276,57 @@ export default function CommandPalette({ items, isLoading = false }: CommandPale
             })}
           </Fragment>
         ))}
+        {searchActive && (resultRecords.length > 0 || searchFetching || searchEmpty) && (
+          <Fragment key="results">
+            <li
+              role="presentation"
+              className="px-2 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wide text-text-tertiary"
+            >
+              {localize('com_ui_command_palette_group_results')}
+            </li>
+            {resultRecords.map((record) => {
+              const id = `${record.type}-${record.id}`;
+              /** Results sit after every command row. */
+              const index = filtered.length + resultRecords.indexOf(record);
+              const isActive = index === safeIndex;
+              const ResultIcon = record.type === 'project' ? Folder : MessageSquare;
+              return (
+                <li
+                  key={id}
+                  id={`${baseId}-option-${id}`}
+                  role="option"
+                  aria-selected={isActive}
+                  data-active={isActive}
+                  onMouseMove={() => setActiveIndex(index)}
+                  onClick={() => runRow({ kind: 'result', id, record })}
+                  className={cn(
+                    'flex min-w-0 cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-primary',
+                    isActive ? 'bg-surface-hover' : 'bg-transparent',
+                  )}
+                >
+                  <ResultIcon className="h-4 w-4 shrink-0 text-text-secondary" aria-hidden="true" />
+                  <span className="truncate">
+                    {record.title?.trim() || localize('com_ui_command_palette_untitled')}
+                  </span>
+                </li>
+              );
+            })}
+            {searchFetching && (
+              <li
+                role="presentation"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-text-tertiary"
+              >
+                <Spinner className="h-3 w-3" aria-hidden="true" />
+                {localize('com_ui_command_palette_searching')}
+              </li>
+            )}
+            {searchEmpty && (
+              <li role="presentation" className="px-3 py-2 text-sm text-text-tertiary">
+                {localize('com_ui_command_palette_search_empty')}
+              </li>
+            )}
+          </Fragment>
+        )}
       </ul>
     );
   }

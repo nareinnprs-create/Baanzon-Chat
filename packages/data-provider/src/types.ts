@@ -411,9 +411,7 @@ export type TCreateChatProjectRequest = {
   workspaceId?: string;
 };
 
-export type TUpdateChatProjectRequest = Partial<
-  Omit<TCreateChatProjectRequest, 'workspaceId'>
-> & {
+export type TUpdateChatProjectRequest = Partial<Omit<TCreateChatProjectRequest, 'workspaceId'>> & {
   projectId: string;
   workspaceId?: string | null;
 };
@@ -421,6 +419,34 @@ export type TUpdateChatProjectRequest = Partial<
 export type TDeleteChatProjectResponse = {
   deletedCount: number;
   modifiedCount: number;
+};
+
+/** Wire shape of `GET /api/organizations`; ids are strings and dates are ISO-8601. */
+export type TOrganization = {
+  id: string;
+  name: string;
+  slug: string;
+  ownerId: string;
+  status: 'active' | 'suspended';
+  isPersonal: boolean;
+  settings?: Record<string, unknown>;
+  tenantId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+/** Wire shape of `GET /api/workspaces`; ids are strings and dates are ISO-8601. */
+export type TWorkspace = {
+  id: string;
+  organizationId: string;
+  name: string;
+  slug: string;
+  description?: string;
+  visibility: 'private' | 'org';
+  createdBy: string;
+  tenantId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type TAssignConversationToProjectRequest = {
