@@ -15,6 +15,8 @@ export * from './Projects';
 export * from './DeepResearch';
 /* Feature flags */
 export * from './Flags';
+/* Trust engine (B6 / A7.1) */
+export * from './Trust';
 /* Cross-entity palette search */
 export * from './CrossSearch';
 /* Scheduled chats */

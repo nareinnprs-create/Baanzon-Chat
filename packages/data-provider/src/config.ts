@@ -28,6 +28,7 @@ import { apiBaseUrl } from './api-endpoints';
 import { FileSources } from './types/files';
 import { MCPServersSchema } from './mcp';
 import { featureFlagsConfigSchema } from './flags';
+import { trustEngineConfigSchema } from './trust';
 import { crossEntitySearchConfigSchema } from './searchAll';
 export {
   MAX_SUBAGENTS,
@@ -2788,6 +2789,7 @@ export const configSchema = z.object({
   rag: ragSchema.optional(),
   sandbox: sandboxConfigSchema.optional(),
   notifications: notificationsConfigSchema.optional(),
+  trustEngine: trustEngineConfigSchema.optional(),
   deepResearch: deepResearchConfigSchema.optional(),
   featureFlags: featureFlagsConfigSchema,
   summarization: summarizationConfigSchema.optional(),

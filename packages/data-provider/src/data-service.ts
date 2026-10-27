@@ -22,6 +22,7 @@ import request from './request';
 import * as s from './schemas';
 import * as fl from './flags';
 import * as sa from './searchAll';
+import * as tr from './trust';
 import * as r from './roles';
 
 export function getInsights(params: TInsightsParams = {}): Promise<TInsightsResponse> {
@@ -1014,6 +1015,26 @@ export function searchAll(params: { q: string; limit?: number }): Promise<sa.TSe
     query.set('limit', String(params.limit));
   }
   return request.get(`${endpoints.searchAll()}?${query.toString()}`);
+}
+
+export function getTrust(params: tr.TTrustRequest): Promise<tr.TTrustResponse> {
+  const query = new URLSearchParams();
+  if (params.credibility?.length) {
+    query.set('credibility', params.credibility.join(','));
+  }
+  if (params.ageDays?.length) {
+    query.set('ageDays', params.ageDays.join(','));
+  }
+  if (params.positive !== undefined) {
+    query.set('positive', String(params.positive));
+  }
+  if (params.negative !== undefined) {
+    query.set('negative', String(params.negative));
+  }
+  const suffix = query.size ? `?${query.toString()}` : '';
+  return request.get(
+    `${endpoints.trust()}/${encodeURIComponent(params.entityType)}/${encodeURIComponent(params.id)}${suffix}`,
+  );
 }
 
 export function pinConversation(

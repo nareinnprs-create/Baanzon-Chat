@@ -9,7 +9,7 @@
 - **`NEXTROUND.md` is the phased execution plan and stays separate.** It owns phase
   sequencing, the live status ledger and per-phase detail; this file owns the backlog
   and the decision record. Read both.
-- Requirement authority: `Masterblueprint(1).md` v2.0 (locked 2026-09-08). Audit /
+- Requirement authority: `docs/masterblueprint.md` v2.0 (locked 2026-09-08). Audit /
   remediation detail: `REMEDIATION-PLAN.md`.
 - **Status legend:** ⬜ pending · 🔄 in progress · ✅ complete · ⛔ blocked · 🚫 deferred · ☑ decided
 - Rule per sub-batch: build → wire → test → verify. A sub-batch is complete only when
