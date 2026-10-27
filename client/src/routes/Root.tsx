@@ -25,6 +25,7 @@ import {
   useAgentsMap,
   useFileMap,
 } from '~/hooks';
+import MobileBottomNav, { MOBILE_BOTTOM_NAV_RESERVATION } from '~/components/Nav/MobileBottomNav';
 import KeyboardShortcutsDialog from '~/components/Nav/KeyboardShortcutsDialog';
 import KeyboardDeleteDialog from '~/components/Nav/KeyboardDeleteDialog';
 import { useUserTermsQuery, useGetStartupConfig } from '~/data-provider';
@@ -172,6 +173,10 @@ export default function Root() {
                        *  drawer without a literal and survives rotation. */
                       transform: isSmallScreen && sidebarExpanded ? MOBILE_PANE_SHIFT : 'none',
                       transition: prefersReducedMotion ? undefined : SIDEBAR_TRANSITION,
+                      /** The bottom bar is fixed to the viewport, so the pane
+                       *  must shrink by its height or the composer (and every
+                       *  route's footer) renders underneath it. */
+                      paddingBottom: isSmallScreen ? MOBILE_BOTTOM_NAV_RESERVATION : undefined,
                     }}
                     /** Recoil's flip is deferred past the opening frames and
                      *  the closing transition outlives it at the other end, so
@@ -196,6 +201,10 @@ export default function Root() {
                       onClick={onScrimClick}
                     />
                   )}
+                  {/* Layers under the drawer when it is open and renders nothing
+                      above the mobile breakpoint; it owns its own breakpoint
+                      reader, so no prop threads through here. */}
+                  <MobileBottomNav />
                 </div>
               </div>
             </PromptGroupsProvider>

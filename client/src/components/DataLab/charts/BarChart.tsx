@@ -9,13 +9,15 @@ import {
   scaleLinear,
   valueDomain,
 } from './geometry';
+import ChartDataTable from './ChartDataTable';
 import { seriesFillClass } from './palette';
 import ChartLegend from './ChartLegend';
 import ChartEmpty from './ChartEmpty';
 
 /**
  * Dependency-free responsive grouped bar chart. One group per row, one bar per
- * series; bars are measured against a zero baseline.
+ * series; bars are measured against a zero baseline. A visually hidden data
+ * table mirrors the plotted values for screen readers.
  */
 export default function BarChart({
   data,
@@ -52,6 +54,11 @@ export default function BarChart({
   const groupWidth = categoryWidth - groupPadding * 2;
   const barWidth = groupWidth / series.length;
   const stride = labelStride(data.length);
+  const tableColumns = [xLabel ?? '', ...series.map((definition) => definition.label)];
+  const tableRows = data.map((row, index) => [
+    x(row, index),
+    ...series.map((definition) => String(definition.value(row, index))),
+  ]);
 
   return (
     <figure className={className}>
@@ -154,6 +161,7 @@ export default function BarChart({
           index,
         }))}
       />
+      <ChartDataTable caption={ariaLabel} columns={tableColumns} rows={tableRows} />
     </figure>
   );
 }

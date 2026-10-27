@@ -28,7 +28,9 @@ interface PieSlice {
 
 /**
  * Dependency-free responsive pie chart. A row with a non-positive value is
- * skipped; the remaining values drive each slice's share of the whole.
+ * skipped; the remaining values drive each slice's share of the whole. The
+ * slice list doubles as the accessible data fallback, carrying the exact
+ * value (visually hidden) next to the rounded share.
  */
 export default function PieChart({
   data,
@@ -93,6 +95,7 @@ export default function PieChart({
             />
             <span className="text-text-primary">{slice.label}</span>
             <span>{`${Math.round((slice.value / total) * 100)}%`}</span>
+            <span className="sr-only">{` (${slice.value})`}</span>
           </li>
         ))}
       </ul>

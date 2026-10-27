@@ -5,8 +5,10 @@ import { Button, ControlCombobox } from '@librechat/client';
 import type { Agent, TMessage } from 'librechat-data-provider';
 import type { ReactNode } from 'react';
 import type { OptionWithIcon } from '~/common';
+import TrustIndicator from '~/components/Trust/TrustIndicator';
 import MessageIcon from '~/components/Share/MessageIcon';
 import { useAgentsMapContext } from '~/Providers';
+import { useTrust } from '~/data-provider';
 import { useLocalize } from '~/hooks';
 
 const AGENT_MESSAGE = { endpoint: EModelEndpoint.agents, isCreatedByUser: false } as TMessage;
@@ -169,12 +171,31 @@ interface StaticAgentRowProps {
   removeLabel: string;
 }
 
-/** Borderless display row for a selected agent (avatar, name, remove). */
+/**
+ * The trust verdict for a rostered agent (`entityType: 'agent'`). With no
+ * evidence producers yet (A7.1b) the engine scores whatever rides on the
+ * query — none — and answers `uncertain`; until a verdict exists (or while
+ * the agent id is absent and the query is disabled, mirroring `useTrust`'s
+ * `enabled` logic) the badge renders that same honest default.
+ */
+function AgentTrustBadge({ agentId }: { agentId?: string }) {
+  const { data } = useTrust({ entityType: 'agent', id: agentId ?? '' });
+  return (
+    <TrustIndicator
+      state={data?.trust.state ?? 'uncertain'}
+      sourcesCount={data?.trust.sourcesCount}
+      size="sm"
+    />
+  );
+}
+
+/** Borderless display row for a selected agent (avatar, name, trust, remove). */
 export function StaticAgentRow({ agent, name, onRemove, removeLabel }: StaticAgentRowProps) {
   return (
     <div className="flex items-center gap-2 rounded-lg px-1 py-1 transition hover:bg-surface-secondary">
       <AgentGlyph agent={agent} />
       <span className="min-w-0 flex-1 truncate text-sm text-text-primary">{name}</span>
+      <AgentTrustBadge agentId={agent?.id} />
       <RemoveButton onClick={onRemove} label={removeLabel} />
     </div>
   );

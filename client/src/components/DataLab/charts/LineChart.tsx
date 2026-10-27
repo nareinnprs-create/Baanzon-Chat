@@ -10,13 +10,15 @@ import {
   valueDomain,
 } from './geometry';
 import { seriesFillClass, seriesStrokeClass } from './palette';
+import ChartDataTable from './ChartDataTable';
 import ChartLegend from './ChartLegend';
 import ChartEmpty from './ChartEmpty';
 
 /**
  * Dependency-free responsive line chart. The viewBox is fixed at
  * {@link CHART_WIDTH}×{@link CHART_HEIGHT} and scales to its container; the
- * enclosing element supplies the height.
+ * enclosing element supplies the height. A visually hidden data table mirrors
+ * the plotted values for screen readers.
  */
 export default function LineChart({
   data,
@@ -54,6 +56,11 @@ export default function LineChart({
     margin.top + scaleLinear(value, tickMin, tickMax, plotHeight, 0);
   const baseline = yFor(Math.max(0, tickMin));
   const stride = labelStride(data.length);
+  const tableColumns = [xLabel ?? '', ...series.map((definition) => definition.label)];
+  const tableRows = data.map((row, index) => [
+    x(row, index),
+    ...series.map((definition) => String(definition.value(row, index))),
+  ]);
 
   return (
     <figure className={className}>
@@ -157,6 +164,7 @@ export default function LineChart({
           index,
         }))}
       />
+      <ChartDataTable caption={ariaLabel} columns={tableColumns} rows={tableRows} />
     </figure>
   );
 }
