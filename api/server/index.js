@@ -421,12 +421,16 @@ const startServer = async () => {
   app.use('/api/keys', routes.keys);
   app.use('/api/api-keys', routes.apiKeys);
   app.use('/api/user', routes.user);
+  /** Cross-entity palette search — mounted before `/api/search` so `/all` is
+   *  claimed by its own router instead of falling through to MeiliSearch. */
+  app.use('/api/search/all', routes.searchAll);
   app.use('/api/search', routes.search);
   app.use('/api/messages', routes.messages);
   app.use('/api/convos', routes.convos);
   app.use('/api/presets', routes.presets);
   app.use('/api/projects', routes.projects);
   app.use('/api/deep-research', routes.deepResearch);
+  app.use('/api/flags', routes.flags);
   app.use('/api/organizations', routes.organizations);
   app.use('/api/workspaces', routes.workspaces);
   app.use('/api/prompts', routes.prompts);

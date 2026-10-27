@@ -73,6 +73,10 @@ export * from './prompts';
 export * from './projects';
 /* Deep Research */
 export * from './deepResearch';
+/* Feature flags (B23/W15) */
+export * from './flags';
+/* Cross-entity palette search (B9 / A7.3) */
+export * from './search';
 /* Tenant hierarchy: organization -> workspace */
 export * from './organizations';
 export * from './workspaces';

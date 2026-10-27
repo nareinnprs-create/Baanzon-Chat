@@ -26,6 +26,8 @@ const workflows = require('./workflows');
 const presets = require('./presets');
 const projects = require('./projects');
 const deepResearch = require('./deepResearch');
+const flags = require('./flags');
+const searchAll = require('./search-all');
 const organizations = require('./organizations');
 const workspaces = require('./workspaces');
 const prompts = require('./prompts');
@@ -85,6 +87,8 @@ module.exports = {
   prompts,
   projects,
   deepResearch,
+  flags,
+  searchAll,
   organizations,
   workspaces,
   schedules,

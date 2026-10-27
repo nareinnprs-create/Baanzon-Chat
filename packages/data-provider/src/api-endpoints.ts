@@ -179,6 +179,8 @@ export const search = (q: string, cursor?: string | null) =>
 
 export const searchEnabled = () => `${BASE_URL}/api/search/enable`;
 
+export const searchAll = () => `${BASE_URL}/api/search/all`;
+
 export const presets = () => `${BASE_URL}/api/presets`;
 
 export const deletePreset = () => `${BASE_URL}/api/presets/delete`;

@@ -40,6 +40,13 @@ export type ListChatProjectsResult = {
   nextCursor: string | null;
 };
 
+/** Small projection for cross-entity palette search: enough to list and navigate. */
+export type ChatProjectTitleHit = {
+  id: string;
+  name: string;
+  lastConversationAt: Date | null;
+};
+
 export type DeleteChatProjectResult = {
   deletedCount: number;
   modifiedCount: number;
@@ -63,6 +70,12 @@ export interface ChatProjectMethods {
     workspaceId: string,
     options?: ListChatProjectsOptions,
   ): Promise<ListChatProjectsResult>;
+  /** Cross-entity palette search: bounded case-insensitive name/description hits for one user. */
+  searchChatProjectsByTitle(
+    user: string,
+    query: string,
+    limit?: number,
+  ): Promise<ChatProjectTitleHit[]>;
   updateChatProject(
     user: string,
     projectId: string,
@@ -90,6 +103,9 @@ type ProjectStatsSnapshot = Pick<
 
 const VALID_SORT_FIELDS = new Set<ChatProjectSortBy>(['name', 'createdAt', 'lastConversationAt']);
 const PROJECT_STATS_REFRESH_MAX_ATTEMPTS = 8;
+/** Per-request default and hard cap for `searchChatProjectsByTitle`. */
+const DEFAULT_TITLE_SEARCH_LIMIT = 10;
+const MAX_TITLE_SEARCH_LIMIT = 20;
 
 function normalizeSortBy(sortBy?: string): ChatProjectSortBy {
   return VALID_SORT_FIELDS.has(sortBy as ChatProjectSortBy)
@@ -599,11 +615,54 @@ export function createChatProjectMethods(mongoose: typeof import('mongoose')): C
     return await refreshChatProjectStatsForUser(mongoose, user, projectId);
   }
 
+  /**
+   * Cross-entity palette search over project names. The listing path already
+   * filters `name`/`description` with a bounded case-insensitive regex, so this
+   * rides the same pattern on the stored `{ user, workspaceId }` index with a
+   * hard cap (`limit <= 20`), matching only the requesting user's projects.
+   */
+  async function searchChatProjectsByTitle(
+    user: string,
+    query: string,
+    limit?: number,
+  ): Promise<ChatProjectTitleHit[]> {
+    const trimmed = typeof query === 'string' ? query.trim() : '';
+    if (!trimmed) {
+      return [];
+    }
+    const pageSize = Number.isFinite(limit)
+      ? Math.min(Math.max(Math.trunc(limit as number), 1), MAX_TITLE_SEARCH_LIMIT)
+      : DEFAULT_TITLE_SEARCH_LIMIT;
+    try {
+      const ChatProject = mongoose.models.ChatProject as Model<IChatProjectDocument>;
+      const searchRegex = { $regex: escapeRegExp(trimmed), $options: 'i' };
+      return await ChatProject.find({
+        user,
+        $or: [{ name: searchRegex }, { description: searchRegex }],
+      })
+        .select('name lastConversationAt updatedAt')
+        .sort({ updatedAt: -1, _id: -1 })
+        .limit(pageSize)
+        .lean<Array<Pick<ProjectLean, '_id' | 'name' | 'lastConversationAt' | 'updatedAt'>>>()
+        .then((projects) =>
+          projects.map((project) => ({
+            id: project._id.toString(),
+            name: project.name,
+            lastConversationAt: project.lastConversationAt ?? null,
+          })),
+        );
+    } catch (error) {
+      logger.error('[searchChatProjectsByTitle] Error searching project titles', error);
+      throw new Error('Error searching project titles');
+    }
+  }
+
   return {
     createChatProject,
     getChatProject,
     listChatProjects,
     listWorkspaceChatProjects,
+    searchChatProjectsByTitle,
     updateChatProject,
     deleteChatProject,
     assignConversationToProject,

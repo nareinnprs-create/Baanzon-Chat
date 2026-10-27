@@ -28,6 +28,7 @@ import { apiBaseUrl } from './api-endpoints';
 import { FileSources } from './types/files';
 import { MCPServersSchema } from './mcp';
 import { featureFlagsConfigSchema } from './flags';
+import { crossEntitySearchConfigSchema } from './searchAll';
 export {
   MAX_SUBAGENTS,
   MAX_SUBAGENTS_CEILING,
@@ -2779,6 +2780,7 @@ export type DeepResearchConfig = z.infer<typeof deepResearchConfigSchema>;
 export const configSchema = z.object({
   version: z.string(),
   cache: z.boolean().default(true),
+  crossEntitySearch: crossEntitySearchConfigSchema.optional(),
   ocr: ocrSchema.optional(),
   webSearch: webSearchSchema.optional(),
   langfuse: langfuseConfigSchema.optional(),

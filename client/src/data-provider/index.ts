@@ -13,6 +13,10 @@ export * from './Misc';
 export * from './Projects';
 /* Deep Research */
 export * from './DeepResearch';
+/* Feature flags */
+export * from './Flags';
+/* Cross-entity palette search */
+export * from './CrossSearch';
 /* Scheduled chats */
 export * from './Schedules';
 export * from './Subagents';

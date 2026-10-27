@@ -111,6 +111,8 @@ export enum QueryKeys {
   /* Deep Research */
   deepResearchPlan = 'deepResearchPlan',
   deepResearchReport = 'deepResearchReport',
+  /* Cross-entity palette search */
+  searchAll = 'searchAll',
 }
 
 // Dynamic query keys that require parameters

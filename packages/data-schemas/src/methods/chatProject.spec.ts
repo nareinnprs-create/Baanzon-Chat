@@ -643,4 +643,36 @@ describe('ChatProject workspace link', () => {
     const persisted = await ChatProject.findOne({ workspaceId }).lean<IChatProject>();
     expect(persisted?.tenantId).toBe(tenantA);
   });
+
+  describe('searchChatProjectsByTitle', () => {
+    it('returns bounded user-scoped hits for name and description matches', async () => {
+      await methods.createChatProject(user, { name: 'Customer Alpha', description: 'Support work' });
+      await methods.createChatProject(user, {
+        name: 'Internal Tools',
+        description: 'Overflow menu test',
+      });
+      await methods.createChatProject(teammate, { name: 'Customer Alpha clone' });
+
+      const byName = await methods.searchChatProjectsByTitle(user, 'alpha');
+      expect(byName.map((hit) => hit.name)).toEqual(['Customer Alpha']);
+      expect(byName[0]?.id).toBeTruthy();
+
+      const byDescription = await methods.searchChatProjectsByTitle(user, 'overflow');
+      expect(byDescription.map((hit) => hit.name)).toEqual(['Internal Tools']);
+
+      const noMatch = await methods.searchChatProjectsByTitle(user, 'zzzz');
+      expect(noMatch).toEqual([]);
+    });
+
+    it('answers an empty query without hits and keeps an oversized limit bounded', async () => {
+      await methods.createChatProject(user, { name: 'Alpha One' });
+      await methods.createChatProject(user, { name: 'Alpha Two' });
+      await methods.createChatProject(user, { name: 'Alpha Three' });
+
+      expect(await methods.searchChatProjectsByTitle(user, '   ')).toEqual([]);
+
+      const hits = await methods.searchChatProjectsByTitle(user, 'Alpha', 500);
+      expect(hits.map((hit) => hit.name).sort()).toEqual(['Alpha One', 'Alpha Three', 'Alpha Two']);
+    });
+  });
 });

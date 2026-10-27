@@ -85,6 +85,7 @@ export type {
   AssignConversationToProjectResult,
   ChatProjectSortBy,
   ChatProjectSortDirection,
+  ChatProjectTitleHit,
   CreateChatProjectInput,
   DeleteChatProjectResult,
   ListChatProjectsOptions,

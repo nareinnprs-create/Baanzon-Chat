@@ -4,7 +4,6 @@ import type { TFileConfig } from './file-config';
 import type * as t from './types';
 import * as permissions from './accessPermissions';
 import * as endpoints from './api-endpoints';
-import * as fl from './flags';
 import { uploadEventStream } from './upload';
 import * as nt from './types/notifications';
 import * as dr from './types/deepResearch';
@@ -21,6 +20,8 @@ import * as f from './types/files';
 import * as config from './config';
 import request from './request';
 import * as s from './schemas';
+import * as fl from './flags';
+import * as sa from './searchAll';
 import * as r from './roles';
 
 export function getInsights(params: TInsightsParams = {}): Promise<TInsightsResponse> {
@@ -997,6 +998,22 @@ export function assignConversationToProject(
 export function getFlags(organizationId?: string): Promise<fl.TFeatureFlagsResponse> {
   const query = organizationId ? `?organizationId=${encodeURIComponent(organizationId)}` : '';
   return request.get(`${endpoints.flags()}${query}`);
+}
+
+export function setFeatureFlag(
+  key: string,
+  payload: fl.TSetFeatureFlagRequest,
+): Promise<fl.TFeatureFlagOverride> {
+  return request.put(`${endpoints.flags()}/${key}`, payload);
+}
+
+export function searchAll(params: { q: string; limit?: number }): Promise<sa.TSearchAllResponse> {
+  const query = new URLSearchParams();
+  query.set('q', params.q);
+  if (params.limit !== undefined) {
+    query.set('limit', String(params.limit));
+  }
+  return request.get(`${endpoints.searchAll()}?${query.toString()}`);
 }
 
 export function pinConversation(
