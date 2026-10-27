@@ -160,6 +160,7 @@ import {
 import { createDeviceMethods, type DeviceMethods } from './device';
 import { createSubscriptionMethods, type SubscriptionMethods } from './subscription';
 import { createFlagOverrideMethods, type FlagOverrideMethods } from './flagOverride';
+import { createPlanEntitlementMethods, type PlanEntitlementMethods } from './planEntitlement';
 import { createUsageRecordMethods, type UsageRecordMethods } from './usageRecord';
 import { createFeedbackMethods, type FeedbackMethods } from './feedback';
 /* Tier 3 — Complex (heavier injection) */
@@ -337,6 +338,8 @@ export type AllMethods = UserMethods &
   DeviceMethods &
   SubscriptionMethods &
   UsageRecordMethods &
+  FlagOverrideMethods &
+  PlanEntitlementMethods &
   FeedbackMethods &
   TxMethods &
   TransactionMethods &
@@ -580,6 +583,8 @@ export function createMethods(
     ...createDeviceMethods(mongoose),
     ...createSubscriptionMethods(mongoose),
     ...createUsageRecordMethods(mongoose),
+    ...createFlagOverrideMethods(mongoose),
+    ...createPlanEntitlementMethods(mongoose),
     ...createFeedbackMethods(mongoose),
     /* Tier 3 */
     ...txMethods,
@@ -662,6 +667,8 @@ export type {
   DeviceMethods,
   SubscriptionMethods,
   UsageRecordMethods,
+  FlagOverrideMethods,
+  PlanEntitlementMethods,
   FeedbackMethods,
   TxMethods,
   TransactionMethods,

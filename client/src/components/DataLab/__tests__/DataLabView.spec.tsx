@@ -1,4 +1,5 @@
 import { Provider } from 'jotai';
+import * as echartsCore from 'echarts/core';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import type { TOptions } from 'i18next';
@@ -6,6 +7,26 @@ import type { DataTable } from '../types';
 import { DATA_LAB_LABELS } from '../labels';
 import DataLabView from '../DataLabView';
 import i18n from '~/locales/i18n';
+
+jest.mock('echarts/core', () => ({
+  init: jest.fn(),
+  use: jest.fn(),
+}));
+jest.mock('echarts/charts', () => ({
+  LineChart: {},
+  BarChart: {},
+  PieChart: {},
+}));
+jest.mock('echarts/components', () => ({
+  GridComponent: {},
+  TooltipComponent: {},
+  LegendComponent: {},
+}));
+jest.mock('echarts/renderers', () => ({
+  CanvasRenderer: {},
+}));
+
+const initMock = jest.mocked(echartsCore.init);
 
 const t = i18n.t.bind(i18n) as (key: string, options?: TOptions) => string;
 const L = Object.fromEntries(
@@ -29,6 +50,18 @@ const dataset: DataTable = {
 function renderView(ui: ReactElement) {
   return render(<Provider>{ui}</Provider>);
 }
+
+/** `restoreMocks` wipes implementations between tests, so re-prime each one. */
+beforeEach(() => {
+  initMock.mockImplementation(
+    () =>
+      ({
+        setOption: jest.fn(),
+        resize: jest.fn(),
+        dispose: jest.fn(),
+      }) as unknown as ReturnType<typeof echartsCore.init>,
+  );
+});
 
 describe('DataLabView', () => {
   it('shows a loading state', () => {

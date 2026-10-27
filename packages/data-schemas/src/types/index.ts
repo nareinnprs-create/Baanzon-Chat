@@ -79,6 +79,7 @@ export * from './usageRecord';
 export * from './feedback';
 /* Feature flags (B23/W15) */
 export * from './flagOverride';
+export * from './planEntitlement';
 /* Admin */
 export * from './admin';
 /* Web */

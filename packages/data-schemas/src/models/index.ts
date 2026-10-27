@@ -21,6 +21,7 @@ import { createWorkflowRunModel } from './workflowRun';
 import { createUsageRecordModel } from './usageRecord';
 import { createChatProjectModel } from './chatProject';
 import { createFlagOverrideModel } from './flagOverride';
+import { createPlanEntitlementModel } from './planEntitlement';
 import { createAgentApiKeyModel } from './agentApiKey';
 import { createTransactionModel } from './transaction';
 import { createPromptGroupModel } from './promptGroup';
@@ -137,6 +138,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
   Subscription: ReturnType<typeof createSubscriptionModel>;
   UsageRecord: ReturnType<typeof createUsageRecordModel>;
   FlagOverride: ReturnType<typeof createFlagOverrideModel>;
+  PlanEntitlement: ReturnType<typeof createPlanEntitlementModel>;
   Feedback: ReturnType<typeof createFeedbackModel>;
 } {
   const models = {
@@ -207,6 +209,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
     Subscription: createSubscriptionModel(mongoose),
     UsageRecord: createUsageRecordModel(mongoose),
     FlagOverride: createFlagOverrideModel(mongoose),
+    PlanEntitlement: createPlanEntitlementModel(mongoose),
     Feedback: createFeedbackModel(mongoose),
   };
   /**

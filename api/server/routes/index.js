@@ -27,6 +27,7 @@ const presets = require('./presets');
 const projects = require('./projects');
 const deepResearch = require('./deepResearch');
 const flags = require('./flags');
+const billing = require('./billing');
 const trust = require('./trust');
 const searchAll = require('./search-all');
 const organizations = require('./organizations');
@@ -89,6 +90,7 @@ module.exports = {
   projects,
   deepResearch,
   flags,
+  billing,
   trust,
   searchAll,
   organizations,

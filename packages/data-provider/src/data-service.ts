@@ -20,6 +20,7 @@ import * as f from './types/files';
 import * as config from './config';
 import * as sa from './searchAll';
 import request from './request';
+import * as bl from './billing';
 import * as s from './schemas';
 import * as fl from './flags';
 import * as tr from './trust';
@@ -1014,6 +1015,19 @@ export function setFeatureFlag(
   payload: fl.TSetFeatureFlagRequest,
 ): Promise<fl.TFeatureFlagOverride> {
   return request.put(`${endpoints.flags()}/${key}`, payload);
+}
+
+export function getEntitlements(organizationId?: string): Promise<bl.TGetEntitlementsResponse> {
+  const query = organizationId ? `?organizationId=${encodeURIComponent(organizationId)}` : '';
+  return request.get(`${endpoints.billingEntitlements()}${query}`);
+}
+
+export function setEntitlement(
+  plan: bl.TEntitlementPlan,
+  resource: bl.TEntitlementResource,
+  payload: bl.TSetEntitlementRequest,
+): Promise<bl.TEntitlementOverride> {
+  return request.put(`${endpoints.billingEntitlements()}/${plan}/${resource}`, payload);
 }
 
 export function searchAll(params: { q: string; limit?: number }): Promise<sa.TSearchAllResponse> {

@@ -183,6 +183,10 @@ const flagsRoot = `${BASE_URL}/api/flags`;
 
 export const flags = () => flagsRoot;
 
+const billingEntitlementsRoot = `${BASE_URL}/api/billing/entitlements`;
+
+export const billingEntitlements = () => billingEntitlementsRoot;
+
 export const trust = () => `${BASE_URL}/api/trust`;
 
 export const search = (q: string, cursor?: string | null) =>

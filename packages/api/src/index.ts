@@ -75,6 +75,8 @@ export * from './projects';
 export * from './deepResearch';
 /* Feature flags (B23/W15) */
 export * from './flags';
+/* Billing entitlements / plan limits (B18) */
+export * from './billing';
 /* Trust engine (B6 / A7.1) */
 export * from './trust';
 /* Cross-entity palette search (B9 / A7.3) */

@@ -53,6 +53,7 @@ export enum QueryKeys {
   project = 'project',
   projectConversations = 'projectConversations',
   flags = 'flags',
+  billing = 'billing',
   organizations = 'organizations',
   workspaces = 'workspaces',
   trust = 'trust',

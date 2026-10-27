@@ -20,16 +20,17 @@ import {
 import { ComponentTypes, SettingTypes, OptionTypes } from './generate';
 import { MAX_SUBAGENTS, MAX_SUBAGENTS_CEILING } from './limits';
 import { STATEFUL_CODE_ENVIRONMENTS } from './stateful-code';
+import { crossEntitySearchConfigSchema } from './searchAll';
 import { specsConfigSchema, TSpecsConfig } from './models';
+import { featureFlagsConfigSchema } from './flags';
 import { isActionTool } from './types/assistants';
 import { REFILL_INTERVAL_UNITS } from './balance';
+import { trustEngineConfigSchema } from './trust';
 import { fileConfigSchema } from './file-config';
+import { billingConfigSchema } from './billing';
 import { apiBaseUrl } from './api-endpoints';
 import { FileSources } from './types/files';
 import { MCPServersSchema } from './mcp';
-import { featureFlagsConfigSchema } from './flags';
-import { trustEngineConfigSchema } from './trust';
-import { crossEntitySearchConfigSchema } from './searchAll';
 export {
   MAX_SUBAGENTS,
   MAX_SUBAGENTS_CEILING,
@@ -2792,6 +2793,7 @@ export const configSchema = z.object({
   trustEngine: trustEngineConfigSchema.optional(),
   deepResearch: deepResearchConfigSchema.optional(),
   featureFlags: featureFlagsConfigSchema,
+  billing: billingConfigSchema.optional(),
   summarization: summarizationConfigSchema.optional(),
   skillSync: skillSyncConfigSchema,
   secureImageLinks: z.boolean().optional(),

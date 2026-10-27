@@ -1,24 +1,10 @@
+import { useId } from 'react';
+import type { DataLabChartOption } from './echarts';
 import type { PieChartProps } from '../types';
-import { seriesFillClass, seriesBackgroundClass } from './palette';
-import { CHART_HEIGHT, CHART_WIDTH } from './geometry';
+import { seriesColors, tokenColor } from './theme';
+import { seriesBackgroundClass } from './palette';
 import ChartEmpty from './ChartEmpty';
-
-function polar(cx: number, cy: number, radius: number, angle: number) {
-  const radians = ((angle - 90) * Math.PI) / 180;
-  return { x: cx + radius * Math.cos(radians), y: cy + radius * Math.sin(radians) };
-}
-
-function arcPath(cx: number, cy: number, radius: number, start: number, end: number): string {
-  const startPoint = polar(cx, cy, radius, start);
-  const endPoint = polar(cx, cy, radius, end);
-  const largeArc = end - start > 180 ? 1 : 0;
-  return [
-    `M ${cx} ${cy}`,
-    `L ${startPoint.x} ${startPoint.y}`,
-    `A ${radius} ${radius} 0 ${largeArc} 1 ${endPoint.x} ${endPoint.y}`,
-    'Z',
-  ].join(' ');
-}
+import useEChart from './useEChart';
 
 interface PieSlice {
   label: string;
@@ -27,10 +13,13 @@ interface PieSlice {
 }
 
 /**
- * Dependency-free responsive pie chart. A row with a non-positive value is
- * skipped; the remaining values drive each slice's share of the whole. The
- * slice list doubles as the accessible data fallback, carrying the exact
- * value (visually hidden) next to the rounded share.
+ * ECharts pie chart. Same props contract as the previous SVG renderer: a row
+ * with a non-positive value is skipped; the remaining values drive each
+ * slice's share of the whole, and slices are separated by the surface color
+ * the old 2px stroke provided. The canvas is mounted on a `role="img"`
+ * container carrying the localized accessible name. The slice list doubles
+ * as the accessible data fallback, carrying the exact value (visually
+ * hidden) next to the rounded share.
  */
 export default function PieChart({
   data,
@@ -47,42 +36,59 @@ export default function PieChart({
     .filter((slice) => slice.value > 0);
   const total = slices.reduce((sum, slice) => sum + slice.value, 0);
 
+  const containerRef = useEChart((container): DataLabChartOption => {
+    const colors = seriesColors(container, slices.length);
+    const surfacePrimary = tokenColor(container, '--surface-primary');
+    const textPrimary = tokenColor(container, '--text-primary');
+    const borderLight = tokenColor(container, '--border-light');
+    return {
+      ...(colors.length > 0 ? { color: colors } : {}),
+      tooltip: {
+        trigger: 'item',
+        confine: true,
+        ...(surfacePrimary ? { backgroundColor: surfacePrimary } : {}),
+        ...(borderLight ? { borderColor: borderLight } : {}),
+        ...(textPrimary ? { textStyle: { color: textPrimary } } : {}),
+      },
+      series: [
+        {
+          type: 'pie',
+          data: slices.map((slice) => ({ name: slice.label, value: slice.value })),
+          center: ['50%', '50%'],
+          radius: '85%',
+          label: { show: false },
+          labelLine: { show: false },
+          itemStyle: {
+            borderWidth: 2,
+            ...(surfacePrimary ? { borderColor: surfacePrimary } : {}),
+          },
+        },
+      ],
+    };
+  });
+  const descriptionId = useId();
+
   if (slices.length === 0 || total <= 0) {
     return <ChartEmpty ariaLabel={ariaLabel} label={emptyLabel} className={className} />;
   }
-
-  const cx = CHART_WIDTH / 2;
-  const cy = CHART_HEIGHT / 2;
-  const radius = Math.min(cx, cy) - 24;
-  let angle = 0;
 
   return (
     <figure className={className}>
       {title ? (
         <figcaption className="mb-2 text-sm font-medium text-text-primary">{title}</figcaption>
       ) : null}
-      <svg
+      <div
+        ref={containerRef}
         role="img"
         aria-label={ariaLabel}
-        viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-        className="h-auto w-full"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        {description ? <desc>{description}</desc> : null}
-        {slices.map((slice) => {
-          const start = angle;
-          const sweep = (slice.value / total) * 360;
-          angle += sweep;
-          return (
-            <path
-              key={`${slice.label}-${slice.index}`}
-              d={arcPath(cx, cy, radius, start, angle)}
-              strokeWidth={2}
-              className={`stroke-surface-primary ${seriesFillClass(slice.index)}`}
-            />
-          );
-        })}
-      </svg>
+        aria-describedby={description ? descriptionId : undefined}
+        className="aspect-[2/1] w-full"
+      />
+      {description ? (
+        <span id={descriptionId} className="sr-only">
+          {description}
+        </span>
+      ) : null}
       <ul
         aria-label={ariaLabel}
         className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-text-secondary"

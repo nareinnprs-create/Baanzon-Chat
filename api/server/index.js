@@ -431,6 +431,7 @@ const startServer = async () => {
   app.use('/api/projects', routes.projects);
   app.use('/api/deep-research', routes.deepResearch);
   app.use('/api/flags', routes.flags);
+  app.use('/api/billing', routes.billing);
   app.use('/api/trust', routes.trust);
   app.use('/api/organizations', routes.organizations);
   app.use('/api/workspaces', routes.workspaces);
