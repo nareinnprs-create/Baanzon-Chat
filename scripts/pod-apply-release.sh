@@ -7,7 +7,11 @@ NEW_DIR=/workspace/baanzon-next
 OLD_DIR=/workspace/baanzon-old
 
 echo "[apply] unpacking release"
-rm -rf "$NEW_DIR" "$OLD_DIR"
+for i in 1 2 3 4; do
+  if rm -rf "$NEW_DIR" "$OLD_DIR" 2>/dev/null; then break; fi
+  echo "[apply] rm retry $i (network-volume rm race)"; sleep 5
+done
+rm -rf "$NEW_DIR" "$OLD_DIR" 2>/dev/null || true
 mkdir -p "$NEW_DIR"
 tar --no-same-owner --no-same-permissions -xzf "$RELEASE_SRC/baanzon-app.tar.gz" -C "$NEW_DIR"
 
@@ -37,7 +41,7 @@ supervisorctl restart baanzon-api 2>/dev/null || supervisorctl start baanzon-api
 
 echo "[apply] health-gate node http://127.0.0.1:3080/readyz"
 for i in $(seq 1 60); do
-  if curl -sf http://127.0.0.1:3080/readyz >/dev/null; then echo "[apply] healthy"; rm -rf "$OLD_DIR"; exit 0; fi
+  if curl -sf http://127.0.0.1:3080/readyz >/dev/null; then echo "[apply] healthy"; rm -rf "$OLD_DIR" 2>/dev/null & exit 0; fi
   sleep 3
 done
 # rollback on failure
