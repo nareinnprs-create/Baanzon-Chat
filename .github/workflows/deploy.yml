@@ -1,0 +1,102 @@
+# Baanzon Chat production deploy: push-to-b1 -> build image -> GHCR -> deploy to Runpod pod.
+#
+# Secrets required (repo-level):
+#   PROD_DOTENV      full production .env contents (contains all secrets: TUNNEL_TOKEN, JWT_SECRET, ...)
+#   BAANZON_YAML     full baanzon.yaml contents (runtime app config, git-ignored locally)
+#   POD_SSH_KEY      private key for SSH into the Runpod pod
+#   POD_SSH_HOST     pod IP/hostname reachable over SSH (Runpod TCP proxy: pod-ip from runpodctl -x)
+#   POD_SSH_PORT     port of the SSH TCP proxy (e.g. 22002 by default for Runpod TCP proxies)
+#   POD_SSH_USER     pod non-root ssh user (runpod image default: runpod)
+#
+name: Deploy b1 to Runpod
+
+on:
+  push:
+    branches: [b1]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/${{ github.event.repository.name }}
+
+concurrency:
+  group: deploy-b1
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image tag
+        id: meta
+        run: echo "tag=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          build-args: |
+            BUILD_COMMIT=${{ steps.meta.outputs.tag }}
+            BUILD_BRANCH=${{ github.ref_name }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:b1
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write secrets to deploy directory
+        run: |
+          mkdir -p deploy-files
+          echo "${{ secrets.PROD_DOTENV }}" > deploy-files/.env
+          echo "${{ secrets.BAANZON_YAML }}" > deploy-files/baanzon.yaml
+          chmod 600 deploy-files/.env deploy-files/baanzon.yaml
+
+      - name: Copy files to pod
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.POD_SSH_HOST }}
+          port: ${{ secrets.POD_SSH_PORT }}
+          username: ${{ secrets.POD_SSH_USER }}
+          key: ${{ secrets.POD_SSH_KEY }}
+          source: deploy-files/*,docker-compose.prod.yml
+          target: /home/runpod/baanzon
+
+      - name: Pull and restart stack
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.POD_SSH_HOST }}
+          port: ${{ secrets.POD_SSH_PORT }}
+          username: ${{ secrets.POD_SSH_USER }}
+          key: ${{ secrets.POD_SSH_KEY }}
+          command_timeout: 20m
+          script: |
+            cd /home/runpod/baanzon
+            echo '${{ secrets.GHCR_PAT_TOKEN }}' | docker login ghcr.io --username ${{ github.repository_owner }} --password-stdin
+            docker compose -f docker-compose.prod.yml pull api
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker system prune -f
+            docker image inspect ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ needs.build.outputs.tag }} --format 'deployed {{ "{{" }}.Id{{ "}}" }}'

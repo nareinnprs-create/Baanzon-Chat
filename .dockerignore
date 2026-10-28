@@ -7,6 +7,7 @@
 **/node_modules
 
 # Specific patterns to ignore
+client/dist
 data-node
 uploads
 logs
