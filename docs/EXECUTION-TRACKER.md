@@ -128,3 +128,22 @@ Context snapshot at approval time:
 - 2026-10-28: Final regression sweep: full client tsc exit 0 (whole tree); 8 new-feature spec suites 96/96 (TrustIndicator, AuroraPulse, MobileBottomNav, charts, DataLabView, CommandPalette, ProjectEditDialog, ActionsInput; 407s + ProjectEditDialog rerun 7/7 after path fix). ALL 1–15 items closed; standing remainders: A7.1b evidence producers/persistence, A7.2 host wiring, A7.5 invoker transport, A5.7 majors register (npm arborist), A7.11 native scaffolds (awaiting user priority).
 
 - 2026-10-28 (deploy): Brought baanzonchat.opraiz.com LIVE. Named tunnel 'baanzon-chat' (id 147a0eba-563f-4bd0-934a-4d14f6be5d31, remotely-managed via API; ingress baanzonchat.opraiz.com -> http://api:3080) + proxied CNAME (record bde9a3281a1757e07c55bd183db49514). Stack: docker compose (override: local image build + baanzon.yaml live bind + tunnel service; admin-panel disabled via profile) — api/mongodb(mongo:8.0.20)/meilisearch/rag_api/vectordb/tunnel all Up. Fixes en route: 6 name-stripped orphan '=hash' lines in .env neutralized (dups of :1440-1444 values), baanzon.yaml got the A7.4 featureFlags lever block (pre-A7.4 file), TENANT_ISOLATION_STRICT=false + SCHEDULES_SINGLE_PROCESS=true for single-replica. Verified: compose healthy, tunnel 4x QUIC conns (SIN/KUL), https 200 with Baanzon Chat title, scheduler armed. NOTE: compose override stays local by policy (gitignored); tunnel token + creds in .env — do not commit either.
+
+## Production deploy — Option A, git-connected (IN-PROGRESS)
+
+| # | Item | Status | Evidence |
+|---|---|---|---|
+| D1 | Diagnose blank page | DONE | bundle `framer-motion.YoDp1lJc.js` contained `import s from"@emotion/memoize"` (bare specifier → module parse fail → blank); stale Oct-18 `client/dist` inside image (Dockerfile `;` chain swallowed build failure); `.env` CORS served `http://localhost:3080` (module scripts refused cross-origin). Evidence: live bundle fetch + `docs/launch-readiness.md:244-270` stray node_modules history |
+| D2 | Fix dep tree (`react-window` peer of `react-vtree@3.0.0`) | DONE | `client/package.json` += `react-window@^1.8.11`; lock churn +24 lines (react-window + memoize-one only); `npm ci` exit 0 |
+| D3 | Clean client build, zero bare imports | DONE | local `npm run build` exit 0; scan of `dist/assets/*.js`: 0 `@emotion/memoize` hits (17 pre-existing bare specifiers unchanged vs upstream sandpack/codemirror plugin chunks) |
+| D4 | Dockerfile fail-fast (`;` → `&&`) + `.dockerignore` += `client/dist` | DONE | commit 47f07d162 (also gate: workflows/deploy.yml, docker-compose.prod.yml) |
+| D5 | Runpod pod provision | DONE (2 vCPU/4GB — cost $0.06/hr; REST 4vCPU create stuck) | pod squrllcijupg4p, US-CA-2, net volume ku7eqt28jz (40GB @/workspace); node v24.22.1, mongod 8.0.20, meili 1.56, cloudflared 2026.10.5, supervisord 4 progs; ssh 38.80.152.147:39702 (RunPod-Key-Go) |
+| D6 | App payload on pod + npm ci --omit=dev | PENDING | ar |
+| D7 | Tunnel re-home to pod connector, local halted | PENDING | |
+| D8 | Site live end-to-end (200 + console clean) | PENDING | |
+| D9 | GH Actions auto-deploy proven (push trivial commit → green run → site updated) | PENDING | |
+
+Notes (verbatim):
+- Runpod pods cannot run Docker (docs ↓ "Docker Compose is not supported"), so the pod runs the stack NATIVE under supervisord: mongod (127.0.0.1, cache 0.4GB) + meili (0.0.0.0:7700) + baanzon-api (node api/server/index.js, .env sourced) + cloudflared (token from .env). Provision = scripts/provision-pod.sh (idempotent; container disk wipes on pod restart → rerun script).
+- Continue CI release path: .github/workflows/deploy.yml builds the same payload (npm run frontend + npm prune --production), ships tarball via scp, applies with scripts/pod-apply-release.sh (health-gated rollback).
+- Latency: users in AP; site origin US-CA-2 behind Cloudflare edge — TLS ends at edge, keep-alives to origin are always-on so first paint latency ≈ RTT SFO - KLAdd ~200-300ms per origin fetch chain (with HTTP/2 to origin may amortize).

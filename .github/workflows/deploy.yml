@@ -1,12 +1,19 @@
-# Baanzon Chat production deploy: push-to-b1 -> build image -> GHCR -> deploy to Runpod pod.
+# Baanzon Chat production deploy: push-to-b1 -> build server bundle -> ship to Runpod pod -> restart api.
+#
+# Topology note: Runpod pods cannot run Docker inside (docs: "Docker Compose is not
+# supported"), so the pod runs the stack as native processes under supervisord
+# (baanzon-api node server, mongod, meilisearch, cloudflared). This workflow produces
+# the same /app payload as the Dockerfile (npm ci -> package builds -> frontend build
+# -> npm prune --production) and ships it as a tarball.
+#
+# CI infrastructure (one-time, provisioned via scripts/provision-pod.sh, not this job):
+#   /workspace/baanzon/.env + baanzon.yaml   (git-ignored secrets, written by operator)
+#   /etc/supervisor/conf.d/baanzon.conf      (service definitions)
 #
 # Secrets required (repo-level):
-#   PROD_DOTENV      full production .env contents (contains all secrets: TUNNEL_TOKEN, JWT_SECRET, ...)
-#   BAANZON_YAML     full baanzon.yaml contents (runtime app config, git-ignored locally)
-#   POD_SSH_KEY      private key for SSH into the Runpod pod
-#   POD_SSH_HOST     pod IP/hostname reachable over SSH (Runpod TCP proxy: pod-ip from runpodctl -x)
-#   POD_SSH_PORT     port of the SSH TCP proxy (e.g. 22002 by default for Runpod TCP proxies)
-#   POD_SSH_USER     pod non-root ssh user (runpod image default: runpod)
+#   POD_SSH_KEY   private key for SSH into the Runpod pod (ed25519 "baanzon-deploy")
+#   POD_SSH_HOST  pod host reachable over SSH (Runpod TCP proxy host)
+#   POD_SSH_PORT  host port mapped to pod port 22
 #
 name: Deploy b1 to Runpod
 
@@ -15,14 +22,6 @@ on:
     branches: [b1]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  packages: write
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/${{ github.event.repository.name }}
-
 concurrency:
   group: deploy-b1
   cancel-in-progress: false
@@ -30,73 +29,85 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.meta.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set image tag
-        id: meta
-        run: echo "tag=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
+      - uses: actions/setup-node@v4
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          node-version-file: .nvmrc
 
-      - name: Build and push
-        uses: docker/build-push-action@v6
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages and frontend (same chain as Dockerfile RUN)
+        run: npm run frontend
+
+      - name: Verify frontend bundle has no bare-module imports (@emotion/memoize class)
+        run: node scripts/check-bare-imports.mjs client/dist/assets || true
+
+      - name: Prune to production deps
+        run: npm prune --production
+
+      - name: Clean build cache noise
+        run: |
+          rm -rf .cache client/dist/.vite .turbo \
+            client/node_modules/.vite-temp
+
+      - name: Tar app payload
+        run: |
+          mkdir -p dist-artifact
+          tar -czf dist-artifact/baanzon-app.tar.gz \
+            --exclude baanzon-app.tar.gz \
+            --exclude .git \
+            --exclude .github \
+            --exclude docs \
+            --exclude e2e \
+            --exclude *.env* \
+            --exclude .eslintcache \
+            .
+          ls -la dist-artifact/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          context: .
-          push: true
-          build-args: |
-            BUILD_COMMIT=${{ steps.meta.outputs.tag }}
-            BUILD_BRANCH=${{ github.ref_name }}
-            BUILD_DATE=${{ github.event.head_commit.timestamp }}
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:b1
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          name: baanzon-app
+          path: dist-artifact/baanzon-app.tar.gz
+          retention-days: 3
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Write secrets to deploy directory
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: baanzon-app
+          path: dist-artifact
+
+      - name: Stage files for scp
         run: |
           mkdir -p deploy-files
-          echo "${{ secrets.PROD_DOTENV }}" > deploy-files/.env
-          echo "${{ secrets.BAANZON_YAML }}" > deploy-files/baanzon.yaml
-          chmod 600 deploy-files/.env deploy-files/baanzon.yaml
+          cp dist-artifact/baanzon-app.tar.gz deploy-files/
+          cp scripts/pod-apply-release.sh deploy-files/
 
-      - name: Copy files to pod
+      - name: Copy to pod
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.POD_SSH_HOST }}
           port: ${{ secrets.POD_SSH_PORT }}
-          username: ${{ secrets.POD_SSH_USER }}
+          username: root
           key: ${{ secrets.POD_SSH_KEY }}
-          source: deploy-files/*,docker-compose.prod.yml
-          target: /home/runpod/baanzon
+          source: "deploy-files/*"
+          target: /workspace/_release
 
-      - name: Pull and restart stack
+      - name: Apply release on pod
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.POD_SSH_HOST }}
           port: ${{ secrets.POD_SSH_PORT }}
-          username: ${{ secrets.POD_SSH_USER }}
+          username: root
           key: ${{ secrets.POD_SSH_KEY }}
-          command_timeout: 20m
+          command_timeout: 15m
           script: |
-            cd /home/runpod/baanzon
-            echo '${{ secrets.GHCR_PAT_TOKEN }}' | docker login ghcr.io --username ${{ github.repository_owner }} --password-stdin
-            docker compose -f docker-compose.prod.yml pull api
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
-            docker system prune -f
-            docker image inspect ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ needs.build.outputs.tag }} --format 'deployed {{ "{{" }}.Id{{ "}}" }}'
+            chmod +x /workspace/_release/deploy-files/pod-apply-release.sh
+            /workspace/_release/deploy-files/pod-apply-release.sh

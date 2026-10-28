@@ -195,3 +195,4 @@ scripts/activity-labels/results/
 /e2e/lighthouse/.test-results/
 
 .eslintcache
+vite-build-log.txt
