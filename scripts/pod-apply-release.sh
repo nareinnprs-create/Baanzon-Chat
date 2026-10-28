@@ -1,7 +1,7 @@
 #!/bin/bash
 # Apply a release tarball onto the pod. Invoked by the deploy workflow over SSH.
 set -euo pipefail
-RELEASE_SRC=/workspace/_release/deploy-files
+RELEASE_SRC=/workspace/_release
 APP_DIR=/workspace/baanzon
 NEW_DIR=/workspace/baanzon-next
 OLD_DIR=/workspace/baanzon-old
@@ -9,7 +9,7 @@ OLD_DIR=/workspace/baanzon-old
 echo "[apply] unpacking release"
 rm -rf "$NEW_DIR" "$OLD_DIR"
 mkdir -p "$NEW_DIR"
-tar -xzf "$RELEASE_SRC/baanzon-app.tar.gz" -C "$NEW_DIR"
+tar --no-same-owner --no-same-permissions -xzf "$RELEASE_SRC/baanzon-app.tar.gz" -C "$NEW_DIR"
 
 # preserve operator-managed files the tarball must not carry
 for f in .env baanzon.yaml; do

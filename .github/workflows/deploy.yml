@@ -93,14 +93,18 @@ jobs:
             ./scripts/pod-apply-release.sh
 
       - name: Copy to pod
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.POD_SSH_HOST }}
-          port: ${{ secrets.POD_SSH_PORT }}
-          username: root
-          key: ${{ secrets.POD_SSH_KEY }}
-          source: "deploy-files/*"
-          target: /workspace/_release
+        env:
+          SSH_KEY: ${{ secrets.POD_SSH_KEY }}
+        run: |
+          echo "$SSH_KEY" > pod_key
+          chmod 600 pod_key
+          SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null)
+          ssh -i pod_key -p "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" "root@${{ secrets.POD_SSH_HOST }}" \
+            "mkdir -p /workspace/_release"
+          scp -q -i pod_key -P "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" \
+            dist-artifact/baanzon-app.tar.gz "root@${{ secrets.POD_SSH_HOST }}:/workspace/_release/baanzon-app.tar.gz"
+          scp -q -i pod_key -P "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" \
+            deploy-files/scripts/pod-apply-release.sh "root@${{ secrets.POD_SSH_HOST }}:/workspace/_release/pod-apply-release.sh"
 
       - name: Apply release on pod
         uses: appleboy/ssh-action@v1.2.0
@@ -111,5 +115,5 @@ jobs:
           key: ${{ secrets.POD_SSH_KEY }}
           command_timeout: 15m
           script: |
-            chmod +x /workspace/_release/deploy-files/pod-apply-release.sh
-            /workspace/_release/deploy-files/pod-apply-release.sh
+            chmod +x /workspace/_release/pod-apply-release.sh
+            /workspace/_release/pod-apply-release.sh
