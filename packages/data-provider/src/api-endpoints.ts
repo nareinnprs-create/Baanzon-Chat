@@ -187,6 +187,12 @@ const billingEntitlementsRoot = `${BASE_URL}/api/billing/entitlements`;
 
 export const billingEntitlements = () => billingEntitlementsRoot;
 
+const evalRunsRoot = `${BASE_URL}/api/evals/runs`;
+
+export const evalRuns = () => evalRunsRoot;
+
+export const evalRunById = (id: string) => `${evalRunsRoot}/${encodeURIComponent(id)}`;
+
 export const trust = () => `${BASE_URL}/api/trust`;
 
 export const search = (q: string, cursor?: string | null) =>

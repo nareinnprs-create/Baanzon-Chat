@@ -161,6 +161,12 @@ import { createDeviceMethods, type DeviceMethods } from './device';
 import { createSubscriptionMethods, type SubscriptionMethods } from './subscription';
 import { createFlagOverrideMethods, type FlagOverrideMethods } from './flagOverride';
 import { createPlanEntitlementMethods, type PlanEntitlementMethods } from './planEntitlement';
+import {
+  createEvalRunMethods,
+  EVAL_RUN_LIST_DEFAULT_LIMIT,
+  EVAL_RUN_LIST_MAX_LIMIT,
+  type EvalRunMethods,
+} from './evalRun';
 import { createUsageRecordMethods, type UsageRecordMethods } from './usageRecord';
 import { createFeedbackMethods, type FeedbackMethods } from './feedback';
 /* Tier 3 — Complex (heavier injection) */
@@ -340,6 +346,7 @@ export type AllMethods = UserMethods &
   UsageRecordMethods &
   FlagOverrideMethods &
   PlanEntitlementMethods &
+  EvalRunMethods &
   FeedbackMethods &
   TxMethods &
   TransactionMethods &
@@ -585,6 +592,7 @@ export function createMethods(
     ...createUsageRecordMethods(mongoose),
     ...createFlagOverrideMethods(mongoose),
     ...createPlanEntitlementMethods(mongoose),
+    ...createEvalRunMethods(mongoose),
     ...createFeedbackMethods(mongoose),
     /* Tier 3 */
     ...txMethods,
@@ -669,6 +677,7 @@ export type {
   UsageRecordMethods,
   FlagOverrideMethods,
   PlanEntitlementMethods,
+  EvalRunMethods,
   FeedbackMethods,
   TxMethods,
   TransactionMethods,
@@ -717,6 +726,8 @@ export {
   slugifyWorkspaceName,
   AGENT_RUN_LIST_DEFAULT_LIMIT,
   AGENT_RUN_LIST_MAX_LIMIT,
+  EVAL_RUN_LIST_DEFAULT_LIMIT,
+  EVAL_RUN_LIST_MAX_LIMIT,
   NOTIFICATION_LIST_DEFAULT_LIMIT,
   NOTIFICATION_LIST_MAX_LIMIT,
   TOOL_NAME_MAX_LENGTH,

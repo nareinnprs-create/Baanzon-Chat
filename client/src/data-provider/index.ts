@@ -19,6 +19,8 @@ export * from './DeepResearch';
 export * from './Flags';
 /* Billing entitlements / plan limits */
 export * from './Billing';
+/* Evals (B22) */
+export * from './Evals';
 /* Trust engine (B6 / A7.1) */
 export * from './Trust';
 /* Cross-entity palette search */

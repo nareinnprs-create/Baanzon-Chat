@@ -80,6 +80,7 @@ export * from './feedback';
 /* Feature flags (B23/W15) */
 export * from './flagOverride';
 export * from './planEntitlement';
+export * from './evalRun';
 /* Admin */
 export * from './admin';
 /* Web */

@@ -11,17 +11,17 @@ import { createArtifactVersionModel } from './artifactVersion';
 import { createSkillSyncStatusModel } from './skillSyncStatus';
 import { createConversationTagModel } from './conversationTag';
 import { createCodeEnvironmentModel } from './codeEnvironment';
+import { createPlanEntitlementModel } from './planEntitlement';
 import { createToolPermissionModel } from './toolPermission';
 import { createAgentCategoryModel } from './agentCategory';
 import { createOrganizationModel } from './organization';
 import { createNotificationModel } from './notification';
 import { createSubscriptionModel } from './subscription';
+import { createFlagOverrideModel } from './flagOverride';
 import { createToolVersionModel } from './toolVersion';
 import { createWorkflowRunModel } from './workflowRun';
 import { createUsageRecordModel } from './usageRecord';
 import { createChatProjectModel } from './chatProject';
-import { createFlagOverrideModel } from './flagOverride';
-import { createPlanEntitlementModel } from './planEntitlement';
 import { createAgentApiKeyModel } from './agentApiKey';
 import { createTransactionModel } from './transaction';
 import { createPromptGroupModel } from './promptGroup';
@@ -45,6 +45,7 @@ import { createToolCallModel } from './toolCall';
 import { createAclEntryModel } from './aclEntry';
 import { createAuditLogModel } from './auditLog';
 import { createAgentRunModel } from './agentRun';
+import { createEvalRunModel } from './evalRun';
 import { createSessionModel } from './session';
 import { createBalanceModel } from './balance';
 import { createMessageModel } from './message';
@@ -139,6 +140,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
   UsageRecord: ReturnType<typeof createUsageRecordModel>;
   FlagOverride: ReturnType<typeof createFlagOverrideModel>;
   PlanEntitlement: ReturnType<typeof createPlanEntitlementModel>;
+  EvalRun: ReturnType<typeof createEvalRunModel>;
   Feedback: ReturnType<typeof createFeedbackModel>;
 } {
   const models = {
@@ -210,6 +212,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
     UsageRecord: createUsageRecordModel(mongoose),
     FlagOverride: createFlagOverrideModel(mongoose),
     PlanEntitlement: createPlanEntitlementModel(mongoose),
+    EvalRun: createEvalRunModel(mongoose),
     Feedback: createFeedbackModel(mongoose),
   };
   /**

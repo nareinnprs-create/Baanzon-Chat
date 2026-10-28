@@ -22,6 +22,7 @@ import * as sa from './searchAll';
 import request from './request';
 import * as bl from './billing';
 import * as s from './schemas';
+import * as ev from './evals';
 import * as fl from './flags';
 import * as tr from './trust';
 import * as r from './roles';
@@ -1028,6 +1029,29 @@ export function setEntitlement(
   payload: bl.TSetEntitlementRequest,
 ): Promise<bl.TEntitlementOverride> {
   return request.put(`${endpoints.billingEntitlements()}/${plan}/${resource}`, payload);
+}
+
+export function createEvalRun(payload: ev.TCreateEvalRunRequest): Promise<ev.TEvalRun> {
+  return request.post(endpoints.evalRuns(), payload);
+}
+
+export function listEvalRuns(params?: ev.TEvalRunListParams): Promise<ev.TEvalRunListResponse> {
+  const query = new URLSearchParams();
+  if (params?.agentId) {
+    query.set('agentId', params.agentId);
+  }
+  if (params?.workflowId) {
+    query.set('workflowId', params.workflowId);
+  }
+  if (params?.limit !== undefined) {
+    query.set('limit', String(params.limit));
+  }
+  const suffix = query.size ? `?${query.toString()}` : '';
+  return request.get(`${endpoints.evalRuns()}${suffix}`);
+}
+
+export function getEvalRun(runId: string): Promise<ev.TEvalRun> {
+  return request.get(endpoints.evalRunById(runId));
 }
 
 export function searchAll(params: { q: string; limit?: number }): Promise<sa.TSearchAllResponse> {

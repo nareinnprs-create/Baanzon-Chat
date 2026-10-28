@@ -117,6 +117,8 @@ export enum QueryKeys {
   deepResearchReport = 'deepResearchReport',
   /* Cross-entity palette search */
   searchAll = 'searchAll',
+  /* Evals (B22) */
+  evalRuns = 'evalRuns',
 }
 
 // Dynamic query keys that require parameters

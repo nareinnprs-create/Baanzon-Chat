@@ -67,3 +67,4 @@ export { default as usageRecordSchema } from './usageRecord';
 export { default as feedbackSchema } from './feedback';
 export { default as flagOverrideSchema } from './flagOverride';
 export { default as planEntitlementSchema } from './planEntitlement';
+export { default as evalRunSchema } from './evalRun';

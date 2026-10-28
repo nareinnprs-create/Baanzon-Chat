@@ -28,6 +28,7 @@ const projects = require('./projects');
 const deepResearch = require('./deepResearch');
 const flags = require('./flags');
 const billing = require('./billing');
+const evals = require('./evals');
 const trust = require('./trust');
 const searchAll = require('./search-all');
 const organizations = require('./organizations');
@@ -91,6 +92,7 @@ module.exports = {
   deepResearch,
   flags,
   billing,
+  evals,
   trust,
   searchAll,
   organizations,

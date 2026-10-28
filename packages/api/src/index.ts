@@ -77,6 +77,8 @@ export * from './deepResearch';
 export * from './flags';
 /* Billing entitlements / plan limits (B18) */
 export * from './billing';
+/* Eval framework (B22 / A7.5) */
+export * from './evals';
 /* Trust engine (B6 / A7.1) */
 export * from './trust';
 /* Cross-entity palette search (B9 / A7.3) */
