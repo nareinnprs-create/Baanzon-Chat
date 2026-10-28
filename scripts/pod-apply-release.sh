@@ -20,12 +20,19 @@ for d in images uploads logs; do
   if [ -d "$APP_DIR/$d" ]; then cp -a "$APP_DIR/$d/." "$NEW_DIR/$d/" 2>/dev/null || true; fi
 done
 
+# data dirs: carry over by rename (instant, and the frontend payload tarball
+# must never own them). Create if missing so mongod/meili come up clean.
+for d in mongodb meili_data; do
+  if [ -d "$APP_DIR/$d" ]; then mv "$APP_DIR/$d" "$NEW_DIR/$d"; else mkdir -p "$NEW_DIR/$d"; fi
+done
+
 echo "[apply] swapping release"
 if [ -d "$APP_DIR" ]; then mv "$APP_DIR" "$OLD_DIR"; fi
 mv "$NEW_DIR" "$APP_DIR"
 
 echo "[apply] restarting api under supervisord"
 supervisorctl reread >/dev/null 2>&1 || true
+supervisorctl restart all >/dev/null 2>&1 || true
 supervisorctl restart baanzon-api 2>/dev/null || supervisorctl start baanzon-api 2>/dev/null || echo "[apply] WARN supervisor missing - manual remediation needed"
 
 echo "[apply] health-gate node http://127.0.0.1:3080/readyz"
