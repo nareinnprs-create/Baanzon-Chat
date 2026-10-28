@@ -90,7 +90,7 @@ jobs:
           cp dist-artifact/baanzon-app.tar.gz deploy-files/
           # deploy job has no checkout; the apply script travels inside the tarball
           tar -xzf dist-artifact/baanzon-app.tar.gz -C deploy-files \
-            scripts/pod-apply-release.sh
+            ./scripts/pod-apply-release.sh
 
       - name: Copy to pod
         uses: appleboy/scp-action@v0.1.7
