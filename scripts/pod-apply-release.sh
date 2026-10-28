@@ -30,7 +30,11 @@ for d in mongodb meili_data; do
   if [ -d "$APP_DIR/$d" ]; then mv "$APP_DIR/$d" "$NEW_DIR/$d"; else mkdir -p "$NEW_DIR/$d"; fi
 done
 
-echo "[apply] swapping release"
+echo "[apply] installing prod deps (persistent cache)"
+cd "$NEW_DIR"
+NPM_CONFIG_CACHE=/workspace/.npm-cache npm ci --omit=dev --no-audit --no-fund >/workspace/npminstall.log 2>&1 \
+  || { echo "[apply] npm ci FAILED"; tail -5 /workspace/npminstall.log; exit 1; }
+echo "[apply] deps ready: $(ls node_modules | wc -l) top-level packages"
 if [ -d "$APP_DIR" ]; then mv "$APP_DIR" "$OLD_DIR"; fi
 mv "$NEW_DIR" "$APP_DIR"
 
