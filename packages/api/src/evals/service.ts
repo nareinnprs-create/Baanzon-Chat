@@ -1,7 +1,7 @@
 import type { CreateEvalRunInput, IEvalRun } from '@librechat/data-schemas';
 import type { EvalCaseResult } from './scoring';
 import { scoreCaseResults } from './scoring';
-import type { EvalServiceDeps, EvalTargetInvokers } from './types';
+import type { EvalService, EvalServiceDeps, EvalTargetInvokers } from './types';
 
 /**
  * The wiring-provided stub invoker (A7.5): no clean agent/workflow transport is
@@ -26,7 +26,7 @@ export function createNoTransportEvalInvokers(
  * service owns only orchestration: create (`queued`) -> `running` -> score ->
  * terminal `passed`/`failed` with the scores JSON persisted.
  */
-export function createEvalService(deps: EvalServiceDeps) {
+export function createEvalService(deps: EvalServiceDeps): EvalService {
   const { store } = deps;
 
   async function startRun(input: CreateEvalRunInput): Promise<IEvalRun> {
