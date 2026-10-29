@@ -204,5 +204,5 @@ export function createAdminProvidersHandlers(deps: AdminProvidersDeps) {
     }
   }
 
-  return { listProviders, testProvider };
+  return { listProviders: listProviders, testProvider: testProvider };
 }
