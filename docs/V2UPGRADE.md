@@ -103,3 +103,88 @@ assume (accounts, uploads, sharing, mobile, PWA).
 ## Session log
 - 2026-10-29: plan written, pending approval. Supersedes UPGRADEPROD2 draft concepts (glass removed per user).
 - Prior wave UPGRADEPROD1 (A–F) complete & live.
+
+---
+
+## Tracker (live status — update after every batch)
+
+Legend: `[ ]` todo · `[$]` active · `[x]` done · `[b]` blocked (needs user/decision) · each item carries its verify proof in the last column when done.
+
+| Item | Status | Verify proof (when done) |
+|---|---|---|
+| W1.1 Auth ON | [b] needs SMTP + approval | register→verify→login E2E on live |
+| W1.2 Admin user + surface | [b] needs first registration | /api/admin/providers 200 w/ admin JWT |
+| W1.3 Provider keys live E2E | [b] needs operator key | real chat completion on live |
+| W1.4 Uploads (RAG) | [ ] decision: run RAG on pod vs disable | upload→embed→cite E2E |
+| W1.5 SMTP | [b] needs provider choice | verification + reset email received |
+| W1.6 Mobile web | [ ] | 320/375/768px screenshots, no 2-D scroll |
+| W1.7 Share links | [ ] | public URL w/o auth + revoke works |
+| W1.8 PWA | [ ] | Lighthouse installable ✓, offline shell loads |
+| W1.9 Onboarding flow | [ ] | fresh-account→first-chat < 60s |
+| W1.10 Perf/CDN | [ ] | static via CF cache, Lighthouse perf ≥90 |
+| G1 Shell scaffold | [ ] | lever flips classic↔atelier live |
+| G2 Composer+iris+meter X3 | [ ] | streaming shows thread; meter matches usage |
+| G3 Canvas+branch tree X2 | [ ] | branch → tree node appears, rewind works |
+| G4 Arena X1 / Route X5 / Lab X4 | [ ] | 2-model side-by-side renders; diff applies |
+| G5 Cards X6 / Recap X7 / Canvas X9 | [ ] | tool result renders as card; recap pinned |
+| G6 Palette-OS X10 / Recall X8 | [ ] | ⌘K covers listed actions; recall cites chats |
+| G7 Voice + file viewer | [ ] | mic roundtrip; PDF renders in canvas |
+| G8 Memory + Projects++ | [ ] | memory editable; project prompt applies |
+| G9 Cost dashboard + gallery | [ ] | dashboard matches token ledger |
+| G10–G13 | [ ] scoping | per-feature specs before build |
+
+## Readiness scorecard (recompute after each wave; % = earned/total weight)
+
+### Production-ready (is it safe to run for real users?)
+| Dimension | Weight | Now | Target |
+|---|---|---|---|
+| Deploy pipeline + rollback | 15 | 15 (auto-deploy green, health-gated) | 15 |
+| Secrets & config management | 10 | 9 | 10 |
+| Auth & session security | 15 | 3 (config-only, no public reg) | 15 |
+| Data safety: backups + restore drill | 15 | 0 | 15 |
+| Monitoring & alerts | 10 | 2 (supervisord + logs only) | 10 |
+| Rate limiting / abuse guards | 10 | 2 | 10 |
+| Uploads & file pipeline | 10 | 0 | 10 |
+| Error/retry states coverage | 5 | 3 | 5 |
+| HTTPS/domain/CDN | 5 | 5 | 5 |
+| Incident runbook | 5 | 0 | 5 |
+| **PRODUCTION-READY** | **100** | **≈ 39%** | **100%** |
+
+### Launch-ready (can we hand it to 5,000 strangers?)
+| Dimension | Weight | Now | Target |
+|---|---|---|---|
+| Accounts + onboarding <60s | 15 | 0 | 15 |
+| Core chat E2E with real keys | 15 | 8 (works, keys unverified live) | 15 |
+| Mobile experience | 10 | 1 | 10 |
+| PWA/installable | 5 | 0 | 5 |
+| Share/recollab | 5 | 0 | 5 |
+| Search (chat + cross-chat) | 10 | 4 | 10 |
+| New interface (Monolith) | 15 | 0 | 15 |
+| Cortex differentiators X1–X10 | 15 | 2 (palette exists) | 15 |
+| Perf at load (CF cache, TTFB) | 5 | 2 | 5 |
+| Legal: ToS/Privacy/Imprint | 5 | 0 | 5 |
+| **LAUNCH-READY** | **100** | **≈ 17%** | **100%** |
+
+Formula: honest checkbox math, no vibes — any dimension partially done scores its fraction; recompute in each wave's final report.
+
+## Scale plan — 5,000 users
+
+### Sizing tiers (act at triggers, not dates)
+| Tier | Users | Infra | ~Monthly | Trigger to move up |
+|---|---|---|---|---|
+| T0 now | ≤100 | 1 pod 2c/4GB (all-in-one) + 40GB volume | ~$46 | p95 TTFB >2s or 300 DAU |
+| T1 | 100–1,000 | App pod 4c/8GB; Mongo+Meili moved to own pod 2c/4GB+50GB; CF cache on | ~$120 | CPU >70% sustained or 1k DAU |
+| T2 | 1,000–5,000 | 2× app pods behind CF LB; DB pod 4c/8GB + 100GB; RAG pod (uploads on); backups off-site | ~$350 | 5k DAU or uploads >50GB |
+
+### What changes at 5,000 (all planned into batches)
+- **Stateless app**: nothing user-local on disk except volume dirs; sessions already JWT → any pod can serve. W1 batches keep it that way.
+- **Mongo**: single replica set; index audit + slow-query log in W1; nightly dump to volume + off-site copy at T1 (backups dimension).
+- **Meilisearch**: dedicated pod at T1; conversations index sized ~5k×avg 40KB ≈ manageable; X8 recall reads it.
+- **Uploads**: volume → per-tier quotas (default 200MB/user), lifecycle cleanup cron; RAG pod separate at T2.
+- **Rate limiting**: per-user + per-IP (CF rules + app middleware) — dimensions row exists; ship by W1.
+- **Cloudflare**: cache static (`/assets/*` immutable), WAF managed rules, bot fight at launch.
+- **Observability**: uptime probe (CF health-check → email), supervisor restart alerts, disk/mem triggers — replaces "check logs by hand".
+- **Cost honesty**: T2 ≈ $350/mo ≈ $0.07/user/mo at 5k — undercuts any SaaS tier you'd charge.
+
+### Launch gates (all must be green before opening registrations publicly)
+`[ ]` Auth E2E · `[ ]` backups restore drill · `[ ]` alerts firing · `[ ]` rate limits on · `[ ]` ToS/Privacy live · `[ ]` mobile pass · `[ ]` cost dashboard shows per-user spend
