@@ -1431,6 +1431,9 @@ export const endpointSchema = baseEndpointSchema.merge(
       default: z.array(modelItemSchema).min(1),
       fetch: z.boolean().optional(),
       userIdQuery: z.boolean().optional(),
+      /** Timeout in milliseconds for /models fetches against this endpoint.
+       * Defaults to 10000 when omitted. */
+      fetchTimeoutMs: z.number().int().positive().optional(),
     }),
     iconURL: z.string().optional(),
     modelDisplayLabel: z.string().optional(),
@@ -2779,6 +2782,24 @@ export const deepResearchConfigSchema = z
 
 export type DeepResearchConfig = z.infer<typeof deepResearchConfigSchema>;
 
+/**
+ * Administrative levers for the `endpoints.custom` block. Defaults preserve
+ * current behavior: custom endpoints are enabled and the deployment caps
+ * how many upstreams may be configured at once (`maxUpstreams`) so a
+ * misbehaving admin config cannot fan `/models` fetches out unboundedly.
+ */
+export const customEndpointsDefaults = {
+  enabled: true,
+  maxUpstreams: 8,
+} as const;
+
+export const customEndpointsConfigSchema = z.object({
+  enabled: z.boolean().optional(),
+  maxUpstreams: z.number().int().positive().optional(),
+});
+
+export type CustomEndpointsLeverConfig = z.infer<typeof customEndpointsConfigSchema>;
+
 export const configSchema = z.object({
   version: z.string(),
   cache: z.boolean().default(true),
@@ -2792,6 +2813,7 @@ export const configSchema = z.object({
   notifications: notificationsConfigSchema.optional(),
   trustEngine: trustEngineConfigSchema.optional(),
   deepResearch: deepResearchConfigSchema.optional(),
+  customEndpoints: customEndpointsConfigSchema.optional(),
   featureFlags: featureFlagsConfigSchema,
   billing: billingConfigSchema.optional(),
   summarization: summarizationConfigSchema.optional(),

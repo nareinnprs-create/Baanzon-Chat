@@ -41,6 +41,7 @@ import { RevokeKeys } from '../SettingsTabs/Data/RevokeKeys';
 import { ClearChats } from '../SettingsTabs/Data/ClearChats';
 import { TokenCredits, AutoRefill } from './BillingControls';
 import AdminPanel from '../SettingsTabs/General/AdminPanel';
+import ProvidersManagement from '~/components/Admin/ProvidersManagement';
 import SharedLinks from '../SettingsTabs/Data/SharedLinks';
 import ImageResize from '../SettingsTabs/Chat/ImageResize';
 import { showThinkingAtom } from '~/store/showThinking';
@@ -190,6 +191,15 @@ export const registry: SettingEntry[] = [
     keywords: ['admin', 'panel', 'dashboard'],
     Component: AdminPanel,
     show: (ctx) => ctx.adminPanelURL !== '',
+  },
+  {
+    id: 'providersManagement',
+    tab: GENERAL,
+    section: 'admin',
+    labelKey: 'com_ui_providers',
+    keywords: ['providers', 'custom', 'endpoints', 'upstream'],
+    Component: ProvidersManagement,
+    show: (ctx) => ctx.isAdmin === true,
   },
 
   // Chat · Sending

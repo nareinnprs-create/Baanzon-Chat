@@ -33,12 +33,14 @@ key ignores user-provided key). Goals: user keys honored everywhere; readable er
 - [ ] A5: Live smoke with a real operator key — deferred to Batch B's Test-provider surface (same need, one place).
 Verification: tsc --noEmit packages/api exit 0 (data-provider dist rebuilt for stale-dist false positive).
 
-## Batch B — Custom providers, full  [ ]
-- [ ] B1: `customEndpoints.*` config-schema fields (enabled flag, per-provider entries) w/ default preserving behavior.
-- [ ] B2: Admin panel: Add/Edit/Delete/Test provider — name, baseURL, auth header scheme, model list (static or fetch), icon.
-- [ ] B3: Endpoint picker integration: custom providers render as first-class endpoints; user key entry per provider.
-- [ ] B4 (efficiency): server-side model-list cache per provider (short TTL), no redundant upstream fetches per request.
-- [ ] B5: Verify: tsc, tests, live smoke adding a dummy provider via admin.
+## Batch B — Custom providers, full  [x!]
+- [x] B1: `customEndpoints` config lever (enabled default true, maxUpstreams 8) + guards enforcing on both endpoint-config and models paths.
+- [x] B2: Admin Providers management (Settings ▸ General ▸ Admin ▸ Providers): Add/Edit/Delete/Test with live SSRF-validited probe OK/401 inline; YAML fragment output for persistence; admin-gated.
+- [x] B3: Endpoint picker + BYO-key dialog verified complete (no gaps).
+- [x] B4: modelListCache (2-min TTL, LRU 64, in-flight coalescing) + note that fetchModels already carries a 2-min TTL cache; chat hot path untouched.
+- [ ] B5: Live admin smoke on pod after CI deploy.
+- Fixes during integration: lever filtering applied to config/models.ts too (race #1); featureFlags block made optional-with-default (27 pre-existing config.spec failures fixed → 405/405).
+Deviations: persistence = config-file source of truth (draft → YAML copy); DB-backed provider CRUD deferred.
 
 ## Batch C — Design tokens "premium elite"  [x]
 - [x] C1–C4: graphite `#0B0B0F` base, surfaces `#15151B`, text `#F5F5F7`/`#A1A1AA`; velvet iris `#8E7CFF` (dark) / `#6D5CE6` (light) accents; `--brand-sig-gradient` champagne→iris token added. Subtle/border/status/series/syntax families re-based onto graphite; gizmo themes left except removed references. Guardrails: semanticTokens.spec 54/54, highContrast.spec 36/36. Contrast: light ink/white and accents verified by subagent report; dark text pairs ≥4.5:1.

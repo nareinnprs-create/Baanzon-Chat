@@ -60,6 +60,16 @@ export function testLangfuseConnection(
   return request.post(endpoints.adminLangfuseConnectionTest(), payload);
 }
 
+export function getAdminProviders(): Promise<t.TAdminProvidersResponse> {
+  return request.get(endpoints.adminProviders());
+}
+
+export function testAdminProvider(
+  payload: t.TAdminProviderTestRequest,
+): Promise<t.TAdminProviderTestResponse> {
+  return request.post(endpoints.adminProvidersTest(), payload);
+}
+
 export function getLangfuseSessionLink(
   conversationId: string,
 ): Promise<t.TLangfuseSessionLinkResponse> {

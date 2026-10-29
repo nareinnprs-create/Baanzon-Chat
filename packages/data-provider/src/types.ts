@@ -1076,6 +1076,50 @@ export type TLangfuseConnectionTestResponse =
   | { success: true }
   | { success: false; errorCode: TLangfuseConnectionTestErrorCode };
 
+/** Admin-side sanitized view of one configured custom endpoint. */
+export type TAdminProvider = {
+  name: string;
+  baseURL?: string;
+  title?: string;
+  /** True when the stored key is the USER_PROVIDED sentinel (per-user BYO). */
+  apiKeyUserProvided: boolean;
+  /** Masked preview recorded at config write time, e.g. `sk-…94f2`. */
+  apiKeyPreview?: string;
+  provider?: string;
+  iconURL?: string;
+  modelDisplayLabel?: string;
+  /** Auth header in use when the endpoint does not use `Authorization`. */
+  headerName?: string;
+  staticModels: string[];
+  /** Whether the manifest is fetched live from `{baseURL}/models`. */
+  modelsFetch: boolean;
+};
+
+export type TAdminProvidersResponse = {
+  providers: TAdminProvider[];
+};
+
+export type TAdminProviderTestRequest = {
+  baseURL: string;
+  apiKey: string;
+  /** Optional override for the auth header name (default `Authorization`). */
+  headerName?: string;
+  /** Force a fresh probe, bypassing the two-minute server cache. */
+  skipCache?: boolean;
+};
+
+export const adminProviderTestCodes = ['ok', 'unauthorized', 'error'] as const;
+
+export type TAdminProviderTestResponse = {
+  status: (typeof adminProviderTestCodes)[number];
+  /** HTTP status of the upstream reply, when reached. */
+  code?: number;
+  count?: number;
+  models?: string[];
+  error?: string;
+  cached?: boolean;
+};
+
 export type TLangfuseSessionLinkResponse = {
   url: string | null;
 };

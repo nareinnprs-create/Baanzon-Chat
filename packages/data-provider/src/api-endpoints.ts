@@ -523,6 +523,10 @@ export const adminLangfuseConnectionTest = () => `${adminLangfuseConnection()}/t
 export const adminLangfuseSessionLink = (conversationId: string) =>
   `${adminLangfuseConnection()}/session/${encodeURIComponent(conversationId)}`;
 
+/* Custom providers (admin) */
+export const adminProviders = () => `${BASE_URL}/api/admin/providers`;
+export const adminProvidersTest = () => `${adminProviders()}/test`;
+
 /* Tool favorites (starred marketplace items) */
 export const toolFavorites = () => `${BASE_URL}/api/user/settings/favorites/tools`;
 export const toolFavorite = (itemType: string, itemId: string) =>

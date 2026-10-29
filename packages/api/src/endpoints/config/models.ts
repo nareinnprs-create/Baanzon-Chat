@@ -12,6 +12,7 @@ import type { ServerRequest, GetUserKeyValuesFunction, UserKeyValues } from '~/t
 import type { FetchModelsParams } from '~/endpoints/models';
 import type { GetAppConfigOptions } from '~/app/service';
 import { fetchModels as defaultFetchModels } from '~/endpoints/models';
+import { filterCustomEndpoints } from '~/endpoints/custom/guards';
 import { getTokenConfigKey } from '~/endpoints/custom/initialize';
 import { getAppConfigOptionsFromUser } from '~/app/service';
 import { resolveConfigSecret } from '~/admin/secrets';
@@ -81,7 +82,13 @@ export function createLoadConfigModels(deps: LoadConfigModelsDeps) {
       return modelsConfig;
     }
 
-    const customEndpoints = (appConfig.endpoints[EModelEndpoint.custom] as TEndpoint[]).filter(
+    // Apply admin custom-endpoint levers (enabled / maxUpstreams) before
+    // resolving model lists, mirroring getEndpointsConfig so a disabled
+    // customEndpoints block contributes nothing on the models path either.
+    const { endpoints: leveredCustomEndpoints } = filterCustomEndpoints(
+      appConfig.endpoints[EModelEndpoint.custom] as TEndpoint[],
+    );
+    const customEndpoints = leveredCustomEndpoints.filter(
       (endpoint) =>
         endpoint.baseURL &&
         endpoint.apiKey &&

@@ -11,6 +11,7 @@ export enum QueryKeys {
   searchEnabled = 'searchEnabled',
   langfuseConnection = 'langfuseConnection',
   langfuseSessionLink = 'langfuseSessionLink',
+  adminProviders = 'adminProviders',
   user = 'user',
   name = 'name', // user key name
   models = 'models',
@@ -133,6 +134,7 @@ export enum MutationKeys {
   cancelAgentQueuedTurn = 'cancelAgentQueuedTurn',
   updateLangfuseConnection = 'updateLangfuseConnection',
   testLangfuseConnection = 'testLangfuseConnection',
+  testAdminProvider = 'testAdminProvider',
   createAgentApiKey = 'createAgentApiKey',
   deleteAgentApiKey = 'deleteAgentApiKey',
   fileUpload = 'fileUpload',

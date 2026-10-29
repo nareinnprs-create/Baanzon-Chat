@@ -39,7 +39,10 @@ export const featureFlagsConfigSchema = z
     'deepResearch.ui': z.boolean().default(true),
     'workflow.builder': z.boolean().default(true),
   })
-  .strict();
+  .strict()
+  /** `featureFlags` itself is optional: all flags default on, matching the
+   *  majority of configs that predate the block. */
+  .default({ 'workspace.projects': true, 'deepResearch.ui': true, 'workflow.builder': true });
 
 export type FeatureFlagsConfig = z.infer<typeof featureFlagsConfigSchema>;
 
