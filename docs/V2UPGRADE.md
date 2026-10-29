@@ -106,6 +106,122 @@ assume (accounts, uploads, sharing, mobile, PWA).
 
 ---
 
+# V2UPGRADE TRACKER (this section is the live ledger — update every batch)
+
+Legend: `[ ]` todo · `[$]` active · `[x]` done · `[x!]` done w/ deviation · `[b]` blocked on user/decision
+
+## Wave 1 — Foundations
+- [ ] W1.1 Auth ON (register/login/verify/reset) — `[b]` SMTP creds
+- [ ] W1.2 First admin + admin surface live — `[b]` user registers
+- [ ] W1.3 Deployment provider keys live + BYO E2E — `[b]` user supplies keys
+- [ ] W1.4 Uploads: RAG API on pod OR uploads disabled gracefully — `[b]` decision 5
+- [ ] W1.5 SMTP wired — `[b]` decision 4
+- [ ] W1.6 Mobile web pass (dock pattern, 320px)
+- [ ] W1.7 Share links (public read-only + revoke)
+- [ ] W1.8 PWA (manifest, SW offline shell, installable)
+- [ ] W1.9 Onboarding first-60s flow
+- [x] W1.10 Perf: CF edge cache + preload audit — CF proxied (full SSL); bundle preload audit done in PROD1-F; cold TTFB tune pending scale data
+
+## Wave 2 — Monolith shell
+- [ ] G1 lever + rail/canvas/focus scaffold
+- [ ] G2 composer slab + iris thread + context meter (X3)
+- [ ] G3 conversation canvas + branch tree (X2)
+
+## Wave 3 — Cortex core
+- [ ] G4 Arena (X1) + Smart Route (X5) + Prompt Lab (X4)
+- [ ] G5 Cards (X6) + Recap (X7) + Canvas/diff (X9)
+
+## Wave 4 — Cortex reach + premium
+- [ ] G6 Palette-OS (X10) + Cross-chat recall (X8) — `[b]` decision 6
+- [ ] G7 Voice + file viewers
+- [ ] G8 Memory surface + Projects++
+- [ ] G9 Usage/cost dashboard + templates gallery
+
+## Wave 5 — Ground-breaking (scope later)
+- [ ] G10 Agent workflow step cards
+- [ ] G11 Local-model mode (Ollama/vLLM on pod)
+- [ ] G12 MCP tools marketplace
+- [ ] G13 Realtime collab
+
+## Ops fixes (done in this session, pre-approval)
+- [x] Deploy-DB-outage bug: data dirs moved out of release swap path → `/workspace/data/{mongodb,meili_data}`; supervisor conf + provision + apply script updated; sha no-op guard added (docs-only deploys now skip)
+- [x] mongod crash-loop root-caused twice; permanently eliminated
+
+---
+
+# PRODUCTION / LAUNCH READINESS
+
+Percentages = weighted gate model. Production-ready = can real users be on it safely.
+Launch-ready = marketed, public, self-serve at scale.
+
+## Current state (2026-10-29)
+
+| Gate | Weight | Score | Why |
+|---|---|---|---|
+| Infra & deploy | 15% | 90% | CI/CD health-gated, rollback, no-downtime deploys, hardened data path; single pod, no HA |
+| App functionality | 25% | 55% | chat+endpoints+admin+key flows solid; auth OFF, uploads OFF, sharing OFF |
+| Security | 15% | 45% | secrets hygiene good, SSRF guards, admin gated; no rate limiting, no audit log, auth unexercised |
+| Scalability | 15% | 25% | single 2vCPU pod; see scale plan below |
+| Ops & observability | 10% | 40% | logs exist; no metrics/alerting/uptime monitor/error tracking |
+| Data safety | 10% | 50% | data outside release path now; no backups schedule, no restore drill |
+| Compliance/privacy | 5% | 10% | no privacy policy, ToS, data-retention policy |
+| Product polish | 5% | 35% | PROD1 shipped; Monolith not started |
+| **PRODUCTION-READY** | | **≈52%** | |
+| **LAUNCH-READY** (adds: onboarding, PWA, share, i18n audit, support path, status page) | | **≈38%** | |
+
+## Road to 100% (target gates)
+- Prod 100% = W1 complete + scale plan phase S1–S2 done + backups+restore drill + metrics/alerting + rate limits + privacy/ToS pages.
+- Launch 100% = + Waves 2–4 shipped + onboarding + PWA + share + support email + status page + load test at 2× target.
+
+---
+
+# SCALE PLAN — 5,000 USERS (and beyond)
+
+## Load model (assumptions → math)
+- 5,000 registered; concurrency ≈ 5–8% peak ⇒ 250–400 concurrent; ~40–80 streaming completions at peak.
+- 1 streaming completion ≈ (server-side relay) ~30KB memory + keep-alive socket; API CPU mostly JSON relay (model inference is upstream).
+- Persistent stores: Mongo working set small (conv text grows ~2–5GB/mo at this scale); Meili index ~1–2GB.
+
+## Phase S0 — current (hold ~50 concurrent, fine for pilot)
+- 1 pod 2vCPU/4GB, single mongo, network volume. BOTTLENECKS: API CPU, single mongo, no rate limit.
+
+## Phase S1 — 500–1,500 DAU (≈ 2–3 weeks of work, low cost)
+1. **Pod resize**: 8 vCPU / 16GB (Runpod live resize or new pod; $0.24/hr class ≈ $170/mo)
+2. **Rate limiting**: express-rate-limit per user/IP (auth+completion+upload routes) + CF WAF rules (bot protection, 10r/s per IP burst)
+3. **Mongo**: journal on, WiredTiger cache 4GB, daily `mongodump` to /workspace/backups + weekly off-pod copy (r2/s3 via runpodctl) + restore drill
+4. **Meili**: dedicated 2vCPU within pod OK; index refresh async
+5. **CF**: cache static assets (assets/* immutable), enable Brotli, tiered cache
+6. **Metrics**: prom-client on /metrics + UptimeRobot on /readyz + Grafana Cloud free / simple CF analytics + error tracking (Sentry free tier)
+7. **Node**: UV_THREADPOOL=8, keep-alive timeouts tuned; PM2-style cluster NOT needed (supervisord single node proc fine to ~1k concurrent on 8vCPU)
+
+## Phase S2 — 5,000 users (the target) 
+1. **Split planes**: app pod (8vCPU) + db pod (4vCPU/16GB NVMe) — separate Runpod pods, same region, private network; Mongo on db pod w/ 8GB WT cache
+2. **API**: 2× app pods behind CF load balancing (health-checked), sticky not required (JWT + Mongo sessions)
+3. **Mongo**: single replica set (3 nodes if HA wanted; 1 node + backups acceptable at this tier) + change-stream consumers isolated
+4. **Meili**: own pod (2vCPU/8GB), snapshot daily
+5. **Uploads/RAG**: object storage (Cloudflare R2 — zero egress) instead of pod disk; presigned URLs
+6. **Queue offload**: schedules/agentQueuedTurns move to a worker process (same repo, supervisord program on db pod) so API stays latency-clean
+7. **Autoscale story**: Runpod serverless endpoint for the API is possible later (stateless relays); keep pods until cost curve says otherwise (~$400–600/mo total at S2 vs ChatGPT-class unit economics fine at any seat pricing)
+8. **Backups**: mongodump hourly → R2, 30-day retention; Meili snapshots; .env/baanzon.yaml in secrets vault (not repo)
+
+## Phase S3 — beyond 5k (only if it happens)
+- Mongo 3-node replica set + read preference routing; API HPA via serverless; per-tenant shard by userId hash; multi-region CF + origin in EU/US split if compliance requires.
+
+## Cost summary (Runpod+CF+R2, rough)
+| Phase | Infra/mo | Supports |
+|---|---|---|
+| S0 now | ~$45 | pilot ≤50 concurrent |
+| S1 | ~$200–250 | 1–1.5k DAU |
+| S2 | ~$400–600 | 5,000 users / 300+ concurrent |
+
+## Scale acceptance tests (gate to claim "5k-ready")
+- [ ] k6/Artillery: 300 concurrent streaming sessions, p95 relay latency <300ms overhead, 0 5xx over 30 min
+- [ ] Mongo: 10k inserts/min sustained, replica lag 0, backups restore <15 min
+- [ ] Rate limit: burst abuse contained (429s) without affecting normal users
+- [ ] CF: static hit-rate >90%, origin CPU flat under static load
+
+---
+
 ## Tracker (live status — update after every batch)
 
 Legend: `[ ]` todo · `[$]` active · `[x]` done · `[b]` blocked (needs user/decision) · each item carries its verify proof in the last column when done.

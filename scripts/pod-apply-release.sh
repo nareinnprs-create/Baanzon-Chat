@@ -7,6 +7,12 @@ NEW_DIR=/workspace/baanzon-next
 OLD_DIR=/workspace/baanzon-old
 
 echo "[apply] unpacking release"
+# No-op guard: identical payload already deployed (docs-only pushes etc.)
+NEW_SHA=$(sha256sum "$RELEASE_SRC/baanzon-app.tar.gz" | cut -d' ' -f1)
+if [ -f /workspace/.release-sha ] && [ "$(cat /workspace/.release-sha)" = "$NEW_SHA" ]; then
+  echo "[apply] payload unchanged (sha match) - nothing to do"
+  exit 0
+fi
 for i in 1 2 3 4; do
   if rm -rf "$NEW_DIR" "$OLD_DIR" 2>/dev/null; then break; fi
   echo "[apply] rm retry $i (network-volume rm race)"; sleep 5
@@ -24,11 +30,8 @@ for d in images uploads logs; do
   if [ -d "$APP_DIR/$d" ]; then cp -a "$APP_DIR/$d/." "$NEW_DIR/$d/" 2>/dev/null || true; fi
 done
 
-# data dirs: carry over by rename (instant, and the frontend payload tarball
-# must never own them). Create if missing so mongod/meili come up clean.
-for d in mongodb meili_data; do
-  if [ -d "$APP_DIR/$d" ]; then mv "$APP_DIR/$d" "$NEW_DIR/$d"; else mkdir -p "$NEW_DIR/$d"; fi
-done
+# data dirs: live OUTSIDE the app dir at /workspace/data/{mongodb,meili_data}
+# (mongod/meili supervisor conf point there) so releases never touch them.
 
 echo "[apply] installing prod deps (persistent cache)"
 cd "$NEW_DIR"
@@ -45,7 +48,7 @@ supervisorctl restart baanzon-api 2>/dev/null || supervisorctl start baanzon-api
 
 echo "[apply] health-gate node http://127.0.0.1:3080/readyz"
 for i in $(seq 1 60); do
-  if curl -sf http://127.0.0.1:3080/readyz >/dev/null; then echo "[apply] healthy"; rm -rf "$OLD_DIR" 2>/dev/null & exit 0; fi
+  if curl -sf http://127.0.0.1:3080/readyz >/dev/null; then echo "[apply] healthy"; printf '%s' "$NEW_SHA" > /workspace/.release-sha; rm -rf "$OLD_DIR" 2>/dev/null & exit 0; fi
   sleep 3
 done
 # rollback on failure

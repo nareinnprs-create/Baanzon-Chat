@@ -41,7 +41,7 @@ echo "cloudflared: $(cloudflared --version)"
 # ---- supervisor config ----
 cat >/etc/supervisor/conf.d/baanzon.conf <<'EOF'
 [program:mongod]
-command=/usr/local/bin/mongod --dbpath /workspace/baanzon/mongodb --bind_ip 127.0.0.1 --wiredTigerCacheSizeGB 0.4
+command=/usr/local/bin/mongod --dbpath /workspace/data/mongodb --bind_ip 127.0.0.1 --wiredTigerCacheSizeGB 0.4
 directory=/workspace/baanzon
 autostart=true
 autorestart=true
@@ -50,7 +50,7 @@ stdout_logfile=/workspace/baanzon/logs/supervisor-mongod.log
 redirect_stderr=true
 
 [program:meilisearch]
-command=/bin/bash -lc 'set -a; source /workspace/baanzon/.env; exec meilisearch --db-path /workspace/baanzon/meili_data --http-addr 0.0.0.0:7700 --no-analytics'
+command=/bin/bash -lc 'set -a; source /workspace/baanzon/.env; exec meilisearch --db-path /workspace/data/meili_data --http-addr 0.0.0.0:7700 --no-analytics'
 directory=/workspace/baanzon
 autostart=true
 autorestart=true
@@ -78,7 +78,7 @@ stdout_logfile=/workspace/baanzon/logs/supervisor-tunnel.log
 redirect_stderr=true
 EOF
 
-mkdir -p /workspace/baanzon/logs /workspace/baanzon/mongodb /workspace/baanzon/meili_data /workspace/baanzon/images /workspace/baanzon/uploads
+mkdir -p /workspace/data/mongodb /workspace/data/meili_data /workspace/baanzon/logs /workspace/baanzon/images /workspace/baanzon/uploads
 supervisorctl reread && supervisorctl update || true
 echo "PROVISION COMPLETE"
 supervisorctl status || true
