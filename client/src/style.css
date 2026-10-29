@@ -97,6 +97,57 @@
   --avatar-ease-out: cubic-bezier(0.34, 3.85, 0.64, 1);
 }
 
+/* Streaming affordance (Batch D): a quiet 2px progress filament across the top
+ * edge of the composer surface while a run is in flight. It sweeps with the
+ * signature brand gradient's hue family (iris), stops mid-loop like the text
+ * cursor does, and flattens to a static low-alpha filament under
+ * prefers-reduced-motion — motion-free but still present. */
+.composer-sig-streaming {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 999px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.composer-sig-streaming::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-60%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--accent-primary) / 0.7) 45%,
+    rgb(var(--link-hover) / 0.9) 60%,
+    transparent
+  );
+  animation: composer-sig-sweep 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes composer-sig-sweep {
+  0% {
+    transform: translateX(-60%);
+  }
+  62% {
+    transform: translateX(0%);
+  }
+  82% {
+    transform: translateX(85%);
+  }
+  100% {
+    transform: translateX(85%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .composer-sig-streaming::before {
+    transform: none;
+    background: rgb(var(--accent-primary) / 0.35);
+    animation: none;
+  }
+}
+
 /* Icon swap — cross-fade two icons sharing a slot. */
 .t-icon-swap {
   position: relative;

@@ -2107,6 +2107,7 @@
   "com_ui_no_schedules": "Create one to have an agent run a prompt on a schedule",
   "com_ui_no_schedules_title": "No scheduled chats yet",
   "com_ui_no_search_results": "No results match your search",
+  "com_ui_no_search_results_hint": "Try different words, or start a new chat instead.",
   "com_ui_no_selection": "No selection",
   "com_ui_no_skills_found": "No skills found",
   "com_ui_no_terms_content": "No terms and conditions content to display",

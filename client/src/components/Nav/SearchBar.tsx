@@ -139,7 +139,7 @@ const SearchBar = forwardRef((props: SearchBarProps, ref: React.Ref<HTMLDivEleme
   return (
     <div
       ref={ref}
-      className="group relative flex h-9 min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-lg border-2 border-transparent px-3 py-1.5 text-text-primary focus-within:border-ring-primary focus-within:bg-surface-active-alt hover:bg-surface-active-alt"
+      className="group relative flex h-9 min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-lg border-2 border-transparent bg-surface-active/40 px-3 py-1.5 text-text-primary focus-within:border-ring-primary focus-within:bg-surface-active-alt hover:bg-surface-active/70"
     >
       <Search
         aria-hidden="true"
@@ -168,7 +168,7 @@ const SearchBar = forwardRef((props: SearchBarProps, ref: React.Ref<HTMLDivEleme
         type="button"
         aria-label={localize('com_ui_clear_search')}
         className={cn(
-          'absolute right-[7px] flex h-5 w-5 items-center justify-center rounded-full border-none bg-transparent p-0 transition-opacity duration-200',
+          'absolute right-[7px] flex h-5 w-5 items-center justify-center rounded-full border-none bg-transparent p-0 transition-opacity duration-200 max-md:-mr-2 max-md:h-11 max-md:w-11',
           showClearIcon ? 'opacity-100' : 'opacity-0',
           isSmallScreen === true ? 'right-[16px]' : '',
         )}

@@ -7,6 +7,9 @@ describe('composerSurfaceClasses', () => {
     expect(classes).toContain('border-border-light');
     expect(classes).toContain('bg-surface-chat');
     expect(classes).toContain('text-text-primary');
+    // Batch D: the live signal is iris, from tokens only.
+    expect(classes).toContain('focus-within:ring-ring-primary/25');
+    expect(classes).not.toMatch(/#[0-9a-f]{3,6}/i);
   });
 });
 

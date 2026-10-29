@@ -667,6 +667,11 @@ const ChatForm = memo(function ChatForm({
               )}
             >
               {project ? <ProjectLandingChip project={project} /> : null}
+              {/* Quiet streaming affordance: a 2px iris filament across the top
+                  edge while a run is live. Stop stays accessible in the action row. */}
+              {isSubmitting && (
+                <span className="composer-sig-streaming" aria-hidden="true" />
+              )}
               <TextareaHeader addedConvo={addedConvo} setAddedConvo={setAddedConvo} />
               <PendingManualSkillsChips conversationId={conversationId} />
               {quotesEnabled && (

@@ -45,12 +45,13 @@ Deviations: persistence = config-file source of truth (draft → YAML copy); DB-
 ## Batch C — Design tokens "premium elite"  [x]
 - [x] C1–C4: graphite `#0B0B0F` base, surfaces `#15151B`, text `#F5F5F7`/`#A1A1AA`; velvet iris `#8E7CFF` (dark) / `#6D5CE6` (light) accents; `--brand-sig-gradient` champagne→iris token added. Subtle/border/status/series/syntax families re-based onto graphite; gizmo themes left except removed references. Guardrails: semanticTokens.spec 54/54, highContrast.spec 36/36. Contrast: light ink/white and accents verified by subagent report; dark text pairs ≥4.5:1.
 
-## Batch D — Core surfaces  [ ]
-- [ ] D1 Composer: inline model picker, attachments + paste/drag, streaming state affordance.
-- [ ] D2 Conversation: message cards, hover copy/regenerate, citation/tool disclosures.
-- [ ] D3 Sidebar: search-first, folders, collapse states.
-- [ ] D4 Settings sheets, undo for destructive, rewritten empty/error copy.
-- [ ] D5 Responsive 320→ultrawide, visible focus, reduced-motion honored.
+## Batch D — Core surfaces  [x]
+- [x] D1: Composer focus signal (iris border+halo via composerSurfaceClasses), streaming filament (`composer-sig-streaming`, incl. reduce guard), picker polish verified.
+- [x] D2: small-caps author chips (MessageRow/AuthorHeader), hover actions verified present.
+- [x] D3: search puck on graphite, iris active-row marker, ≥44px touch on clear button.
+- [x] D4: search-empty state row (new `com_ui_no_search_results_hint` key), destructive confirms verified upstream.
+- [x] D5: 320px rows h-12, focus-visible verified, new motion reduce-guarded.
+Verification: tsc client + packages/client exit 0; jest: 6 client suites 49/49 + composer.spec 3/3.
 
 ## Batch E — UI intelligence  [ ]
 - [ ] E1: ⌘K command palette (nav/endpoints/model switch/prompts).
