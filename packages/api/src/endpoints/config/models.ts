@@ -120,11 +120,12 @@ export function createLoadConfigModels(deps: LoadConfigModelsDeps) {
       };
       resolved.push(entry);
 
-      if (
-        endpoint.models?.fetch &&
-        (entry.apiKeyIsUserProvided || entry.baseURLIsUserProvided) &&
-        req.user?.id
-      ) {
+      if (endpoint.models?.fetch && req.user?.id) {
+        /** Every `models.fetch: true` endpoint participates in user-key-first
+         *  resolution: when the user has stored a key through the /api/keys
+         *  flow, that key is preferred over the admin-configured (env) key,
+         *  letting a valid per-user key succeed even when the server's env
+         *  key is missing or rejected (401) by the provider. */
         userKeyEndpoints.push(entry);
       }
     }
@@ -173,7 +174,12 @@ export function createLoadConfigModels(deps: LoadConfigModelsDeps) {
       // fetched model list within the same request.
       const uniqueKey = `${BASE_URL}__${API_KEY}__${headersFingerprint(endpointHeaders)}`;
 
-      if (models?.fetch && !apiKeyIsUserProvided && !baseURLIsUserProvided) {
+      if (
+        models?.fetch &&
+        !apiKeyIsUserProvided &&
+        !baseURLIsUserProvided &&
+        !userKeyMap.get(name)?.apiKey
+      ) {
         if (!fetchPromisesMap[uniqueKey]) {
           /** User-scoped when configured headers resolve per user — the
            *  derived token config must not be cached under the shared name */
@@ -191,6 +197,7 @@ export function createLoadConfigModels(deps: LoadConfigModelsDeps) {
             direct: endpoint.directEndpoint,
             userIdQuery: models.userIdQuery,
             tokenKey,
+            fetchTimeoutMs: models.fetchTimeoutMs,
           });
         }
         uniqueKeyToEndpointsMap[uniqueKey] = uniqueKeyToEndpointsMap[uniqueKey] || [];
@@ -200,8 +207,11 @@ export function createLoadConfigModels(deps: LoadConfigModelsDeps) {
 
       if (models?.fetch && userKeyMap.has(name)) {
         const userKeyValues = userKeyMap.get(name);
+        /** Prefer the user's stored key over the resolved env key; the env
+         *  key is only a fallback when the user has no stored key. */
         const resolvedApiKey =
-          apiKeyIsUserProvided || baseURLIsUserProvided ? userKeyValues?.apiKey : API_KEY;
+          userKeyValues?.apiKey ||
+          (apiKeyIsUserProvided || baseURLIsUserProvided ? undefined : API_KEY);
         const resolvedBaseURL = baseURLIsUserProvided ? userKeyValues?.baseURL : BASE_URL;
 
         if (resolvedApiKey && resolvedBaseURL) {
@@ -236,6 +246,7 @@ export function createLoadConfigModels(deps: LoadConfigModelsDeps) {
                 skipCache: true,
                 /** Fetched with the user's key/URL — always user-scoped */
                 tokenKey: getTokenConfigKey(endpoint, name, req.user?.id ?? '', tenantId),
+                fetchTimeoutMs: models.fetchTimeoutMs,
               });
             })();
           uniqueKeyToEndpointsMap[userFetchKey] = uniqueKeyToEndpointsMap[userFetchKey] || [];

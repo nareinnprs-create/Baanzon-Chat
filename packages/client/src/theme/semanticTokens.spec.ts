@@ -125,8 +125,8 @@ describe('dark destructive text', () => {
     );
 
     expect(appStyles).toMatch(/--text-destructive:\s*var\(--red-400\);/);
-    expect(darkTheme['rgb-text-destructive']).toBe('248 113 113');
-    expect(darkTheme['rgb-status-error']).toBe('252 165 165');
+    expect(darkTheme['rgb-text-destructive']).toBe('255 92 108');
+    expect(darkTheme['rgb-status-error']).toBe('255 154 165');
   });
 });
 

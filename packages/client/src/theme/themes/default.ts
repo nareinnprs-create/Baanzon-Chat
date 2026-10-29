@@ -1,120 +1,120 @@
 import { IThemeRGB } from '../types';
 
 /**
- * Baanzon Aurora Pearl — Light Theme
- * Premium paper and soft daylight.
+ * Baanzon Gunmetal Pearl — Light Theme
+ * Cool paper on graphite, velvet iris accents.
  */
 export const defaultTheme: IThemeRGB = {
   // Text colors
-  'rgb-text-primary': '16 42 45', // #102A2D (Primary Text)
-  'rgb-text-secondary': '82 104 106', // #52686A (Secondary Text)
-  'rgb-text-secondary-alt': '95 112 113', // #5F7071 (Muted Text, WCAG AA)
-  'rgb-text-tertiary': '95 112 113', // #5F7071 (Muted Text, WCAG AA)
-  'rgb-text-muted': '95 112 113', // #5F7071 (Muted Text, WCAG AA)
+  'rgb-text-primary': '23 23 28', // #17171C (Primary Text)
+  'rgb-text-secondary': '82 82 94', // #52525E (Secondary Text)
+  'rgb-text-secondary-alt': '107 107 117', // #6B6B75 (Muted Text, WCAG AA)
+  'rgb-text-tertiary': '107 107 117', // #6B6B75 (Muted Text, WCAG AA)
+  'rgb-text-muted': '107 107 117', // #6B6B75 (Muted Text, WCAG AA)
   'rgb-text-warning': '180 83 9', // #b45309 (amber-700)
-  'rgb-text-destructive': '220 38 38', // #dc2626 (red-600)
-  'rgb-shimmer-base': '16 42 45', // #102A2D, matching text-primary
-  'rgb-shimmer-dip': '110 127 128', // #6E7F80
+  'rgb-text-destructive': '217 40 56', // #d92838 (Velvet Red)
+  'rgb-shimmer-base': '23 23 28', // #17171C, matching text-primary
+  'rgb-shimmer-dip': '131 131 143', // #83838F
 
   // Link and accent colors
-  'rgb-link': '8 127 131', // #087F83 (Baanzon Teal)
-  'rgb-link-hover': '6 107 111', // #066B6F (Teal darker)
-  'rgb-link-visited': '155 138 251', // #9B8AFB (Soft Orchid)
-  'rgb-accent-primary': '8 127 131', // #087F83 (Baanzon Teal)
-  'rgb-accent-primary-hover': '6 107 111', // #066B6F (Teal darker)
+  'rgb-link': '91 75 212', // #5B4BD4 (Velvet Iris)
+  'rgb-link-hover': '74 59 191', // #4A3BBF (Iris darker)
+  'rgb-link-visited': '106 62 200', // #6A3EC8 (Iris visited)
+  'rgb-accent-primary': '109 92 230', // #6D5CE6 (Velvet Iris)
+  'rgb-accent-primary-hover': '91 75 212', // #5B4BD4 (Iris darker)
 
   // Ring colors
-  'rgb-ring-primary': '8 127 131', // #087F83 (Baanzon Teal)
+  'rgb-ring-primary': '109 92 230', // #6D5CE6 (Velvet Iris)
 
   // Header colors
   'rgb-header-primary': '255 255 255', // #fff (white)
-  'rgb-header-hover': '247 250 248', // #F7FAF8 (Pearl background)
-  'rgb-header-button-hover': '247 250 248', // #F7FAF8 (Pearl background)
+  'rgb-header-hover': '250 250 252', // #FAFAFC (paper background)
+  'rgb-header-button-hover': '250 250 252', // #FAFAFC (paper background)
 
   // Surface colors
-  'rgb-surface-active': '232 243 240', // #E8F3F0 (Mist)
-  'rgb-surface-active-alt': '221 233 229', // #DDE9E5 (Border)
-  'rgb-surface-hover': '232 243 240', // #E8F3F0 (Mist)
-  'rgb-surface-hover-alt': '221 233 229', // #DDE9E5 (Border)
-  'rgb-surface-composer-hover': '232 243 240', // #E8F3F0 (Mist)
+  'rgb-surface-active': '239 239 244', // #EFEFF4
+  'rgb-surface-active-alt': '228 228 234', // #E4E4EA (Border)
+  'rgb-surface-hover': '239 239 244', // #EFEFF4
+  'rgb-surface-hover-alt': '228 228 234', // #E4E4EA (Border)
+  'rgb-surface-composer-hover': '239 239 244', // #EFEFF4
   'rgb-surface-primary': '255 255 255', // #FFFFFF (Surface)
   'rgb-chart-widget-surface': '255 255 255', // #FFFFFF
-  'rgb-chart-widget-stroke': '221 233 229', // #DDE9E5 (Border)
-  'rgb-surface-primary-alt': '247 250 248', // #F7FAF8 (Pearl background)
-  'rgb-surface-primary-contrast': '232 243 240', // #E8F3F0 (Mist)
-  'rgb-surface-secondary': '247 250 248', // #F7FAF8 (Pearl background)
-  'rgb-surface-secondary-alt': '239 246 243', // #EFF6F3 (Surface Soft)
-  'rgb-surface-tertiary': '232 243 240', // #E8F3F0 (Mist)
+  'rgb-chart-widget-stroke': '228 228 234', // #E4E4EA (Border)
+  'rgb-surface-primary-alt': '250 250 252', // #FAFAFC (Paper background)
+  'rgb-surface-primary-contrast': '239 239 244', // #EFEFF4
+  'rgb-surface-secondary': '246 246 249', // #F6F6F9
+  'rgb-surface-secondary-alt': '240 240 244', // #F0F0F4
+  'rgb-surface-tertiary': '239 239 244', // #EFEFF4
   'rgb-surface-tertiary-alt': '255 255 255', // #FFFFFF (Surface)
   'rgb-surface-dialog': '255 255 255', // #FFFFFF (Surface)
-  'rgb-surface-overlay': '16 42 45', // #102A2D (overlay)
-  'rgb-surface-submit': '8 127 131', // #087F83 (Baanzon Teal)
-  'rgb-surface-submit-hover': '6 107 111', // #066B6F (Teal darker)
-  'rgb-surface-destructive': '185 28 28', // #b91c1c (red-700)
-  'rgb-surface-destructive-hover': '153 27 27', // #991b1b (red-800)
+  'rgb-surface-overlay': '23 23 28', // #17171C (overlay)
+  'rgb-surface-submit': '109 92 230', // #6D5CE6 (Velvet Iris)
+  'rgb-surface-submit-hover': '91 75 212', // #5B4BD4 (Iris darker)
+  'rgb-surface-destructive': '178 24 40', // #b21828
+  'rgb-surface-destructive-hover': '143 18 32', // #8f1220
   'rgb-surface-chat': '255 255 255', // #FFFFFF (Surface)
-  'rgb-surface-code': '247 250 248', // #F7FAF8 (Pearl background)
-  'rgb-surface-inverted': '6 60 69', // #063C45 (Deep Ocean)
-  'rgb-surface-inverted-hover': '8 127 131', // #087F83 (Teal)
+  'rgb-surface-code': '250 250 252', // #FAFAFC (Paper background)
+  'rgb-surface-inverted': '23 23 28', // #17171C (Graphite)
+  'rgb-surface-inverted-hover': '91 75 212', // #5B4BD4 (Iris)
   'rgb-text-inverted': '255 255 255', // #FFFFFF
   'rgb-surface-fixed': '255 255 255', // #FFFFFF
-  'rgb-surface-fixed-hover': '232 243 240', // #E8F3F0 (Mist)
-  'rgb-text-fixed': '16 42 45', // #102A2D
+  'rgb-surface-fixed-hover': '239 239 244', // #EFEFF4
+  'rgb-text-fixed': '23 23 28', // #17171C
 
   // Border colors
-  'rgb-border-light': '221 233 229', // #DDE9E5 (Border)
-  'rgb-border-medium': '200 218 214', // #C8DAD6 (darker border)
-  'rgb-border-medium-alt': '200 218 214', // #C8DAD6
-  'rgb-border-heavy': '160 185 180', // #A0B9B4 (heavy border)
-  'rgb-border-xheavy': '110 127 128', // #6E7F80 (Muted)
-  'rgb-border-destructive': '220 38 38', // #dc2626 (red-600)
+  'rgb-border-light': '228 228 234', // #E4E4EA (Border)
+  'rgb-border-medium': '211 211 219', // #D3D3DB (darker border)
+  'rgb-border-medium-alt': '211 211 219', // #D3D3DB
+  'rgb-border-heavy': '173 173 185', // #ADADB9 (heavy border)
+  'rgb-border-xheavy': '131 131 143', // #83838F (Muted)
+  'rgb-border-destructive': '217 40 56', // #d92838
 
   // Status colors
   'rgb-status-success': '4 120 87', // #047857 (green-700)
-  'rgb-status-success-subtle': '236 253 245', // #ecfdf5 (green-50)
+  'rgb-status-success-subtle': '232 246 239', // #ECF6EF (green-tinted paper)
   'rgb-status-success-border': '110 231 183', // #6ee7b7 (green-300)
   'rgb-status-success-strong': '2 133 94', // #02855e
   'rgb-status-info': '7 121 125', // #07797D (Baanzon Teal, stepped for the Mist fill)
-  'rgb-status-info-subtle': '232 243 240', // #E8F3F0 (Mist)
-  'rgb-status-info-border': '53 214 199', // #35D6C7 (Luminous Aqua)
-  'rgb-status-info-strong': '8 127 131', // #087F83 (Teal)
+  'rgb-status-info-subtle': '228 242 242', // #E4F2F2
+  'rgb-status-info-border': '106 198 204', // #6AC6CC
+  'rgb-status-info-strong': '7 121 125', // #07797D
   'rgb-status-warning': '180 83 9', // #b45309 (amber-700)
   'rgb-status-warning-subtle': '255 251 235', // #fffbeb (amber-50)
   'rgb-status-warning-border': '252 211 77', // #fcd34d (amber-300)
-  'rgb-status-warning-strong': '199 82 9', // #c75209
-  'rgb-status-error': '185 28 28', // #b91c1c (red-700)
-  'rgb-status-error-subtle': '254 242 242', // #fef2f2 (red-50)
-  'rgb-status-error-border': '252 165 165', // #fca5a5 (red-300)
-  'rgb-status-error-strong': '224 47 31', // #e02f1f
-  'rgb-status-neutral': '82 104 106', // #52686A (Secondary Text)
-  'rgb-status-neutral-subtle': '232 243 240', // #E8F3F0 (Mist)
-  'rgb-status-neutral-border': '200 218 214', // #C8DAD6
+  'rgb-status-warning-strong': '180 83 9', // #b45309
+  'rgb-status-error': '178 24 40', // #b21828
+  'rgb-status-error-subtle': '254 242 244', // #fef2f4
+  'rgb-status-error-border': '255 154 165', // #FF9AA5
+  'rgb-status-error-strong': '217 40 56', // #d92838
+  'rgb-status-neutral': '82 82 94', // #52525E (Secondary Text)
+  'rgb-status-neutral-subtle': '239 239 244', // #EFEFF4
+  'rgb-status-neutral-border': '211 211 219', // #D3D3DB
   'rgb-text-on-status': '255 255 255', // #FFFFFF
 
   // Brand colors
   'rgb-brand-purple': '155 138 251', // #9B8AFB (Soft Orchid)
 
   /** Code syntax highlighting, measured against the `surface-code` fill. */
-  'rgb-syntax-text': '16 42 45', // #102A2D
-  'rgb-syntax-comment': '110 127 128', // #6E7F80
-  'rgb-syntax-meta': '82 104 106', // #52686A
+  'rgb-syntax-text': '23 23 28', // #17171C
+  'rgb-syntax-comment': '131 131 143', // #83838F
+  'rgb-syntax-meta': '82 82 94', // #52525E
   'rgb-syntax-builtin': '154 103 0', // #9a6700
-  'rgb-syntax-keyword': '8 127 131', // #087F83 (Baanzon Teal)
-  'rgb-syntax-string': '10 123 98', // #0a7b62
-  'rgb-syntax-attr': '155 138 251', // #9B8AFB (Soft Orchid)
-  'rgb-syntax-title': '180 35 24', // #b42318
+  'rgb-syntax-keyword': '91 75 212', // #5B4BD4 (Velvet Iris)
+  'rgb-syntax-string': '14 122 100', // #0E7A64 (Deep Teal)
+  'rgb-syntax-attr': '109 92 230', // #6D5CE6 (Velvet Iris)
+  'rgb-syntax-title': '190 18 60', // #BE123C (Rose)
 
-  /** Categorical series scale. CVD-safe, Baanzon Aurora-stepped. */
-  'rgb-series-1': '8 127 131', // #087F83 (Baanzon Teal)
-  'rgb-series-2': '233 86 13', // #e9560d (orange)
-  'rgb-series-3': '30 145 124', // #1E917C (Teal-green, WCAG-compliant)
-  'rgb-series-4': '182 123 5', // #b67b05 (amber)
-  'rgb-series-5': '118 101 251', // #7665FB (Deep orchid, WCAG-compliant)
+  /** Categorical series scale. CVD-safe, slot order is the mechanism. */
+  'rgb-series-1': '28 111 232', // #1C6FE8 (Sky)
+  'rgb-series-2': '232 89 12', // #E8590C (Orange)
+  'rgb-series-3': '14 148 136', // #0E9488 (Teal-green, WCAG-compliant)
+  'rgb-series-4': '184 116 2', // #B87402 (Amber, WCAG-compliant)
+  'rgb-series-5': '109 92 230', // #6D5CE6 (Velvet Iris, WCAG-compliant)
   'rgb-series-6': '140 106 47', // #8C6A2F (Umber, WCAG-compliant)
-  'rgb-series-7': '162 28 175', // #A21CAF (Fuchsia — was #047857, identical to success)
+  'rgb-series-7': '162 28 175', // #A21CAF (Fuchsia)
 
-  /** Unchecked switch track. 3.54:1 against white surface (#FFFFFF). */
-  'rgb-switch-unchecked': '113 142 137', // #718E89
+  /** Unchecked switch track. 3.74:1 against white surface (#FFFFFF). */
+  'rgb-switch-unchecked': '131 131 143', // #83838F
 
   // Presentation
   'rgb-presentation': '255 255 255', // #FFFFFF

@@ -55,7 +55,12 @@ export interface FetchModelsParams {
   userObject?: Partial<IUser>;
   /** Skip MODEL_QUERIES cache (e.g., for user-provided keys) */
   skipCache?: boolean;
+  /** Timeout in milliseconds for the /models request (defaults to 10000) */
+  fetchTimeoutMs?: number;
 }
+
+/** Default timeout for model-list fetches, configurable via `models.fetchTimeoutMs`. */
+export const DEFAULT_MODELS_FETCH_TIMEOUT_MS = 10000;
 
 function applyUserProvidedBaseURLProtection(
   options: AxiosRequestConfig,
@@ -166,9 +171,11 @@ export async function fetchModels({
   headers,
   userObject,
   skipCache = false,
+  fetchTimeoutMs,
 }: FetchModelsParams): Promise<string[]> {
   let models: string[] = [];
   const baseURL = direct ? extractBaseURL(_baseURL ?? '') : _baseURL;
+  const timeoutMs = fetchTimeoutMs ?? DEFAULT_MODELS_FETCH_TIMEOUT_MS;
 
   if (!baseURL && !azure) {
     return models;
@@ -251,7 +258,7 @@ export async function fetchModels({
       headers: {
         ...resolvedHeaders,
       },
-      timeout: 5000,
+      timeout: timeoutMs,
     };
 
     if (name === EModelEndpoint.anthropic) {
