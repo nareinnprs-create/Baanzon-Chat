@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { useRecoilCallback } from 'recoil';
+import { Box } from 'lucide-react';
 import { useRecoilValue } from 'recoil';
-import { MessageCircleDashed, Box } from 'lucide-react';
+import { useRecoilCallback } from 'recoil';
 import type { BadgeItem } from '~/common';
 import { useLocalize, TranslationKeys } from '~/hooks';
 import store from '~/store';
@@ -13,15 +13,7 @@ interface ChatBadgeConfig {
   atom?: any;
 }
 
-const badgeConfig: ReadonlyArray<ChatBadgeConfig> = [
-  // {
-  //   id: '1',
-  //   icon: Box,
-  //   label: 'com_ui_artifacts',
-  //   atom: store.codeArtifacts,
-  // },
-  // TODO: add more badges here (missing store atoms)
-];
+const badgeConfig: ReadonlyArray<ChatBadgeConfig> = [];
 
 export default function useChatBadges(): BadgeItem[] {
   const localize = useLocalize();

@@ -6,10 +6,15 @@ const importLimiters = require('./importLimiters');
 const uploadLimiters = require('./uploadLimiters');
 const forkLimiters = require('./forkLimiters');
 const shareLimiters = require('./shareLimiters');
+const knowledgeLimiters = require('./knowledgeLimiters');
+const projectsLimiter = require('./projectsLimiter');
+const flagsLimiter = require('./flagsLimiter');
+const billingLimiter = require('./billingLimiter');
 const registerLimiter = require('./registerLimiter');
 const toolCallLimiter = require('./toolCallLimiter');
 const messageLimiters = require('./messageLimiters');
 const promptUsageLimiter = require('./promptUsageLimiter');
+const rewriteLimiter = require('./rewriteLimiter');
 const verifyEmailLimiter = require('./verifyEmailLimiter');
 const resetPasswordLimiter = require('./resetPasswordLimiter');
 const twoFactorTempLimiter = require('./twoFactorTempLimiter');
@@ -22,7 +27,12 @@ module.exports = {
   ...messageLimiters,
   ...forkLimiters,
   ...shareLimiters,
+  ...knowledgeLimiters,
+  ...projectsLimiter,
+  ...flagsLimiter,
+  ...billingLimiter,
   ...promptUsageLimiter,
+  rewriteLimiter,
   loginLimiter,
   registerLimiter,
   toolCallLimiter,

@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import type { IChatProject, IConversation } from '~/types';
+import { tenantStorage } from '~/config/tenantContext';
 import {
   createChatProjectMethods,
   updateChatProjectLastConversationForUser,
@@ -488,5 +489,190 @@ describe('ChatProject methods', () => {
     expect(otherRead).toBeNull();
     expect(assignment).toBeNull();
     expect(deleteResult.deletedCount).toBe(0);
+  });
+});
+
+describe('ChatProject workspace link', () => {
+  const user = 'workspace-user-1';
+  const teammate = 'workspace-user-2';
+  let workspaceId: string;
+  let otherWorkspaceId: string;
+
+  beforeEach(() => {
+    workspaceId = new mongoose.Types.ObjectId().toHexString();
+    otherWorkspaceId = new mongoose.Types.ObjectId().toHexString();
+  });
+
+  it('creates projects with and without a workspace', async () => {
+    const linked = await methods.createChatProject(user, { name: 'Linked', workspaceId });
+    const personal = await methods.createChatProject(user, { name: 'Personal' });
+    const explicitNull = await methods.createChatProject(user, {
+      name: 'Explicitly none',
+      workspaceId: null,
+    });
+
+    expect(linked.workspaceId).toBe(workspaceId);
+    expect(personal.workspaceId).toBeUndefined();
+    expect(explicitNull.workspaceId).toBeUndefined();
+
+    const persisted = await ChatProject.findById(linked._id).lean<IChatProject>();
+    expect(persisted?.workspaceId).toBe(workspaceId);
+  });
+
+  it('rejects a workspace id that is not an ObjectId', async () => {
+    await expect(
+      methods.createChatProject(user, { name: 'Bad', workspaceId: 'not-a-workspace' }),
+    ).rejects.toThrow('A valid workspaceId is required');
+
+    const stored = await ChatProject.countDocuments({ user });
+    expect(stored).toBe(0);
+  });
+
+  it('scopes the user list to one workspace', async () => {
+    await methods.createChatProject(user, { name: 'In Workspace', workspaceId });
+    await methods.createChatProject(user, { name: 'Elsewhere', workspaceId: otherWorkspaceId });
+    await methods.createChatProject(user, { name: 'Pre-workspace' });
+    await methods.createChatProject(teammate, { name: 'Theirs', workspaceId });
+
+    const scoped = await methods.listChatProjects(user, { workspaceId, sortBy: 'name' });
+    const unscoped = await methods.listChatProjects(user, { sortBy: 'name' });
+    const invalid = await methods.listChatProjects(user, { workspaceId: 'nope' });
+
+    expect(scoped.projects.map((project) => project.name)).toEqual(['In Workspace']);
+    expect(unscoped.projects.map((project) => project.name)).toEqual([
+      'Pre-workspace',
+      'In Workspace',
+      'Elsewhere',
+    ]);
+    expect(invalid.projects).toHaveLength(0);
+    expect(invalid.nextCursor).toBeNull();
+  });
+
+  it('composes workspace scoping with search, sort and cursor paging', async () => {
+    await methods.createChatProject(user, { name: 'Alpha One', workspaceId });
+    await methods.createChatProject(user, { name: 'Alpha Two', workspaceId });
+    await methods.createChatProject(user, { name: 'Alpha Three', workspaceId });
+    await methods.createChatProject(user, { name: 'Beta', workspaceId });
+    await methods.createChatProject(user, { name: 'Alpha noise', workspaceId: otherWorkspaceId });
+
+    const firstPage = await methods.listChatProjects(user, {
+      workspaceId,
+      search: 'alpha',
+      sortBy: 'name',
+      sortDirection: 'asc',
+      limit: 2,
+    });
+    const secondPage = await methods.listChatProjects(user, {
+      workspaceId,
+      search: 'alpha',
+      sortBy: 'name',
+      sortDirection: 'asc',
+      limit: 2,
+      cursor: firstPage.nextCursor,
+    });
+
+    expect(firstPage.projects.map((project) => project.name)).toEqual(['Alpha One', 'Alpha Three']);
+    expect(firstPage.nextCursor).toBeTruthy();
+    expect(secondPage.projects.map((project) => project.name)).toEqual(['Alpha Two']);
+    expect(secondPage.nextCursor).toBeNull();
+  });
+
+  it('lists every member project in a workspace', async () => {
+    await methods.createChatProject(user, { name: 'Mine', workspaceId });
+    await methods.createChatProject(teammate, { name: 'Theirs', workspaceId });
+    await methods.createChatProject(user, { name: 'Elsewhere', workspaceId: otherWorkspaceId });
+
+    const listed = await methods.listWorkspaceChatProjects(workspaceId, { sortBy: 'name' });
+    const invalid = await methods.listWorkspaceChatProjects('not-a-workspace');
+
+    expect(listed.projects.map((project) => project.name).sort()).toEqual(['Mine', 'Theirs']);
+    expect(listed.projects.every((project) => project.workspaceId === workspaceId)).toBe(true);
+    expect(invalid.projects).toHaveLength(0);
+  });
+
+  it('moves a project into and out of a workspace on update', async () => {
+    const project = await methods.createChatProject(user, { name: 'Movable' });
+
+    const linked = await methods.updateChatProject(user, project._id!.toString(), { workspaceId });
+    const renamed = await methods.updateChatProject(user, project._id!.toString(), {
+      name: 'Movable, renamed',
+    });
+    const detached = await methods.updateChatProject(user, project._id!.toString(), {
+      workspaceId: null,
+    });
+
+    expect(linked?.workspaceId).toBe(workspaceId);
+    expect(renamed?.workspaceId).toBe(workspaceId);
+    expect(detached?.workspaceId).toBeUndefined();
+
+    const persisted = await ChatProject.findById(project._id).lean<IChatProject>();
+    expect(persisted?.workspaceId).toBeUndefined();
+    expect(persisted?.name).toBe('Movable, renamed');
+
+    await expect(
+      methods.updateChatProject(user, project._id!.toString(), { workspaceId: 'not-a-workspace' }),
+    ).rejects.toThrow('A valid workspaceId is required');
+  });
+
+  it('composes workspace scoping with user and tenant scoping', async () => {
+    const tenantA = 'tenant-workspace-a';
+    const tenantB = 'tenant-workspace-b';
+
+    await tenantStorage.run({ tenantId: tenantA }, () =>
+      methods.createChatProject(user, { name: 'Tenant A project', workspaceId }),
+    );
+
+    const inTenantA = await tenantStorage.run({ tenantId: tenantA }, () =>
+      methods.listChatProjects(user, { workspaceId }),
+    );
+    const tenantWideA = await tenantStorage.run({ tenantId: tenantA }, () =>
+      methods.listWorkspaceChatProjects(workspaceId),
+    );
+    const inTenantB = await tenantStorage.run({ tenantId: tenantB }, () =>
+      methods.listChatProjects(user, { workspaceId }),
+    );
+    const tenantWideB = await tenantStorage.run({ tenantId: tenantB }, () =>
+      methods.listWorkspaceChatProjects(workspaceId),
+    );
+
+    expect(inTenantA.projects.map((project) => project.name)).toEqual(['Tenant A project']);
+    expect(tenantWideA.projects.map((project) => project.name)).toEqual(['Tenant A project']);
+    expect(inTenantB.projects).toHaveLength(0);
+    expect(tenantWideB.projects).toHaveLength(0);
+
+    const persisted = await ChatProject.findOne({ workspaceId }).lean<IChatProject>();
+    expect(persisted?.tenantId).toBe(tenantA);
+  });
+
+  describe('searchChatProjectsByTitle', () => {
+    it('returns bounded user-scoped hits for name and description matches', async () => {
+      await methods.createChatProject(user, { name: 'Customer Alpha', description: 'Support work' });
+      await methods.createChatProject(user, {
+        name: 'Internal Tools',
+        description: 'Overflow menu test',
+      });
+      await methods.createChatProject(teammate, { name: 'Customer Alpha clone' });
+
+      const byName = await methods.searchChatProjectsByTitle(user, 'alpha');
+      expect(byName.map((hit) => hit.name)).toEqual(['Customer Alpha']);
+      expect(byName[0]?.id).toBeTruthy();
+
+      const byDescription = await methods.searchChatProjectsByTitle(user, 'overflow');
+      expect(byDescription.map((hit) => hit.name)).toEqual(['Internal Tools']);
+
+      const noMatch = await methods.searchChatProjectsByTitle(user, 'zzzz');
+      expect(noMatch).toEqual([]);
+    });
+
+    it('answers an empty query without hits and keeps an oversized limit bounded', async () => {
+      await methods.createChatProject(user, { name: 'Alpha One' });
+      await methods.createChatProject(user, { name: 'Alpha Two' });
+      await methods.createChatProject(user, { name: 'Alpha Three' });
+
+      expect(await methods.searchChatProjectsByTitle(user, '   ')).toEqual([]);
+
+      const hits = await methods.searchChatProjectsByTitle(user, 'Alpha', 500);
+      expect(hits.map((hit) => hit.name).sort()).toEqual(['Alpha One', 'Alpha Three', 'Alpha Two']);
+    });
   });
 });

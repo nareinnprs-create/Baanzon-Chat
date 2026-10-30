@@ -297,3 +297,127 @@ describe('createLoadConfigModels – in-request fetch coalescing', () => {
     expect(fetchModels).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('createLoadConfigModels – user-key-first resolution', () => {
+  const fetchModels = jest.fn().mockResolvedValue(['m-1', 'm-2']);
+
+  beforeEach(() => {
+    fetchModels.mockReset().mockResolvedValue(['m-1', 'm-2']);
+  });
+
+  const buildAppConfig = (apiKey: string, extra: Record<string, unknown> = {}) => ({
+    endpoints: {
+      [EModelEndpoint.custom]: [
+        {
+          name: 'Mistral',
+          baseURL: 'https://api.mistral.ai/v1',
+          apiKey,
+          models: { fetch: true, ...extra },
+        },
+      ],
+    },
+  });
+
+  it('prefers the user-stored key over the configured env key', async () => {
+    const loadConfigModels = createLoadConfigModels({
+      getAppConfig: jest.fn().mockResolvedValue(buildAppConfig('server-env-key-value')),
+      getUserKeyValues: jest.fn().mockResolvedValue({ apiKey: 'sk-user-valid' }),
+      fetchModels,
+    });
+
+    const req = {
+      user: { id: 'user-1' },
+      config: undefined,
+    } as unknown as ServerRequest;
+
+    const modelsConfig = await loadConfigModels(req);
+
+    expect(fetchModels).toHaveBeenCalledTimes(1);
+    expect(fetchModels).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Mistral',
+        apiKey: 'sk-user-valid',
+        baseURL: 'https://api.mistral.ai/v1',
+        skipCache: true,
+      }),
+    );
+    expect(fetchModels).not.toHaveBeenCalledWith(
+      expect.objectContaining({ apiKey: 'server-env-key-value' }),
+    );
+    expect(modelsConfig.Mistral).toEqual(['m-1', 'm-2']);
+  });
+
+  it('falls back to the configured env key when the user has no stored key', async () => {
+    const loadConfigModels = createLoadConfigModels({
+      getAppConfig: jest.fn().mockResolvedValue(buildAppConfig('server-env-key-value')),
+      getUserKeyValues: jest.fn().mockResolvedValue(null),
+      fetchModels,
+    });
+
+    const req = {
+      user: { id: 'user-1' },
+      config: undefined,
+    } as unknown as ServerRequest;
+
+    const modelsConfig = await loadConfigModels(req);
+
+    expect(fetchModels).toHaveBeenCalledTimes(1);
+    expect(fetchModels).toHaveBeenCalledWith(
+      expect.objectContaining({ apiKey: 'server-env-key-value' }),
+    );
+    expect(modelsConfig.Mistral).toEqual(['m-1', 'm-2']);
+  });
+
+  it('forwards models.fetchTimeoutMs to the fetch', async () => {
+    const loadConfigModels = createLoadConfigModels({
+      getAppConfig: jest.fn(),
+      getUserKeyValues: jest.fn().mockResolvedValue(null),
+      fetchModels,
+    });
+
+    const req = {
+      user: { id: 'user-1' },
+      config: {
+        endpoints: {
+          [EModelEndpoint.custom]: [
+            {
+              name: 'Mistral',
+              baseURL: 'https://api.mistral.ai/v1',
+              apiKey: 'server-env-key-value',
+              models: { fetch: true, fetchTimeoutMs: 2500 },
+            },
+          ],
+        },
+      },
+    } as unknown as ServerRequest;
+
+    await loadConfigModels(req);
+
+    expect(fetchModels).toHaveBeenCalledWith(expect.objectContaining({ fetchTimeoutMs: 2500 }));
+  });
+
+  it('falls back to the static models.default list when the fetch fails', async () => {
+    const loadConfigModels = createLoadConfigModels({
+      getAppConfig: jest.fn().mockResolvedValue(
+        buildAppConfig('server-env-key-value', {
+          default: [{ name: 'mistral-large-latest' }, 'mistral-small-latest'],
+        }),
+      ),
+      getUserKeyValues: jest.fn().mockRejectedValue(new Error('No user key found')),
+      fetchModels,
+    });
+
+    /** The suite's default mock resolves; force the fetch to fail so this
+     *  test exercises the rejected-fetch → defaults fallback. */
+    fetchModels.mockRejectedValueOnce(new Error('provider unreachable'));
+
+    const req = {
+      user: { id: 'user-1' },
+      config: undefined,
+    } as unknown as ServerRequest;
+
+    const modelsConfig = await loadConfigModels(req);
+
+    expect(modelsConfig.Mistral).toEqual(['mistral-large-latest', 'mistral-small-latest']);
+  });
+});

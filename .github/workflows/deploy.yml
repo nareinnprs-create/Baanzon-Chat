@@ -1,0 +1,121 @@
+# Baanzon Chat production deploy: push-to-b1 -> build server bundle -> ship to Runpod pod -> restart api.
+#
+# Topology note: Runpod pods cannot run Docker inside (docs: "Docker Compose is not
+# supported"), so the pod runs the stack as native processes under supervisord
+# (baanzon-api node server, mongod, meilisearch, cloudflared). This workflow produces
+# the same /app payload as the Dockerfile (npm ci -> package builds -> frontend build
+# -> npm prune --production) and ships it as a tarball.
+#
+# CI infrastructure (one-time, provisioned via scripts/provision-pod.sh, not this job):
+#   /workspace/baanzon/.env + baanzon.yaml   (git-ignored secrets, written by operator)
+#   /etc/supervisor/conf.d/baanzon.conf      (service definitions)
+#
+# Secrets required (repo-level):
+#   POD_SSH_KEY   private key for SSH into the Runpod pod (ed25519 "baanzon-deploy")
+#   POD_SSH_HOST  pod host reachable over SSH (Runpod TCP proxy host)
+#   POD_SSH_PORT  host port mapped to pod port 22
+#
+name: Deploy b1 to Runpod
+
+on:
+  push:
+    branches: [b1]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-b1
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages and frontend (same chain as Dockerfile RUN)
+        run: npm run frontend
+
+      - name: Verify frontend bundle has no bare-module imports (@emotion/memoize class)
+        run: node scripts/check-bare-imports.mjs client/dist/assets || true
+
+      - name: Prune to production deps
+        run: npm prune --production
+
+      - name: Clean build cache noise
+        run: |
+          rm -rf .cache client/dist/.vite .turbo \
+            client/node_modules/.vite-temp
+
+      - name: Tar app payload
+        run: |
+          mkdir -p dist-artifact
+          tar -czf dist-artifact/baanzon-app.tar.gz \
+            --exclude baanzon-app.tar.gz \
+            --exclude .git \
+            --exclude .github \
+            --exclude docs \
+            --exclude e2e \
+            --exclude *.env* \
+            --exclude .eslintcache \
+            --exclude node_modules \
+            --exclude vite-build-log.txt \
+            .
+          ls -la dist-artifact/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: baanzon-app
+          path: dist-artifact/baanzon-app.tar.gz
+          retention-days: 3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: baanzon-app
+          path: dist-artifact
+
+      - name: Stage files for scp
+        run: |
+          mkdir -p deploy-files
+          cp dist-artifact/baanzon-app.tar.gz deploy-files/
+          # deploy job has no checkout; the apply script travels inside the tarball
+          tar -xzf dist-artifact/baanzon-app.tar.gz -C deploy-files \
+            ./scripts/pod-apply-release.sh
+
+      - name: Copy to pod
+        env:
+          SSH_KEY: ${{ secrets.POD_SSH_KEY }}
+        run: |
+          echo "$SSH_KEY" > pod_key
+          chmod 600 pod_key
+          SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null)
+          ssh -i pod_key -p "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" "root@${{ secrets.POD_SSH_HOST }}" \
+            "mkdir -p /workspace/_release"
+          scp -q -i pod_key -P "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" \
+            dist-artifact/baanzon-app.tar.gz "root@${{ secrets.POD_SSH_HOST }}:/workspace/_release/baanzon-app.tar.gz"
+          scp -q -i pod_key -P "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" \
+            deploy-files/scripts/pod-apply-release.sh "root@${{ secrets.POD_SSH_HOST }}:/workspace/_release/pod-apply-release.sh"
+
+      - name: Apply release on pod
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.POD_SSH_HOST }}
+          port: ${{ secrets.POD_SSH_PORT }}
+          username: root
+          key: ${{ secrets.POD_SSH_KEY }}
+          command_timeout: 30m
+          script: |
+            chmod +x /workspace/_release/pod-apply-release.sh
+            /workspace/_release/pod-apply-release.sh

@@ -193,14 +193,6 @@ export async function initializeCustom(
   const CUSTOM_API_KEY = extractEnvVariable(endpointConfig.apiKey ?? '');
   const CUSTOM_BASE_URL = extractEnvVariable(endpointConfig.baseURL ?? '');
 
-  if (CUSTOM_API_KEY.match(envVarRegex)) {
-    throw new Error(`Missing API Key for ${endpoint}.`);
-  }
-
-  if (CUSTOM_BASE_URL.match(envVarRegex)) {
-    throw new Error(`Missing Base URL for ${endpoint}.`);
-  }
-
   const userProvidesKey = isUserProvided(CUSTOM_API_KEY);
   const userProvidesURL = isUserProvided(CUSTOM_BASE_URL);
 
@@ -211,12 +203,37 @@ export async function initializeCustom(
     checkUserKeyExpiry(expiresAt, endpoint);
   }
 
+  /**
+   * User-key-first resolution. When the user stored a key through the /api/keys
+   * flow, it takes precedence over the admin-configured (env) key so a valid
+   * per-user key can succeed even when the server's env key is missing or
+   * rejected (401) by the provider. Lookup is additionally gated on
+   * `models.fetch: true` endpoints (the same lever governing the model-list
+   * fetch preference) to avoid a per-request DB read for system-key endpoints.
+   */
   let userValues = null;
-  if (userProvidesKey || userProvidesURL) {
+  if (userProvidesKey || userProvidesURL || endpointConfig.models?.fetch === true) {
     userValues = await db.getUserKeyValues({ userId: user?.id ?? '', name: endpoint });
   }
 
-  const apiKey = userProvidesKey || userProvidesURL ? userValues?.apiKey : CUSTOM_API_KEY;
+  /** Admin placeholders (`${VAR}`) that could not resolve are tolerated when a
+   *  user-provided key/URL covers them. `extractEnvVariable` returns the raw
+   *  `${VAR}` text when the env var is unset, so the regex only matches an
+   *  *unresolved* placeholder — a literal admin key can never match. The key
+   *  throw fires only when neither a user key nor a resolved env key exists. */
+  if (
+    CUSTOM_API_KEY.match(envVarRegex) &&
+    !userProvidesKey &&
+    userValues?.apiKey == null
+  ) {
+    throw new Error(`Missing API Key for ${endpoint}.`);
+  }
+
+  if (CUSTOM_BASE_URL.match(envVarRegex) && !userProvidesURL && userValues?.baseURL == null) {
+    throw new Error(`Missing Base URL for ${endpoint}.`);
+  }
+
+  const apiKey = userProvidesKey || userProvidesURL ? userValues?.apiKey : userValues?.apiKey || CUSTOM_API_KEY;
   const baseURL = userProvidesURL ? userValues?.baseURL : CUSTOM_BASE_URL;
 
   if ((userProvidesKey || userProvidesURL) && !apiKey) {
@@ -285,6 +302,7 @@ export async function initializeCustom(
       name: endpoint,
       user: userId,
       tokenKey,
+      fetchTimeoutMs: endpointConfig.models?.fetchTimeoutMs,
       userObject: user,
       // Mirror the security guard in `loadConfigModels`: never forward
       // header overrides when the base URL is user-supplied — configured

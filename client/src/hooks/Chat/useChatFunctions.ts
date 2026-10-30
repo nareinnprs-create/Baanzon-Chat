@@ -304,6 +304,7 @@ export default function useChatFunctions({
       overrideRecoverySteerId,
       overrideExpectedPredecessorCreatedAt,
       overrideQueuedMessageOrigin,
+      overrideModel,
     } = {},
   ) => {
     text = text.trim();
@@ -326,6 +327,10 @@ export default function useChatFunctions({
     }
 
     const conversation = cloneDeep(immutableConversation);
+    /** X5 Smart Route: this turn only — the selector's model stays put. */
+    if (conversation != null && overrideModel) {
+      conversation.model = overrideModel;
+    }
     const latestCodeApprovalMode = getConversation()?.codeApprovalMode;
     const codeApprovalMode =
       latestCodeApprovalMode != null && codeApprovalModes.includes(latestCodeApprovalMode)

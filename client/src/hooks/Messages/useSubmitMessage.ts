@@ -1,9 +1,14 @@
 import { useCallback } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useAtomValue } from 'jotai';
 import { replaceSpecialVars } from 'librechat-data-provider';
 import type { TMessage } from 'librechat-data-provider';
 import { useChatContext, useChatFormContext, useAddedChatContext } from '~/Providers';
+import { useGetStartupConfig } from '~/data-provider';
+import { pickSmartModel } from '~/utils/smartRoute';
+import { smartRouteEnabled } from '~/store/settings';
 import { useGetLatestMessage } from '~/hooks/Messages/useLatestMessage';
+import useOfflineQueue from '~/hooks/useOfflineQueue';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { mainTextareaId } from '~/common';
 import store from '~/store';
@@ -12,11 +17,26 @@ export default function useSubmitMessage() {
   const { user } = useAuthContext();
   const methods = useChatFormContext();
   const { conversation: addedConvo } = useAddedChatContext();
-  const { ask, index, getMessages, setMessages } = useChatContext();
+  const { ask, index, getMessages, setMessages, conversation } = useChatContext();
   const getLatestMessage = useGetLatestMessage(index);
+  const offline = useOfflineQueue({
+    conversationId: conversation?.conversationId ?? null,
+    send: async (item) => {
+      const submitted = ask({ text: item.text });
+      if (submitted === false) {
+        /** Refused, not accepted: keep the item queued rather than silently dropping it. */
+        throw new Error('Queued message was not accepted');
+      }
+      methods.reset();
+    },
+  });
 
   const autoSendPrompts = useRecoilValue(store.autoSendPrompts);
   const setActivePrompt = useSetRecoilState(store.activePromptByIndex(index));
+  /** X5 Smart Route: read the toggle + specs here, resolve per-send below so
+   *  the heuristic always sees the exact text being submitted. */
+  const smartRouteOn = useAtomValue(smartRouteEnabled);
+  const { data: startupConfig } = useGetStartupConfig();
 
   const submitMessage = useCallback(
     (data?: {
@@ -31,6 +51,13 @@ export default function useSubmitMessage() {
     }) => {
       if (!data) {
         return console.warn('No data provided to submitMessage');
+      }
+      /** Offline: park the send in IndexedDB and leave the composer (and its draft) in place,
+       *  so the text is restored on the next mount and the queue drains on reconnect.
+       *  Attachments are not queued by this slice — only the text travels. */
+      if (offline.isOnline === false) {
+        void offline.enqueueSend({ text: data.text });
+        return false;
       }
       const latestMessage = getLatestMessage();
       const rootMessages = getMessages();
@@ -50,6 +77,15 @@ export default function useSubmitMessage() {
         },
         {
           addedConvo: addedConvo ?? undefined,
+          overrideModel:
+            smartRouteOn && startupConfig?.modelSpecs?.list
+              ? pickSmartModel(
+                  data.text,
+                  startupConfig.modelSpecs.list,
+                  conversation?.endpoint,
+                  conversation?.model,
+                ) ?? undefined
+              : undefined,
           // Queued during-run messages carry their own consumed attachments,
           // quote chips, and manual skill picks (undefined = drain composer).
           overrideFiles: data.overrideFiles,
@@ -66,7 +102,17 @@ export default function useSubmitMessage() {
       }
       methods.reset();
     },
-    [ask, methods, addedConvo, setMessages, getMessages, getLatestMessage],
+    [
+      ask,
+      methods,
+      addedConvo,
+      setMessages,
+      getMessages,
+      getLatestMessage,
+      index,
+      conversation,
+      offline,
+    ],
   );
 
   const submitPrompt = useCallback(

@@ -1,5 +1,12 @@
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
+import {
+  darkTheme,
+  defaultTheme,
+  highContrastDarkTheme,
+  highContrastLightTheme,
+} from '@librechat/client';
+import type { IThemeRGB } from '@librechat/client';
 
 /** The pre-React canvas is painted by an inline bootstrap in `index.html`, which
  *  no bundle imports, so the only way to hold it to the resolved palette is to
@@ -33,6 +40,27 @@ const canvasFor = (stored: string | null, matching: string[]): string | undefine
     ?.innerHTML.match(/background-color:\s*([^;\s]+)/)?.[1];
 };
 
+/** The registry stores bare `R G B` triplets and the bootstrap needs a CSS
+ *  colour, so every expectation below is derived from the palette rather than
+ *  restated as a literal. `index.html` cannot read the registry — it runs before
+ *  any bundle — so this is what stops that copy from drifting the way a literal
+ *  here would: move a palette and the shipped script fails here instead. */
+const canvasOf = (palette: IThemeRGB): string => {
+  const triplet = palette['rgb-surface-primary'];
+  if (!triplet) {
+    throw new Error('palette declares no rgb-surface-primary');
+  }
+  return `#${triplet
+    .split(' ')
+    .map((channel) => Number(channel).toString(16).padStart(2, '0'))
+    .join('')}`;
+};
+
+const LIGHT = canvasOf(defaultTheme);
+const DARK = canvasOf(darkTheme);
+const HIGH_CONTRAST_LIGHT = canvasOf(highContrastLightTheme);
+const HIGH_CONTRAST_DARK = canvasOf(highContrastDarkTheme);
+
 const DARK_SCHEME = '(prefers-color-scheme: dark)';
 const MORE_CONTRAST = '(prefers-contrast: more)';
 const CUSTOM_CONTRAST = '(prefers-contrast: custom)';
@@ -40,37 +68,44 @@ const FORCED_COLORS = '(forced-colors: active)';
 
 describe('loading canvas', () => {
   it.each([
-    ['high-contrast-dark', [], '#000000'],
-    ['high-contrast-light', [], '#ffffff'],
-    ['dark', [], '#0d0d0d'],
-    ['light', [], '#ffffff'],
-  ])('paints the stored %s mode', (stored, matching, expected) => {
-    expect(canvasFor(stored, matching as string[])).toBe(expected);
+    ['high-contrast-dark', HIGH_CONTRAST_DARK],
+    ['high-contrast-light', HIGH_CONTRAST_LIGHT],
+    ['dark', DARK],
+    ['light', LIGHT],
+  ])('paints the stored %s mode', (stored, expected) => {
+    expect(canvasFor(stored, [])).toBe(expected);
   });
 
-  /** The mismatch this guards: `system` plus `prefers-contrast: more` resolves to
-   *  the pure-black palette, so the standard-dark canvas would flash behind it
-   *  for the whole application load. */
-  it('follows both OS preferences under system', () => {
-    expect(canvasFor('system', [DARK_SCHEME, MORE_CONTRAST])).toBe('#000000');
-    expect(canvasFor('system', [DARK_SCHEME])).toBe('#0d0d0d');
-    expect(canvasFor('system', [MORE_CONTRAST])).toBe('#ffffff');
-    expect(canvasFor('system', [])).toBe('#ffffff');
+  /** The canvas mirrors `rgb-surface-primary`, and the standard and
+   *  high-contrast dark palettes declare the same one. That is why the bootstrap
+   *  reads only the colour scheme: a contrast request has nothing left to choose
+   *  between, and a palette that later gives the contrast canvas its own value
+   *  has to bring the prefers-contrast and forced-colors queries back with it. */
+  it('resolves one dark canvas for both dark palettes', () => {
+    expect(HIGH_CONTRAST_DARK).toBe(DARK);
+  });
+
+  it('follows the OS colour scheme under system', () => {
+    expect(canvasFor('system', [DARK_SCHEME])).toBe(DARK);
+    expect(canvasFor('system', [])).toBe(LIGHT);
   });
 
   /** A Windows Contrast Theme reports `forced-colors: active` with
-   *  `prefers-contrast: custom`, never `more`, so keying the canvas off `more`
-   *  alone flashes #0d0d0d on the platform the theme README names. */
-  it('treats a forced-colors palette as a contrast request', () => {
-    expect(canvasFor('system', [DARK_SCHEME, CUSTOM_CONTRAST, FORCED_COLORS])).toBe('#000000');
-    expect(canvasFor('system', [DARK_SCHEME, FORCED_COLORS])).toBe('#000000');
-  });
+   *  `prefers-contrast: custom`, never `more`, so none of the three the theme
+   *  provider reads may leave the canvas on the other scheme's surface. */
+  it.each([MORE_CONTRAST, CUSTOM_CONTRAST, FORCED_COLORS])(
+    'keeps the dark canvas under %s',
+    (query) => {
+      expect(canvasFor('system', [DARK_SCHEME, query])).toBe(DARK);
+      expect(canvasFor('system', [query])).toBe(LIGHT);
+    },
+  );
 
   /** An unset or unrecognised value is what `getInitialTheme` resolves as
    *  `system`, so the canvas has to resolve it the same way. */
   it('treats an unset or unknown mode as system', () => {
-    expect(canvasFor(null, [DARK_SCHEME])).toBe('#0d0d0d');
-    expect(canvasFor(null, [DARK_SCHEME, MORE_CONTRAST])).toBe('#000000');
-    expect(canvasFor('sepia', [DARK_SCHEME, MORE_CONTRAST])).toBe('#000000');
+    expect(canvasFor(null, [DARK_SCHEME])).toBe(DARK);
+    expect(canvasFor(null, [])).toBe(LIGHT);
+    expect(canvasFor('sepia', [DARK_SCHEME])).toBe(DARK);
   });
 });

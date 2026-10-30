@@ -1,7 +1,10 @@
 import { atom } from 'recoil';
+import { useAtomValue } from 'jotai';
 import { SettingsViews, LocalStorageKeys } from 'librechat-data-provider';
 import type { TOptionSettings } from '~/common';
 import { CHAT_TITLE_IN_TAB_KEY } from '~/utils/documentTitle';
+import { createStorageAtom } from '~/store/jotai-utils';
+import { useGetStartupConfig } from '~/data-provider';
 import { atomWithLocalStorage } from '~/store/utils';
 import { STTEndpoints } from '~/common';
 
@@ -149,5 +152,41 @@ const localStorageAtoms = {
   // Account settings
   UsernameDisplay: atomWithLocalStorage('UsernameDisplay', true),
 };
+
+/**
+ * Local persisted override for the interface mode lever ('classic' | 'atelier').
+ * `null` = follow the server default (`baanzon.yaml` `interface.mode`).
+ * Jotai on purpose: new client state is always Jotai, even though the atoms
+ * above are still Recoil. Read the resolved value via `useInterfaceMode()`.
+ */
+export const interfaceMode = createStorageAtom<'classic' | 'atelier' | null>('interfaceMode', null);
+
+/**
+ * Atelier focus mode opt-in (localStorage-persisted, default off). Only
+ * honored in atelier mode: while the chat composer has focus the shell dims
+ * its nav chrome, and Esc turns the mode off entirely. Consumed by
+ * `useAtelierFocusMode` (components/Atelier); classic mode ignores it.
+ */
+export const atelierFocusMode = createStorageAtom<boolean>('atelierFocusMode', false);
+
+/**
+ * X5 Smart Route opt-in (localStorage-persisted, default off). When on, each
+ * send runs the `pickSmartModel` heuristic (utils/smartRoute.ts) over the
+ * prompt and, if it lands on a different model for this endpoint, sends that
+ * turn with the routed model — the user's selector choice stays untouched.
+ */
+export const smartRouteEnabled = createStorageAtom<boolean>('smartRouteEnabled', false);
+
+/**
+ * Resolved active interface mode: the persisted local override wins over the
+ * server-configured default ('classic' when `startupConfig.interface.mode` is
+ * absent). Consumer hook for the visual shell — the shell itself is NOT wired
+ * to this yet (G1 step 1 is plumbing only).
+ */
+export function useInterfaceMode(): 'classic' | 'atelier' {
+  const localOverride = useAtomValue(interfaceMode);
+  const { data: startupConfig } = useGetStartupConfig();
+  return localOverride ?? startupConfig?.interface?.mode ?? 'classic';
+}
 
 export default { ...staticAtoms, ...localStorageAtoms };

@@ -1,5 +1,5 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { dataService, QueryKeys } from 'librechat-data-provider';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import type {
   UseInfiniteQueryOptions,
   QueryObserverResult,
@@ -11,16 +11,17 @@ export const useProjectsInfiniteQuery = (
   params: ProjectListParams = {},
   config?: UseInfiniteQueryOptions<ProjectListResponse, unknown>,
 ) => {
-  const { sortBy, sortDirection, search, limit } = params;
+  const { sortBy, sortDirection, search, limit, workspaceId } = params;
 
   return useInfiniteQuery<ProjectListResponse>({
-    queryKey: [QueryKeys.projects, { sortBy, sortDirection, search, limit }],
+    queryKey: [QueryKeys.projects, { sortBy, sortDirection, search, limit, workspaceId }],
     queryFn: ({ pageParam }) =>
       dataService.listProjects({
         sortBy,
         sortDirection,
         search,
         limit,
+        workspaceId,
         cursor: pageParam?.toString(),
       }),
     getNextPageParam: (lastPage) => lastPage?.nextCursor ?? undefined,

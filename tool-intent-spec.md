@@ -1,6 +1,6 @@
 ﻿# Feature Spec: Tool Intent & Outcome Labels
 
-**Status:** proposal, ready for implementation by someone with no prior context
+**Status:** shipped / implemented in-tree — see `packages/api/src/agents/intent.ts` (agent-side intent plumbing) and `client/src/components/Chat/Messages/Content/Parts/intent.ts` (per-call rendering); the agent builder UI moved into `client/src/components/SidePanel/Agents/Tools/ItemDialog/sections/McpSection.tsx`. One known gap: the live streaming-intent header phase (`readStreamingIntent`, section 5.2) is not yet implemented — `client/src/utils/toolIntent.ts` does not exist.
 **Repos:** `danny-avila/agents` (published as `@librechat/agents`, local path `~/agentus`), `danny-avila/LibreChat`
 
 **Verified dependency landscape (2026-07-28):**

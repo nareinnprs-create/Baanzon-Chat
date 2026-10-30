@@ -44,6 +44,8 @@ import AskUserQuestionPopover from './AskUserQuestionPopover';
 import InterruptSteerButton from './InterruptSteerButton';
 import PastedTextDialog from './Files/PastedTextDialog';
 import DuringRunSendButton from './DuringRunSendButton';
+import PromptLabPanel from './PromptLab/PromptLabPanel';
+import VoiceControls from './Voice';
 import ProjectLandingChip from '../ProjectLandingChip';
 import { useGetStartupConfig } from '~/data-provider';
 import { mainTextareaId, BadgeItem } from '~/common';
@@ -57,6 +59,7 @@ import FileFormChat from './Files/FileFormChat';
 import InFlightSteers from './InFlightSteers';
 import TextareaHeader from './TextareaHeader';
 import PromptsCommand from './PromptsCommand';
+import PromptLab from './PromptLab/PromptLab';
 import SkillsCommand from './SkillsCommand';
 import AudioRecorder from './AudioRecorder';
 import AutoPlayAudio from './AutoPlayAudio';
@@ -617,6 +620,8 @@ const ChatForm = memo(function ChatForm({
               onRestoreToComposer={restoreReclaimedSteer}
             />
           )}
+          {/* Prompt Lab review floats above the composer, same anchor as the steer overlay. */}
+          <PromptLabPanel onApply={(text) => editToComposer(text)} />
           <div className={cn('flex w-full items-center', isRTL && 'flex-row-reverse')}>
             <Mention
               index={index}
@@ -667,6 +672,11 @@ const ChatForm = memo(function ChatForm({
               )}
             >
               {project ? <ProjectLandingChip project={project} /> : null}
+              {/* Quiet streaming affordance: a 2px iris filament across the top
+                  edge while a run is live. Stop stays accessible in the action row. */}
+              {isSubmitting && (
+                <span className="composer-sig-streaming" aria-hidden="true" />
+              )}
               <TextareaHeader addedConvo={addedConvo} setAddedConvo={setAddedConvo} />
               <PendingManualSkillsChips conversationId={conversationId} />
               {quotesEnabled && (
@@ -808,6 +818,15 @@ const ChatForm = memo(function ChatForm({
                 {index === 0 && conversationId != null && (
                   <PendingToolApprovalButton conversationId={conversationId} />
                 )}
+                {(textValue?.trim() ?? '') !== '' && (
+                  <div className={`${isRTL ? 'mr-2' : 'ml-2'}`}>
+                    <PromptLab
+                      conversation={conversation}
+                      getText={() => methods.getValues('text')}
+                    />
+                  </div>
+                )}
+                <VoiceControls index={index} textAreaRef={textAreaRef} />
                 <div className="mx-auto flex" />
                 <TokenUsage index={index} conversation={conversation} isSubmitting={isSubmitting} />
                 {SpeechToText && (

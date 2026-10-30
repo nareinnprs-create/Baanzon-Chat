@@ -17,6 +17,8 @@ export const FEEDBACK_REASON_KEYS = [
   'creative_solution',
   'clear_well_written',
   'attention_to_detail',
+  // Arena (X1): pairwise winner marker; not shown in the feedback tag UI
+  'arena_winner',
 ] as const;
 
 export type TFeedbackTagKey = (typeof FEEDBACK_REASON_KEYS)[number];

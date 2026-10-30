@@ -7,8 +7,11 @@ const {
   applyAxiosProxyConfig,
   createMinimalRetentionRequest,
   getHttpsProxyAgent,
+  getBalanceConfig,
+  getTransactionsConfig,
 } = require('@librechat/api');
 const { FileContext, ContentTypes } = require('librechat-data-provider');
+const { createTransaction } = require('~/models');
 
 const fluxApiJsonSchema = {
   type: 'object',
@@ -91,6 +94,50 @@ const fluxApiJsonSchema = {
 const displayMessage =
   "Flux displayed an image. All generated images are already plainly visible, so don't repeat the descriptions in detail. Do not list download links as they are available in the UI already. The user may download the images by clicking on them, but do not mention anything about downloading to the user.";
 
+/** Emits the missing-PRICING warning at most once per process, then stays silent. */
+let pricingWarned = false;
+
+/** Canonicalizes a PRICING key or Flux endpoint path (`_`, `.` and `-` compare equal, case-insensitive). */
+function normalizePriceKey(value) {
+  return value.toLowerCase().replace(/[._]/g, '-');
+}
+
+/**
+ * Records the per-image cost for a Flux endpoint as a credits transaction,
+ * mirroring the sibling image tools' recording pattern (balance/transactions
+ * gating, best-effort with errors logged, not thrown).
+ * @param {Object} params
+ * @param {string} [params.userId]
+ * @param {string} [params.tenantId]
+ * @param {Object} [params.balance] - Resolved balance config
+ * @param {Object} [params.transactions] - Resolved transactions config
+ * @param {number} params.cost - Per-image cost in USD credits (negative)
+ */
+async function recordImageCost({ userId, tenantId, balance, transactions, cost }) {
+  if (!userId) {
+    logger.warn('[FluxAPI] No userId to record image cost for');
+    return;
+  }
+
+  if (!balance?.enabled && transactions?.enabled === false) {
+    return;
+  }
+
+  try {
+    await createTransaction({
+      user: userId,
+      tokenType: 'credits',
+      context: 'image_generation',
+      tenantId,
+      rawAmount: cost,
+      balance,
+      transactions,
+    });
+  } catch (error) {
+    logger.error('[FluxAPI] Error recording image cost:', error);
+  }
+}
+
 /** Endpoints that require a `finetune_id`, regardless of which `action` the caller selected. */
 const FINETUNED_ENDPOINTS = ['/v1/flux-pro-finetuned', '/v1/flux-pro-1.1-ultra-finetuned'];
 
@@ -118,6 +165,8 @@ class FluxAPI extends Tool {
     this.userId = fields.userId;
     this.tenantId = fields.req?.user?.tenantId;
     this.retentionRequest = createMinimalRetentionRequest(fields.req);
+    this.balance = getBalanceConfig(fields.req?.config);
+    this.transactions = getTransactionsConfig(fields.req?.config);
     this.fileStrategy = fields.fileStrategy;
 
     /** @type {boolean} **/
@@ -269,10 +318,22 @@ class FluxAPI extends Tool {
     // Polling for the result
     let status = 'Pending';
     let resultData = null;
+    const pollInterval = 2000; // 2 seconds between polls
+    const maxAttempts = 30; // 30 attempts -> 60 seconds
+    const timeoutMs = 120000; // 120 seconds deadline
+    const startTime = Date.now();
+    let attempts = 0;
     while (status !== 'Ready' && status !== 'Error') {
+      attempts++;
+      const elapsed = Date.now() - startTime;
+      if (attempts > maxAttempts || elapsed >= timeoutMs) {
+        const timeoutMsg = `Flux API polling timed out after ${Math.round(elapsed / 1000)}s (${attempts} attempts). Please try again or adjust your request.`;
+        logger.error('[FluxAPI] Polling timeout:', { attempts, elapsed, taskId });
+        throw new Error(timeoutMsg);
+      }
       try {
         // Wait 2 seconds between polls
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, pollInterval));
         const resultResponse = await axios.get(resultUrl, {
           headers: {
             'x-key': requestApiKey,
@@ -356,14 +417,25 @@ class FluxAPI extends Tool {
       logger.debug('[FluxAPI] Image saved to path:', result.filepath);
 
       // Calculate cost based on endpoint
-      /**
-       * TODO: Cost handling
       const endpoint = imageData.endpoint || '/v1/flux-pro';
-      const endpointKey = Object.entries(FluxAPI.PRICING).find(([key, _]) =>
-        endpoint.includes(key.toLowerCase().replace(/_/g, '-')),
-      )?.[0];
-      const cost = FluxAPI.PRICING[endpointKey] || 0;
-       */
+      const endpointKey = Object.entries(FluxAPI.PRICING)
+        .sort(([a], [b]) => b.length - a.length)
+        .find(([key]) => normalizePriceKey(endpoint).includes(normalizePriceKey(key)))?.[0];
+      const cost = endpointKey != null ? FluxAPI.PRICING[endpointKey] : null;
+      if (cost == null) {
+        if (!pricingWarned) {
+          logger.warn('[FluxAPI] No PRICING entry for endpoint, skipping cost recording:', endpoint);
+          pricingWarned = true;
+        }
+      } else {
+        await recordImageCost({
+          userId: this.userId,
+          tenantId: this.tenantId,
+          balance: this.balance,
+          transactions: this.transactions,
+          cost,
+        });
+      }
       this.result = this.returnMetadata ? result : this.wrapInMarkdown(result.filepath);
       return this.returnValue(this.result);
     } catch (error) {
@@ -503,10 +575,22 @@ class FluxAPI extends Tool {
     // Polling for the result
     let status = 'Pending';
     let resultData = null;
+    const pollInterval = 2000; // 2 seconds between polls
+    const maxAttempts = 30; // 30 attempts -> 60 seconds
+    const timeoutMs = 120000; // 120 seconds deadline
+    const startTime = Date.now();
+    let attempts = 0;
     while (status !== 'Ready' && status !== 'Error') {
+      attempts++;
+      const elapsed = Date.now() - startTime;
+      if (attempts > maxAttempts || elapsed >= timeoutMs) {
+        const timeoutMsg = `Flux API polling timed out after ${Math.round(elapsed / 1000)}s (${attempts} attempts). Please try again or adjust your request.`;
+        logger.error('[FluxAPI] Polling timeout:', { attempts, elapsed, taskId });
+        throw new Error(timeoutMsg);
+      }
       try {
         // Wait 2 seconds between polls
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, pollInterval));
         const resultResponse = await axios.get(resultUrl, {
           headers: {
             'x-key': requestApiKey,

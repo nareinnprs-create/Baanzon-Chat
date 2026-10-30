@@ -53,6 +53,8 @@ export interface SettingsContextValue {
   engineTTS: string;
   langfuseConnectionAccess: boolean;
   adminPanelURL: string;
+  /** ADMIN role; gates admin-only management sections. */
+  isAdmin: boolean;
 }
 
 export interface SettingEntry {

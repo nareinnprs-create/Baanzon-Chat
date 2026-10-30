@@ -7,7 +7,15 @@
 **/node_modules
 
 # Specific patterns to ignore
+client/dist
 data-node
+uploads
+logs
+api/uploads
+api/logs
+.env
+*.env.temp
+api/.env.temp
 meili_data*
 librechat*
 Dockerfile*

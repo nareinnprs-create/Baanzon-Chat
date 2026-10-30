@@ -4,7 +4,6 @@ const telemetry = require('./telemetry');
 const fs = require('fs');
 const path = require('path');
 require('module-alias')({ base: path.resolve(__dirname, '..') });
-const cors = require('cors');
 const axios = require('axios');
 const express = require('express');
 const mongoose = require('mongoose');
@@ -43,6 +42,7 @@ const {
   setPluginHookSource,
   loadToolApprovalHooks,
   maybeInjectQueryDevtoolsBootstrap,
+  runBootMigrations,
   preAuthTenantMiddleware,
   requestContextMiddleware,
   registerShutdownTask,
@@ -83,6 +83,7 @@ const configureSocialLogins = require('./socialLogins');
 const createSpaFallback = require('./utils/fallback');
 const { getAppConfig } = require('./services/Config');
 const staticCache = require('./utils/staticCache');
+const createBaanzonCors = require('./middleware/cors');
 const noIndex = require('./middleware/noIndex');
 const routes = require('./routes');
 const agentEventMethods = require('~/models');
@@ -99,6 +100,27 @@ const { PORT, HOST, ALLOW_SOCIAL_LOGIN, DISABLE_COMPRESSION, TRUST_PROXY } = pro
 const port = isNaN(Number(PORT)) ? 3080 : Number(PORT);
 const host = HOST || 'localhost';
 const trusted_proxy = Number(TRUST_PROXY) || 1; /* trust first proxy by default */
+
+/**
+ * P2.5 security hardening — Content Security Policy defaults.
+ *
+ * A nonce-based, SPA-aware CSP already exists (packages/api `createCspPolicy`); it is
+ * opt-in via `CSP_ENABLED` and defaults to report-only. We turn it ON by default here,
+ * in report-only mode, so the first rollout observes violations without being able to
+ * break the shell. An explicit `CSP_ENABLED` / `CSP_REPORT_ONLY` always wins; these
+ * aliases only fill the gap for this deployment:
+ *   - BAANZON_CSP_ENABLED:     default "true"  → "false" disables CSP entirely.
+ *   - BAANZON_CSP_REPORT_ONLY: default "true"  → "false" enforces (== CSP_REPORT_ONLY=false).
+ * Env defaults are set in the server entrypoint because the policy is resolved once at
+ * startup; a middleware wrapper would only duplicate logic that lives in packages/api.
+ * Note: while CSP is on, the SPA shell is sent `no-store` (see shellCacheHeaders).
+ */
+if (process.env.CSP_ENABLED === undefined) {
+  process.env.CSP_ENABLED = process.env.BAANZON_CSP_ENABLED ?? 'true';
+}
+if (process.env.CSP_REPORT_ONLY === undefined) {
+  process.env.CSP_REPORT_ONLY = process.env.BAANZON_CSP_REPORT_ONLY ?? 'true';
+}
 
 const app = express();
 let serverReady = false;
@@ -193,6 +215,7 @@ const startServer = async () => {
   await connectDb();
 
   logger.info('Connected to MongoDB');
+  await runBootMigrations(mongoose.connection);
   startCodeEnvironmentLifecycleReconciler({ mongoose });
   indexSync().catch((err) => {
     logger.error('[indexSync] Background sync failed:', err);
@@ -337,7 +360,7 @@ const startServer = async () => {
   });
 
   app.use(mongoSanitize());
-  app.use(cors());
+  app.use(createBaanzonCors());
   app.use(cookieParser());
 
   if (!isEnabled(DISABLE_COMPRESSION)) {
@@ -393,17 +416,30 @@ const startServer = async () => {
   app.use('/api/admin/roles', routes.adminRoles);
   app.use('/api/admin/skills', routes.adminSkills);
   app.use('/api/admin/users', routes.adminUsers);
+  app.use('/api/admin/providers', routes.adminProviders);
   app.use('/api/admin/audit-log', routes.adminAuditLog);
   app.use('/api/actions', routes.actions);
   app.use('/api/keys', routes.keys);
   app.use('/api/api-keys', routes.apiKeys);
   app.use('/api/user', routes.user);
+  /** Cross-entity palette search — mounted before `/api/search` so `/all` is
+   *  claimed by its own router instead of falling through to MeiliSearch. */
+  app.use('/api/search/all', routes.searchAll);
   app.use('/api/search', routes.search);
   app.use('/api/messages', routes.messages);
   app.use('/api/convos', routes.convos);
   app.use('/api/presets', routes.presets);
   app.use('/api/projects', routes.projects);
+  app.use('/api/deep-research', routes.deepResearch);
+  app.use('/api/flags', routes.flags);
+  app.use('/api/billing', routes.billing);
+  app.use('/api/evals', routes.evals);
+  app.use('/api/trust', routes.trust);
+  app.use('/api/organizations', routes.organizations);
+  app.use('/api/workspaces', routes.workspaces);
   app.use('/api/prompts', routes.prompts);
+  app.use('/api/rewrite', routes.rewrite);
+  app.use('/api/recall', routes.recall);
   app.use('/api/skills', routes.skills);
   app.use('/api/categories', routes.categories);
   app.use('/api/endpoints', routes.endpoints);
@@ -425,6 +461,13 @@ const startServer = async () => {
   app.use('/api/agents', routes.agents);
   app.use('/api/banner', routes.banner);
   app.use('/api/memories', routes.memories);
+  app.use('/api/knowledge', routes.knowledge);
+  app.use('/api/notifications', routes.notifications);
+  app.use('/api/devices', routes.devices);
+  app.use('/api/subscriptions', routes.subscriptions);
+  app.use('/api/usage-records', routes.usageRecords);
+  app.use('/api/feedback', routes.feedback);
+  app.use('/api/workflows', routes.workflows);
   app.use('/api/schedules', rejectScheduleWritesUntilReady, routes.schedules);
   app.use('/api/permissions', routes.accessPermissions);
 

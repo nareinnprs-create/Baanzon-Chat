@@ -207,9 +207,27 @@ describe('canAccessSharedLink', () => {
       });
     });
 
-    test('returns 401 for anonymous access when ALLOW_SHARED_LINKS_PUBLIC is not set', async () => {
+    test('calls next() for anonymous access when ALLOW_SHARED_LINKS_PUBLIC is unset (default on)', async () => {
       const link = await createTestLink();
       await grantPublicViewer(link._id);
+
+      const req = createReq({ params: { shareId: link.shareId } });
+      const res = createRes();
+      const next = jest.fn();
+      await canAccessSharedLink(req, res, next as unknown as NextFunction);
+
+      expect(next).toHaveBeenCalled();
+      expect(req).toMatchObject({
+        shareResourceId: link._id.toString(),
+        shareConversationId: 'convo1',
+        shareOwnerId: userId.toString(),
+      });
+    });
+
+    test('returns 401 for anonymous access when ALLOW_SHARED_LINKS_PUBLIC=false (kill switch)', async () => {
+      const link = await createTestLink();
+      await grantPublicViewer(link._id);
+      process.env.ALLOW_SHARED_LINKS_PUBLIC = 'false';
 
       const req = createReq({ params: { shareId: link.shareId } });
       const res = createRes();

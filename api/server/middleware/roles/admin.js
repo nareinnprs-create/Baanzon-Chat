@@ -6,7 +6,7 @@ function checkAdmin(req, res, next) {
       return res.status(403).json({ message: 'Forbidden' });
     }
     next();
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }

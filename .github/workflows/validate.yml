@@ -1,0 +1,164 @@
+# Validate - Central validation lanes that run the release validation harness.
+#
+# This workflow runs the `npm run validate` matrix via `scripts/validate.mjs`.
+# The harness orders steps, stops at the first gating failure, reports pass/fail
+# per step, and treats `audit` as non-gating unless `--strict` is passed.
+#
+# Every lane passes `--coverage` explicitly. It is the harness default today, but
+# a gate that only holds because of a default is a gate nobody can see; naming
+# it in the workflow makes the intent reviewable here. Each of the seven unit
+# suites leaves `coverage/coverage-summary.json` behind, and the harness
+# re-checks it against the `coverageThreshold` in that workspace's jest config,
+# so a regression under the floor fails the run rather than being reported.
+#
+# Lanes:
+# - validate-static: fast gate on PRs/pushes (build + typecheck + static-checks).
+#   Maps to `npm run validate:static` (which passes `--only build,typecheck,static-checks`),
+#   plus a `node scripts/validate.mjs --only coverage --audit-thresholds` step so
+#   the lane fails a threshold that rotted to 0/0. It runs no suites, so it
+#   cannot compare coverage numbers: that is validate-changed's and
+#   validate-full's job.
+# - validate-changed: diff-scoped validation on PRs to avoid full-suite cost.
+#   Maps to `npm run validate:changed` (`--changed`). Runs the suites the diff
+#   touched, with coverage, so the gate is enforced per pull request.
+# - validate-full: full matrix on the default branches and on a weekly schedule.
+#   Maps to `npm run validate -- --coverage`. Runs all suites in order.
+
+name: Validate
+
+on:
+  pull_request:
+    # Every pull request, whatever the base: see the note in static-checks.yml.
+  push:
+    branches:
+      - b1
+      - dev
+      - main
+  schedule:
+    # Run full validation weekly on Sundays at 00:00 UTC to catch drift
+    - cron: '0 0 * * 0'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-static:
+    name: Static validation (build + typecheck + static-checks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          # Needed when we may pass --against later; but validate:static doesn't use --changed
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc # 24.16.0
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare test environment
+        shell: bash
+        run: |
+          # Mirror existing workflows: api/data/auth.json and api/test/.env.test
+          mkdir -p api/data
+          [ -f api/data/auth.json ] || echo '{}' > api/data/auth.json
+          [ -f api/test/.env.test ] || cp api/test/.env.test.example api/test/.env.test
+
+      - name: Install depcheck globally (for static-checks)
+        # scripts/static-checks.mts skips the unused-npm-packages gate if absent
+        run: npm install -g depcheck@1.4.7
+
+      - name: Run static validation
+        run: npm run validate:static
+
+      - name: Audit coverage thresholds
+        # Cheap half of the coverage gate, in the lane that cannot run suites:
+        # reads all seven jest configs and fails if one lost its threshold or
+        # dropped it to 0 on every metric. Without this the static lane would
+        # skip coverage silently. Invoked directly rather than through
+        # validate:static, which would re-run build + typecheck + static-checks.
+        run: node scripts/validate.mjs --only coverage --audit-thresholds
+
+  validate-changed:
+    name: Changed validation
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc # 24.16.0
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare test environment
+        shell: bash
+        run: |
+          # Mirror existing workflows: api/data/auth.json and api/test/.env.test
+          mkdir -p api/data
+          [ -f api/data/auth.json ] || echo '{}' > api/data/auth.json
+          [ -f api/test/.env.test ] || cp api/test/.env.test.example api/test/.env.test
+
+      - name: Install depcheck globally (for static-checks)
+        run: npm install -g depcheck@1.4.7
+
+      - name: Run changed validation against base
+        run: npm run validate:changed -- --against ${{ github.base_ref }} --coverage
+
+  validate-full:
+    name: Full validation matrix
+    # The default branches this fork cuts from, plus the weekly drift run. b1 is
+    # the integration branch NEXTROUND.md plans against, and a coverage gate that
+    # only ever ran weekly would let a regression sit for days.
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/b1' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev') || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc # 24.16.0
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare test environment
+        shell: bash
+        run: |
+          # Mirror existing workflows: api/data/auth.json and api/test/.env.test
+          mkdir -p api/data
+          [ -f api/data/auth.json ] || echo '{}' > api/data/auth.json
+          [ -f api/test/.env.test ] || cp api/test/.env.test.example api/test/.env.test
+
+      - name: Install depcheck globally (for static-checks)
+        run: npm install -g depcheck@1.4.7
+
+      - name: Run full validation
+        run: npm run validate -- --coverage

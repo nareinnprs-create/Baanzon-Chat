@@ -193,3 +193,6 @@ scripts/activity-labels/results/
 !e2e/lighthouse/baanzon.yaml
 /.lighthouse/
 /e2e/lighthouse/.test-results/
+
+.eslintcache
+vite-build-log.txt

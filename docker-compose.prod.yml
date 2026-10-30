@@ -1,0 +1,100 @@
+# Baanzon Chat production stack for the Runpod pod.
+# Companion to .github/workflows/deploy.yml — files provisioned beside it on the pod:
+#   .env   (full production env, contains TUNNEL_TOKEN etc.)
+#   baanzon.yaml
+# Volumes live on the pod disk; restart the pod keeps data, delete does not.
+#
+services:
+  api:
+    container_name: LibreChat
+    ports:
+      - "3080:3080"
+    depends_on:
+      - mongodb
+      - rag_api
+    image: ghcr.io/nareinnprs-create/Baanzon-Chat:b1
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3080/readyz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    environment:
+      - HOST=0.0.0.0
+      - MONGO_URI=mongodb://mongodb:27017/LibreChat
+      - MEILI_HOST=http://meilisearch:7700
+      - BAANZON_TEMP_CREDENTIALS_PATH=/app/data/.env.temp
+      - RAG_PORT=${RAG_PORT:-8000}
+      - RAG_API_URL=http://rag_api:${RAG_PORT:-8000}
+      # outbound AI provider calls ride the pod's direct egress; keep proxies empty
+    volumes:
+      - type: bind
+        source: ./.env
+        target: /app/.env
+      - type: bind
+        source: ./baanzon.yaml
+        target: /app/baanzon.yaml
+      - ./images:/app/client/public/images
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+      - ./skill:/app/skill
+      - librechat-data:/app/data
+
+  mongodb:
+    container_name: chat-mongodb
+    image: mongo:8.0.20
+    restart: always
+    volumes:
+      - ./mongodb:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+
+  meilisearch:
+    container_name: chat-meilisearch
+    image: getmeili/meilisearch:v1.35.1
+    restart: always
+    environment:
+      - MEILI_HOST=http://meilisearch:7700
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY}
+    volumes:
+      - ./meili_data:/meili_data
+
+  vectordb:
+    container_name: vectordb
+    image: pgvector/pgvector:0.8.0-pg15-trixie
+    restart: always
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - ./vectordb:/var/lib/postgresql/data
+
+  rag_api:
+    container_name: rag_api
+    image: registry.librechat.ai/danny-avila/librechat-rag-api-dev-lite:latest
+    restart: always
+    environment:
+      - DB_HOST=vectordb
+      - PORT=${RAG_PORT:-8000}
+    depends_on:
+      - vectordb
+
+  tunnel:
+    container_name: baanzon-tunnel
+    image: cloudflare/cloudflared:latest
+    restart: always
+    command: tunnel run --token ${TUNNEL_TOKEN}
+    depends_on:
+      api:
+        condition: service_healthy
+
+  admin-panel:
+    container_name: admin-panel
+    profiles: ["adminpanel-disabled"]
+    image: registry.librechat.ai/clickhouse/librechat-admin-panel:latest
+
+volumes:
+  librechat-data:

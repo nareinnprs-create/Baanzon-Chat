@@ -3,6 +3,7 @@ import {
   allowedAddressesSchema,
   bedrockModels,
   configSchema,
+  customEndpointsConfigSchema,
   excludedKeys,
   resolveEndpointType,
   webSearchSchema,
@@ -1174,5 +1175,39 @@ describe('MCP UI refresh configuration', () => {
         interface: { mcpServers: { statusRefreshInterval: interval } },
       }).success,
     ).toBe(false);
+  });
+});
+
+
+describe('customEndpointsConfigSchema', () => {
+  it('parses the admin levers, all optional', () => {
+    const result = customEndpointsConfigSchema.safeParse({
+      enabled: false,
+      maxUpstreams: 4,
+    });
+    expect(result.success).toBe(true);
+    expect(result.success ? result.data : undefined).toEqual({
+      enabled: false,
+      maxUpstreams: 4,
+    });
+  });
+
+  it('accepts a partially-set lever object and an empty snippet', () => {
+    const partial = customEndpointsConfigSchema.safeParse({ maxUpstreams: 2 });
+    expect(partial.success).toBe(true);
+    const empty = customEndpointsConfigSchema.safeParse({});
+    expect(empty.success).toBe(true);
+  });
+
+  it('is an optional bundle on configSchema (sentinel passes with it absent)', () => {
+    const parsed = configSchema.safeParse({
+      version: '1.0',
+      featureFlags: {},
+      customEndpoints: { enabled: true, maxUpstreams: 8 },
+    });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.customEndpoints).toEqual({ enabled: true, maxUpstreams: 8 });
+    }
   });
 });

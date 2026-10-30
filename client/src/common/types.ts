@@ -380,6 +380,8 @@ export type TOptions = {
   overrideExpectedPredecessorCreatedAt?: number;
   /** Client-only exact queue position restored if admission is rejected. */
   overrideQueuedMessageOrigin?: unknown;
+  /** X5 Smart Route: per-turn model override; the selector's choice stays untouched. */
+  overrideModel?: string;
 };
 
 export type TAskFunction = (props: TAskProps, options?: TOptions) => false | void;

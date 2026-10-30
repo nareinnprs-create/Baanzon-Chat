@@ -108,6 +108,7 @@ const createMockBookmark = (overrides?: Partial<TConversationTag>): TConversatio
 const createMockMutation = (isLoading = false) => ({
   mutate: mockMutate,
   isLoading,
+  isPending: isLoading,
   isError: false,
   isSuccess: false,
   data: undefined,
@@ -120,7 +121,7 @@ const createMockMutation = (isLoading = false) => ({
   failureCount: 0,
   failureReason: null,
   isPaused: false,
-  isIdle: true,
+  isIdle: true as const,
   submittedAt: 0,
 });
 

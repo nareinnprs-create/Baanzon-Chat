@@ -1,8 +1,19 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { QueryKeys, dataService } from 'librechat-data-provider';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { UseMutationResult } from '@tanstack/react-query';
 import type * as t from 'librechat-data-provider';
 
+/**
+ * DECISION NEEDED: skill-tree is a deprecated phase-2 stub. Every dataService
+ * call below (createSkillNode, updateSkillNode, deleteSkillNode,
+ * updateSkillNodeContent) throws and no backend route exists, so these mutations
+ * can only fail. No active UI calls them — useCreateSkillNodeMutation,
+ * useUpdateSkillNodeMutation and useDeleteSkillNodeMutation have no consumers at
+ * all, and useUpdateSkillNodeContentMutation's only consumer (SkillFileEditor) is
+ * exported from the Skills barrel but never rendered. Pending approval to wire
+ * the phase-2 endpoints or delete the tree feature; do not mount these before
+ * then.
+ */
 export const useCreateSkillNodeMutation = (
   skillId: string,
   options?: t.CreateSkillNodeOptions,

@@ -46,6 +46,31 @@ const loadInsightsView = () =>
     Component: m.default,
   }));
 
+const loadDataLabRoute = () =>
+  import('./DataLabRoute').then((m) => ({
+    Component: m.default,
+  }));
+
+const loadDeepResearchRoute = () =>
+  import('./DeepResearchRoute').then((m) => ({
+    Component: m.default,
+  }));
+
+const loadCanvasRoute = () =>
+  import('./CanvasRoute').then((m) => ({
+    Component: m.default,
+  }));
+
+const loadVoiceRoute = () =>
+  import('./VoiceRoute').then((m) => ({
+    Component: m.default,
+  }));
+
+const loadWorkflowRoute = () =>
+  import('./WorkflowRoute').then((m) => ({
+    Component: m.default,
+  }));
+
 const loadProjectsView = () =>
   import('~/components/Projects').then((m) => ({
     Component: m.ProjectsView,
@@ -54,6 +79,16 @@ const loadProjectsView = () =>
 const loadProjectWorkspace = () =>
   import('~/components/Projects').then((m) => ({
     Component: m.ProjectWorkspace,
+  }));
+
+const loadKnowledgeView = () =>
+  import('~/components/Knowledge').then((m) => ({
+    Component: m.KnowledgeView,
+  }));
+
+const loadKnowledgeCollectionWorkspace = () =>
+  import('~/components/Knowledge').then((m) => ({
+    Component: m.KnowledgeCollectionWorkspace,
   }));
 
 const baseEl = document.querySelector('base');
@@ -129,6 +164,16 @@ export const router = createBrowserRouter(
           children: [
             {
               index: true,
+              element: <Navigate to="/home" replace={true} />,
+            },
+            {
+              /**
+               * Dedicated Home route. The onboarding surface (heading, subcopy,
+               * mode chips) is rendered by the single new-conversation landing at
+               * `/c/new`, so Home simply resolves there rather than duplicating
+               * that surface on a second code path.
+               */
+              path: 'home',
               element: <Navigate to="/c/new" replace={true} />,
             },
             {
@@ -161,6 +206,26 @@ export const router = createBrowserRouter(
               lazy: loadInsightsView,
             },
             {
+              path: 'data-lab',
+              lazy: loadDataLabRoute,
+            },
+            {
+              path: 'deep-research',
+              lazy: loadDeepResearchRoute,
+            },
+            {
+              path: 'canvas',
+              lazy: loadCanvasRoute,
+            },
+            {
+              path: 'voice',
+              lazy: loadVoiceRoute,
+            },
+            {
+              path: 'workflow',
+              lazy: loadWorkflowRoute,
+            },
+            {
               path: 'skills/new',
               lazy: loadSkillsView,
             },
@@ -179,6 +244,14 @@ export const router = createBrowserRouter(
             {
               path: 'projects/:projectId',
               lazy: loadProjectWorkspace,
+            },
+            {
+              path: 'knowledge',
+              lazy: loadKnowledgeView,
+            },
+            {
+              path: 'knowledge/:collectionId',
+              lazy: loadKnowledgeCollectionWorkspace,
             },
             {
               path: 'agents',

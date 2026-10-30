@@ -38,6 +38,7 @@ export * from './mcp/context';
 export * from './utils';
 export { default as Tokenizer, countTokens } from './utils/tokenizer';
 export type { EncodingName } from './utils/tokenizer';
+export * from './db/migrations';
 export * from './db/utils';
 /* HTML */
 export * from './html';
@@ -68,8 +69,29 @@ export * from './assistants';
 export * from './actions';
 /* Prompts */
 export * from './prompts';
+/* Rewrite (Prompt Lab / Session Recap) */
+export * from './rewrite';
+/* Cross-chat recall (X8) */
+export * from './recall';
 /* Projects */
 export * from './projects';
+/* Deep Research */
+export * from './deepResearch';
+/* Feature flags (B23/W15) */
+export * from './flags';
+/* Billing entitlements / plan limits (B18) */
+export * from './billing';
+/* Eval framework (B22 / A7.5) */
+export * from './evals';
+/* Trust engine (B6 / A7.1) */
+export * from './trust';
+/* Cross-entity palette search (B9 / A7.3) */
+export * from './search';
+/* Tenant hierarchy: organization -> workspace */
+export * from './organizations';
+export * from './workspaces';
+/* RAG / Knowledge */
+export * from './rag';
 /* Conversations */
 export * from './conversations';
 /* Skills */
@@ -77,6 +99,13 @@ export * from './schedules';
 export * from './schedules/service';
 export * from './skills';
 export * from './favorites';
+export * from './notifications';
+export * from './devices';
+export * from './subscriptions';
+export * from './usageRecords';
+export * from './feedback';
+/* Workflows */
+export * from './workflows';
 /* User */
 export * from './user';
 /* Agent Plugins */
