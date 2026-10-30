@@ -123,7 +123,7 @@ Legend: `[ ]` todo · `[$]` active · `[x]` done · `[x!]` done w/ deviation · 
 - [x] W1.10 Perf: CF edge cache + preload audit — CF proxied (full SSL); bundle preload audit done in PROD1-F; cold TTFB tune pending scale data
 
 ## Wave 2 — Monolith shell
-- [ ] G1 lever + rail/canvas/focus scaffold
+- [ ] G1 rail/canvas/focus scaffold — `[~]` step 1 done: `interface.mode` lever end-to-end (schema default classic, 16 tests, Settings toggle, Jotai `useInterfaceMode()`); step 2 atelier scaffold in flight
 - [ ] G2 composer slab + iris thread + context meter (X3)
 - [ ] G3 conversation canvas + branch tree (X2)
 
