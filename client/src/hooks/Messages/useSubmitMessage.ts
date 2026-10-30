@@ -1,8 +1,12 @@
 import { useCallback } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useAtomValue } from 'jotai';
 import { replaceSpecialVars } from 'librechat-data-provider';
 import type { TMessage } from 'librechat-data-provider';
 import { useChatContext, useChatFormContext, useAddedChatContext } from '~/Providers';
+import { useGetStartupConfig } from '~/data-provider';
+import { pickSmartModel } from '~/utils/smartRoute';
+import { smartRouteEnabled } from '~/store/settings';
 import { useGetLatestMessage } from '~/hooks/Messages/useLatestMessage';
 import useOfflineQueue from '~/hooks/useOfflineQueue';
 import { useAuthContext } from '~/hooks/AuthContext';
@@ -29,6 +33,10 @@ export default function useSubmitMessage() {
 
   const autoSendPrompts = useRecoilValue(store.autoSendPrompts);
   const setActivePrompt = useSetRecoilState(store.activePromptByIndex(index));
+  /** X5 Smart Route: read the toggle + specs here, resolve per-send below so
+   *  the heuristic always sees the exact text being submitted. */
+  const smartRouteOn = useAtomValue(smartRouteEnabled);
+  const { data: startupConfig } = useGetStartupConfig();
 
   const submitMessage = useCallback(
     (data?: {
@@ -69,6 +77,15 @@ export default function useSubmitMessage() {
         },
         {
           addedConvo: addedConvo ?? undefined,
+          overrideModel:
+            smartRouteOn && startupConfig?.modelSpecs?.list
+              ? pickSmartModel(
+                  data.text,
+                  startupConfig.modelSpecs.list,
+                  conversation?.endpoint,
+                  conversation?.model,
+                ) ?? undefined
+              : undefined,
           // Queued during-run messages carry their own consumed attachments,
           // quote chips, and manual skill picks (undefined = drain composer).
           overrideFiles: data.overrideFiles,

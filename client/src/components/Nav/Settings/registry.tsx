@@ -21,6 +21,7 @@ import EnableTwoFactorItem from '../SettingsTabs/Account/TwoFactorAuthentication
 import LangfuseConnection from '../SettingsTabs/Integrations/LangfuseConnection';
 import ClockFormatSelector from '../SettingsTabs/General/ClockFormatSelector';
 import InterfaceModeSwitch from '../SettingsTabs/General/InterfaceModeSwitch';
+import SmartRouteSwitch from '../SettingsTabs/General/SmartRouteSwitch';
 import ImportConversations from '../SettingsTabs/Data/ImportConversations';
 import WeekStartSelector from '../SettingsTabs/General/WeekStartSelector';
 import ProvidersManagement from '~/components/Admin/ProvidersManagement';
@@ -91,6 +92,14 @@ export const registry: SettingEntry[] = [
     labelKey: 'com_nav_interface_atelier',
     keywords: ['interface', 'atelier', 'mode', 'shell', 'classic'],
     Component: InterfaceModeSwitch,
+  },
+  {
+    id: 'smartRoute',
+    tab: GENERAL,
+    section: 'appearance',
+    labelKey: 'com_nav_smart_route',
+    keywords: ['smart', 'route', 'auto', 'model', 'fast', 'deep'],
+    Component: SmartRouteSwitch,
   },
   {
     id: 'fontSize',

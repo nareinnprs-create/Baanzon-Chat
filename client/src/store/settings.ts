@@ -170,6 +170,14 @@ export const interfaceMode = createStorageAtom<'classic' | 'atelier' | null>('in
 export const atelierFocusMode = createStorageAtom<boolean>('atelierFocusMode', false);
 
 /**
+ * X5 Smart Route opt-in (localStorage-persisted, default off). When on, each
+ * send runs the `pickSmartModel` heuristic (utils/smartRoute.ts) over the
+ * prompt and, if it lands on a different model for this endpoint, sends that
+ * turn with the routed model — the user's selector choice stays untouched.
+ */
+export const smartRouteEnabled = createStorageAtom<boolean>('smartRouteEnabled', false);
+
+/**
  * Resolved active interface mode: the persisted local override wins over the
  * server-configured default ('classic' when `startupConfig.interface.mode` is
  * absent). Consumer hook for the visual shell — the shell itself is NOT wired
