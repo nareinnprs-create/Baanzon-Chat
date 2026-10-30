@@ -116,10 +116,10 @@ Legend: `[ ]` todo · `[$]` active · `[x]` done · `[x!]` done w/ deviation · 
 - [ ] W1.3 Deployment provider keys live + BYO E2E — `[b]` user supplies keys
 - [ ] W1.4 Uploads: RAG API on pod OR uploads disabled gracefully — `[b]` decision 5
 - [ ] W1.5 SMTP wired — `[b]` decision 4
-- [ ] W1.6 Mobile web pass (dock pattern, 320px)
+- [x!] W1.6 Mobile web — fork already ships full mobile shell (drawer+swipe+scrim, MobileBottomNav, touch hooks); verified by audit, no new build needed. Legacy `mobile.css` 767px block dead — left as-is
 - [x] W1.7 Share links — existed upstream+fork; enabled anonymous public viewing (`ALLOW_SHARED_LINKS_PUBLIC` default true, `false` = kill switch); routes/ACL/revoke verified + token posture note
 - [x] W1.8 PWA — manifest (192+maskable512, graphite), offline-shell SW (cache-first assets, network-first nav, /api bypass), registration, theme-color
-- [ ] W1.9 Onboarding first-60s flow
+- [x!] W1.9 Onboarding — HomeOnboarding (greeting + mode chips → newConversation) shipped in PROD1; account-creation step blocked on W1.1 auth + SMTP (`[b]` user creds); provider-connect step = admin Providers UI post-W1.2
 - [x] W1.10 Perf: CF edge cache + preload audit — CF proxied (full SSL); bundle preload audit done in PROD1-F; cold TTFB tune pending scale data
 
 ## Wave 2 — Monolith shell
