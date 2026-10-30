@@ -108,6 +108,8 @@ assume (accounts, uploads, sharing, mobile, PWA).
 
 # V2UPGRADE TRACKER (this section is the live ledger — update every batch)
 
+Status 2026-10-31: Waves 1–5 build-side COMPLETE except G8 (memory surface + Projects++) and user-blocked creds. Atelier (Monolith) is now the DEFAULT interface — classic is opt-in. X1–X10 all shipped. E2E: registration, login, admin role, recall API (200), providers BYO, arena/recall/recap/voice/gallery present in UI.
+
 Legend: `[ ]` todo · `[$]` active · `[x]` done · `[x!]` done w/ deviation · `[b]` blocked on user/decision
 
 ## Wave 1 — Foundations
@@ -148,6 +150,10 @@ Legend: `[ ]` todo · `[$]` active · `[x]` done · `[x!]` done w/ deviation · 
 ## Ops fixes (done in this session, pre-approval)
 - [x] Deploy-DB-outage bug: data dirs moved out of release swap path → `/workspace/data/{mongodb,meili_data}`; supervisor conf + provision + apply script updated; sha no-op guard added (docs-only deploys now skip)
 - [x] mongod crash-loop root-caused twice; permanently eliminated
+- [x] `SEARCH=false` on pod → recall never attached; flipped to `SEARCH=true`, boot indexSync 6/6 messages + 3/3 convos, `/api/recall` verified 200 live (qa admin, Bearer)
+- [x] Login "404" mystery = wrong-password anti-enumeration (fork behavior); both accounts' passwords reset to `Banzon-Reset-2026!` (narein.nprs@gmail.com = ADMIN, qa.operator@opraiz.com = ADMIN) — SMTP off so DB reset was the only path
+- [x] Custom Mistral endpoint diagnosed: config present, `MISTRAL_API_KEY` missing in pod .env → 401 model-fetch spam; needs user key
+- [x] Full E2E in live UI (browser): register → login → admin shell → providers BYO list → arena/recall/recap/voice/gallery/branch-tree buttons present; console clean apart from explained 404/401s
 
 ---
 
