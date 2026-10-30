@@ -1833,6 +1833,10 @@ export enum RetentionMode {
 
 export const interfaceSchema = z
   .object({
+    /** UI shell lever. `atelier` is the new interface shell; `classic` keeps
+     *  today's UI. Defaults to `classic` everywhere, so unset deployments (and
+     *  every route that doesn't re-expose `mode`) are unchanged. */
+    mode: z.enum(['classic', 'atelier']).default('classic'),
     privacyPolicy: z
       .object({
         externalUrl: z.string().optional(),

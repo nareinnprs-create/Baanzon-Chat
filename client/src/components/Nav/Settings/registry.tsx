@@ -20,8 +20,10 @@ import ConversationModeSwitch from '../SettingsTabs/Speech/ConversationModeSwitc
 import EnableTwoFactorItem from '../SettingsTabs/Account/TwoFactorAuthentication';
 import LangfuseConnection from '../SettingsTabs/Integrations/LangfuseConnection';
 import ClockFormatSelector from '../SettingsTabs/General/ClockFormatSelector';
+import InterfaceModeSwitch from '../SettingsTabs/General/InterfaceModeSwitch';
 import ImportConversations from '../SettingsTabs/Data/ImportConversations';
 import WeekStartSelector from '../SettingsTabs/General/WeekStartSelector';
+import ProvidersManagement from '~/components/Admin/ProvidersManagement';
 import { ArchiveAllChats } from '../SettingsTabs/Data/ArchiveAllChats';
 import { toggleControl, ThemeSetting, LangSetting } from './controls';
 import BackupCodesItem from '../SettingsTabs/Account/BackupCodesItem';
@@ -41,7 +43,6 @@ import { RevokeKeys } from '../SettingsTabs/Data/RevokeKeys';
 import { ClearChats } from '../SettingsTabs/Data/ClearChats';
 import { TokenCredits, AutoRefill } from './BillingControls';
 import AdminPanel from '../SettingsTabs/General/AdminPanel';
-import ProvidersManagement from '~/components/Admin/ProvidersManagement';
 import SharedLinks from '../SettingsTabs/Data/SharedLinks';
 import ImageResize from '../SettingsTabs/Chat/ImageResize';
 import { showThinkingAtom } from '~/store/showThinking';
@@ -82,6 +83,14 @@ export const registry: SettingEntry[] = [
     labelKey: 'com_nav_language',
     keywords: ['locale', 'translation'],
     Component: LangSetting,
+  },
+  {
+    id: 'interfaceAtelier',
+    tab: GENERAL,
+    section: 'appearance',
+    labelKey: 'com_nav_interface_atelier',
+    keywords: ['interface', 'atelier', 'mode', 'shell', 'classic'],
+    Component: InterfaceModeSwitch,
   },
   {
     id: 'fontSize',

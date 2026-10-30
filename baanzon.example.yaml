@@ -143,6 +143,10 @@ cache: true
 # Custom interface configuration
 interface:
   customWelcome: 'Welcome to Baanzon Chat! Enjoy your experience.'
+  # UI shell mode: 'classic' (default, the current interface) or 'atelier'
+  # (reserved for the new interface shell). Unset deployments stay on 'classic';
+  # 'atelier' has no visual effect yet.
+  # mode: classic
   # Enable/disable file search as a chatarea selection (default: true)
   # Note: This setting does not disable the Agents File Search Capability.
   # To disable the Agents Capability, see the Agents Endpoint configuration instead.

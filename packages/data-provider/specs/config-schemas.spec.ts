@@ -1453,6 +1453,31 @@ describe('interfaceSchema', () => {
 
     expect(result.defaultPinnedTools).toBeUndefined();
   });
+
+  it('defaults mode to classic when unset', () => {
+    expect(interfaceSchema.parse({}).mode).toBe('classic');
+  });
+
+  it.each(['modern', 'Atelier', null, 1])(
+    'rejects invalid interface mode: %s',
+    (mode) => {
+      expect(interfaceSchema.safeParse({ mode }).success).toBe(false);
+    },
+  );
+
+  it('accepts mode: atelier set in baanzon.yaml and flows it through configSchema', () => {
+    const result = configSchema.safeParse({
+      version: '1.3.11',
+      interface: { mode: 'atelier' },
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data?.interface?.mode).toBe('atelier');
+  });
+
+  it('omitted interface section still resolves to the classic default', () => {
+    expect(configSchema.parse({ version: '1.3.11' }).interface?.mode).toBe('classic');
+  });
 });
 
 describe('summarizationTriggerSchema', () => {
