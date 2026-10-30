@@ -129,7 +129,7 @@ Legend: `[ ]` todo · `[$]` active · `[x]` done · `[x!]` done w/ deviation · 
 
 ## Wave 3 — Cortex core
 - [ ] G4 Arena (X1) + Smart Route (X5) + Prompt Lab (X4) — `[~]` X5 DONE: per-turn fast/deep heuristic (Settings toggle, 5/5 tests, overrideModel through ask(), selector untouched). Scout verdict X1: dual-lane wave is agents-endpoint-only (max 2, server-side); generic N-model arena needs server wave work. X4 needs a small rewrite route in packages/api. Next session: X1 duel v1 (agents dual-lane + vote bar) then X4.
-- [ ] G5 Cards (X6) + Recap (X7) + Canvas/diff (X9)
+- [ ] G5 Cards (X6) + Recap (X7) + Canvas/diff (X9) — `[~]` X9 DONE: version diff (dep-free LCS, collapsed gaps, Compare toggle in code tab, 5/5 tests). X6 cards + X7 recap next (X7 needs a small completion route like X4)
 
 ## Wave 4 — Cortex reach + premium
 - [ ] G6 Palette-OS (X10) + Cross-chat recall (X8) — `[b]` decision 6
