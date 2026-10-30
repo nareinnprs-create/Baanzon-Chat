@@ -3,6 +3,7 @@ import { Constants } from 'librechat-data-provider';
 import { MessageCircle, Telescope, ChartColumn, Image } from 'lucide-react';
 import type { HomeMode } from './modes';
 import { HOME_MODES, resolveModePreset } from './modes';
+import StarterGallery from './Gallery/StarterGallery';
 import { useGetStartupConfig } from '~/data-provider';
 import { specDisplayFieldReset } from '~/utils';
 import { useChatContext } from '~/Providers';
@@ -88,6 +89,7 @@ export default function HomeOnboarding() {
           })}
         </ul>
       )}
+      <StarterGallery />
     </section>
   );
 }

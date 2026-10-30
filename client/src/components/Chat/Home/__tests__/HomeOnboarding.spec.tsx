@@ -1,9 +1,10 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import HomeOnboarding from '../HomeOnboarding';
 
 const mockNewConversation = jest.fn();
+const mockSetValue = jest.fn();
 
 let mockStartupConfig: { data: unknown; isLoading: boolean } = {
   data: undefined,
@@ -12,6 +13,7 @@ let mockStartupConfig: { data: unknown; isLoading: boolean } = {
 
 jest.mock('~/Providers', () => ({
   useChatContext: () => ({ newConversation: mockNewConversation }),
+  useChatFormContext: () => ({ setValue: mockSetValue }),
 }));
 
 jest.mock('~/data-provider', () => ({
@@ -65,7 +67,7 @@ describe('HomeOnboarding', () => {
 
     const group = screen.getByRole('list', { name: 'Choose a starting mode' });
     expect(group).toBeInTheDocument();
-    expect(screen.getAllByRole('button')).toHaveLength(4);
+    expect(within(group).getAllByRole('button')).toHaveLength(4);
     expect(screen.getByRole('button', { name: 'Chat' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Deep Research' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Data analysis' })).toBeInTheDocument();
@@ -88,7 +90,7 @@ describe('HomeOnboarding', () => {
     const status = screen.getByRole('status');
     expect(status).toHaveAttribute('aria-busy', 'true');
     expect(screen.getByText('Loading starting modes')).toBeInTheDocument();
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: 'Choose a starting mode' })).not.toBeInTheDocument();
   });
 
   it('starts a new conversation with the matching model spec when one is configured', () => {
