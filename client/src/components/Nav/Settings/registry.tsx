@@ -21,10 +21,10 @@ import EnableTwoFactorItem from '../SettingsTabs/Account/TwoFactorAuthentication
 import LangfuseConnection from '../SettingsTabs/Integrations/LangfuseConnection';
 import ClockFormatSelector from '../SettingsTabs/General/ClockFormatSelector';
 import InterfaceModeSwitch from '../SettingsTabs/General/InterfaceModeSwitch';
-import SmartRouteSwitch from '../SettingsTabs/General/SmartRouteSwitch';
 import ImportConversations from '../SettingsTabs/Data/ImportConversations';
 import WeekStartSelector from '../SettingsTabs/General/WeekStartSelector';
 import ProvidersManagement from '~/components/Admin/ProvidersManagement';
+import SmartRouteSwitch from '../SettingsTabs/General/SmartRouteSwitch';
 import { ArchiveAllChats } from '../SettingsTabs/Data/ArchiveAllChats';
 import { toggleControl, ThemeSetting, LangSetting } from './controls';
 import BackupCodesItem from '../SettingsTabs/Account/BackupCodesItem';
@@ -43,6 +43,7 @@ import { smoothStreamingAtom } from '~/store/smoothStreaming';
 import { RevokeKeys } from '../SettingsTabs/Data/RevokeKeys';
 import { ClearChats } from '../SettingsTabs/Data/ClearChats';
 import { TokenCredits, AutoRefill } from './BillingControls';
+import UsageDashboard from '~/components/Nav/UsageDashboard';
 import AdminPanel from '../SettingsTabs/General/AdminPanel';
 import SharedLinks from '../SettingsTabs/Data/SharedLinks';
 import ImageResize from '../SettingsTabs/Chat/ImageResize';
@@ -677,6 +678,14 @@ export const registry: SettingEntry[] = [
     labelKey: 'com_ui_settings_label_archive_all_chats',
     keywords: ['archive', 'chats', 'conversations', 'bulk'],
     Component: ArchiveAllChats,
+  },
+  {
+    id: 'usageDashboard',
+    tab: DATA,
+    section: 'data',
+    labelKey: 'com_nav_usage_dashboard',
+    keywords: ['usage', 'tokens', 'cost', 'dashboard', 'statistics', 'stats', 'consumption'],
+    Component: UsageDashboard,
   },
   // Data controls · API keys
   {
