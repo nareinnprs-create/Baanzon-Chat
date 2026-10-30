@@ -124,7 +124,11 @@ export function createSharedLinkAccessMiddleware(deps: SharedLinkAccessDeps) {
       const publicGranted = await hasPublicViewPermission(resourceId);
 
       if (publicGranted) {
-        if (isEnabled(process.env.ALLOW_SHARED_LINKS_PUBLIC)) {
+        /* Anonymous viewing of a public share is on by default; the env is the kill switch. */
+        if (
+          process.env.ALLOW_SHARED_LINKS_PUBLIC === undefined ||
+          isEnabled(process.env.ALLOW_SHARED_LINKS_PUBLIC)
+        ) {
           continueRequest();
           return;
         }
