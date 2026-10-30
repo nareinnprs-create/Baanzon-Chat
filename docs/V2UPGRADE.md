@@ -132,10 +132,12 @@ Legend: `[ ]` todo · `[$]` active · `[x]` done · `[x!]` done w/ deviation · 
 - [x] G5 Cards (X6) + Recap (X7) + Canvas/diff (X9) — ALL SHIPPED: X9 version diff (LCS, 5/5, deployed); X6 verified already shipped (full card fleet); X7 recap button in header → `/api/rewrite` recap mode, popover TL;DR
 
 ## Wave 4 — Cortex reach + premium
-- [ ] G6 Palette-OS (X10) + Cross-chat recall (X8) — `[b]` decision 6
-- [ ] G7 Voice + file viewers
-- [ ] G8 Memory surface + Projects++
-- [ ] G9 Usage/cost dashboard + templates gallery
+- [x] G6 Palette-OS (X10) + Cross-chat recall (X8) — X8 SHIPPED: /api/recall (16/16, user-scoped Meili, snippets, limiter, backfill script) + header recall popover; X10 palette shipped in PROD1/E. Lexical v1 (vectors = upgrade path)
+- [x] G7 Voice + file viewers — Voice IN/OUT SHIPPED (Web Speech, 14/14: dictation into composer + read-aloud of latest response; feature-detect gated); file viewers: existing (attachment/artifact cards)
+- [x] G9 Usage/cost dashboard + templates gallery — BOTH SHIPPED: usage panel in Settings▸Data (messages/tokens from loaded convs, honest '—' cost until rate table is client-visible, 3/3); gallery of 12 starters on empty state (9/9)
+- [x] G8 debt fix: dedicated `arena_winner` feedback tag (registered, hidden from UI)
+- [ ] G8 Memory surface + Projects++ — scoped: needs memory-feature audit + project prompts/files schema work (next session)
+- [x] (superseded — see tracker G7/G9 rows above)
 
 ## Wave 5 — Ground-breaking (scope later)
 - [ ] G10 Agent workflow step cards

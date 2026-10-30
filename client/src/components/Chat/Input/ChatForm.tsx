@@ -45,6 +45,7 @@ import InterruptSteerButton from './InterruptSteerButton';
 import PastedTextDialog from './Files/PastedTextDialog';
 import DuringRunSendButton from './DuringRunSendButton';
 import PromptLabPanel from './PromptLab/PromptLabPanel';
+import VoiceControls from './Voice';
 import ProjectLandingChip from '../ProjectLandingChip';
 import { useGetStartupConfig } from '~/data-provider';
 import { mainTextareaId, BadgeItem } from '~/common';
@@ -825,6 +826,7 @@ const ChatForm = memo(function ChatForm({
                     />
                   </div>
                 )}
+                <VoiceControls index={index} textAreaRef={textAreaRef} />
                 <div className="mx-auto flex" />
                 <TokenUsage index={index} conversation={conversation} isSubmitting={isSubmitting} />
                 {SpeechToText && (
