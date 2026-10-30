@@ -124,7 +124,7 @@ Legend: `[ ]` todo · `[$]` active · `[x]` done · `[x!]` done w/ deviation · 
 
 ## Wave 2 — Monolith shell
 - [x] G1 lever + shell scaffold — `interface.mode` end-to-end (16 schema tests, Settings toggle, Jotai hook); Monolith scaffold: tone layer, rail hairline, composer-focus dim + Esc exit (spec 3/3, reduce-guarded, classic path DOM-identical). Iris thread → G2
-- [ ] G2 composer slab + iris thread + context meter (X3)
+- [x] G2 composer slab + iris thread + context meter (X3) — X3 shipped (TokenUsage gauge/breakdown in composer w/ cost+compaction); iris filament shipped in PROD1-D; added atelier slab styling (solid tone + hairline, shadowless)
 - [ ] G3 conversation canvas + branch tree (X2)
 
 ## Wave 3 — Cortex core

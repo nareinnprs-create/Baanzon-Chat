@@ -2774,6 +2774,14 @@ html[data-input-modality='keyboard']
     opacity: 0.25;
   }
 
+  /* Composer slab (G2): solid elevated tone + hairline, no shadow depth —
+     depth is tone-steps, never shadows/glass. */
+  [data-atelier='true'] [data-testid='composer-surface'] {
+    background-color: rgb(var(--surface-secondary));
+    border: 1px solid rgb(var(--border-medium));
+    box-shadow: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     [data-atelier='true'] aside > :first-child {
       transition: none;
