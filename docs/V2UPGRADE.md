@@ -128,7 +128,7 @@ Legend: `[ ]` todo · `[$]` active · `[x]` done · `[x!]` done w/ deviation · 
 - [x] G3 conversation canvas + branch tree (X2) — BranchTree popover in chat header (auto-shown only when branches exist): full tree, active path highlighted, click any node = jump (writes thread sibling atoms incl. ancestor chain, client-only, no server call); spec 2/2, tsc clean
 
 ## Wave 3 — Cortex core
-- [ ] G4 Arena (X1) + Smart Route (X5) + Prompt Lab (X4)
+- [ ] G4 Arena (X1) + Smart Route (X5) + Prompt Lab (X4) — `[~]` X5 DONE: per-turn fast/deep heuristic (Settings toggle, 5/5 tests, overrideModel through ask(), selector untouched). Scout verdict X1: dual-lane wave is agents-endpoint-only (max 2, server-side); generic N-model arena needs server wave work. X4 needs a small rewrite route in packages/api. Next session: X1 duel v1 (agents dual-lane + vote bar) then X4.
 - [ ] G5 Cards (X6) + Recap (X7) + Canvas/diff (X9)
 
 ## Wave 4 — Cortex reach + premium
