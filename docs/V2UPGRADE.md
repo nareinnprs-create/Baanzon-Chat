@@ -117,8 +117,8 @@ Legend: `[ ]` todo · `[$]` active · `[x]` done · `[x!]` done w/ deviation · 
 - [ ] W1.4 Uploads: RAG API on pod OR uploads disabled gracefully — `[b]` decision 5
 - [ ] W1.5 SMTP wired — `[b]` decision 4
 - [ ] W1.6 Mobile web pass (dock pattern, 320px)
-- [ ] W1.7 Share links (public read-only + revoke)
-- [ ] W1.8 PWA (manifest, SW offline shell, installable)
+- [x] W1.7 Share links — existed upstream+fork; enabled anonymous public viewing (`ALLOW_SHARED_LINKS_PUBLIC` default true, `false` = kill switch); routes/ACL/revoke verified + token posture note
+- [x] W1.8 PWA — manifest (192+maskable512, graphite), offline-shell SW (cache-first assets, network-first nav, /api bypass), registration, theme-color
 - [ ] W1.9 Onboarding first-60s flow
 - [x] W1.10 Perf: CF edge cache + preload audit — CF proxied (full SSL); bundle preload audit done in PROD1-F; cold TTFB tune pending scale data
 

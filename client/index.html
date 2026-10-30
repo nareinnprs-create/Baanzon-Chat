@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <base href="/" />
-    <meta name="theme-color" content="#087F83" />
+    <meta name="theme-color" content="#0B0B0F" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -15,6 +15,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png" />
     <link rel="apple-touch-icon" href="assets/apple-touch-icon-180x180.png" />
+    <link rel="manifest" href="/manifest.json" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
@@ -228,6 +229,15 @@
       src="/src/lib/rum/bootstrap-entry.js"
     ></script>
     <script defer type="module" src="/src/main.jsx"></script>
+    <script>
+      window.addEventListener('load', function () {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/service-worker.js').catch(function () {
+            /* SW is purely progressive; boot never depends on it. */
+          });
+        }
+      });
+    </script>
   </head>
   <body>
     <div id="root">
