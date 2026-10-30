@@ -32,6 +32,7 @@ export * from './Tools';
 export * from './connection';
 export * from './Favorites';
 export * from './rewrite';
+export * from './recall';
 export * from './CodeEnvironments';
 export * from './Admin/Providers';
 export * from './mutations';

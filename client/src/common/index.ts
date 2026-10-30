@@ -1,5 +1,6 @@
 export * from './a11y';
 export * from './artifacts';
+export * from './recall';
 export * from './types';
 export * from './menus';
 export * from './tools';

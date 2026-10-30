@@ -18,6 +18,7 @@ import AddMultiConvo from './AddMultiConvo';
 import { useHasAccess } from '~/hooks';
 import BranchTree from './BranchTree';
 import RecapButton from './Recap/RecapButton';
+import RecallButton from './Recall/RecallButton';
 import ArenaButton from './Arena';
 import { cn } from '~/utils';
 import store from '~/store';
@@ -86,6 +87,7 @@ function Header({
           <SubagentThreadLink threadId={parentConversationId} labelClassName="hidden lg:inline" />
         )}
         <BranchTree readOnly={readOnly} />
+        {!readOnly && <RecallButton />}
         {!readOnly && <RecapButton />}
         {!readOnly && <ArenaButton startupConfig={startupConfig} />}
         {!readOnly && <ModelSelector startupConfig={startupConfig} />}
