@@ -36,6 +36,7 @@ const organizations = require('./organizations');
 const workspaces = require('./workspaces');
 const prompts = require('./prompts');
 const rewrite = require('./rewrite');
+const recall = require('./recall');
 const schedules = require('./schedules');
 const skills = require('./skills');
 const balance = require('./balance');
@@ -92,6 +93,7 @@ module.exports = {
   models,
   prompts,
   rewrite,
+  recall,
   projects,
   deepResearch,
   flags,

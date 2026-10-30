@@ -71,6 +71,8 @@ export * from './actions';
 export * from './prompts';
 /* Rewrite (Prompt Lab / Session Recap) */
 export * from './rewrite';
+/* Cross-chat recall (X8) */
+export * from './recall';
 /* Projects */
 export * from './projects';
 /* Deep Research */
