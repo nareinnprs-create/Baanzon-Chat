@@ -128,8 +128,8 @@ Legend: `[ ]` todo · `[$]` active · `[x]` done · `[x!]` done w/ deviation · 
 - [x] G3 conversation canvas + branch tree (X2) — BranchTree popover in chat header (auto-shown only when branches exist): full tree, active path highlighted, click any node = jump (writes thread sibling atoms incl. ancestor chain, client-only, no server call); spec 2/2, tsc clean
 
 ## Wave 3 — Cortex core
-- [ ] G4 Arena (X1) + Smart Route (X5) + Prompt Lab (X4) — `[~]` X5 DONE: per-turn fast/deep heuristic (Settings toggle, 5/5 tests, overrideModel through ask(), selector untouched). Scout verdict X1: dual-lane wave is agents-endpoint-only (max 2, server-side); generic N-model arena needs server wave work. X4 needs a small rewrite route in packages/api. Next session: X1 duel v1 (agents dual-lane + vote bar) then X4.
-- [x] G5 Cards (X6) + Recap (X7) + Canvas/diff (X9) — `[~]` X9 DONE+deployed: version diff (dep-free LCS, collapsed gaps, Compare toggle, 5/5 tests). X6 cards + X7 recap remain (X7 needs small completion route like X4)
+- [x] G4 Arena (X1) + Smart Route (X5) + Prompt Lab (X4) — ALL SHIPPED: X5 per-turn fast/deep heuristic (5/5); X4 Prompt Lab client (3/3) + `/api/rewrite` route (12/12, prompt+recap modes, endpoint fallback, limiter); X1 Arena duel v1 (8/8, lane-2 picker, vote→continue-with-winner, feedback-tag registry constraint noted in code). Live-provider smoke pending user keys
+- [x] G5 Cards (X6) + Recap (X7) + Canvas/diff (X9) — ALL SHIPPED: X9 version diff (LCS, 5/5, deployed); X6 verified already shipped (full card fleet); X7 recap button in header → `/api/rewrite` recap mode, popover TL;DR
 
 ## Wave 4 — Cortex reach + premium
 - [ ] G6 Palette-OS (X10) + Cross-chat recall (X8) — `[b]` decision 6

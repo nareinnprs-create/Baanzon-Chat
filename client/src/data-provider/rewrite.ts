@@ -3,7 +3,7 @@ import type { UseMutationResult } from '@tanstack/react-query';
 
 export interface TRewriteRequest {
   text: string;
-  mode: 'prompt';
+  mode: 'prompt' | 'recap';
   endpoint?: string;
   model?: string;
 }
