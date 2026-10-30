@@ -69,6 +69,8 @@ export * from './assistants';
 export * from './actions';
 /* Prompts */
 export * from './prompts';
+/* Rewrite (Prompt Lab / Session Recap) */
+export * from './rewrite';
 /* Projects */
 export * from './projects';
 /* Deep Research */

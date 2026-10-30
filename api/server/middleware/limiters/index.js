@@ -14,6 +14,7 @@ const registerLimiter = require('./registerLimiter');
 const toolCallLimiter = require('./toolCallLimiter');
 const messageLimiters = require('./messageLimiters');
 const promptUsageLimiter = require('./promptUsageLimiter');
+const rewriteLimiter = require('./rewriteLimiter');
 const verifyEmailLimiter = require('./verifyEmailLimiter');
 const resetPasswordLimiter = require('./resetPasswordLimiter');
 const twoFactorTempLimiter = require('./twoFactorTempLimiter');
@@ -31,6 +32,7 @@ module.exports = {
   ...flagsLimiter,
   ...billingLimiter,
   ...promptUsageLimiter,
+  rewriteLimiter,
   loginLimiter,
   registerLimiter,
   toolCallLimiter,

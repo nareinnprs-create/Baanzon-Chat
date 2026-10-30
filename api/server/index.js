@@ -438,6 +438,7 @@ const startServer = async () => {
   app.use('/api/organizations', routes.organizations);
   app.use('/api/workspaces', routes.workspaces);
   app.use('/api/prompts', routes.prompts);
+  app.use('/api/rewrite', routes.rewrite);
   app.use('/api/skills', routes.skills);
   app.use('/api/categories', routes.categories);
   app.use('/api/endpoints', routes.endpoints);
