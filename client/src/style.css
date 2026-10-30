@@ -2782,6 +2782,63 @@ html[data-input-modality='keyboard']
     box-shadow: none;
   }
 
+  /* Rail (G1 full): fixed-width strip becomes solid tone + hairline; the
+     drag-resize separator is hidden — the rail expands on hover/click. */
+  [data-atelier='true'] aside {
+    background-color: rgb(var(--surface-secondary));
+    border-right: 1px solid rgb(var(--border-medium));
+  }
+
+  [data-atelier='true'] aside [role='separator'],
+  [data-atelier='true'] aside [data-resize-handle] {
+    display: none;
+  }
+
+  /* Canvas (G3): the conversation column caps at 720px, centered — applies to
+     the per-message column wrapper and the messages view, not the whole pane. */
+  [data-atelier='true'] [data-message-role] {
+    max-width: 45rem;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+  }
+
+  /* No bubbles (G3): user turns carry a 2px iris left edge; assistant turns
+     sit plain on the canvas. */
+  [data-atelier='true'] [data-message-role='user'] {
+    border-left: 2px solid #8e7cff;
+    padding-left: 1rem;
+  }
+
+  [data-atelier='true'] [data-message-role='assistant'] {
+    padding-left: calc(1rem + 2px);
+  }
+
+  /* Breadcrumb strip (G1): header hides in atelier and reveals as a solid
+     strip only while scroll-up is detected (data-atelier-reveal on wrapper). */
+  [data-atelier='true'] [data-chat-header] {
+    transition:
+      opacity 200ms ease,
+      transform 200ms ease;
+  }
+
+  [data-atelier='true']:not([data-atelier-reveal='true']) [data-chat-header] {
+    opacity: 0;
+    transform: translateY(-100%);
+    pointer-events: none;
+  }
+
+  [data-atelier='true'][data-atelier-reveal='true'] [data-chat-header] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-atelier='true'] [data-chat-header] {
+      transition: none;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     [data-atelier='true'] aside > :first-child {
       transition: none;

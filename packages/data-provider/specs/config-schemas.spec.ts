@@ -1454,8 +1454,8 @@ describe('interfaceSchema', () => {
     expect(result.defaultPinnedTools).toBeUndefined();
   });
 
-  it('defaults mode to classic when unset', () => {
-    expect(interfaceSchema.parse({}).mode).toBe('classic');
+  it('defaults mode to atelier when unset', () => {
+    expect(interfaceSchema.parse({}).mode).toBe('atelier');
   });
 
   it.each(['modern', 'Atelier', null, 1])(
@@ -1475,8 +1475,8 @@ describe('interfaceSchema', () => {
     expect(result.data?.interface?.mode).toBe('atelier');
   });
 
-  it('omitted interface section still resolves to the classic default', () => {
-    expect(configSchema.parse({ version: '1.3.11' }).interface?.mode).toBe('classic');
+  it('omitted interface section still resolves to the atelier default', () => {
+    expect(configSchema.parse({ version: '1.3.11' }).interface?.mode).toBe('atelier');
   });
 });
 
