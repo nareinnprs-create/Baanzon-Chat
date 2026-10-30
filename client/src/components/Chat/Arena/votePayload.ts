@@ -26,16 +26,15 @@ export type ArenaVotePayload = {
   winner: { model: string | null; spec: string | null; label: string } | null;
   feedback: {
     rating: TFeedbackRating;
-    tag: 'accurate_reliable';
+    tag: 'arena_winner';
     text: string;
   };
 };
 
 /**
- * The feedback endpoint zod-validates `tag` against the fixed reason registry
- * (packages/data-provider/src/feedback.ts), so an invented 'arena-winner' tag
- * would 400 on the server. The arena marker travels in `text` instead, next
- * to the winning model name; the tag itself is a valid positive reason.
+ * `tag: 'arena_winner'` is registered in FEEDBACK_REASON_KEYS
+ * (packages/data-provider/src/feedback.ts) but hidden from the feedback tag
+ * UI; the human-readable marker also rides in `text` next to the winner.
  */
 export function buildArenaVotePayload({
   conversationId,
@@ -63,7 +62,7 @@ export function buildArenaVotePayload({
       winner: null,
       feedback: {
         rating: 'thumbsUp',
-        tag: 'accurate_reliable',
+        tag: 'arena_winner',
         text: `arena-tie: ${lane0.label} vs ${lane1.label}`,
       },
     };
@@ -76,7 +75,7 @@ export function buildArenaVotePayload({
     winner: { model: winner.model, spec: winner.spec, label: winner.label },
     feedback: {
       rating: 'thumbsUp',
-      tag: 'accurate_reliable',
+      tag: 'arena_winner',
       text: `arena-winner: ${winner.label}`,
     },
   };

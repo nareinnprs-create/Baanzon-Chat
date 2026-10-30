@@ -62,7 +62,7 @@ describe('buildArenaVotePayload', () => {
       winner: { model: 'm-a', spec: 'spec-a', label: 'Model A' },
       feedback: {
         rating: 'thumbsUp',
-        tag: 'accurate_reliable',
+        tag: 'arena_winner',
         text: 'arena-winner: Model A',
       },
     });
