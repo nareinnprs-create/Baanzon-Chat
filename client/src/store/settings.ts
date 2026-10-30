@@ -162,6 +162,14 @@ const localStorageAtoms = {
 export const interfaceMode = createStorageAtom<'classic' | 'atelier' | null>('interfaceMode', null);
 
 /**
+ * Atelier focus mode opt-in (localStorage-persisted, default off). Only
+ * honored in atelier mode: while the chat composer has focus the shell dims
+ * its nav chrome, and Esc turns the mode off entirely. Consumed by
+ * `useAtelierFocusMode` (components/Atelier); classic mode ignores it.
+ */
+export const atelierFocusMode = createStorageAtom<boolean>('atelierFocusMode', false);
+
+/**
  * Resolved active interface mode: the persisted local override wins over the
  * server-configured default ('classic' when `startupConfig.interface.mode` is
  * absent). Consumer hook for the visual shell — the shell itself is NOT wired

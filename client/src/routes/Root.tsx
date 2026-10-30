@@ -30,6 +30,7 @@ import KeyboardShortcutsDialog from '~/components/Nav/KeyboardShortcutsDialog';
 import KeyboardDeleteDialog from '~/components/Nav/KeyboardDeleteDialog';
 import { useUserTermsQuery, useGetStartupConfig } from '~/data-provider';
 import { MobileDrawerScrim } from '~/components/UnifiedSidebar/mobile';
+import AtelierShell from '~/components/Atelier';
 import { InConversationFind } from '~/components/InConversationFind';
 import useKeyboardShortcuts from '~/hooks/useKeyboardShortcuts';
 import { NotificationsBell } from '~/components/Notifications';
@@ -147,8 +148,9 @@ export default function Root() {
         <AssistantsMapContext.Provider value={assistantsMap}>
           <AgentsMapContext.Provider value={agentsMap}>
             <PromptGroupsProvider>
-              <Banner onHeightChange={setBannerHeight} />
-              <div className="flex" style={{ height: `calc(100dvh - ${bannerHeight}px)` }}>
+              <AtelierShell>
+                <Banner onHeightChange={setBannerHeight} />
+                <div className="flex" style={{ height: `calc(100dvh - ${bannerHeight}px)` }}>
                 <div
                   className="relative z-0 flex h-full w-full overflow-hidden"
                   /** The drawer and the pane both read this, so their travel
@@ -207,6 +209,7 @@ export default function Root() {
                   <MobileBottomNav />
                 </div>
               </div>
+              </AtelierShell>
             </PromptGroupsProvider>
             <KeyboardShortcutsProvider />
             <CommandPalette />

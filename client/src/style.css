@@ -2749,3 +2749,34 @@ html[data-input-modality='keyboard']
 ::view-transition-group(chat-form) {
   z-index: 2;
 }
+
+/* Atelier (Monolith) shell scaffold — G1 step 2, visual only. Tokens are
+   semantic only (no raw hex, no glass/blur/translucency). The dim targets the
+   sidebar aside's first child, not the aside itself, because the aside keeps
+   an inline `transition` for its width animation that a stylesheet could not
+   join; the child has no inline transition of its own. */
+@layer atelier {
+  [data-atelier='true'] {
+    background-color: rgb(var(--surface-primary));
+  }
+
+  /* Hairline between the sidebar and the pane, drawn on the aside (not the
+     wrapper, whose edge sits at the window edge and would never show). */
+  [data-atelier='true'] aside {
+    border-right: 1px solid rgb(var(--border-medium));
+  }
+
+  [data-atelier='true'] aside > :first-child {
+    transition: opacity 250ms ease;
+  }
+
+  body[data-atelier-focus='true'] [data-atelier='true'] aside > :first-child {
+    opacity: 0.25;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-atelier='true'] aside > :first-child {
+      transition: none;
+    }
+  }
+}
