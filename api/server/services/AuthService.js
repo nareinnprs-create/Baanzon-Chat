@@ -59,6 +59,11 @@ const AuthTokenTypes = Object.freeze({
 
 const latestAuthTokenOptions = Object.freeze({ sort: { createdAt: -1 } });
 const genericVerificationMessage = 'Please check your email to verify your email address.';
+const genericCreatedMessage = 'Account created. You can now sign in.';
+/** Both register outcomes must return the same message per configuration so the
+ *  response never reveals whether the email was already registered. */
+const registrationSuccessMessage = () =>
+  checkEmailConfig() ? genericVerificationMessage : genericCreatedMessage;
 const invalidEmailVerificationMessage = 'Invalid or expired email verification token';
 const OPENID_SESSION_ID_TOKEN_EXPIRY_BUFFER_SECONDS = 30;
 
@@ -409,7 +414,7 @@ const registerUser = async (user, additionalData = {}) => {
 
       // Sleep for 1 second
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      return { status: 200, message: genericVerificationMessage };
+      return { status: 200, message: registrationSuccessMessage() };
     }
 
     // Only the first user in the unscoped, single-tenant deployment bootstraps ADMIN.
@@ -446,7 +451,7 @@ const registerUser = async (user, additionalData = {}) => {
     /** `userCreated` separates this from the identical 200 returned when the email is
      * already in use, so a caller can act on an account having actually been created
      * without the response body revealing which of the two happened. */
-    return { status: 200, message: genericVerificationMessage, userCreated: true };
+    return { status: 200, message: registrationSuccessMessage(), userCreated: true };
   } catch (err) {
     logger.error('[registerUser] Error in registering user:', err);
     if (newUserId) {
