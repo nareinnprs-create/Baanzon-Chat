@@ -108,7 +108,7 @@ assume (accounts, uploads, sharing, mobile, PWA).
 
 # V2UPGRADE TRACKER (this section is the live ledger — update every batch)
 
-Status 2026-10-31: Waves 1–5 build-side COMPLETE except G8 (memory surface + Projects++) and user-blocked creds. Atelier (Monolith) is now the DEFAULT interface — classic is opt-in. X1–X10 all shipped. E2E: registration, login, admin role, recall API (200), providers BYO, arena/recall/recap/voice/gallery present in UI.
+Status 2026-11-03: Signup fixed (register auto-verifies when SMTP off; reply no longer says "check your email"). Providers locked to single `Opraiz` custom endpoint (ENDPOINTS=agents) awaiting `OPRAIZ_BASEURL`/`OPRAIZ_API_KEY` from user's RunPod serverless `octopus-rogue-lb`. Pod migrated to fresh CPU pod `137ulk3yi2pb8g` ($0.06/hr), SSH `38.80.152.147:39791`; meili upgraded via `--upgrade-db`; provision-pod.sh on pod updated (dbpath + meili flag).
 
 Legend: `[ ]` todo · `[$]` active · `[x]` done · `[x!]` done w/ deviation · `[b]` blocked on user/decision
 
