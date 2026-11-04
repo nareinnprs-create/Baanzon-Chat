@@ -11,6 +11,24 @@ if ! command -v node >/dev/null || [ "$(node -v | cut -c2.)" != 24 ]; then
   curl -fsSL https://deb.nodesource.com/setup_24.x | bash - >/dev/null 2>&1
   apt-get install -y -qq nodejs
 fi
+
+# MongoDB Database Tools (mongodump for backups)
+echo "Installing MongoDB Database Tools..."
+curl -fsSL -o /tmp/mtools.deb "https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2204-x86_64-100.10.0.deb" 2>/dev/null
+dpkg -i /tmp/mtools.deb > /dev/null 2>&1 || true
+
+# SearXNG search engine (for web search in agents)
+if [ ! -d /opt/searxng-src ]; then
+  git clone --depth 1 https://github.com/searxng/searxng /opt/searxng-src 2>/dev/null
+  pip install -q -r /opt/searxng-src/requirements.txt 2>/dev/null
+  pip install -q --ignore-installed blinker 2>/dev/null
+  pip uninstall -y -q searxng 2>/dev/null
+  mkdir -p /etc/searxng
+  printf 'use_default_settings: true\nserver:\n  secret_key: "baanzon-searxng-2026"\n  limiter: false\n  port: 8888\n  bind_address: "127.0.0.1"\nsearch:\n  formats:\n    - html\n    - json\n' > /etc/searxng/settings.yml
+fi
+
+# Cron for nightly backups
+apt-get install -y -qq cron > /dev/null 2>&1 || true
 echo "node: $(node -v)"
 
 # ---- MongoDB server 8.0 (binary tarball; avoids apt repo roundtrips) ----
@@ -56,6 +74,15 @@ autostart=true
 autorestart=true
 stopasgroup=true
 stdout_logfile=/workspace/baanzon/logs/supervisor-meili.log
+redirect_stderr=true
+
+[program:searxng]
+command=gunicorn -b 127.0.0.1:8888 searx.webapp:app
+directory=/opt/searxng-src
+environment=SEARXNG_SETTINGS_PATH="/etc/searxng/settings.yml",PYTHONPATH="/opt/searxng-src"
+autostart=true
+autorestart=true
+stdout_logfile=/workspace/baanzon/logs/searxng.log
 redirect_stderr=true
 
 [program:baanzon-api]
