@@ -78,6 +78,7 @@ router.use(
   }),
 );
 router.use(moderateText);
+router.use(require('~/server/services/billing/usage').enforce());
 router.use(checkAgentAccess);
 router.use(checkAgentResourceAccess);
 router.use(validateConvoAccess);
