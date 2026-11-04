@@ -312,3 +312,34 @@ Formula: honest checkbox math, no vibes — any dimension partially done scores 
 
 ### Launch gates (all must be green before opening registrations publicly)
 `[ ]` Auth E2E · `[ ]` backups restore drill · `[ ]` alerts firing · `[ ]` rate limits on · `[ ]` ToS/Privacy live · `[ ]` mobile pass · `[ ]` cost dashboard shows per-user spend
+
+## Status log — 2026-11-05: Opraiz gateway live, fresh-user chat fixed, E2E green
+
+Production truths as of today:
+- vLLM (RunPod LB `aviqz5uyw3g23e`, RTX PRO 6000, Mistral-7B-Instruct-v0.2 bf16) serves real replies:
+  OPRAIZ_BASEURL -> Baanzon API -> SSE. Warm gateway ping ~0.9s.
+- Pod `baanzon.yaml` Opraiz default + titleModel = `mistralai/Mistral-7B-Instruct-v0.2` (exact vLLM id;
+  `opraiz-small` 404'd at the gateway). `fetch: true` keeps the live list; `default` is the cold fallback.
+  baanzon.yaml is gitignored - the operative copy is pod `/workspace/baanzon/baanzon.yaml`.
+- Agent `agent_wqrc7GyJSv5z0i-naJNxI` has a PUBLIC view AclEntry (principalType=public, permBits=1) so
+  non-owner users can chat with it.
+- client-v2: model pill fixed (old flushed-DB agent ids + `opraiz-small` were 404ing the gateway); labels are
+  Baanzon AI / Baanzon Ara; new chats send `conversationId: 'new'` - the zeros-UUID placeholder was read as a
+  real conversation owned by qa, so every fresh user died with "convo_access: User not authorized".
+- streamMessage tolerates both POST shapes: JSON `{streamId}` (queued) and direct `text/event-stream`.
+- Billing usage enforcement verified live: exhausted test user gets `cap_reached` with the upgrade message.
+
+Deploy procedure (follow exactly):
+1. `npm run build` in client-v2 (build = `tsc -b && vite build`, so it typechecks).
+2. tar dist -> scp -> extract into pod `/workspace/baanzon/client/dist` (clean stale hashed assets first).
+3. `supervisorctl restart baanzon-api` - index.html is read once at boot (`api/server/index.js`
+   `fs.readFileSync(indexPath)`) and cached in memory; deploying without a restart serves stale HTML.
+4. Verify pod `curl 127.0.0.1:3080/` bundle hash == dist hash == served hash; readyz 200.
+
+Evidence: qa E2E streamed a real Mistral reply ("BAANZON E2E OK..."); fresh-user probes (isTemporary
+true/false, conversationId new) all reached queued start with real conversation ids; site serves the fixed
+bundle through Cloudflare.
+
+Open items: CF Workers AI free-tier routing (deferred by owner); ZeptoMail credits exhausted (registration
+auto-verifies meanwhile); if the shared agent id ever changes (Ara/Chenni split), re-grant the PUBLIC view ACL.
+
