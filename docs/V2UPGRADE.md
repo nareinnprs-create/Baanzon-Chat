@@ -343,3 +343,11 @@ bundle through Cloudflare.
 Open items: CF Workers AI free-tier routing (deferred by owner); ZeptoMail credits exhausted (registration
 auto-verifies meanwhile); if the shared agent id ever changes (Ara/Chenni split), re-grant the PUBLIC view ACL.
 
+
+- 2026-11-05 (later): **All tiers routed through Cloudflare Workers AI** per owner instruction. Opraiz endpoint now
+  points at CF OpenAI-compat gateway (/ai/v1), model @cf/meta/llama-3.1-8b-instruct-fp8 (old llama-3-8b id is
+  deprecated at CF). Fresh-user E2E green: queued start -> SSE deltas -> final with persisted conversation.
+  RunPod vLLM config preserved as RUNPOD_BASEURL/RUNPOD_API_KEY for instant fallback (2-line .env edit).
+  Gotchas hit and fixed: yaml scalar @cf/... must be quoted (reserved char); CF has no GET /v1/models so
+  etch: false; env edits must append, not replace-after-rename. Client AGENTS model id updated + deployed
+  (bundle index-B0YIgCGR.js), site verified.
