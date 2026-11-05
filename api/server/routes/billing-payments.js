@@ -117,11 +117,80 @@ router.post('/webhook', express.raw({ type: '*/*', limit: '256kb' }), async (req
       }
       return res.json({ received: true });
     }
+    // Checkout-based subscriptions/renewals fire payment.succeeded with the tier
+    // in metadata (Dodo may not create a subscription object for manual renewals).
+    const metaTier = String(payload?.metadata?.tier || payload?.subscription?.metadata?.tier || '').toLowerCase();
+    if (metaTier && (type === 'payment.succeeded' || payload?.status === 'succeeded')) {
+      if (resolved?.pack) {
+        await usage.grantPack(userId, resolved.credits, PACKS[resolved.pack].validDays);
+        return res.json({ received: true, pack: resolved.pack });
+      }
+      await usage.setSubscription(userId, metaTier, 'active');
+      return res.json({ received: true, tier: metaTier });
+    }
     if (resolved?.pack && (type === 'payment.succeeded' || payload?.status === 'succeeded')) {
       await usage.grantPack(userId, resolved.credits, PACKS[resolved.pack].validDays);
       return res.json({ received: true, pack: resolved.pack });
     }
+    if (type.startsWith('subscription.cancelled') && metaTier) {
+      await usage.setSubscription(userId, metaTier, 'canceled');
+      return res.json({ received: true, canceled: metaTier });
+    }
     return res.json({ received: true, ignored: type || 'unmatched' });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+/* admin: recent Dodo payments joined with our applied subscription state (verification view) */
+router.get('/admin/recent-dodo', authed, async (req, res) => {
+  try {
+    if (req.user?.role !== 'ADMIN') return res.status(403).json({ message: 'Admin only' });
+    if (isMock()) return res.json({ items: [], mock: true });
+    const key = process.env.DODO_API_KEY || '';
+    const base = DODO_BASE;
+    const cr = await fetch(`${base}/payments?limit=20`, { headers: { Authorization: `Bearer ${key}` } });
+    const body = await cr.json();
+    const items = (body.items || []).map((p) => ({
+      paymentId: p.payment_id,
+      status: p.status,
+      amount: p.total_amount,
+      currency: p.currency,
+      email: p.customer?.email,
+      createdAt: p.created_at,
+      metadata: p.metadata || {},
+    }));
+    return res.json({ items });
+  } catch (err) {
+    return res.status(502).json({ message: err.message });
+  }
+});
+
+/* admin: apply a missed payment (replay of the webhook logic) */
+router.post('/admin/apply-payment', authed, async (req, res) => {
+  try {
+    if (req.user?.role !== 'ADMIN') return res.status(403).json({ message: 'Admin only' });
+    const { paymentId } = req.body || {};
+    if (!paymentId) return res.status(400).json({ message: 'paymentId required' });
+    const key = process.env.DODO_API_KEY || '';
+    const pr = await fetch(`${DODO_BASE}/payments/${paymentId}`, { headers: { Authorization: `Bearer ${key}` } });
+    const p = await pr.json();
+    if (!pr.ok) return res.status(p.status || 502).json({ message: p.message || 'Dodo fetch failed' });
+    if (p.status !== 'succeeded') return res.status(400).json({ message: `payment status is ${p.status}` });
+    const userId = p.metadata?.userId;
+    if (!userId) return res.status(400).json({ message: 'payment has no userId metadata' });
+    const metaTier = String(p.metadata?.tier || '').toLowerCase();
+    const productId = p.product_id || '';
+    const resolved = resolveProductId(productId);
+    if (metaTier && ['free', 'lite', 'pro', 'enterprise'].includes(metaTier)) {
+      await usage.setSubscription(userId, metaTier, 'active');
+      return res.json({ applied: 'subscription', tier: metaTier, userId });
+    }
+    if (resolved?.pack) {
+      await usage.grantPack(userId, resolved.credits, PACKS[resolved.pack].validDays);
+      return res.json({ applied: 'pack', pack: resolved.pack, credits: resolved.credits, userId });
+    }
+    return res.status(400).json({ message: 'could not resolve product from payment' });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
