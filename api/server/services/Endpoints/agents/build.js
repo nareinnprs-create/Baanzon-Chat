@@ -16,10 +16,12 @@ const loadAgent = (params) =>
 const buildOptions = (req, endpoint, parsedBody, endpointType) => {
   const { spec, iconURL, agent_id, chatProjectId, ...model_parameters } = parsedBody;
   // Tier x brand routing: brand keys (baanzon-*) resolve to the plan's model;
-  // the user's tier comes from the account, never from the client payload.
+  // the tier comes from the account DB. The brand arrives on the RAW body —
+  // the compact agents zod schema strips `model` from parsedBody.
+  const requestedModel = String(req.body?.model || model_parameters.model || '');
   const tier = String(req.user?.subscriptionTier || 'free').toLowerCase();
-  model_parameters.model = routeModel(tier, model_parameters.model);
-  logger.info(`[modelRouter] user=${req.user?.id} tier=${tier} -> ${model_parameters.model}`);
+  model_parameters.model = routeModel(tier, requestedModel);
+  logger.info(`[modelRouter] tier=${tier} requested=${requestedModel} routed=${model_parameters.model}`);
   const agentPromise = loadAgent({
     req,
     spec,

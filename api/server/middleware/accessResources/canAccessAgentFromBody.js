@@ -15,6 +15,10 @@ const db = require('~/models');
 
 const { getRoleByName, getAgent } = db;
 
+/** Single-agent deployment: when the client omits agent_id, default to the
+ *  shared Baanzon agent (its PUBLIC view ACL gates access as usual). */
+const SHARED_AGENT_ID = process.env.BAANZON_SHARED_AGENT_ID || '';
+
 const resolveEnforcedAgentId = (req, endpoint) => {
   const modelSpecs = req.config?.modelSpecs;
   const spec = req.body?.spec;
@@ -178,6 +182,10 @@ const canAccessAgentFromBody = (options) => {
 
       if (!isAgentsEndpoint(endpoint)) {
         agentId = Constants.EPHEMERAL_AGENT_ID;
+      }
+
+      if (!agentId && SHARED_AGENT_ID) {
+        agentId = SHARED_AGENT_ID;
       }
 
       if (!agentId) {
