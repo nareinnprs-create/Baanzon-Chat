@@ -330,11 +330,22 @@ const startServer = async () => {
 
   app.get('/health', (_req, res) => res.status(200).send('OK'));
   app.get('/livez', (_req, res) => res.status(200).send('OK'));
-  app.get('/readyz', (_req, res) => {
+  app.get('/readyz', async (_req, res) => {
     if (!serverReady) {
       return res.status(503).send('NOT_READY');
     }
-    return res.status(200).send('OK');
+    // Enriched health: critical deps gate the status, the rest is informational
+    // (CF health monitors/alerting key off the HTTP status).
+    const checks = { server: 'ok' };
+    let critical = true;
+    try {
+      await mongoose.connection.db.admin().command({ ping: 1 });
+      checks.mongodb = 'ok';
+    } catch {
+      checks.mongodb = 'down';
+      critical = false;
+    }
+    return res.status(critical ? 200 : 503).json({ status: critical ? 'ok' : 'degraded', checks });
   });
 
   /* Middleware */
