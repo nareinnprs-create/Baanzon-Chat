@@ -3,6 +3,7 @@
  * API key + webhook secret in .env only.
  */
 const express = require('express');
+const crypto = require('crypto');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
 const usage = require('~/server/services/billing/usage');
 const { PRODUCTS, PACKS, resolveProductId, isMock } = require('~/server/services/billing/catalog');
@@ -12,6 +13,45 @@ const authed = requireJwtAuth;
 const DODO_BASE = process.env.DODO_BASE_URL || 'https://live.dodopayments.com';
 const DODO_KEY = process.env.DODO_API_KEY || '';
 const DODO_WEBHOOK_SECRET = process.env.DODO_WEBHOOK_SECRET || '';
+
+/**
+ * Webhook auth: Dodo follows the Standard Webhooks spec — HMAC-SHA256 of
+ * `${webhook-id}.${webhook-timestamp}.${rawBody}` with the (base64) secret,
+ * signatures listed space-separated in `webhook-signature` as `v1,<b64>`.
+ * 5-minute timestamp tolerance; falls back to the legacy plain-secret header.
+ */
+function verifyWebhookSignature(req) {
+  const raw = typeof req.body === 'string'
+    ? req.body
+    : Buffer.isBuffer(req.body)
+      ? req.body.toString('utf8')
+      : JSON.stringify(req.body || {});
+  const id = req.headers['webhook-id'];
+  const ts = req.headers['webhook-timestamp'];
+  const sigHeader = req.headers['webhook-signature'];
+
+  if (id && ts && sigHeader) {
+    const key = DODO_WEBHOOK_SECRET.startsWith('whsec_') ? DODO_WEBHOOK_SECRET.slice(6) : DODO_WEBHOOK_SECRET;
+    let keyBuf;
+    try {
+      keyBuf = Buffer.from(key, 'base64');
+    } catch {
+      keyBuf = Buffer.from(key, 'utf8');
+    }
+    const expected = crypto.createHmac('sha256', keyBuf).update(`${id}.${ts}.${raw}`).digest('base64');
+    const age = Math.abs(Date.now() / 1000 - Number(ts));
+    if (Number.isNaN(age) || age > 300) {
+      return false;
+    }
+    return sigHeader.split(' ').some((part) => {
+      const sig = part.replace(/^v1,/, '');
+      const a = Buffer.from(sig, 'base64');
+      const b = Buffer.from(expected, 'base64');
+      return a.length === b.length && crypto.timingSafeEqual(a, b);
+    });
+  }
+  return !secret || req.headers['webhook-secret'] === secret;
+}
 
 /* products (public) */
 router.get('/products', (req, res) => {
@@ -58,8 +98,8 @@ router.post('/checkout', authed, async (req, res) => {
 /* webhook (Dodo -> us) */
 router.post('/webhook', express.raw({ type: '*/*', limit: '256kb' }), async (req, res) => {
   try {
-    if (DODO_WEBHOOK_SECRET && req.headers['webhook-secret'] !== DODO_WEBHOOK_SECRET) {
-      return res.status(401).json({ message: 'invalid webhook secret' });
+    if (DODO_WEBHOOK_SECRET && !verifyWebhookSignature(req)) {
+      return res.status(401).json({ message: 'invalid webhook signature' });
     }
     const event = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const type = event.type || '';

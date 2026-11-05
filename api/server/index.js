@@ -433,6 +433,7 @@ const startServer = async () => {
   app.use('/api/keys', routes.keys);
   app.use('/api/api-keys', routes.apiKeys);
   app.use('/api/user', routes.user);
+  app.use('/api/images/generate', routes.imagesGenerate);
   /** Cross-entity palette search — mounted before `/api/search` so `/all` is
    *  claimed by its own router instead of falling through to MeiliSearch. */
   app.use('/api/search/all', routes.searchAll);
