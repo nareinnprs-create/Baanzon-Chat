@@ -1,26 +1,38 @@
 /**
- * Image generation via Cloudflare Workers AI (Stable Diffusion XL).
- * Requires CF_ACCOUNT_ID + CF_API_TOKEN in .env. Auth + basic per-user limiter.
+ * Image generation via Cloudflare Workers AI. Tier-based models + daily caps:
+ * Free 3/day (flux-1-schnell), Lite 10/day (SDXL-lightning), Pro 50/day (flux-2-klein),
+ * Enterprise 200/day (flux-2-dev). Requires CF_ACCOUNT_ID + CF_API_TOKEN in .env.
  */
 const express = require('express');
+const mongoose = require('mongoose');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
 
 const router = express.Router();
-const MODEL = '@cf/stabilityai/stable-diffusion-xl-base-1.0';
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 5;
-const hits = new Map(); // userId -> [timestamps]
+const hits = new Map(); // userId -> [timestamps] (burst guard)
+const DAILY = {
+  free: { model: '@cf/black-forest-labs/flux-1-schnell', cap: 3 },
+  lite: { model: '@cf/bytedance/stable-diffusion-xl-lightning', cap: 10 },
+  pro: { model: '@cf/black-forest-labs/flux-2-klein-9b', cap: 50 },
+  enterprise: { model: '@cf/black-forest-labs/flux-2-dev', cap: 200 },
+};
 
-function limited(userId) {
-  const now = Date.now();
-  const arr = (hits.get(userId) || []).filter((t) => now - t < WINDOW_MS);
-  if (arr.length >= MAX_PER_WINDOW) {
-    hits.set(userId, arr);
-    return true;
-  }
-  arr.push(now);
-  hits.set(userId, arr);
+function limited(userId, cap) {
+  const day = new Date().toISOString().slice(0, 10);
+  const key = `${userId}:${day}`;
+  const used = (hits.get(key) || 0);
+  if (used >= cap) return true;
+  hits.set(key, used + 1);
   return false;
+}
+
+async function userTier(userId) {
+  const tier = await mongoose.connection.db.collection('users').findOne(
+    { _id: new mongoose.Types.ObjectId(String(userId)) },
+    { projection: { subscriptionTier: 1 } },
+  );
+  return String(tier?.subscriptionTier || 'free').toLowerCase();
 }
 
 router.post('/', requireJwtAuth, async (req, res) => {
@@ -28,16 +40,28 @@ router.post('/', requireJwtAuth, async (req, res) => {
   if (!prompt) {
     return res.status(400).json({ message: 'prompt is required' });
   }
-  if (limited(req.user.id)) {
+  const tier = await userTier(req.user.id);
+  const { model, cap } = DAILY[tier] || DAILY.free;
+  if (limited(`${req.user.id}`)) {
     return res.status(429).json({ message: 'Too many images this minute — try again shortly.' });
   }
+  const today = new Date().toISOString().slice(0, 10);
+  const usedToday = await mongoose.connection.db.collection('usage_counters').findOne({ key: `img:${req.user.id}:${today}` });
+  if ((usedToday?.count || 0) >= cap) {
+    return res.status(402).json({ message: `Daily image limit reached (${cap}/day on your plan) — resets tonight.` });
+  }
+  await mongoose.connection.db.collection('usage_counters').updateOne(
+    { key: `img:${req.user.id}:${today}` },
+    { $setOnInsert: { userId: req.user.id, date: today, kind: 'image' }, $inc: { count: 1 } },
+    { upsert: true },
+  );
   const account = process.env.CF_ACCOUNT_ID;
   const token = process.env.CF_API_TOKEN;
   if (!account || !token) {
     return res.status(501).json({ message: 'Image generation is not configured on this deployment.' });
   }
   try {
-    const r = await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/${MODEL}`, {
+    const r = await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/${model}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt }),

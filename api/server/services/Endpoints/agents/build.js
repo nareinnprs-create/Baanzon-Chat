@@ -3,6 +3,7 @@ const { loadAgent: loadAgentFn } = require('@librechat/api');
 const { isAgentsEndpoint, removeNullishValues, Constants } = require('librechat-data-provider');
 const { getMCPServerTools } = require('~/server/services/Config');
 const { getAccessibleMCPServers } = require('~/server/services/MCP');
+const { routeModel } = require('~/server/services/billing/modelRouter');
 const db = require('~/models');
 
 const loadAgent = (params) =>
@@ -14,6 +15,11 @@ const loadAgent = (params) =>
 
 const buildOptions = (req, endpoint, parsedBody, endpointType) => {
   const { spec, iconURL, agent_id, chatProjectId, ...model_parameters } = parsedBody;
+  // Tier x brand routing: brand keys (baanzon-*) resolve to the plan's model;
+  // the user's tier comes from the account, never from the client payload.
+  const tier = String(req.user?.subscriptionTier || 'free').toLowerCase();
+  model_parameters.model = routeModel(tier, model_parameters.model);
+  logger.info(`[modelRouter] user=${req.user?.id} tier=${tier} -> ${model_parameters.model}`);
   const agentPromise = loadAgent({
     req,
     spec,
