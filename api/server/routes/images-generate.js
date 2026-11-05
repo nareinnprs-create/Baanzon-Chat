@@ -6,7 +6,7 @@ const express = require('express');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
 
 const router = express.Router();
-const MODEL = '@cf/stable-diffusion-xl-base-1.0';
+const MODEL = '@cf/stabilityai/stable-diffusion-xl-base-1.0';
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 5;
 const hits = new Map(); // userId -> [timestamps]

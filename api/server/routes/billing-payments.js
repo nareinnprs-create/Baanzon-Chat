@@ -156,3 +156,4 @@ router.post('/mock/purchase', authed, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.verifyWebhookSignature = verifyWebhookSignature;
