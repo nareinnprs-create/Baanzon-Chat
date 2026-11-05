@@ -21,12 +21,13 @@ function users() {
 async function getUserSlim(userId) {
   const user = await users().findOne(
     { _id: new mongoose.Types.ObjectId(String(userId)) },
-    { projection: { subscriptionTier: 1, subscriptionStatus: 1, packCredits: 1 } },
+    { projection: { subscriptionTier: 1, subscriptionStatus: 1, packCredits: 1, packExpiresAt: 1 } },
   );
+  const expired = !!user?.packExpiresAt && new Date() > new Date(user.packExpiresAt);
   return {
     tier: (user?.subscriptionTier || 'free').toLowerCase(),
     status: user?.subscriptionStatus || 'active',
-    packCredits: user?.packCredits || 0,
+    packCredits: expired ? 0 : user?.packCredits || 0,
   };
 }
 
@@ -55,22 +56,29 @@ const enforce = () => async (req, res, next) => {
     }
     const counter = await getCounter(userId);
     const limit = TIER_LIMITS[tier] ?? TIER_LIMITS.free;
-    const packsRemaining = Math.max(0, packCredits - (counter?.packsUsed || 0));
-    if ((counter?.count || 0) >= limit && packsRemaining <= 0) {
+    const packsRemaining = packCredits; // already 0 when expired (getUserSlim)
+    const overCap = (counter?.count || 0) >= limit;
+    if (overCap && packsRemaining <= 0) {
       return res.status(402).json({
         code: 'cap_reached',
         message: "You've used today's allowance — it resets tonight. Upgrade or add a pack for more.",
       });
     }
     const inc = { count: 1 };
-    if ((counter?.count || 0) >= limit) inc.packsUsed = 1; // consuming a pack credit
+    if (overCap) {
+      inc.packsUsed = 1; // daily analytics only — the pool itself decrements on the user doc
+      await users().updateOne(
+        { _id: new mongoose.Types.ObjectId(String(userId)) },
+        { $inc: { packCredits: -1 } },
+      );
+    }
     await counters().updateOne(
       { key: `${String(userId)}:${today()}` },
       { $inc: inc },
       { upsert: true },
     );
     req.tier = tier;
-    req.fromPack = inc.packsUsed != null;
+    req.fromPack = overCap;
     return next();
   } catch (err) {
     return next();
@@ -80,16 +88,23 @@ const enforce = () => async (req, res, next) => {
 /** Subscription summary for the caller (no numbers exposed). */
 const summary = () => async (userId) => {
   const { tier, status, packCredits } = await getUserSlim(userId);
-  const counter = await getCounter(userId);
   return {
     tier,
     status,
-    packsRemaining: Math.max(0, packCredits - (counter?.packsUsed || 0)),
+    packsRemaining: Math.max(0, packCredits),
   };
 };
 
-async function grantPack(userId, credits) {
-  await users().updateOne({ _id: new mongoose.Types.ObjectId(String(userId)) }, { $inc: { packCredits: credits } });
+/** Grant pack credits with a validity window. A new purchase re-windows the
+ * whole pool: credits stack, expiry is 30 days from the latest purchase. */
+async function grantPack(userId, credits, validDays = 30) {
+  await users().updateOne(
+    { _id: new mongoose.Types.ObjectId(String(userId)) },
+    {
+      $inc: { packCredits: credits },
+      $set: { packExpiresAt: new Date(Date.now() + validDays * 24 * 60 * 60 * 1000) },
+    },
+  );
 }
 
 async function setSubscription(userId, tier, status) {

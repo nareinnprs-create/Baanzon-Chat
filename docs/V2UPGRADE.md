@@ -351,3 +351,11 @@ auto-verifies meanwhile); if the shared agent id ever changes (Ara/Chenni split)
   Gotchas hit and fixed: yaml scalar @cf/... must be quoted (reserved char); CF has no GET /v1/models so
   etch: false; env edits must append, not replace-after-rename. Client AGENTS model id updated + deployed
   (bundle index-B0YIgCGR.js), site verified.
+
+- 2026-11-05 (final): context budget fixed - CF llama-3.1-8b is 32k, LibreChat was assuming 121k
+  (agents endpoint reads agent.model_parameters.maxContextTokens, not the endpoint yaml). Set 32000 on the
+  shared agent + endpoint yaml; verified live (maxContextTokens:32000, 30234 usable). Packs fixed + tested:
+  permanent pool decrement on overflow (was: daily refill bug = infinite credits), 30-day expiry with
+  lazy check, webhook + mock paths pass validDays. Behavioral test ALL PASS (grant/consume/exhaust 402/
+  expire 402). Identity prompt verified under direct questioning; live streaming fix deployed (CRcpqzGi).
+

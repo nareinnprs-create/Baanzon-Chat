@@ -78,7 +78,7 @@ router.post('/webhook', express.raw({ type: '*/*', limit: '256kb' }), async (req
       return res.json({ received: true });
     }
     if (resolved?.pack && (type === 'payment.succeeded' || payload?.status === 'succeeded')) {
-      await usage.grantPack(userId, resolved.credits);
+      await usage.grantPack(userId, resolved.credits, PACKS[resolved.pack].validDays);
       return res.json({ received: true, pack: resolved.pack });
     }
     return res.json({ received: true, ignored: type || 'unmatched' });
@@ -103,7 +103,7 @@ router.post('/mock/purchase', authed, async (req, res) => {
   try {
     const { tier, cycle, pack } = req.body || {};
     if (pack && PACKS[pack]) {
-      await usage.grantPack(req.user.id, PACKS[pack].credits);
+      await usage.grantPack(req.user.id, PACKS[pack].credits, PACKS[pack].validDays);
       return res.json({ ok: true, pack, credits: PACKS[pack].credits });
     }
     const product = PRODUCTS[(tier || '').toLowerCase()];
