@@ -12,14 +12,17 @@ const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 5;
 const hits = new Map(); // userId -> [timestamps] (burst guard)
 const DAILY = {
-  free: { model: '@cf/black-forest-labs/flux-1-schnell', cap: 3 },
-  lite: { model: '@cf/bytedance/stable-diffusion-xl-lightning', cap: 10 },
-  pro: { model: '@cf/black-forest-labs/flux-2-klein-9b', cap: 50 },
-  enterprise: { model: '@cf/black-forest-labs/flux-2-dev', cap: 200 },
+  free: { model: '@cf/black-forest-labs/flux-1-schnell', cap: 5 },
+  lite: { model: '@cf/bytedance/stable-diffusion-xl-lightning', cap: 15 },
+  pro: { model: '@cf/black-forest-labs/flux-2-klein-9b', cap: 75 },
+  enterprise: { model: '@cf/black-forest-labs/flux-2-dev', cap: 300 },
 };
 
+/** Day boundary for image caps: midnight IST, matching usage caps. */
+const imgDay = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+
 function limited(userId, cap) {
-  const day = new Date().toISOString().slice(0, 10);
+  const day = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
   const key = `${userId}:${day}`;
   const used = (hits.get(key) || 0);
   if (used >= cap) return true;
@@ -45,7 +48,7 @@ router.post('/', requireJwtAuth, async (req, res) => {
   if (limited(`${req.user.id}`)) {
     return res.status(429).json({ message: 'Too many images this minute — try again shortly.' });
   }
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
   const usedToday = await mongoose.connection.db.collection('usage_counters').findOne({ key: `img:${req.user.id}:${today}` });
   if ((usedToday?.count || 0) >= cap) {
     return res.status(402).json({ message: `Daily image limit reached (${cap}/day on your plan) — resets tonight.` });
@@ -61,7 +64,27 @@ router.post('/', requireJwtAuth, async (req, res) => {
     return res.status(501).json({ message: 'Image generation is not configured on this deployment.' });
   }
   try {
-    const r = await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/${model}`, {
+    const isFlux2 = model.includes('flux-2');
+    const runUrl = `https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/${model}`;
+    let r;
+    if (isFlux2) {
+      // flux-2 family requires multipart/form-data input
+      const fd = new FormData();
+      fd.append('prompt', prompt);
+      r = await fetch(runUrl, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd });
+      if (!r.ok) {
+        const detail = (await r.text()).slice(0, 300);
+        return res.status(502).json({ message: 'Image generation failed', detail });
+      }
+      const j = await r.json();
+      const b64 = j.result && (j.result.image || j.result.content);
+      if (!b64) return res.status(502).json({ message: 'Image generation returned no image' });
+      const buf = Buffer.from(String(b64), 'base64');
+      res.setHeader('Content-Type', 'image/jpeg');
+      res.setHeader('Content-Disposition', 'inline; filename="baanzon-image.jpg"');
+      return res.send(buf);
+    }
+    r = await fetch(runUrl, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt }),

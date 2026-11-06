@@ -186,6 +186,8 @@ const canAccessAgentFromBody = (options) => {
 
       if (!agentId && SHARED_AGENT_ID) {
         agentId = SHARED_AGENT_ID;
+        // Propagate downstream — the generation's agent load reads it from the body.
+        req.body.agent_id = agentId;
       }
 
       if (!agentId) {

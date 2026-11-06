@@ -20,8 +20,11 @@ const buildOptions = (req, endpoint, parsedBody, endpointType) => {
   // the compact agents zod schema strips `model` from parsedBody.
   const requestedModel = String(req.body?.model || model_parameters.model || '');
   const tier = String(req.user?.subscriptionTier || 'free').toLowerCase();
-  model_parameters.model = routeModel(tier, requestedModel);
-  logger.info(`[modelRouter] tier=${tier} requested=${requestedModel} routed=${model_parameters.model}`);
+  const routedCfg = routeModel(tier, requestedModel) || { model: requestedModel };
+  model_parameters.model = routedCfg.model;
+  if (routedCfg.maxContextTokens) model_parameters.maxContextTokens = routedCfg.maxContextTokens;
+  if (routedCfg.max_tokens) model_parameters.max_tokens = routedCfg.max_tokens;
+  logger.info(`[modelRouter] tier=${tier} requested=${requestedModel} routed=${model_parameters.model} ctx=${model_parameters.maxContextTokens} out=${model_parameters.max_tokens}`);
   const agentPromise = loadAgent({
     req,
     spec,

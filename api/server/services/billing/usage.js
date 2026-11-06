@@ -6,9 +6,10 @@
  */
 const mongoose = require('mongoose');
 
-const TIER_LIMITS = { free: 15, lite: 33, pro: 110, enterprise: 200 };
+const TIER_LIMITS = { free: 30, lite: 50, pro: 150, enterprise: 300 };
 
-const today = () => new Date().toISOString().slice(0, 10);
+/** Day boundary for usage caps: midnight IST (the product's home timezone). */
+const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 
 function counters() {
   return mongoose.connection.db.collection('usage_counters');
@@ -85,13 +86,21 @@ const enforce = () => async (req, res, next) => {
   }
 };
 
-/** Subscription summary for the caller (no numbers exposed). */
+/** Subscription summary for the caller. Own-usage numbers (remaining today)
+ *  are exposed for the near-wall composer counter; never for other users. */
 const summary = () => async (userId) => {
   const { tier, status, packCredits } = await getUserSlim(userId);
+  const counter = await getCounter(userId);
+  const limit = TIER_LIMITS[tier] ?? TIER_LIMITS.free;
+  const used = counter?.count || 0;
+  const remainingToday = Math.max(0, limit + Math.max(0, packCredits) - used);
   return {
     tier,
     status,
     packsRemaining: Math.max(0, packCredits),
+    dailyLimit: limit,
+    usedToday: used,
+    remainingToday,
   };
 };
 
