@@ -41,8 +41,8 @@ the build plan's architecture section.**
 
 ### GATE B — The deploy path ships the wrong product
 `deploy-compose.yml:3-7` has the `build:` block **commented out** and pulls three
-unbranded upstream LibreChat `-dev` images. `npm run start:deployed` runs stock
-LibreChat with **zero fork features** and reports green. This is P0-1.
+unbranded upstream Baanzon Chat `-dev` images. `npm run start:deployed` runs stock
+Baanzon Chat with **zero fork features** and reports green. This is P0-1.
 
 ### GATE C — Nothing can fail a build
 `.github/` does not exist (0 workflows) **and** `static-checks.mts` exits 0 on an
@@ -67,7 +67,7 @@ remediation below is independent of both and can start immediately.**
 
 # 1. P0 — LAUNCH BLOCKERS
 
-## P0-1 · `deploy-compose.yml` deploys upstream LibreChat, not this fork
+## P0-1 · `deploy-compose.yml` deploys upstream Baanzon Chat, not this fork
 
 **Files:** `deploy-compose.yml:3-7, 8, 22, 37-38, 43, 46, 62, 97-99, 104, 114-116`
 
@@ -86,9 +86,9 @@ stage that also carries `client/dist`, which is why the `client` service is
 nginx-only. **Leave line 46** (ClickHouse admin panel, third-party prebuilt) and
 **line 104** (`rag_api`) alone — this repo cannot build either.
 
-Then, in the same PR: `container_name: LibreChat-API`→`baanzon-api`,
-`LibreChat-NGINX`→`baanzon-nginx`, `librechat-data` volume →`baanzon-data`,
-`MONGO_URI=.../LibreChat` →`/BaanzonChat`. P0-7 covers the rest of the strings.
+Then, in the same PR: `container_name: Baanzon Chat-API`→`baanzon-api`,
+`Baanzon Chat-NGINX`→`baanzon-nginx`, `librechat-data` volume →`baanzon-data`,
+`MONGO_URI=.../Baanzon Chat` →`/BaanzonChat`. P0-7 covers the rest of the strings.
 
 **CRITICAL — do this or RAG ships dead:** `deploy-compose.yml:37-38` bind-mounts
 `./baanzon.yaml`, which **does not exist on disk**. Docker creates a *directory*
@@ -280,7 +280,7 @@ prettier reformatting a `.tsx` can expose a latent parse issue.
 `npm run sort-imports:check` (expect 0) · `npm run lint` (expect 0, or a
 documented pre-existing baseline count).
 
-## P0-7 · 9 user-visible `LibreChat` fallbacks + `.env.example`
+## P0-7 · 9 user-visible `Baanzon Chat` fallbacks + `.env.example`
 
 **Files:** `api/server/routes/config.js:73,145` ·
 `api/server/services/AuthService.js:273,542,593,982` ·
@@ -289,7 +289,7 @@ documented pre-existing baseline count).
 
 **Depends on:** nothing. ~30 min.
 
-**Approach:** `'LibreChat'` → `'Baanzon Chat'` at the 7 `APP_TITLE` sites. Highest
+**Approach:** `'Baanzon Chat'` → `'Baanzon Chat'` at the 7 `APP_TITLE` sites. Highest
 visibility is `config.js:73` (`GET /api/config` → `appTitle` → every `<title>`, the
 wordmark fallback, and the PWA manifest name).
 
@@ -302,7 +302,7 @@ for `.env.example:1186`.
 `.env.example`: `APP_TITLE=Baanzon Chat`, `EMAIL_FROM=noreply@<your-domain>`,
 `MONGO_URI=.../BaanzonChat`, plus 5 commented-out stale values
 (`OTEL_SERVICE_NAME=librechat`, `CODEAPI_AUTH_PROVIDER=librechat-jwt`,
-`CODEAPI_JWT_ISSUER=librechat`, `EMAIL_FROM_NAME="LibreChat"`,
+`CODEAPI_JWT_ISSUER=librechat`, `EMAIL_FROM_NAME="Baanzon Chat"`,
 `REDIS_KEY_PREFIX=librechat`). **`CODEAPI_JWT_ISSUER` needs care** —
 `packages/api/src/auth/codeapi.ts:62 DEFAULT_ISSUER = 'librechat'`; changing the
 env without changing the code invalidates existing tokens. Change both or neither.
@@ -312,7 +312,7 @@ else. 2FA (`TwoFactorController.js:12`) changes the TOTP account label — users
 already enrolled see a different name, **enrollment still works**.
 
 **Tests:** `npx jest` on `AuthService.spec.js`, `TwoFactorController` specs,
-`config.js` route specs. A grep gate asserting zero `'LibreChat'` in
+`config.js` route specs. A grep gate asserting zero `'Baanzon Chat'` in
 `api/server/` and zero `librechat.ai` in `.env.example`.
 
 ## P0-8 · RAG ships dark, and has no consumer
@@ -492,7 +492,7 @@ failures on the bind-mounted `./uploads`, `./images`, `./logs`, `./skill`.
 
 **File:** `packages/api/src/credentials.ts:276-370` (`:309-313` generate, `:345-359` warn-only)
 
-**Good news:** `:46-57` is a SHA-256 blocklist of **retired upstream LibreChat
+**Good news:** `:46-57` is a SHA-256 blocklist of **retired upstream Baanzon Chat
 defaults** and `rejectLegacyJwtCredential` (`:61-69`) throws correctly.
 
 **The problem:** the *unset* case is handled by **generating** secrets with
@@ -567,7 +567,7 @@ Both are git-tracked. They **disagree**: `nodemailer` **10.0.1 vs ^9.0.1**,
 `packageManager` is `npm@11.13.0` and both Dockerfiles use `npm ci` and never
 reference `bun.lock` — **npm is authoritative**. But the 15 `b:*` scripts make
 bun a live path, and the audited security posture is **not reproducible** under
-`bun install`. Both lockfiles also still carry root `"name": "LibreChat"`.
+`bun install`. Both lockfiles also still carry root `"name": "Baanzon Chat"`.
 
 **Approach:** pick one. Recommended — **keep npm, delete the `b:*` scripts and
 `bun.lock`**, and record it in ADR-002 (§84 says pnpm; we're deviating to npm —
@@ -676,7 +676,7 @@ an identical `apiUrl` does **not**.
 | **P2-6** | `as unknown as` in production code | `packages/data-schemas/src/methods/knowledgeCollection.ts:154` | Remove by typing the store double / narrowing properly. Test-only suppressions (`service.spec.ts:548,563`; `routes.spec.ts` ×10) are acceptable and documented. | LOW | `npx tsc --noEmit` in data-schemas |
 | **P2-7** | 222 outdated deps (164 major behind) | `package.json` | Security-relevant only (P1-2). Defer the rest — 164 majors is a quarter of work with no launch value. | — | — |
 | **P2-8** | No error tracking | — | Add Sentry (or equivalent) for API + client. Today every fault is log-only with no aggregation and no alerting hook — which is why the `api` workspace's 5-vs-33 failure instability went unnoticed. **[OWNER DECISION]** vendor + whether errors may leave the deployment. | LOW | Verify an intentional throw surfaces with a fingerprint |
-| **P2-9** | 50 `LibreChat` lines in 28 non-English locales | `client/src/locales/{ca,de,es,fa,fi,fr,he,is,it,ja,ka,ko,lt,lv,nb,nl,nn,pl,pt-BR,pt-PT,ru,sv,th,tr,uk,vi,zh-Hans,zh-Hant}/translation.json` | 3 keys: `com_agents_mcp_trust_subtext`×28, `com_ui_api_keys_description`×13, `com_ui_tools_native_short`×9. Worst offenders (3 each): `de,he,is,it,lv,pl,pt-PT,zh-Hant`. `i18n.ts:290-295` falls through to `en`, so this is **cosmetic, not a defect** — fix for polish, not correctness. | LOW | `npm run static-checks:full` (runs `findUnusedI18nKeys`) |
+| **P2-9** | 50 `Baanzon Chat` lines in 28 non-English locales | `client/src/locales/{ca,de,es,fa,fi,fr,he,is,it,ja,ka,ko,lt,lv,nb,nl,nn,pl,pt-BR,pt-PT,ru,sv,th,tr,uk,vi,zh-Hans,zh-Hant}/translation.json` | 3 keys: `com_agents_mcp_trust_subtext`×28, `com_ui_api_keys_description`×13, `com_ui_tools_native_short`×9. Worst offenders (3 each): `de,he,is,it,lv,pl,pt-PT,zh-Hant`. `i18n.ts:290-295` falls through to `en`, so this is **cosmetic, not a defect** — fix for polish, not correctness. | LOW | `npm run static-checks:full` (runs `findUnusedI18nKeys`) |
 | **P2-10** | 31 `librechat` lines in `baanzon.example.yaml` | `baanzon.example.yaml:145` (`customWelcome: 'Welcome to LibreChat!'`), `:152-194` (ToS/privacy **legal copy** + `contact@librechat.ai`), `:286` (the only `Librechat` variant, user-facing MCP warning), `:412` (`- 'librechat.ai'` allowlist), `:103,541,607,647,670` (comments) | `:286` and `:145` are user-facing → fix now. `:412` is a **security-relevant allowlist** → fix with P0-7. The ToS/privacy block is **legal text requiring your input** — do not auto-rewrite. | LOW (except `:412`) | grep gate: zero `librechat.ai` in the yaml |
 | **P2-11** | Package metadata + lockfile names | 6 manifests' `repository`/`homepage`/`bugs` → `danny-avila/LibreChat` (P2 of P0-2) · `packages/data-schemas/package.json:96` keyword `"librechat"` · `package-lock.json:2,8` + `bun.lock:6` root `"name": "LibreChat"` · `api/app/clients/tools/manifest.json:24,29` ("Our Docs" → `danny-avila`) · `packages/api/src/app/checks.ts:28,33,102,136,382,428` (operator error text + docs links) | Repoint URLs; regenerate the lockfile root name. `checks.ts` strings are **operator-visible** — fix in P1 batch. | LOW | `npm pack --dry-run` metadata check |
 | **P2-12** | Persisted internal identifiers (P3-candidate, listed here for review) | `client/src/utils/artifacts.ts:20-22,57-59,155-157,298-300` — MIME types `application/vnd.librechat.docx-preview` etc. **cross the wire and can be stored in message records** · `packages/data-provider/src/request.ts:70` + `components/Chat/Subagents/state.ts:309` — localStorage keys (safe to rename, users just re-auth) · `packages/api/src/credentials.ts:43` + `tools/rolePermissions.ts:248` — `Symbol.for(...)` in the **global** registry (renaming orphans any live process's grants) | **MIME types: do NOT rename** without a data migration + back-compat read. localStorage + Symbols: safe. Record the decision in ADR-002 rather than acting. | MEDIUM (MIME) | If renamed later: a read-path spec that accepts both old and new |

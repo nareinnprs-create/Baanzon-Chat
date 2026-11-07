@@ -1,6 +1,6 @@
 # Architecture Decision Records
 
-Architectural decisions for Baanzon Chat (a LibreChat fork). Each ADR is
+Architectural decisions for Baanzon Chat (a Baanzon Chat fork). Each ADR is
 numbered, immutable once Accepted, and superseded rather than edited.
 
 | ADR                                     | Title                        | Status   | Date       |

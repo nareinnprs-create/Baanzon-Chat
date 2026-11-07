@@ -5,7 +5,7 @@
 
 ## Context
 
-Baanzon Chat is a fork of LibreChat. Several string identifiers are **persisted**:
+Baanzon Chat is a fork of Baanzon Chat. Several string identifiers are **persisted**:
 they are written directly into MongoDB documents and/or crossed the wire into
 stored message records. Examples include file MIME types used as map keys,
 knowledge-collection scopes (`private` / `global`), file storage enums, tool

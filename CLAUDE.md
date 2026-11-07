@@ -1,8 +1,8 @@
-# LibreChat
+# Baanzon Chat
 
 ## Project Overview
 
-LibreChat is a monorepo with the following key workspaces:
+Baanzon Chat is a monorepo with the following key workspaces:
 
 | Workspace | Language | Side | Dependency | Purpose |
 |---|---|---|---|---|

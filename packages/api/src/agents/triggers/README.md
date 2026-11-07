@@ -78,7 +78,7 @@ Authenticated controllers and source adapters can enqueue the same durable envel
 agents feature permission, and the target agent's existing remote-view ACL. Send exactly one
 `Idempotency-Key` header and keep it stable when retrying the same source-event-to-target delivery.
 The authenticated user, tenant, API-key source identity, request id, and receive time are always
-supplied by LibreChat. Remote callers do not choose `event.source`; provider-specific webhook
+supplied by Baanzon Chat. Remote callers do not choose `event.source`; provider-specific webhook
 adapters may verify their native signature and map verified provider metadata into the trusted
 in-process adapter contract above.
 
@@ -112,7 +112,7 @@ For a bound `continue`, `succeeded` means generation admission succeeded, not th
 work finished. The status response therefore also exposes a durable `handling` lifecycle:
 `started`, followed by exactly one of `applied`, `completed_no_action`, `failed`, or `cancelled`.
 Action-aware bound-child sources may send an `expectedAction` containing a tool name and optional
-argument subset. LibreChat reports `applied` only when the exact generation completes with
+argument subset. Baanzon Chat reports `applied` only when the exact generation completes with
 host-observed tool evidence matching that contract; model-authored prose is never accepted as
 proof. Fire, steer, and unbound continue deliveries reject this contract.
 
@@ -173,7 +173,7 @@ Content-Type: application/json
 }
 ```
 
-LibreChat resolves the bound agent and child conversation from `(user, tenant, API key, binding)`;
+Baanzon Chat resolves the bound agent and child conversation from `(user, tenant, API key, binding)`;
 caller-supplied target fields are discarded. It also resolves the latest assistant branch leaf
 immediately before dispatch, so queued events do not persist stale chat topology. Each actor binding
 is its default ordering lane. A short-lived internal trigger token plus a second binding lookup is
@@ -213,7 +213,7 @@ compatible request:
 }
 ```
 
-LibreChat collects compatible events for up to 750 ms, with a maximum of 8 events and 512 KiB of
+Baanzon Chat collects compatible events for up to 750 ms, with a maximum of 8 events and 512 KiB of
 combined envelopes. It invokes the child once with a deterministic JSON document whose
 `kind` is `librechat.agent_event_batch`; the document contains every event, source input, delivery
 identity, and a count by event type. Each source event still requires its own stable

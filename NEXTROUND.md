@@ -10,7 +10,7 @@
 
 | ID  | Decision                                                       | Resolution                                                                                                                                                                                                                                                             |
 | --- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Licensing for subscription business (FREE/LITE/PRO/ENTERPRISE) | **MIT** for the LibreChat fork base (attribution required by upstream), **proprietary "Baanzon" terms** for Baanzon-original additions; unify the 4-way conflicting metadata (root `ISC`, MIT `LICENSE`, package `ISC`, data-schemas MIT). Add `NOTICE`/`ATTRIBUTION`. |
+| A1  | Licensing for subscription business (FREE/LITE/PRO/ENTERPRISE) | **MIT** for the Baanzon Chat fork base (attribution required by upstream), **proprietary "Baanzon" terms** for Baanzon-original additions; unify the 4-way conflicting metadata (root `ISC`, MIT `LICENSE`, package `ISC`, data-schemas MIT). Add `NOTICE`/`ATTRIBUTION`. |
 | A2  | `HELP_AND_FAQ_URL`                                             | `https://baanzonchat.opraiz.com`                                                                                                                                                                                                                                       |
 | A3  | `semanticSearch`                                               | **Wire it** (embedder + semantic client injection; keyword fallback guaranteed)                                                                                                                                                                                        |
 | A4  | Data engine for 28 §45 entities                                | **MongoDB primary (existing, mature) + PostgreSQL/pgvector as the durable vector store** for RAG. Lowest migration risk + durable RAG.                                                                                                                                 |
@@ -75,7 +75,7 @@ Each phase: implement with ≥7 agents/subagents in parallel → typecheck → f
 
 ### P2 — Production hardening
 
-- **P2.1** Live-config defaults: `APP_TITLE=Baanzon Chat`, `EMAIL_FROM` Baanzon address, `HELP_AND_FAQ_URL=https://baanzonchat.opraiz.com`, `MONGO_URI=.../BaanzonChat`; replace LibreChat ToS/contact in `baanzon.yaml` (legal copy).
+- **P2.1** Live-config defaults: `APP_TITLE=Baanzon Chat`, `EMAIL_FROM` Baanzon address, `HELP_AND_FAQ_URL=https://baanzonchat.opraiz.com`, `MONGO_URI=.../BaanzonChat`; replace Baanzon Chat ToS/contact in `baanzon.yaml` (legal copy).
 - **P2.2** Secrets fail-fast: refuse production boot without fixed JWT/CREDS secrets; `BAANZON_ALLOW_EPHEMERAL_SECRETS` escape hatch.
 - **P2.3** Docker: non-root `USER` in `Dockerfile.multi`; healthchecks in both compose files; `depends_on: service_healthy`; `.dockerignore` excludes `.env`, `*.env.temp`, uploads, logs, data-node.
 - **P2.4** Mongo `--auth`; pgvector creds parameterized; no public DB ports.
@@ -84,7 +84,7 @@ Each phase: implement with ≥7 agents/subagents in parallel → typecheck → f
 - **P2.7** Remove tracked debug artifacts (`packages/api/rt_dbg.txt`, `run1*.txt`, `runtime*.txt`, `junit.xml`).
 - **P2.8** License unification + `NOTICE`/`ATTRIBUTION`.
 - **P2.9** Remove `bun.lock` + 15 `b:*` scripts; regenerate lockfile root name → `baanzon-chat`.
-- **Acceptance:** compose boots with healthchecks; container runs non-root; `npm audit --level=high` clean; no `LibreChat` in live branding surfaces.
+- **Acceptance:** compose boots with healthchecks; container runs non-root; `npm audit --level=high` clean; no `Baanzon Chat` in live branding surfaces.
 
 ### P3 — Security & dependency hygiene
 

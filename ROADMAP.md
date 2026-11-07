@@ -70,7 +70,7 @@ metadata) — shipped layers are recorded in **Decided**. Remaining / unverified
 - **Brand assets** — verify Aurora mark logo SVG (no text), favicons/apple-touch-icon
   (Deep Ocean + Teal), OG/social meta, `theme-color` `#087F83`. Files:
   `client/public/assets/*`, `client/index.html`, `client/vite.config.ts`.
-- **Residual brand strings** — grep to zero user-visible `LibreChat` across
+- **Residual brand strings** — grep to zero user-visible `Baanzon Chat` across
   `client/`, `api/`, `.env.example`, `baanzon.example.yaml`, and all locale files.
   Known operator-visible residuals are tracked in `REMEDIATION-PLAN.md` (P0-7, P2-9/10/11).
 - **Package/CI identity** — package metadata + repository/homepage/bugs URLs in 6
@@ -80,7 +80,7 @@ metadata) — shipped layers are recorded in **Decided**. Remaining / unverified
   — 🚫 see **Decided** (Batch 27.5).
 
 **Completion criteria** (rebrand):
-- [ ] Zero user-visible `LibreChat` on any surface.
+- [ ] Zero user-visible `Baanzon Chat` on any surface.
 - [ ] Light theme matches Pearl palette exactly; dark matches Deep Ocean exactly.
 - [ ] Home matches blueprint §63.2 layout; composer placeholder "Ask Baanzon anything...".
 - [ ] All 30+ locale files updated.
@@ -219,7 +219,7 @@ Closed / shipped items removed from the outstanding lists above.
 - 1.3 README/docs user-facing rebrand.
 - 1.4 Protocol header decision: keep `X-LibreChat-Generation-Protocol` value (wire
   compat); rationale documented.
-- 1.5 Grep sweep: no user-visible `LibreChat` in client/public, index.html, manifest,
+- 1.5 Grep sweep: no user-visible `Baanzon Chat` in client/public, index.html, manifest,
   locales `en`.
 - 1.6 print/OCR brand strings extended.
 - **27.5 (deferred, 🚫):** rename of package import specifiers

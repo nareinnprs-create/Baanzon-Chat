@@ -4,7 +4,7 @@ Authoritative ledger for the approved remediation (approval stamp: 2026-10-21, u
 Rule: every item gets status PENDING / IN-PROGRESS / DONE / BLOCKED with evidence (file:line or verification command result). No item is DONE without verification.
 
 Context snapshot at approval time:
-- Repo: LibreChat/ (canonical), remote nareinnprs-create/Baanzon-Chat, branch b1 (tracks origin/b1, 0/0)
+- Repo: Baanzon Chat/ (canonical), remote nareinnprs-create/Baanzon-Chat, branch b1 (tracks origin/b1, 0/0)
 - Pending at approval: 26 modified + 3 untracked files
 - Local node v26.7.0 vs pinned 24.16.0 (.nvmrc); npm 12.0.2 vs packageManager npm@11.13.0
 
@@ -14,7 +14,7 @@ Context snapshot at approval time:
 
 | # | Item | Status | Evidence |
 |---|---|---|---|
-| A1.1 | Delete parent wrapper: temp_service.ts + parent .git (LibreChat/ stays canonical) | DONE | wrapper deleted; LibreChat/ is the canonical repo on b1 |
+| A1.1 | Delete parent wrapper: temp_service.ts + parent .git (Baanzon Chat/ stays canonical) | DONE | wrapper deleted; Baanzon Chat/ is the canonical repo on b1 |
 | A1.2 | git rm packages/api/run2.txt (tracked Jest log) | DONE | commit 6cd449a42 |
 | A1.3 | Delete untracked junk before commit: junit.xml (root), packages/api/junit.xml, coverage/, lc-reaper-*.pid in packages/api | DONE | commit 6cd449a42 |
 | A1.4 | Verify before commit: tsc --noEmit in packages/api + packages/data-schemas; targeted specs (projects handlers, chatProject) | DONE | tsc exit 0 both packages; projects handlers spec 29/29; chatProject spec 20/20 |
@@ -28,7 +28,7 @@ Context snapshot at approval time:
 | A2.1 | Switch to Node 24.16.0 (nvm) and run npm ci (sync node_modules with lock) | DONE | node shim resolves pinned 24.16.0/npm 11.13.0. Majors events reverted to pinned baseline (zod ^3.22.4 at packages/api/package.json:167 + data-provider:51; @tanstack/react-query ^4.28.0 peer at data-provider:76 + client:71; zod workspace deps kept as ^3.25.76 effective). Stale lock records removed (node_modules/zod, node_modules/@tanstack/react-query). **Plain `npm ci` exit 0 (3282 packages)**; resolved versions verified: root zod 3.25.76, root RQ 4.44.0, client zod and data-provider zod and packages api zod all resolve to root 3.25.76. Client jest suites are slow but pass (28–230s each, silent until done because coverage defaults ON via jest.config.cjs — see A2.6 note) |
 | A2.2 | Generate + set blank secrets in .env: JWT_SECRET, JWT_REFRESH_SECRET, CREDS_KEY, CREDS_IV, MEILI_MASTER_KEY, ADMIN_PANEL_SESSION_SECRET | DONE | all six written cryptographically random (128/128/64/32/64/96), each appearing exactly once, git-ignored |
 | A2.3 | Set deploy-compose required vars: MONGO_INITDB_ROOT_USERNAME/PASSWORD, POSTGRES_PASSWORD | DONE | MONGO creds set earlier; POSTGRES_PASSWORD generated (8+…3e8, 64 hex) into .env |
-| A2.4 | Create LibreChat/skill/ (.gitkeep) to satisfy Dockerfile.multi:114 COPY | DONE | skill/.gitkeep committed |
+| A2.4 | Create Baanzon Chat/skill/ (.gitkeep) to satisfy Dockerfile.multi:114 COPY | DONE | skill/.gitkeep committed |
 | A2.5 | Delete 7 broken scripts in api/package.json + 4 broken start:demo scripts in packages/api/package.json | DONE | removed both sets |
 | A2.6 | Verify: npm ls clean (no ELSPROBLEMS), docker compose config validation | DONE | `npm ci` exit 0 clean (see A2.1); `docker compose config --quiet` PASS for docker-compose.yml (UID/GID blank-string warnings only); **`docker compose -f deploy-compose.yml config` PASS (exit 0)** after POSTGRES_PASSWORD was added to .env |
 

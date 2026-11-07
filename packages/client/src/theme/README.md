@@ -3,7 +3,7 @@
 ## Versioned theme definitions
 
 New themes should use the versioned `ThemeDefinition` interface. Definitions are data-only, may
-provide separate light and dark overrides, and resolve missing values against LibreChat's bundled
+provide separate light and dark overrides, and resolve missing values against Baanzon Chat's bundled
 defaults before any CSS variables are applied.
 
 ```tsx

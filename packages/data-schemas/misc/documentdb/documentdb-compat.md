@@ -114,12 +114,12 @@ DB-enforced — documented, loud, but not fixable in application code.
 - **Transactions**: supported on 4.0+ instance-based ("Amazon DocumentDB …
   supports transactions in Amazon DocumentDB 4.0 and later" —
   [transactions.html](https://docs.aws.amazon.com/documentdb/latest/developerguide/transactions.html));
-  unsupported on 3.6 and elastic. LibreChat already probes at runtime
+  unsupported on 3.6 and elastic. Baanzon Chat already probes at runtime
   (`packages/data-schemas/src/utils/transactions.ts`, cached in
   `api/server/services/PermissionService.js`) and falls back to
   non-transactional writes — the same mode as standalone MongoDB without a
   replica set. DocumentDB's restrictions (1-minute execution limit, no cursors
-  in transactions, no retryable commit/abort) don't intersect LibreChat's
+  in transactions, no retryable commit/abort) don't intersect Baanzon Chat's
   usage.
 - **GridFS**: `packages/api/src/cache/keyvMongo.ts` only constructs a
   `GridFSBucket` when `useGridFS` is set — no caller ever sets it and the
@@ -128,7 +128,7 @@ DB-enforced — documented, loud, but not fixable in application code.
   clusters (elastic: no).
 - **TTL indexes**: supported everywhere including elastic. AWS warns deletion
   is best-effort ("Documents are not guaranteed to be deleted within any
-  specific period") — acceptable, since LibreChat treats TTL as cleanup, not
+  specific period") — acceptable, since Baanzon Chat treats TTL as cleanup, not
   as a security boundary.
 - **`$ifNull`**: supported on all versions (only its pipeline-update context
   was the problem).
@@ -240,7 +240,7 @@ is how it survived three audits.
 
 ## Support matrix and recommendation
 
-| Capability (LibreChat dependency)        | 3.6 | 4.0 | 5.0 | 8.0 | Elastic |
+| Capability (Baanzon Chat dependency)        | 3.6 | 4.0 | 5.0 | 8.0 | Elastic |
 | ---------------------------------------- | --- | --- | --- | --- | ------- |
 | Pipeline updates (**no longer used**)    | ✗   | ✗   | ✗   | ?   | ✗       |
 | Plain update operators (all writes now)  | ✓   | ✓   | ✓   | ✓   | ✓       |

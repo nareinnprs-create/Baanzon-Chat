@@ -7,7 +7,7 @@
 
 | Dependency | State | What it means for this spec |
 |---|---|---|
-| Background capability core (`packages/api/src/agents/background.ts` + `background.spec.ts`) | **merged in LibreChat main** | the reference implementation exists today; clone it freely |
+| Background capability core (`packages/api/src/agents/background.ts` + `background.spec.ts`) | **merged in Baanzon Chat main** | the reference implementation exists today; clone it freely |
 | [#14407](https://github.com/danny-avila/LibreChat/pull/14407) — Background Execution Toggles for Actions & Plugin Tools | **open** | this is the "bg tools open PR"; only slice 5 (builder toggles) sequences after it |
 | Activity labels, SDK side (`Run.generateActivityLabel`, `src/prompts/activityLabel.ts`, `src/types/activityLabel.ts`, `ACTIVITY_LABEL_PROMPT`) | **merged & published** in `@librechat/agents@3.3.0` ([danny-avila/agents#327](https://github.com/danny-avila/agents/pull/327)) | treat as existing API, build on it directly |
 | [#14391](https://github.com/danny-avila/LibreChat/pull/14391) — Activity Groups With Fast-Model Headers (LibreChat host side) | **open, near merge** | reshapes `ToolCallGroup` grouping and header precedence; §5.2, §9.2, and §10.10 assume it lands first and specify the composition explicitly |
@@ -258,7 +258,7 @@ Six to eight edit sites cover three engines and all file CRUD. Still verify per 
 | `subagent` | `SUBAGENT` | intent is the card header; `ON_SUBAGENT_UPDATE.label` stays the ticker |
 | `skill` | `SKILL_TOOL` | |
 | `tool_search` | `TOOL_SEARCH` | "Looking for a tool that can convert PDFs" |
-| `web_search` | `WEB_SEARCH` | SDK constant; LibreChat's implementation is host-side |
+| `web_search` | `WEB_SEARCH` | SDK constant; Baanzon Chat's implementation is host-side |
 
 **Host (`danny-avila/LibreChat`)**
 
@@ -286,7 +286,7 @@ Every injected tool must call `stripIntent` before validating or using its args,
 
 ### 6.5 The `edit_file` collision
 
-`edit_file` exists in both surfaces: the SDK coding suite (`Constants.EDIT_FILE`) and LibreChat's skill-authoring tool (`EDIT_FILE_TOOL_NAME`, matched by `FILE_AUTHORING_TOOLS` in `useStepHandler.ts` alongside `create_file`). Consequences:
+`edit_file` exists in both surfaces: the SDK coding suite (`Constants.EDIT_FILE`) and Baanzon Chat's skill-authoring tool (`EDIT_FILE_TOOL_NAME`, matched by `FILE_AUTHORING_TOOLS` in `useStepHandler.ts` alongside `create_file`). Consequences:
 
 - Host injection must be idempotent against an SDK-injected schema (`if (INTENT_ARG in existingProps) return def;`). Add an explicit test for this pair, because double injection would move `intent` out of first position.
 - Icon and label resolution in `client/src/utils` keys on the shared name, so both render identically. That should stay true.
@@ -319,7 +319,7 @@ Everything here ships as a minor `@librechat/agents` release (3.4.x), mirroring 
 
 ---
 
-## 8. Implementation: LibreChat host
+## 8. Implementation: Baanzon Chat host
 
 ### 8.1 New module `packages/api/src/agents/intent.ts`
 
@@ -562,7 +562,7 @@ Borrow #14391's tracing decisions wholesale; they are the template for how a lab
 
 What #14391 established:
 
-- Label generations are traced through `run.generateActivityLabel` with the **conversation as the Langfuse session** and a per-batch trace seed, so they group under their conversation (trace name `LibreChat Activity Label`, tags `["librechat", "activity-label"]`) instead of appearing as orphans.
+- Label generations are traced through `run.generateActivityLabel` with the **conversation as the Langfuse session** and a per-batch trace seed, so they group under their conversation (trace name `Baanzon Chat Activity Label`, tags `["librechat", "activity-label"]`) instead of appearing as orphans.
 - The executing agent is forwarded (`RunActivityLabelOptions.agentId`), which selects that agent's trace metadata **and its tool-output redaction policy** — a stricter per-agent overlay cannot leak through the label path.
 
 What intents add — with **no new model call and no new trace**:
@@ -683,9 +683,9 @@ Six PRs, each independently reviewable and shippable. Dependencies are explicit 
 
 1. **SDK core** (`danny-avila/agents`). `intentArg.ts`, `applyOutcome`, `outcome` / `outcome_patch` on results, `ToolNode` threading, unit tests. No behavior change until a tool opts in.
 2. **SDK native tools** (`danny-avila/agents`). Schema-level injection per §6.2, coverage pin test, all three engines. Slices 1–2 can ship as one minor release (3.4.x), mirroring how #327 shipped ahead of its host PR.
-3. **Host** (LibreChat, requires the published SDK bump). `intent.ts`, `handlers.ts` strip, capability plumbing through all four routes, schema and config surface, `web_search`, `create_file` / `edit_file`, memory tools, tests cloned from `background.spec.ts`.
-4. **UI** (LibreChat, **rebases on #14391's `ToolCallGroup` shape — land after it**). Partial-JSON parser, per-card label, three-phase group header, shimmer, sanitization, i18n fallbacks.
-5. **Builder toggles** (LibreChat, **after #14407** so the switches extend its shared component rather than forking it). Including encoded-domain aliasing and the bulk toggle.
+3. **Host** (Baanzon Chat, requires the published SDK bump). `intent.ts`, `handlers.ts` strip, capability plumbing through all four routes, schema and config surface, `web_search`, `create_file` / `edit_file`, memory tools, tests cloned from `background.spec.ts`.
+4. **UI** (Baanzon Chat, **rebases on #14391's `ToolCallGroup` shape — land after it**). Partial-JSON parser, per-card label, three-phase group header, shimmer, sanitization, i18n fallbacks.
+5. **Builder toggles** (Baanzon Chat, **after #14407** so the switches extend its shared component rather than forking it). Including encoded-domain aliasing and the bulk toggle.
 6. **Anchors, traces, and activity-label integration** (both repos, **after #14391 merges**). Langfuse span annotation per §11.3, batch-entry enrichment per §10.10, ledger derivation, compaction survival, HITL payload threading, named checkpoints.
 
 **Documentation** in `librechat.ai`: a single **"Tool capability conventions"** page documenting `defer_loading`, `allowed_callers`, `run_in_background`, and `describe_intent` as one family, with the shared shape spelled out (per-tool `tool_options` key, admin capability gate, injection or metadata mechanism, self-spawn stripping obligation, token cost). Plus a `baanzon.example.yaml` entry, and a cross-reference from the activity-labels docs explaining the two-layer labeling model (§11.2) so admins understand they compose rather than compete. This page is the deliverable that turns four features into a convention, so it is not optional.

@@ -245,7 +245,7 @@ not present for a full matrix run, and the enforcing run happens in the
 
 A `C:\Users\manag\node_modules` directory exists **outside** this repository.
 Node and TypeScript resolution walks up from
-`C:\Users\manag\Baanzon Chat\LibreChat\client` and finds it, so packages missing
+`C:\Users\manag\Baanzon Chat\Baanzon Chat\client` and finds it, so packages missing
 from the repo's own tree are resolved from there instead of failing. Its
 `@types/react` is **19.3.0** while the repo pins **18.2.53**.
 

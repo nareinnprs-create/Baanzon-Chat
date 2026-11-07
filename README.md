@@ -17,7 +17,7 @@
     <img
       src="https://img.shields.io/discord/1086345563026489514?label=&logo=discord&style=for-the-badge&logoWidth=20&logoColor=white&labelColor=000000&color=blueviolet">
   </a>
-  <a href="https://www.youtube.com/@LibreChat"> 
+  <a href="https://www.youtube.com/@Baanzon Chat"> 
     <img
       src="https://img.shields.io/badge/YOUTUBE-red.svg?style=for-the-badge&logo=youtube&logoColor=white&labelColor=000000&logoWidth=20">
   </a>
