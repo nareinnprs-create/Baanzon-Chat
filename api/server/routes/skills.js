@@ -100,7 +100,15 @@ router.use(checkSkillAccess);
 // CRUD handlers
 // ---------------------------------------------------------------------------
 const { getSkillsHandlers } = require('~/server/services/Skills/handlers');
+const { getSkillTreeHandlers } = require('~/server/services/Skills/treeHandlers');
 const handlers = getSkillsHandlers();
+
+/**
+ * The skill-tree handlers are built once and share this router's auth/config
+ * middleware. Deps are resolved in the service module, so this file only wires
+ * routes.
+ */
+const treeHandlers = getSkillTreeHandlers();
 
 // ---------------------------------------------------------------------------
 // File storage helper: resolve the active strategy's saveBuffer
@@ -331,6 +339,52 @@ router.delete(
   '/:id/files/*relativePath',
   canAccessSkillResource({ requiredPermission: PermissionBits.EDIT }),
   handlers.deleteFile,
+);
+
+// ---------------------------------------------------------------------------
+// Skill tree (phase 2) — derived filesystem view over the skill body + files.
+// Node ids are skill-relative paths; content routes are registered before the
+// bare node wildcard so a trailing `/content` segment routes here (the wildcard
+// is greedy and would otherwise swallow it).
+// ---------------------------------------------------------------------------
+router.get(
+  '/:id/tree',
+  canAccessSkillResource({ requiredPermission: PermissionBits.VIEW }),
+  treeHandlers.getTree,
+);
+
+router.post(
+  '/:id/tree',
+  canAccessSkillResource({ requiredPermission: PermissionBits.EDIT }),
+  fileUploadIpLimiter,
+  fileUploadUserLimiter,
+  singleFileUpload.single('file'),
+  restoreTenantContextFromReq,
+  treeHandlers.createNode,
+);
+
+router.get(
+  '/:id/tree/*nodePath/content',
+  canAccessSkillResource({ requiredPermission: PermissionBits.VIEW }),
+  treeHandlers.getNodeContent,
+);
+
+router.put(
+  '/:id/tree/*nodePath/content',
+  canAccessSkillResource({ requiredPermission: PermissionBits.EDIT }),
+  treeHandlers.updateNodeContent,
+);
+
+router.patch(
+  '/:id/tree/*nodePath',
+  canAccessSkillResource({ requiredPermission: PermissionBits.EDIT }),
+  treeHandlers.updateNode,
+);
+
+router.delete(
+  '/:id/tree/*nodePath',
+  canAccessSkillResource({ requiredPermission: PermissionBits.EDIT }),
+  treeHandlers.deleteNode,
 );
 
 // Multer + file-filter error handler — surface as 400, forward everything else

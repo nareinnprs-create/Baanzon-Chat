@@ -60,7 +60,13 @@ export default function useContentHandler({ setMessages, getMessages }: TUseCont
         messageMap.set(messageId, response);
       }
 
-      // TODO: handle streaming for non-text
+      /** Non-text content types the backend emits on this path (`data.type`):
+       *  `tool_call` (StreamRunManager tool streams, ToolService required
+       *  actions) and `image_file` (image-gen tool outputs) — both land in the
+       *  content array below via `data[type]`, image files additionally go
+       *  through `addFileToCache`. THINK/reasoning never traverses this path:
+       *  it streams as `ON_REASONING_DELTA` step events handled by
+       *  `useStepHandler`, and arrives intact in `final`/`sync` payloads. */
       const textPart: Text | string | undefined = data[ContentTypes.TEXT];
       const part: ContentPart =
         textPart != null && typeof textPart === 'string' ? { value: textPart } : data[type];

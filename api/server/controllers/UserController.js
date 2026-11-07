@@ -68,8 +68,36 @@ const sanitizeUserForResponse = (user) => {
   }, {});
 };
 
-const getUserController = async (req, res) => {
-  const appConfig = req.config ?? (await getAppConfig(getAppConfigOptionsFromUser(req.user)));
+/** GDPR data export: the user's profile, conversations, messages, billing rows. */
+const exportUserDataController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const oid = new mongoose.Types.ObjectId(String(userId));
+    const dbc = mongoose.connection.db;
+    const sensitive = { projection: { totpSecret: 0, pendingTotpSecret: 0, backupCodes: 0, pendingBackupCodes: 0, password: 0, refreshTokens: 0 } };
+    const [user, conversations, messages, subscriptions, balances, transactions] = await Promise.all([
+      dbc.collection('users').findOne({ _id: oid }, sensitive),
+      dbc.collection('conversations').find({ $or: [{ user: oid }, { user: String(userId) }] }).sort({ updatedAt: -1 }).toArray(),
+      dbc.collection('messages').find({ $or: [{ user: oid }, { user: String(userId) }] }).sort({ createdAt: 1 }).toArray(),
+      dbc.collection('subscriptions').find({ $or: [{ userId: oid }, { userId: String(userId) }] }).toArray(),
+      dbc.collection('balances').find({ $or: [{ user: oid }, { user: String(userId) }] }).toArray(),
+      dbc.collection('transactions').find({ $or: [{ userId: oid }, { user: oid }] }).sort({ createdAt: 1 }).toArray(),
+    ]);
+    res.setHeader('Content-Disposition', 'attachment; filename="baanzon-export.json"');
+    return res.json({
+      exportedAt: new Date().toISOString(),
+      profile: user,
+      conversations,
+      messages,
+      billing: { subscriptions, balances, transactions },
+    });
+  } catch (error) {
+    logger.error('[exportUserData]', error);
+    return res.status(500).json({ message: 'Error exporting user data' });
+  }
+};
+
+const getUserController = async (req, res) => {  const appConfig = req.config ?? (await getAppConfig(getAppConfigOptionsFromUser(req.user)));
   /** @type {IUser} */
   const userData = sanitizeUserForResponse(req.user);
   if (appConfig.fileStrategy === FileSources.s3 && userData.avatar) {
@@ -620,6 +648,7 @@ const resendVerificationController = async (req, res) => {
 
 module.exports = {
   getUserController,
+  exportUserDataController,
   getTermsStatusController,
   acceptTermsController,
   deleteUserController,

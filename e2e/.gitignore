@@ -1,0 +1,6 @@
+# Generated e2e output — never committed. Kept here rather than in the root
+# .gitignore so the lane owns its own artifacts.
+test-results/
+playwright-report/
+lighthouse-report/
+.lighthouseci/

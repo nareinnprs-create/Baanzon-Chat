@@ -13,6 +13,7 @@ const { getStrategyFunctions } = require('~/server/services/Files/strategies');
 const { resizeAvatar } = require('~/server/services/Files/images/avatar');
 const { getFileStrategy } = require('~/server/utils/getFileStrategy');
 const { filterFile } = require('~/server/services/Files/process');
+const { validateMagicBytes } = require('~/server/utils/magicBytes');
 
 const router = express.Router();
 
@@ -20,6 +21,10 @@ router.post('/', async (req, res) => {
   try {
     const appConfig = req.config;
     filterFile({ req, file: req.file, image: true, isAvatar: true });
+    const magicError = await validateMagicBytes(req.file.path, req.file.mimetype, req.file.originalname);
+    if (magicError) {
+      return res.status(400).json({ message: magicError });
+    }
     if (hasActiveFileFieldPolicy(req.config?.filters, ['name', 'content'])) {
       const finding = inspectContent(extractFileContent({ name: req.file.originalname }), {
         filters: req.config.filters,

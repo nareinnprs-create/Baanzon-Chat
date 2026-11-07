@@ -110,8 +110,11 @@ export const highContrastLightTheme: IThemeRGB = {
   'rgb-syntax-attr': '85 73 180', // #5549b4
   'rgb-syntax-title': '143 26 16', // #8f1a10
 
-  /** Categorical series scale at AAA on white canvas. */
-  'rgb-series-1': '0 80 77', // #00504d (Baanzon teal)
+  /** Categorical series scale at AAA on white canvas. Slot 1 must stay clear of
+   *  `rgb-status-success-strong`, which is also teal: Gantt draws a pending task
+   *  in slot 1 and a completed one in the success fill, so a shared hue makes
+   *  "done" indistinguishable from "not started". */
+  'rgb-series-1': '11 79 160', // #0b4fa0
   'rgb-series-2': '143 59 0', // #8f3b00
   'rgb-series-3': '0 82 79', // #00524f
   'rgb-series-4': '92 74 0', // #5c4a00
@@ -228,14 +231,17 @@ export const highContrastDarkTheme: IThemeRGB = {
   'rgb-syntax-attr': '169 152 255', // #A998FF (Orchid)
   'rgb-syntax-title': '255 143 143', // #ff8f8f
 
-  /** Categorical series scale at AAA on dark canvas. */
-  'rgb-series-1': '70 226 210', // #46E2D2
+  /** Categorical series scale at AAA on dark canvas. Every slot must be a
+   *  distinct hue: the seventh wraps back to the first once mermaid asks for
+   *  more, so a repeat here silently merges two pie slices or two Git branches
+   *  into one another. */
+  'rgb-series-1': '107 184 255', // #6bb8ff
   'rgb-series-2': '255 179 102', // #ffb366
   'rgb-series-3': '53 214 199', // #35D6C7
   'rgb-series-4': '216 194 157', // #D8C29D (Champagne)
   'rgb-series-5': '169 152 255', // #A998FF (Orchid)
   'rgb-series-6': '19 166 160', // #13A6A0 (Dark Teal)
-  'rgb-series-7': '70 226 210', // #46E2D2
+  'rgb-series-7': '140 230 140', // #8ce68c
 
   'rgb-switch-unchecked': '128 128 128', // #808080
 

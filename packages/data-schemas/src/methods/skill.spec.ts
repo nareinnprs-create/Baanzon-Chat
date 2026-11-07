@@ -8,6 +8,7 @@ import {
   PrincipalType,
   PermissionBits,
 } from 'librechat-data-provider';
+import type { SkillTreeNode } from './skill';
 import {
   partitionIssues,
   validateSkillName,
@@ -2280,5 +2281,224 @@ describe('deleteUserSkills', () => {
     } | null;
     expect(agentAfter?.skills).toEqual([]);
     expect(agentAfter?.skills_enabled).toBe(false);
+  });
+});
+
+describe('skill tree methods', () => {
+  async function seedFile(
+    skillId: mongoose.Types.ObjectId | string,
+    relativePath: string,
+    overrides: Record<string, unknown> = {},
+  ) {
+    return methods.upsertSkillFile({
+      skillId,
+      relativePath,
+      file_id: `file-${relativePath}`,
+      filename: relativePath.split('/').pop() as string,
+      filepath: `/tmp/${relativePath}`,
+      source: 'local',
+      mimeType: 'text/plain',
+      bytes: 5,
+      author: owner._id,
+      ...overrides,
+    });
+  }
+
+  function nodeAt(nodes: SkillTreeNode[] | null, id: string) {
+    return nodes?.find((node) => node._id === id);
+  }
+
+  describe('listSkillTree', () => {
+    it('returns null for a skill that does not exist', async () => {
+      const missing = new mongoose.Types.ObjectId();
+      await expect(methods.listSkillTree(missing)).resolves.toBeNull();
+    });
+
+    it('derives SKILL.md, synthesized folders, and files with server order', async () => {
+      const { skill } = await methods.createSkill(makeSkillInput());
+      await seedFile(skill._id, 'README.md');
+      await seedFile(skill._id, 'scripts/run.sh');
+      await seedFile(skill._id, 'scripts/lib/util.ts');
+
+      const nodes = await methods.listSkillTree(skill._id);
+      expect(nodes).not.toBeNull();
+
+      const ids = (nodes ?? []).map((node) => node._id);
+      expect(ids).toEqual([
+        'README.md',
+        'SKILL.md',
+        'scripts',
+        'scripts/lib',
+        'scripts/run.sh',
+        'scripts/lib/util.ts',
+      ]);
+
+      expect(nodeAt(nodes, 'SKILL.md')).toMatchObject({
+        type: 'file',
+        parentId: null,
+        name: 'SKILL.md',
+      });
+      expect(nodeAt(nodes, 'scripts')).toMatchObject({
+        type: 'folder',
+        parentId: null,
+        name: 'scripts',
+      });
+      expect(nodeAt(nodes, 'scripts/run.sh')).toMatchObject({
+        type: 'file',
+        parentId: 'scripts',
+        name: 'run.sh',
+      });
+
+      // Root siblings: folder first, then files lexicographically.
+      expect(nodeAt(nodes, 'scripts')?.order).toBe(0);
+      expect(nodeAt(nodes, 'README.md')?.order).toBe(1);
+      expect(nodeAt(nodes, 'SKILL.md')?.order).toBe(2);
+      // Nested siblings: folder `lib` before file `run.sh`.
+      expect(nodeAt(nodes, 'scripts/lib')?.order).toBe(0);
+      expect(nodeAt(nodes, 'scripts/run.sh')?.order).toBe(1);
+    });
+
+    it('lets a file node win over a derived folder sharing its path', async () => {
+      const { skill } = await methods.createSkill(makeSkillInput());
+      await seedFile(skill._id, 'scripts');
+      await seedFile(skill._id, 'scripts/run.sh');
+
+      const nodes = await methods.listSkillTree(skill._id);
+      expect(nodeAt(nodes, 'scripts')).toMatchObject({ type: 'file' });
+      // The descendant still resolves; its parent is the file node.
+      expect(nodeAt(nodes, 'scripts/run.sh')).toMatchObject({ parentId: 'scripts' });
+    });
+  });
+
+  describe('renameSkillNode', () => {
+    it('renames an exact file row without changing fileCount', async () => {
+      const { skill } = await methods.createSkill(makeSkillInput());
+      await seedFile(skill._id, 'old.md');
+
+      const result = await methods.renameSkillNode({
+        skillId: skill._id.toString(),
+        fromPath: 'old.md',
+        toPath: 'new.md',
+      });
+      expect(result).toEqual({ status: 'ok', renamed: 1 });
+
+      const files = await methods.listSkillFiles(skill._id);
+      expect(files.map((f) => f.relativePath)).toEqual(['new.md']);
+      expect(files[0].filename).toBe('new.md');
+
+      const after = await methods.getSkillById(skill._id);
+      expect(after?.fileCount).toBe(1);
+      expect(after?.version).toBe(3);
+    });
+
+    it('rewrites the path prefix of a derived folder subtree', async () => {
+      const { skill } = await methods.createSkill(makeSkillInput());
+      await seedFile(skill._id, 'scripts/run.sh');
+      await seedFile(skill._id, 'scripts/lib/util.ts');
+
+      const result = await methods.renameSkillNode({
+        skillId: skill._id.toString(),
+        fromPath: 'scripts',
+        toPath: 'tools',
+      });
+      expect(result).toEqual({ status: 'ok', renamed: 2 });
+
+      const files = await methods.listSkillFiles(skill._id);
+      expect(files.map((f) => f.relativePath).sort()).toEqual([
+        'tools/lib/util.ts',
+        'tools/run.sh',
+      ]);
+    });
+
+    it('reports a conflict when the target path already exists', async () => {
+      const { skill } = await methods.createSkill(makeSkillInput());
+      await seedFile(skill._id, 'a.md');
+      await seedFile(skill._id, 'b.md');
+
+      const result = await methods.renameSkillNode({
+        skillId: skill._id.toString(),
+        fromPath: 'a.md',
+        toPath: 'b.md',
+      });
+      expect(result).toEqual({ status: 'conflict', renamed: 0 });
+    });
+
+    it('reports not_found when neither a file nor a folder matches', async () => {
+      const { skill } = await methods.createSkill(makeSkillInput());
+      const result = await methods.renameSkillNode({
+        skillId: skill._id.toString(),
+        fromPath: 'nope',
+        toPath: 'x',
+      });
+      expect(result).toEqual({ status: 'not_found', renamed: 0 });
+    });
+
+    it('reports not_found for a missing skill', async () => {
+      const result = await methods.renameSkillNode({
+        skillId: new mongoose.Types.ObjectId().toString(),
+        fromPath: 'a',
+        toPath: 'b',
+      });
+      expect(result).toEqual({ status: 'not_found', renamed: 0 });
+    });
+  });
+
+  describe('deleteSkillNode', () => {
+    it('deletes an exact file row and returns blob refs', async () => {
+      const { skill } = await methods.createSkill(makeSkillInput());
+      await seedFile(skill._id, 'keep.md');
+      await seedFile(skill._id, 'drop.md');
+
+      const result = await methods.deleteSkillNode({
+        skillId: skill._id.toString(),
+        path: 'drop.md',
+      });
+      expect(result.status).toBe('ok');
+      expect(result.deleted).toBe(1);
+      expect(result.files).toHaveLength(1);
+      expect(result.files[0]).toMatchObject({
+        relativePath: 'drop.md',
+        filepath: '/tmp/drop.md',
+        source: 'local',
+        author: owner._id.toString(),
+      });
+
+      const files = await methods.listSkillFiles(skill._id);
+      expect(files.map((f) => f.relativePath)).toEqual(['keep.md']);
+      const after = await methods.getSkillById(skill._id);
+      expect(after?.fileCount).toBe(1);
+    });
+
+    it('deletes an entire derived folder subtree', async () => {
+      const { skill } = await methods.createSkill(makeSkillInput());
+      await seedFile(skill._id, 'scripts/run.sh');
+      await seedFile(skill._id, 'scripts/lib/util.ts');
+      await seedFile(skill._id, 'keep.md');
+
+      const result = await methods.deleteSkillNode({
+        skillId: skill._id.toString(),
+        path: 'scripts',
+      });
+      expect(result.status).toBe('ok');
+      expect(result.deleted).toBe(2);
+      expect(result.files.map((f) => f.relativePath).sort()).toEqual([
+        'scripts/lib/util.ts',
+        'scripts/run.sh',
+      ]);
+
+      const files = await methods.listSkillFiles(skill._id);
+      expect(files.map((f) => f.relativePath)).toEqual(['keep.md']);
+      const after = await methods.getSkillById(skill._id);
+      expect(after?.fileCount).toBe(1);
+    });
+
+    it('reports not_found when nothing matches', async () => {
+      const { skill } = await methods.createSkill(makeSkillInput());
+      const result = await methods.deleteSkillNode({
+        skillId: skill._id.toString(),
+        path: 'nope',
+      });
+      expect(result).toEqual({ status: 'not_found', deleted: 0, files: [] });
+    });
   });
 });

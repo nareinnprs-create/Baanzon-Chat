@@ -7,13 +7,30 @@
     "declarationMap": false,
     "declarationDir": null,
     "outDir": null,
-    "types": ["jest", "node"]
+    // The parent config pairs `isolatedDeclarations` with `declaration` for the
+    // tsdown build. This project never emits, and tsc rejects the option
+    // outright without `declaration`/`composite` (TS5069), so it is off here.
+    "isolatedDeclarations": false,
+    // `allowJs` so the two `.spec.js` files jest runs are program roots too, and
+    // so the `.js` theme helper the specs import resolves to inferred types
+    // rather than tripping TS7016 at the import site.
+    "allowJs": true,
+    // jest for the globals the specs call, node for `process`/`Buffer`, and
+    // vite/client for `import.meta.env` — src/components/DataTable/
+    // DataTableErrorBoundary.tsx reads `import.meta.env.MODE`, and with `types`
+    // pinned it is the only declaration of ImportMetaEnv in the program.
+    // Left unset instead, TypeScript pulls every one of the ~105 `@types/*`
+    // packages hoisted at the monorepo root, which drags in @types/bun and its
+    // `fetch.preconnect` augmentation — a browser package typed by a Bun global.
+    "types": ["jest", "node", "vite/client"]
   },
   "include": [
     "src/**/*.spec.ts",
     "src/**/*.spec.tsx",
+    "src/**/*.spec.js",
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
+    "src/**/*.test.js",
     "jest.setup.ts"
   ],
   "exclude": ["dist", "node_modules"]

@@ -39,6 +39,14 @@ jest.mock('fs', () => ({
   mkdirSync: jest.fn(),
   promises: { writeFile: jest.fn(), readFile: jest.fn(), unlink: jest.fn() },
 }));
+jest.mock('~/models', () => ({
+  createTransaction: jest.fn(),
+}));
+jest.mock('@librechat/api', () => ({
+  ...jest.requireActual('@librechat/api'),
+  getBalanceConfig: jest.fn(() => ({ enabled: false })),
+  getTransactionsConfig: jest.fn(() => ({ enabled: false })),
+}));
 
 const FAKE_BASE64 = 'aGVsbG8=';
 

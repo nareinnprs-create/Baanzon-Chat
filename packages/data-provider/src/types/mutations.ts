@@ -403,7 +403,10 @@ export type UpdateMarketplacePermOptions = MutationOptions<
   types.TError | null | undefined
 >;
 
-/* Skill tree / node mutations (phase 2 — stubbed in data-service) */
+/* Skill tree / node mutation types (phase 2). The data-service methods behind
+ * these options now issue real requests to the skill-tree routes, so the hooks
+ * no longer compile against stubs. UI wiring (mounting the tree hooks) is the
+ * remaining step. */
 
 export type CreateSkillNodeBody = {
   skillId: string;

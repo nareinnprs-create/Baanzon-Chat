@@ -10,42 +10,43 @@
 :root {
   --white: 255 255 255;
   --black: 0 0 0;
-  --gray-20: 240 244 242;
-  --gray-50: 247 250 248;
-  --gray-100: 239 246 243;
-  --gray-200: 221 233 229;
-  --gray-300: 200 218 214;
-  --gray-400: 160 185 180;
-  --gray-500: 110 127 128;
-  --gray-600: 82 104 106;
-  --gray-650: 63 82 84;
-  --gray-700: 46 66 69;
-  --gray-800: 16 42 45;
-  --gray-850: 10 28 32;
-  --gray-875: 8 22 25;
-  --gray-900: 6 19 22;
-  --green-50: 240 250 249;
-  --green-100: 213 240 238;
-  --green-200: 168 228 224;
-  --green-300: 108 207 201;
-  --green-400: 70 226 210;
-  --green-500: 53 214 199;
-  --green-600: 19 166 160;
-  --green-700: 8 127 131;
-  --green-800: 6 107 111;
-  --green-900: 6 83 90;
-  --green-950: 6 60 69;
-  --red-50: 254 242 242;
-  --red-100: 254 226 226;
-  --red-200: 254 202 202;
-  --red-300: 252 165 165;
-  --red-400: 248 113 113;
-  --red-500: 239 68 68;
-  --red-600: 220 38 38;
-  --red-700: 185 28 28;
-  --red-800: 153 27 27;
-  --red-900: 127 29 29;
-  --red-950: 69 10 10;
+  /* Graphite ramp — cool, violet-leaning greys shared by both modes. */
+  --gray-20: 251 251 253; /* #FBFBFD */
+  --gray-50: 250 250 252; /* #FAFAFC */
+  --gray-100: 240 240 244; /* #F0F0F4 */
+  --gray-200: 228 228 234; /* #E4E4EA */
+  --gray-300: 211 211 219; /* #D3D3DB */
+  --gray-400: 173 173 185; /* #ADADB9 */
+  --gray-500: 131 131 143; /* #83838F */
+  --gray-600: 82 82 94; /* #52525E */
+  --gray-650: 66 66 76; /* #42424C */
+  --gray-700: 43 43 51; /* #2B2B33 */
+  --gray-800: 23 23 28; /* #17171C */
+  --gray-850: 21 21 27; /* #15151B elevated */
+  --gray-875: 18 18 23; /* #121217 */
+  --gray-900: 11 11 15; /* #0B0B0F */
+  --green-50: 235 250 243;
+  --green-100: 209 244 226;
+  --green-200: 172 232 201;
+  --green-300: 121 219 175;
+  --green-400: 74 222 128;
+  --green-500: 34 197 94;
+  --green-600: 22 163 74;
+  --green-700: 21 128 61;
+  --green-800: 22 101 52;
+  --green-900: 20 82 45;
+  --green-950: 13 42 26;
+  --red-50: 254 242 244;
+  --red-100: 254 227 231;
+  --red-200: 255 203 210;
+  --red-300: 255 154 165; /* #FF9AA5 */
+  --red-400: 255 92 108; /* #FF5C6C */
+  --red-500: 243 68 86; /* #F34456 */
+  --red-600: 217 40 56; /* #D92838 */
+  --red-700: 178 24 40; /* #B21828 */
+  --red-800: 143 18 32;
+  --red-900: 118 14 28;
+  --red-950: 66 6 14;
   --amber-50: 255 251 235;
   --amber-100: 254 243 199;
   --amber-200: 253 230 138;
@@ -94,6 +95,57 @@
   --avatar-falloff: 0.45;
   --avatar-ease-in: cubic-bezier(0.22, 1, 0.36, 1);
   --avatar-ease-out: cubic-bezier(0.34, 3.85, 0.64, 1);
+}
+
+/* Streaming affordance (Batch D): a quiet 2px progress filament across the top
+ * edge of the composer surface while a run is in flight. It sweeps with the
+ * signature brand gradient's hue family (iris), stops mid-loop like the text
+ * cursor does, and flattens to a static low-alpha filament under
+ * prefers-reduced-motion — motion-free but still present. */
+.composer-sig-streaming {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 999px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.composer-sig-streaming::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-60%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--accent-primary) / 0.7) 45%,
+    rgb(var(--link-hover) / 0.9) 60%,
+    transparent
+  );
+  animation: composer-sig-sweep 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes composer-sig-sweep {
+  0% {
+    transform: translateX(-60%);
+  }
+  62% {
+    transform: translateX(0%);
+  }
+  82% {
+    transform: translateX(85%);
+  }
+  100% {
+    transform: translateX(85%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .composer-sig-streaming::before {
+    transform: none;
+    background: rgb(var(--accent-primary) / 0.35);
+    animation: none;
+  }
 }
 
 /* Icon swap — cross-fade two icons sharing a slot. */
@@ -151,40 +203,40 @@ html {
   --presentation: var(--white);
   --text-primary: var(--gray-800);
   --text-secondary: var(--gray-600);
-  --text-secondary-alt: var(--gray-500);
-  --text-tertiary: var(--gray-500);
-  --text-muted: 105 110 121; /* Click UI global.color.text.muted #696e79 */
-  --shimmer-dip: 129 130 134;
+  --text-secondary-alt: 107 107 117; /* #6B6B75 (Muted Text, WCAG AA) */
+  --text-tertiary: 107 107 117;
+  --text-muted: 107 107 117;
+  --shimmer-dip: var(--gray-500);
   --shimmer-dip-alpha: 0.18;
   --text-warning: var(--amber-700);
   --text-destructive: var(--red-600);
-  --link: var(--blue-600);
-  --link-hover: var(--blue-700);
-  --link-visited: 147 51 234;
-  --accent-primary: 8 127 131; /* #087F83 Baanzon Teal */
-  --accent-primary-hover: 6 107 111;
-  --ring-primary: 8 127 131;
+  --link: 91 75 212; /* #5B4BD4 Velvet Iris, stepped for the paper canvas */
+  --link-hover: 74 59 191; /* #4A3BBF Iris darker */
+  --link-visited: 106 62 200; /* #6A3EC8 Iris visited */
+  --accent-primary: 109 92 230; /* #6D5CE6 Velvet Iris */
+  --accent-primary-hover: 91 75 212; /* #5B4BD4 */
+  --ring-primary: 109 92 230; /* #6D5CE6 Velvet Iris */
   --header-primary: var(--white);
   --header-hover: var(--gray-50);
   --header-button-hover: var(--gray-50);
-  --surface-active: var(--gray-100);
+  --surface-active: 239 239 244;
   --surface-active-alt: var(--gray-200);
-  --surface-hover: var(--gray-200);
-  --surface-hover-alt: var(--gray-300);
-  --surface-composer-hover: var(--gray-200);
+  --surface-hover: 239 239 244;
+  --surface-hover-alt: var(--gray-200);
+  --surface-composer-hover: 239 239 244;
   --surface-primary: var(--white);
   --chart-widget-surface: 255 255 255; /* Click UI dashboards.chartWidget.color.background.default #ffffff */
-  --chart-widget-stroke: 230 231 233; /* Click UI dashboards.chartWidget.color.stroke.default #e6e7e9 */
+  --chart-widget-stroke: var(--gray-200);
   --surface-primary-alt: var(--gray-50);
-  --surface-primary-contrast: var(--gray-100);
-  --surface-secondary: var(--gray-50);
-  --surface-secondary-alt: var(--gray-200);
-  --surface-tertiary: var(--gray-100);
+  --surface-primary-contrast: 239 239 244;
+  --surface-secondary: 246 246 249; /* #F6F6F9 */
+  --surface-secondary-alt: var(--gray-100);
+  --surface-tertiary: 239 239 244;
   --surface-tertiary-alt: var(--white);
   --surface-dialog: var(--white);
-  --surface-overlay: 16 42 45;
-  --surface-submit: 8 127 131; /* #087F83 Baanzon Teal */
-  --surface-submit-hover: 6 107 111;
+  --surface-overlay: 23 23 28;
+  --surface-submit: 109 92 230; /* #6D5CE6 Velvet Iris */
+  --surface-submit-hover: 91 75 212; /* #5B4BD4 */
   --surface-destructive: var(--red-700);
   --surface-destructive-hover: var(--red-800);
   --surface-chat: var(--white);
@@ -200,51 +252,54 @@ html {
   --border-xheavy: var(--gray-500);
   --border-xheavy-alpha: 1;
   --border-destructive: var(--red-600);
-  --status-success: var(--green-700);
-  --status-success-subtle: var(--green-50);
-  --status-success-border: var(--green-300);
+  --status-success: 4 120 87;
+  --status-success-subtle: 232 246 239;
+  --status-success-border: 110 231 183;
   --status-success-strong: 2 133 94;
-  --status-info: var(--blue-600);
-  --status-info-subtle: var(--blue-50);
-  --status-info-border: var(--blue-300);
-  --status-info-strong: var(--gray-500);
+  --status-info: 7 121 125; /* #07797D (Baanzon Teal, stepped for the Mist fill) */
+  --status-info-subtle: 228 242 242;
+  --status-info-border: 106 198 204; /* #6AC6CC */
+  --status-info-strong: 7 121 125;
   --status-warning: var(--amber-700);
   --status-warning-subtle: var(--amber-50);
   --status-warning-border: var(--amber-300);
-  --status-warning-strong: 199 82 9;
+  --status-warning-strong: var(--amber-700);
   --status-error: var(--red-700);
   --status-error-subtle: var(--red-50);
   --status-error-border: var(--red-300);
-  --status-error-strong: 224 47 31;
+  --status-error-strong: 217 40 56; /* #D92838 */
   --status-neutral: var(--gray-600);
-  --status-neutral-subtle: var(--gray-100);
+  --status-neutral-subtle: 239 239 244;
   --status-neutral-border: var(--gray-300);
   --text-on-status: var(--white);
 
   /* Categorical series scale — slot order is the CVD-safety mechanism */
-  --series-1: 5 110 189;
-  --series-2: 233 86 13;
-  --series-3: 0 148 142;
-  --series-4: 182 123 5;
-  --series-5: 216 90 142;
-  --series-6: 126 35 205;
-  --series-7: 1 131 1;
+  --series-1: 28 111 232; /* #1C6FE8 Sky */
+  --series-2: 232 89 12; /* #E8590C Orange */
+  --series-3: 14 148 136; /* #0E9488 Teal-green */
+  --series-4: 184 116 2; /* #B87402 Amber */
+  --series-5: 109 92 230; /* #6D5CE6 Velvet Iris */
+  --series-6: 140 106 47; /* #8C6A2F Umber */
+  --series-7: 162 28 175; /* #A21CAF Fuchsia */
 
   /* Code syntax highlighting */
   --syntax-text: var(--gray-800);
   --syntax-comment: var(--gray-500);
   --syntax-meta: var(--gray-600);
   --syntax-builtin: 154 103 0;
-  --syntax-keyword: 5 80 174;
-  --syntax-string: 10 123 98;
-  --syntax-attr: 154 47 106;
-  --syntax-title: 180 35 24;
+  --syntax-keyword: 91 75 212; /* #5B4BD4 Velvet Iris */
+  --syntax-string: 14 122 100; /* #0E7A64 Deep Teal */
+  --syntax-attr: 109 92 230; /* #6D5CE6 Velvet Iris */
+  --syntax-title: 190 18 60; /* #BE123C Rose */
 
-  --surface-inverted: var(--gray-850);
-  --surface-inverted-hover: var(--gray-700);
+  /* Signature brand gradient — champagne into velvet iris. */
+  --brand-sig-gradient: linear-gradient(135deg, #EAD9FF, #8E7CFF);
+
+  --surface-inverted: var(--gray-800);
+  --surface-inverted-hover: 91 75 212; /* #5B4BD4 */
   --text-inverted: var(--white);
   --surface-fixed: var(--white);
-  --surface-fixed-hover: var(--gray-100);
+  --surface-fixed-hover: 239 239 244;
   --text-fixed: var(--gray-800);
   --radius: 0.75rem; /* 12px - MD */
   --theme-control-radius: 0.75rem; /* 12px - MD */
@@ -259,7 +314,7 @@ html {
   --theme-elevation-surface: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --theme-motion-fast: 150ms;
   --theme-motion-normal: 200ms;
-  --switch-unchecked: 148 148 148;
+  --switch-unchecked: 131 131 143; /* #83838F (Unchecked switch track) */
   --provider-openai: #19c37d;
   --provider-openai-gpt4: #ab68ff;
   --provider-openai-reasoning: #000000;
@@ -269,104 +324,107 @@ html {
   --provider-foreground: #ffffff;
 }
 .dark {
-  --brand-purple: 169 152 255; /* #A998FF Orchid */
-  --presentation: var(--gray-800);
-  --text-primary: var(--gray-100);
-  --text-secondary: var(--gray-300);
-  --text-secondary-alt: var(--gray-400);
-  --text-tertiary: var(--gray-400);
-  --text-muted: 179 182 189; /* Click UI global.color.text.muted #b3b6bd */
-  --shimmer-base: 255 255 255;
+  --brand-purple: 183 165 255; /* #B7A5FF Iris, velvet-stepped for graphite */
+  --presentation: var(--gray-850);
+  --text-primary: 245 245 247; /* #F5F5F7 */
+  --text-secondary: 161 161 170; /* #A1A1AA */
+  --text-secondary-alt: 148 148 159; /* #94949F */
+  --text-tertiary: 148 148 159;
+  --text-muted: 110 110 121; /* #6E6E79 */
+  --shimmer-base: 245 245 247;
   --shimmer-base-alpha: 0.8;
-  --shimmer-dip: 179 179 179;
+  --shimmer-dip: 92 92 102; /* #5C5C66 */
   --shimmer-dip-alpha: 0.25;
-  --text-warning: var(--amber-500);
-  --text-destructive: var(--red-400);
-  --link: var(--blue-400);
-  --link-hover: var(--blue-300);
-  --link-visited: 192 132 252;
-  --accent-primary: 19 166 160; /* #13A6A0 Baanzon Dark Teal */
-  --accent-primary-hover: 70 226 210; /* #46E2D2 Luminous Aqua */
-  --header-primary: var(--gray-700);
-  --header-hover: var(--gray-600);
-  --header-button-hover: var(--gray-700);
-  --surface-active: var(--gray-500);
-  --surface-active-alt: var(--gray-700);
-  --surface-hover: var(--gray-650);
-  --surface-hover-alt: var(--gray-600);
-  --surface-composer-hover: var(--gray-600);
-  --surface-primary: var(--gray-900);
-  --chart-widget-surface: 40 40 40; /* Click UI dashboards.chartWidget.color.background.default #282828 */
-  --chart-widget-stroke: 50 50 50; /* Click UI dashboards.chartWidget.color.stroke.default #323232 */
+  --text-warning: var(--amber-300);
+  --text-destructive: var(--red-400); /* #FF5C6C */
+  --link: 169 154 255; /* #A99AFF */
+  --link-hover: 196 182 255; /* #C4B6FF */
+  --link-visited: 234 217 255; /* #EAD9FF Champagne */
+  --accent-primary: 142 124 255; /* #8E7CFF Velvet Iris */
+  --accent-primary-hover: 169 154 255; /* #A99AFF */
+  --ring-primary: 142 124 255; /* #8E7CFF Velvet Iris */
+  --header-primary: var(--gray-850); /* #15151B */
+  --header-hover: 28 28 35; /* #1C1C23 */
+  --header-button-hover: var(--gray-850);
+  --surface-active: 36 36 44; /* #24242C */
+  --surface-active-alt: var(--gray-850);
+  --surface-hover: 28 28 35; /* #1C1C23 */
+  --surface-hover-alt: 36 36 44; /* #24242C */
+  --surface-composer-hover: 28 28 35; /* #1C1C23 */
+  --surface-primary: var(--gray-900); /* #0B0B0F */
+  --chart-widget-surface: var(--gray-850);
+  --chart-widget-stroke: 35 35 41; /* #232329 */
   --surface-primary-alt: var(--gray-850);
-  --surface-primary-contrast: var(--gray-850);
-  --surface-secondary: var(--gray-800);
-  --surface-secondary-alt: var(--gray-800);
-  --surface-tertiary: var(--gray-700);
-  --surface-tertiary-alt: var(--gray-700);
-  --surface-dialog: var(--gray-875);
+  --surface-primary-contrast: 28 28 35; /* #1C1C23 */
+  --surface-secondary: var(--gray-850);
+  --surface-secondary-alt: 28 28 35; /* #1C1C23 */
+  --surface-tertiary: 28 28 35; /* #1C1C23 */
+  --surface-tertiary-alt: 28 28 35; /* #1C1C23 */
+  --surface-dialog: var(--gray-850); /* #15151B */
   --surface-overlay: 0 0 0;
-  --surface-submit: 19 166 160; /* #13A6A0 Baanzon Dark Teal */
-  --surface-submit-hover: 70 226 210; /* #46E2D2 Luminous Aqua */
+  --surface-submit: 142 124 255; /* #8E7CFF Velvet Iris */
+  --surface-submit-hover: 169 154 255; /* #A99AFF */
   --surface-destructive: var(--red-800);
   --surface-destructive-hover: var(--red-900);
-  --surface-chat: var(--gray-700);
+  --surface-chat: var(--gray-850);
   --surface-code: var(--presentation);
   --surface-qr: var(--white);
-  --border-light: var(--gray-700);
-  --border-medium-alt: var(--gray-600);
-  --border-medium: var(--gray-600);
-  --border-heavy: var(--gray-500);
-  --border-xheavy: var(--gray-400);
+  --border-light: 35 35 41; /* #232329 */
+  --border-medium-alt: 46 46 54; /* #2E2E36 */
+  --border-medium: 46 46 54; /* #2E2E36 */
+  --border-heavy: 58 58 69; /* #3A3A45 */
+  --border-xheavy: 91 91 104; /* #5B5B68 */
   --border-destructive: var(--red-500);
-  --status-success: var(--green-300);
-  --status-success-subtle: var(--green-950);
-  --status-success-border: var(--green-800);
-  --status-success-strong: 8 135 89;
-  --status-info: var(--blue-300);
-  --status-info-subtle: var(--blue-950);
-  --status-info-border: var(--blue-800);
-  --status-info-strong: var(--gray-600);
+  --status-success: 74 222 128; /* #4ADE80 */
+  --status-success-subtle: 13 42 26; /* #0D2A1A */
+  --status-success-border: 22 101 52; /* #166534 */
+  --status-success-strong: 74 222 128; /* #4ADE80 */
+  --status-info: 120 217 255; /* #78D9FF */
+  --status-info-subtle: 11 42 61; /* #0B2A3D */
+  --status-info-border: 46 122 160; /* #2E7AA0 */
+  --status-info-strong: 120 217 255; /* #78D9FF */
   --status-warning: var(--amber-300);
-  --status-warning-subtle: var(--amber-950);
+  --status-warning-subtle: 42 33 6; /* #2A2106 */
   --status-warning-border: var(--amber-800);
   --status-warning-strong: var(--amber-800);
-  --status-error: var(--red-300);
-  --status-error-subtle: var(--red-950);
+  --status-error: 255 154 165; /* #FF9AA5 */
+  --status-error-subtle: 56 16 23; /* #381017 */
   --status-error-border: var(--red-800);
   --status-error-strong: var(--red-800);
-  --status-neutral: var(--gray-300);
-  --status-neutral-subtle: var(--gray-800);
-  --status-neutral-border: var(--gray-700);
-  --text-on-status: var(--white);
+  --status-neutral: 161 161 170; /* #A1A1AA */
+  --status-neutral-subtle: var(--gray-850);
+  --status-neutral-border: 35 35 41; /* #232329 */
+  --text-on-status: var(--gray-900);
 
   /* Categorical series scale — same hues, stepped for the dark surface */
-  --series-1: 9 140 238;
-  --series-2: 217 87 35;
-  --series-3: 6 158 152;
-  --series-4: 200 133 12;
-  --series-5: 213 82 130;
-  --series-6: 171 104 254;
-  --series-7: 80 167 49;
+  --series-1: 56 189 248; /* #38BDF8 Sky */
+  --series-2: 255 159 107; /* #FF9F6B Peach */
+  --series-3: 53 214 199; /* #35D6C7 Aqua */
+  --series-4: 216 194 157; /* #D8C29D Champagne */
+  --series-5: 169 154 255; /* #A99AFF Velvet Iris */
+  --series-6: 20 184 166; /* #14B8A6 Teal */
+  --series-7: 163 230 53; /* #A3E635 Lime */
 
-  /* Code syntax highlighting. Comment and meta are the flattened equivalents of
-     the 50% and 60% alpha whites this palette used before it was tokenized. */
-  --syntax-text: var(--white);
-  --syntax-comment: 144 144 144;
-  --syntax-meta: 166 166 166;
-  --syntax-builtin: 233 149 12;
-  --syntax-keyword: 46 149 211;
-  --syntax-string: 0 166 125;
-  --syntax-attr: 223 48 121;
-  --syntax-title: 242 44 61;
+  /* Code syntax highlighting, restated from the registry (see semanticTokens.spec.ts). */
+  --syntax-text: 245 245 247;
+  --syntax-comment: 142 142 154; /* #8E8E9A */
+  --syntax-meta: 161 161 170; /* #A1A1AA */
+  --syntax-builtin: 216 194 157; /* #D8C29D Champagne */
+  --syntax-keyword: 183 165 255; /* #B7A5FF Iris */
+  --syntax-string: 155 208 255; /* #9BD0FF Sky */
+  --syntax-attr: 196 176 255; /* #C4B0FF Iris */
+  --syntax-title: 255 154 165; /* #FF9AA5 */
 
-  --surface-inverted: var(--white);
-  --surface-inverted-hover: var(--gray-100);
-  --text-inverted: var(--gray-850);
-  --surface-fixed: var(--white);
-  --surface-fixed-hover: var(--gray-100);
-  --text-fixed: var(--gray-800);
-  --switch-unchecked: 102 102 102;
+  /* Signature brand gradient — champagne into velvet iris. */
+  --brand-sig-gradient: linear-gradient(135deg, #EAD9FF, #8E7CFF);
+
+  --surface-inverted: 245 245 247;
+  --surface-inverted-hover: 161 161 170; /* #A1A1AA */
+  --text-inverted: var(--gray-900);
+  --surface-fixed: 245 245 247;
+  --surface-fixed-hover: 161 161 170; /* #A1A1AA */
+  --text-fixed: var(--gray-900);
+  --switch-unchecked: 99 99 111; /* #63636F */
   --provider-openai: #19c37d;
   --provider-openai-gpt4: #ab68ff;
   --provider-openai-reasoning: #000000;
@@ -2690,4 +2748,100 @@ html[data-input-modality='keyboard']
    question card, so the card travels behind the ChatForm, not over it. */
 ::view-transition-group(chat-form) {
   z-index: 2;
+}
+
+/* Atelier (Monolith) shell scaffold — G1 step 2, visual only. Tokens are
+   semantic only (no raw hex, no glass/blur/translucency). The dim targets the
+   sidebar aside's first child, not the aside itself, because the aside keeps
+   an inline `transition` for its width animation that a stylesheet could not
+   join; the child has no inline transition of its own. */
+@layer atelier {
+  [data-atelier='true'] {
+    background-color: rgb(var(--surface-primary));
+  }
+
+  /* Hairline between the sidebar and the pane, drawn on the aside (not the
+     wrapper, whose edge sits at the window edge and would never show). */
+  [data-atelier='true'] aside {
+    border-right: 1px solid rgb(var(--border-medium));
+  }
+
+  [data-atelier='true'] aside > :first-child {
+    transition: opacity 250ms ease;
+  }
+
+  body[data-atelier-focus='true'] [data-atelier='true'] aside > :first-child {
+    opacity: 0.25;
+  }
+
+  /* Composer slab (G2): solid elevated tone + hairline, no shadow depth —
+     depth is tone-steps, never shadows/glass. */
+  [data-atelier='true'] [data-testid='composer-surface'] {
+    background-color: rgb(var(--surface-secondary));
+    border: 1px solid rgb(var(--border-medium));
+    box-shadow: none;
+  }
+
+  /* Rail (G1 full): fixed-width strip becomes solid tone + hairline; the
+     drag-resize separator is hidden — the rail expands on hover/click. */
+  [data-atelier='true'] aside {
+    background-color: rgb(var(--surface-secondary));
+    border-right: 1px solid rgb(var(--border-medium));
+  }
+
+  [data-atelier='true'] aside [role='separator'],
+  [data-atelier='true'] aside [data-resize-handle] {
+    display: none;
+  }
+
+  /* Canvas (G3): the conversation column caps at 720px, centered — applies to
+     the per-message column wrapper and the messages view, not the whole pane. */
+  [data-atelier='true'] [data-message-role] {
+    max-width: 45rem;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+  }
+
+  /* No bubbles (G3): user turns carry a 2px iris left edge; assistant turns
+     sit plain on the canvas. */
+  [data-atelier='true'] [data-message-role='user'] {
+    border-left: 2px solid #8e7cff;
+    padding-left: 1rem;
+  }
+
+  [data-atelier='true'] [data-message-role='assistant'] {
+    padding-left: calc(1rem + 2px);
+  }
+
+  /* Breadcrumb strip (G1): header hides in atelier and reveals as a solid
+     strip only while scroll-up is detected (data-atelier-reveal on wrapper). */
+  [data-atelier='true'] [data-chat-header] {
+    transition:
+      opacity 200ms ease,
+      transform 200ms ease;
+  }
+
+  [data-atelier='true']:not([data-atelier-reveal='true']) [data-chat-header] {
+    opacity: 0;
+    transform: translateY(-100%);
+    pointer-events: none;
+  }
+
+  [data-atelier='true'][data-atelier-reveal='true'] [data-chat-header] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-atelier='true'] [data-chat-header] {
+      transition: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-atelier='true'] aside > :first-child {
+      transition: none;
+    }
+  }
 }

@@ -31,7 +31,7 @@ const usernameSchema = z
   });
 
 const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().min(2).max(320),
   password: z
     .string()
     .min(MIN_PASSWORD_LENGTH)

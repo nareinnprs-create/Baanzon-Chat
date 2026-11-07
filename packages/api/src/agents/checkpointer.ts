@@ -22,10 +22,7 @@ import {
 import { checkpointOwnerNamespacePrefix } from '../stream/checkpoints';
 import { resolveCheckpointerConfig } from './checkpoints/config';
 
-export {
-  BAANZON_CHECKPOINT_OWNER_KEY,
-  BAANZON_LEGACY_CHECKPOINT_KEY,
-} from './checkpoints/saver';
+export { BAANZON_CHECKPOINT_OWNER_KEY, BAANZON_LEGACY_CHECKPOINT_KEY } from './checkpoints/saver';
 export { checkpointOwnerNamespacePrefix } from '../stream/checkpoints';
 
 export { resolveCheckpointerConfig } from './checkpoints/config';
@@ -98,8 +95,7 @@ function fromStorageCheckpointConfig(
     configurable: {
       ...storedConfig.configurable,
       ...(requestedConfig.configurable?.[BAANZON_CHECKPOINT_OWNER_KEY] && {
-        [BAANZON_CHECKPOINT_OWNER_KEY]:
-          requestedConfig.configurable[BAANZON_CHECKPOINT_OWNER_KEY],
+        [BAANZON_CHECKPOINT_OWNER_KEY]: requestedConfig.configurable[BAANZON_CHECKPOINT_OWNER_KEY],
       }),
       ...(requestedConfig.configurable?.[BAANZON_LEGACY_CHECKPOINT_KEY] && {
         [BAANZON_LEGACY_CHECKPOINT_KEY]:

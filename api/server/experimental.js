@@ -637,6 +637,7 @@ if (cluster.isMaster) {
     app.use('/api/insights', routes.insights);
     app.use('/api/admin', routes.adminAuth);
     app.use('/api/admin/skills', routes.adminSkills);
+    app.use('/api/admin/providers', routes.adminProviders);
     app.use('/api/admin/code-environments', routes.adminCodeEnvironments);
     app.use('/api/code-environments', routes.codeEnvironments);
     app.use('/api/actions', routes.actions);

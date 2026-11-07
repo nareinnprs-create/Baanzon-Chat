@@ -89,6 +89,24 @@ const LoadingSpinner = memo(() => {
 
 LoadingSpinner.displayName = 'LoadingSpinner';
 
+/** Search answered empty: short inviting copy, nothing else on the row. */
+const SearchEmptyRow = memo(() => {
+  const localize = useLocalize();
+
+  return (
+    <div className="flex flex-col items-center gap-1 px-3 py-6 text-center">
+      <p className="text-sm font-medium text-text-primary">
+        {localize('com_ui_no_search_results' as TranslationKeys)}
+      </p>
+      <p className="text-xs text-text-secondary">
+        {localize('com_ui_no_search_results_hint' as TranslationKeys)}
+      </p>
+    </div>
+  );
+});
+
+SearchEmptyRow.displayName = 'SearchEmptyRow';
+
 interface ChatsHeaderProps {
   isExpanded: boolean;
   onToggle: () => void;
@@ -145,7 +163,8 @@ type FlattenedItem =
   | { type: 'favorites' }
   | { type: 'header'; groupName: string }
   | { type: 'convo'; convo: TConversation }
-  | { type: 'loading' };
+  | { type: 'loading' }
+  | { type: 'search-empty' };
 
 const Conversations: FC<ConversationsProps> = ({
   conversations: rawConversations,
@@ -239,9 +258,20 @@ const Conversations: FC<ConversationsProps> = ({
       if (isLoading) {
         items.push({ type: 'loading' } as any);
       }
+
+      /** Search answered with nothing, and no page is in flight: leave one inviting
+       *  row instead of silent empty space beneath the query. */
+      if (
+        search.query &&
+        !isLoading &&
+        !isSearchLoading &&
+        groupedConversations.length === 0
+      ) {
+        items.push({ type: 'search-empty' });
+      }
     }
     return items;
-  }, [groupedConversations, isLoading, isChatsExpanded, shouldShowFavorites]);
+  }, [groupedConversations, isLoading, isChatsExpanded, shouldShowFavorites, search.query, isSearchLoading]);
 
   // Store flattenedItems in a ref for keyMapper to access without recreating cache
   const flattenedItemsRef = useRef(flattenedItems);
@@ -270,6 +300,9 @@ const Conversations: FC<ConversationsProps> = ({
           }
           if (item.type === 'loading') {
             return 'loading';
+          }
+          if (item.type === 'search-empty') {
+            return 'search-empty';
           }
           return `unknown-${index}`;
         },
@@ -341,6 +374,14 @@ const Conversations: FC<ConversationsProps> = ({
         return (
           <MeasuredRow key={key} {...rowProps}>
             <LoadingSpinner />
+          </MeasuredRow>
+        );
+      }
+
+      if (item.type === 'search-empty') {
+        return (
+          <MeasuredRow key={key} {...rowProps}>
+            <SearchEmptyRow />
           </MeasuredRow>
         );
       }

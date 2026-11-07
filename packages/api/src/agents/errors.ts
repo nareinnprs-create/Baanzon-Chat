@@ -1,5 +1,6 @@
 import {
   ErrorTypes,
+  EModelEndpoint,
   parseLangChainErrorCode,
   stripLangChainTroubleshootingUrl,
 } from 'librechat-data-provider';
@@ -56,6 +57,75 @@ export function isFatalAgentInitializationError(
 
 /** Fallback shown when provider error text must not reach the user. */
 export const GENERIC_PROVIDER_ERROR = 'An error occurred while processing the request';
+
+/** A provider-side authentication failure, normalized for user surfacing. */
+export class ProviderAuthError extends Error {
+  provider?: string;
+  status: number;
+
+  constructor(params: { provider?: string; status: number }) {
+    const { provider, status } = params;
+    const name = provider?.trim() || 'The provider';
+    super(
+      status === 401
+        ? `Invalid API key — ${name} rejected the key (${status})`
+        : `${name} rejected the request (${status})`,
+    );
+    this.name = 'ProviderAuthError';
+    this.provider = provider;
+    this.status = status;
+  }
+}
+
+/** HTTP statuses a provider returns when the presented API key is unusable. */
+const AUTH_FAILURE_STATUSES = new Set([401, 403]);
+
+function extractResponseStatus(error: unknown): number | undefined {
+  if (error == null || typeof error !== 'object') {
+    return undefined;
+  }
+  // Bounded cause walk: provider SDKs often wrap the raw response error.
+  let current: unknown = error;
+  for (let depth = 0; depth < MAX_CAUSE_DEPTH && current != null; depth++) {
+    if (typeof current !== 'object') {
+      return undefined;
+    }
+    const candidate = current as {
+      status?: unknown;
+      response_status?: unknown;
+      response?: { status?: unknown };
+      cause?: unknown;
+    };
+    for (const value of [candidate.status, candidate.response_status, candidate.response?.status]) {
+      if (typeof value === 'number' && AUTH_FAILURE_STATUSES.has(value)) {
+        return value;
+      }
+    }
+    current = candidate.cause;
+  }
+  return undefined;
+}
+
+/**
+ * Normalizes a provider authentication rejection (401/403) into a typed
+ * {@link ProviderAuthError} carrying the provider name, HTTP status, and a
+ * human-facing message. Returns `undefined` for any other failure so callers
+ * keep their existing handling.
+ */
+export function resolveProviderAuthError(
+  error: unknown,
+  context: { provider?: string; endpoint?: string } = {},
+): ProviderAuthError | undefined {
+  const status = extractResponseStatus(error);
+  if (status == null) {
+    return undefined;
+  }
+  const provider =
+    context.endpoint && context.endpoint !== EModelEndpoint.agents
+      ? context.endpoint
+      : context.provider;
+  return new ProviderAuthError({ provider, status });
+}
 
 /**
  * LangChain error codes we answer with localized copy. Codes absent here keep the provider's own

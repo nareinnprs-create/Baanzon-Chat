@@ -35,6 +35,32 @@ function load() {
   return loadPlugin(root, { dataRoot, hookCapabilities: CAPABILITIES });
 }
 
+const isWindows = process.platform === 'win32';
+/**
+ * Points `skills/<name>` at `targetDirectory`, which must already hold the
+ * `SKILL.md` the loader reads.
+ *
+ * Windows grants `SeCreateSymbolicLinkPrivilege` only in Developer Mode or an
+ * elevated shell, so on a stock host `fs.symlink` of a `SKILL.md` *file* fails
+ * `EPERM` before the loader is ever reached. A directory junction needs no
+ * elevation and is the same kind of reparse point. Containment is decided by
+ * `resolveWithinRoot` on the realpath of `skills/<name>/SKILL.md`
+ * (`src/plugins/paths.ts`), which resolves identically through a linked file
+ * and a linked parent directory, so both branches drive the identical product
+ * code path and assert the identical outcome. The Windows branch additionally
+ * covers the junction-escape vector a stock Windows host does permit.
+ */
+async function linkSkillDirectory(name: string, targetDirectory: string): Promise<void> {
+  const linked = path.join(root, 'skills', name);
+  await fs.promises.mkdir(path.dirname(linked), { recursive: true });
+  if (isWindows) {
+    await fs.promises.symlink(targetDirectory, linked, 'junction');
+    return;
+  }
+  await fs.promises.mkdir(linked, { recursive: true });
+  await fs.promises.symlink(path.join(targetDirectory, 'SKILL.md'), path.join(linked, 'SKILL.md'));
+}
+
 beforeEach(async () => {
   base = await fs.promises.realpath(
     await fs.promises.mkdtemp(path.join(os.tmpdir(), 'lc-plugin-load-')),
@@ -254,11 +280,7 @@ describe('loadPlugin', () => {
       const outside = path.join(base, 'outside');
       await fs.promises.mkdir(outside, { recursive: true });
       await fs.promises.writeFile(path.join(outside, 'SKILL.md'), skillDocument('escaped'));
-      await fs.promises.mkdir(path.join(root, 'skills', 'escaped'), { recursive: true });
-      await fs.promises.symlink(
-        path.join(outside, 'SKILL.md'),
-        path.join(root, 'skills', 'escaped', 'SKILL.md'),
-      );
+      await linkSkillDirectory('escaped', outside);
 
       const result = await load();
       expect(result.status).toBe('loaded');
@@ -272,11 +294,7 @@ describe('loadPlugin', () => {
     it('accepts a symlink that resolves within the plugin root', async () => {
       await writeManifest();
       await write('shared/SKILL.md', skillDocument('shared'));
-      await fs.promises.mkdir(path.join(root, 'skills', 'shared'), { recursive: true });
-      await fs.promises.symlink(
-        path.join(root, 'shared', 'SKILL.md'),
-        path.join(root, 'skills', 'shared', 'SKILL.md'),
-      );
+      await linkSkillDirectory('shared', path.join(root, 'shared'));
 
       const result = await load();
       expect(result.status === 'loaded' && result.plugin.skills.map((s) => s.name)).toEqual([

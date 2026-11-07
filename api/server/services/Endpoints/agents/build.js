@@ -3,6 +3,7 @@ const { loadAgent: loadAgentFn } = require('@librechat/api');
 const { isAgentsEndpoint, removeNullishValues, Constants } = require('librechat-data-provider');
 const { getMCPServerTools } = require('~/server/services/Config');
 const { getAccessibleMCPServers } = require('~/server/services/MCP');
+const { routeModel } = require('~/server/services/billing/modelRouter');
 const db = require('~/models');
 
 const loadAgent = (params) =>
@@ -14,6 +15,16 @@ const loadAgent = (params) =>
 
 const buildOptions = (req, endpoint, parsedBody, endpointType) => {
   const { spec, iconURL, agent_id, chatProjectId, ...model_parameters } = parsedBody;
+  // Tier x brand routing: brand keys (baanzon-*) resolve to the plan's model;
+  // the tier comes from the account DB. The brand arrives on the RAW body —
+  // the compact agents zod schema strips `model` from parsedBody.
+  const requestedModel = String(req.body?.model || model_parameters.model || '');
+  const tier = String(req.user?.subscriptionTier || 'free').toLowerCase();
+  const routedCfg = routeModel(tier, requestedModel) || { model: requestedModel };
+  model_parameters.model = routedCfg.model;
+  if (routedCfg.maxContextTokens) model_parameters.maxContextTokens = routedCfg.maxContextTokens;
+  if (routedCfg.max_tokens) model_parameters.max_tokens = routedCfg.max_tokens;
+  logger.info(`[modelRouter] tier=${tier} requested=${requestedModel} routed=${model_parameters.model} ctx=${model_parameters.maxContextTokens} out=${model_parameters.max_tokens}`);
   const agentPromise = loadAgent({
     req,
     spec,

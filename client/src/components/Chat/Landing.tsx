@@ -15,6 +15,7 @@ import {
 import { useChatContext, useAgentsMapContext, useAssistantsMapContext } from '~/Providers';
 import { useGetEndpointsQuery, useGetStartupConfig } from '~/data-provider';
 import { useLocalize, useAuthContext, useGreeting } from '~/hooks';
+import HomeOnboarding from '~/components/Chat/Home/HomeOnboarding';
 import AgentContact from '~/components/Agents/AgentContact';
 import ConvoIcon from '~/components/Endpoints/ConvoIcon';
 import temporaryStore from '~/store/temporary';
@@ -43,7 +44,14 @@ function getTextSizeClass(text: string | undefined | null) {
   return 'text-lg sm:text-base';
 }
 
-export default function Landing({ centerFormOnLanding }: { centerFormOnLanding: boolean }) {
+export default function Landing({
+  centerFormOnLanding,
+  showOnboarding = true,
+}: {
+  centerFormOnLanding: boolean;
+  /** Off for project-scoped landings, where a mode chip would drop the scope. */
+  showOnboarding?: boolean;
+}) {
   const { conversation } = useChatContext();
   const agentsMap = useAgentsMapContext();
   const assistantMap = useAssistantsMapContext();
@@ -235,6 +243,7 @@ export default function Landing({ centerFormOnLanding }: { centerFormOnLanding: 
             className="animate-fadeIn mt-2 max-w-md justify-center text-center text-sm"
           />
         )}
+        {showOnboarding && !isTemporary && <HomeOnboarding />}
       </div>
     </div>
   );

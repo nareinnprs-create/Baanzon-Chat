@@ -25,6 +25,7 @@ const {
 } = require('@librechat/api');
 const { createSseStreamTelemetry } = require('@librechat/api/telemetry');
 const { logger } = require('@librechat/data-schemas');
+const { scrubStreamEvent } = require('~/server/utils/identityFilter');
 const {
   uaParser,
   checkBan,
@@ -267,7 +268,8 @@ router.get('/chat/stream/:streamId', async (req, res) => {
     }
     if (!res.writableEnded) {
       const eventName = options.eventName ?? 'message';
-      const payload = `event: ${eventName}\ndata: ${JSON.stringify(event)}\n\n`;
+      const safeEvent = scrubStreamEvent(streamId, event);
+      const payload = `event: ${eventName}\ndata: ${JSON.stringify(safeEvent)}\n\n`;
       res.write(payload);
       streamTelemetry.recordWrite(payload, { final: options.final });
       if (typeof res.flush === 'function') {

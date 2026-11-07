@@ -5,18 +5,26 @@ import type * as t from './types';
 import * as permissions from './accessPermissions';
 import * as endpoints from './api-endpoints';
 import { uploadEventStream } from './upload';
+import * as nt from './types/notifications';
+import * as dr from './types/deepResearch';
 import * as mcp from './types/mcpServers';
 import * as qt from './types/queuedTurns';
 import * as sch from './types/schedules';
 import * as a from './types/assistants';
 import * as m from './types/mutations';
+import * as k from './types/knowledge';
 import * as ag from './types/agents';
 import * as q from './types/queries';
 import * as sk from './types/skills';
 import * as f from './types/files';
 import * as config from './config';
+import * as sa from './searchAll';
 import request from './request';
+import * as bl from './billing';
 import * as s from './schemas';
+import * as ev from './evals';
+import * as fl from './flags';
+import * as tr from './trust';
 import * as r from './roles';
 
 export function getInsights(params: TInsightsParams = {}): Promise<TInsightsResponse> {
@@ -50,6 +58,16 @@ export function testLangfuseConnection(
   payload: t.TLangfuseConnectionTestRequest,
 ): Promise<t.TLangfuseConnectionTestResponse> {
   return request.post(endpoints.adminLangfuseConnectionTest(), payload);
+}
+
+export function getAdminProviders(): Promise<t.TAdminProvidersResponse> {
+  return request.get(endpoints.adminProviders());
+}
+
+export function testAdminProvider(
+  payload: t.TAdminProviderTestRequest,
+): Promise<t.TAdminProviderTestResponse> {
+  return request.post(endpoints.adminProvidersTest(), payload);
 }
 
 export function getLangfuseSessionLink(
@@ -990,6 +1008,91 @@ export function assignConversationToProject(
   });
 }
 
+export function listOrganizations(): Promise<q.OrganizationListResponse> {
+  return request.get(endpoints.organizations());
+}
+
+export function listWorkspaces(organizationId: string): Promise<q.WorkspaceListResponse> {
+  return request.get(endpoints.workspaces(organizationId));
+}
+
+export function getFlags(organizationId?: string): Promise<fl.TFeatureFlagsResponse> {
+  const query = organizationId ? `?organizationId=${encodeURIComponent(organizationId)}` : '';
+  return request.get(`${endpoints.flags()}${query}`);
+}
+
+export function setFeatureFlag(
+  key: string,
+  payload: fl.TSetFeatureFlagRequest,
+): Promise<fl.TFeatureFlagOverride> {
+  return request.put(`${endpoints.flags()}/${key}`, payload);
+}
+
+export function getEntitlements(organizationId?: string): Promise<bl.TGetEntitlementsResponse> {
+  const query = organizationId ? `?organizationId=${encodeURIComponent(organizationId)}` : '';
+  return request.get(`${endpoints.billingEntitlements()}${query}`);
+}
+
+export function setEntitlement(
+  plan: bl.TEntitlementPlan,
+  resource: bl.TEntitlementResource,
+  payload: bl.TSetEntitlementRequest,
+): Promise<bl.TEntitlementOverride> {
+  return request.put(`${endpoints.billingEntitlements()}/${plan}/${resource}`, payload);
+}
+
+export function createEvalRun(payload: ev.TCreateEvalRunRequest): Promise<ev.TEvalRun> {
+  return request.post(endpoints.evalRuns(), payload);
+}
+
+export function listEvalRuns(params?: ev.TEvalRunListParams): Promise<ev.TEvalRunListResponse> {
+  const query = new URLSearchParams();
+  if (params?.agentId) {
+    query.set('agentId', params.agentId);
+  }
+  if (params?.workflowId) {
+    query.set('workflowId', params.workflowId);
+  }
+  if (params?.limit !== undefined) {
+    query.set('limit', String(params.limit));
+  }
+  const suffix = query.size ? `?${query.toString()}` : '';
+  return request.get(`${endpoints.evalRuns()}${suffix}`);
+}
+
+export function getEvalRun(runId: string): Promise<ev.TEvalRun> {
+  return request.get(endpoints.evalRunById(runId));
+}
+
+export function searchAll(params: { q: string; limit?: number }): Promise<sa.TSearchAllResponse> {
+  const query = new URLSearchParams();
+  query.set('q', params.q);
+  if (params.limit !== undefined) {
+    query.set('limit', String(params.limit));
+  }
+  return request.get(`${endpoints.searchAll()}?${query.toString()}`);
+}
+
+export function getTrust(params: tr.TTrustRequest): Promise<tr.TTrustResponse> {
+  const query = new URLSearchParams();
+  if (params.credibility?.length) {
+    query.set('credibility', params.credibility.join(','));
+  }
+  if (params.ageDays?.length) {
+    query.set('ageDays', params.ageDays.join(','));
+  }
+  if (params.positive !== undefined) {
+    query.set('positive', String(params.positive));
+  }
+  if (params.negative !== undefined) {
+    query.set('negative', String(params.negative));
+  }
+  const suffix = query.size ? `?${query.toString()}` : '';
+  return request.get(
+    `${endpoints.trust()}/${encodeURIComponent(params.entityType)}/${encodeURIComponent(params.id)}${suffix}`,
+  );
+}
+
 export function pinConversation(
   payload: t.TPinConversationRequest,
 ): Promise<t.TPinConversationResponse> {
@@ -1246,35 +1349,35 @@ export function deleteSkillFile(
 }
 
 /* -------------------------------------------------------------------------- */
-/* Skill Tree (nodes) — phase 2 backend                                       */
+/* Skill tree (nodes) — phase 2                                                 */
 /* -------------------------------------------------------------------------- */
-/* These were introduced by the original UI PR and are shipped as stubs in    */
-/* phase 1 so the tree UI compiles. Each resolves with empty/no-op data until */
-/* the backend persists a folder hierarchy. The call surface matches what the */
-/* tree hooks expect so wiring real endpoints later is a one-line swap.       */
+/* DECISION (phase 2): the tree is a derived, path-addressed view over the      */
+/* skill body + its file rows; these six calls now hit the skill-tree routes    */
+/* (`GET/POST /api/skills/:id/tree`, plus `:nodeId` / `:nodeId/content`).       */
+/* `nodeId` is the skill-relative path (e.g. `SKILL.md`, `scripts/run.sh`), so  */
+/* it is URL-encoded into the single `path` segment the endpoint helper builds. */
+/* UI wiring (mounting the tree hooks) is the remaining step.                   */
 
-export const getSkillTree = (_skillId: string): Promise<t.TSkillTreeResponse> => {
-  return Promise.resolve({ nodes: [] });
+/** `true` only when a usable `FormData` global exists (browser / Node 18+). */
+const isFormData = (value: unknown): value is FormData =>
+  typeof FormData !== 'undefined' && value instanceof FormData;
+
+const skillNodePath = (nodeId: string): string => encodeURIComponent(nodeId);
+
+const skillNodeContentPath = (nodeId: string): string => `${encodeURIComponent(nodeId)}/content`;
+
+export const getSkillTree = (skillId: string): Promise<t.TSkillTreeResponse> => {
+  return request.get(endpoints.skillTree({ skillId }));
 };
 
 export const createSkillNode = (
   skillId: string,
   data: FormData | t.TCreateSkillNodeRequest,
 ): Promise<t.TSkillNode> => {
-  const name = data instanceof FormData ? (data.get('name') as string) || 'untitled' : data.name;
-  const type = data instanceof FormData ? 'file' : data.type;
-  const now = new Date().toISOString();
-  return Promise.resolve({
-    _id: `pending-${now}`,
-    skillId,
-    parentId: null,
-    type,
-    name,
-    order: 0,
-    author: '',
-    createdAt: now,
-    updatedAt: now,
-  });
+  if (isFormData(data)) {
+    return request.postMultiPart(endpoints.skillTree({ skillId }), data);
+  }
+  return request.post(endpoints.skillTree({ skillId }), data);
 };
 
 export const updateSkillNode = (variables: {
@@ -1282,29 +1385,28 @@ export const updateSkillNode = (variables: {
   nodeId: string;
   data: t.TUpdateSkillNodeRequest;
 }): Promise<t.TSkillNode> => {
-  const now = new Date().toISOString();
-  return Promise.resolve({
-    _id: variables.nodeId,
-    skillId: variables.skillId,
-    parentId: variables.data.parentId ?? null,
-    type: 'file',
-    name: variables.data.name ?? '',
-    order: variables.data.order ?? 0,
-    author: '',
-    createdAt: now,
-    updatedAt: now,
-  });
+  return request.patch(
+    endpoints.skillTree({ skillId: variables.skillId, path: skillNodePath(variables.nodeId) }),
+    variables.data,
+  );
 };
 
-export const deleteSkillNode = (_variables: { skillId: string; nodeId: string }): Promise<void> => {
-  return Promise.resolve();
+export const deleteSkillNode = (variables: { skillId: string; nodeId: string }): Promise<void> => {
+  return request.delete(
+    endpoints.skillTree({ skillId: variables.skillId, path: skillNodePath(variables.nodeId) }),
+  );
 };
 
-export const getSkillNodeContent = (_variables: {
+export const getSkillNodeContent = (variables: {
   skillId: string;
   nodeId: string;
 }): Promise<{ content: string; mimeType: string }> => {
-  return Promise.resolve({ content: '', mimeType: 'text/plain' });
+  return request.get(
+    endpoints.skillTree({
+      skillId: variables.skillId,
+      path: skillNodeContentPath(variables.nodeId),
+    }),
+  );
 };
 
 export const updateSkillNodeContent = (variables: {
@@ -1312,18 +1414,13 @@ export const updateSkillNodeContent = (variables: {
   nodeId: string;
   content: string;
 }): Promise<t.TSkillNode> => {
-  const now = new Date().toISOString();
-  return Promise.resolve({
-    _id: variables.nodeId,
-    skillId: variables.skillId,
-    parentId: null,
-    type: 'file',
-    name: '',
-    order: 0,
-    author: '',
-    createdAt: now,
-    updatedAt: now,
-  });
+  return request.put(
+    endpoints.skillTree({
+      skillId: variables.skillId,
+      path: skillNodeContentPath(variables.nodeId),
+    }),
+    { content: variables.content },
+  );
 };
 
 export function getGitHubSkillSyncStatus(): Promise<sk.TGitHubSkillSyncStatusResponse> {
@@ -1604,3 +1701,114 @@ export interface ActiveJobsResponse {
 export const getActiveJobs = (): Promise<ActiveJobsResponse> => {
   return request.get(endpoints.activeJobs());
 };
+
+/* Knowledge */
+export function listKnowledgeCollections(): Promise<k.TKnowledgeCollectionListResponse> {
+  return request.get(endpoints.knowledgeCollections);
+}
+
+export function getKnowledgeCollection(id: string): Promise<k.TKnowledgeCollectionResponse> {
+  return request.get(endpoints.knowledgeCollectionById(id));
+}
+
+export function createKnowledgeCollection(
+  payload: k.TKnowledgeCreateRequest,
+): Promise<k.TKnowledgeCollection> {
+  return request.post(endpoints.knowledgeCollections, payload);
+}
+
+export function updateKnowledgeCollection(
+  payload: k.TKnowledgeUpdateRequest,
+): Promise<k.TKnowledgeUpdateResponse> {
+  const { id, ...data } = payload;
+  return request.patch(endpoints.knowledgeCollectionById(id), data);
+}
+
+export function deleteKnowledgeCollection(id: string): Promise<k.TKnowledgeDeletedResponse> {
+  return request.delete(endpoints.knowledgeCollectionById(id));
+}
+
+export function addKnowledgeDocument(
+  collectionId: string,
+  payload: k.TKnowledgeAddDocumentRequest,
+): Promise<k.TKnowledgeDocumentResponse> {
+  const { content, source, metadata } = payload;
+  return request.post(endpoints.knowledgeDocuments(collectionId), { content, source, metadata });
+}
+
+export function deleteKnowledgeDocument(
+  collectionId: string,
+  documentId: string,
+): Promise<k.TKnowledgeDeletedResponse> {
+  return request.delete(endpoints.knowledgeDocumentById(collectionId, documentId));
+}
+
+export function retrieveKnowledge(
+  collectionId: string,
+  payload: k.TKnowledgeRetrieveRequest,
+): Promise<k.TKnowledgeRetrieveResponse> {
+  const { query, hybridAlpha, topK } = payload;
+  return request.post(endpoints.knowledgeRetrieve(collectionId), { query, hybridAlpha, topK });
+}
+
+/* Notifications / Activity Center */
+export function listNotifications(
+  params: nt.TNotificationsListParams = {},
+): Promise<nt.TNotificationsListResponse> {
+  const query = new URLSearchParams();
+  if (params.limit != null) {
+    query.set('limit', String(params.limit));
+  }
+  if (params.page != null) {
+    query.set('page', String(params.page));
+  }
+  if (params.unreadOnly != null) {
+    query.set('unreadOnly', String(params.unreadOnly));
+  }
+  const suffix = query.toString();
+  const url = `${endpoints.apiBaseUrl()}/api/notifications${suffix ? `?${suffix}` : ''}`;
+  return request.get(url);
+}
+
+export function getNotificationsUnreadCount(): Promise<nt.TNotificationsUnreadCountResponse> {
+  return request.get(`${endpoints.apiBaseUrl()}/api/notifications/unread-count`);
+}
+
+export function markNotificationRead(id: string): Promise<nt.TNotificationResponse> {
+  return request.post(`${endpoints.apiBaseUrl()}/api/notifications/${id}/read`, {});
+}
+
+export function markAllNotificationsRead(): Promise<nt.TNotificationsMarkAllReadResponse> {
+  return request.post(`${endpoints.apiBaseUrl()}/api/notifications/read-all`, {});
+}
+
+export function deleteNotification(id: string): Promise<nt.TNotificationDeleteResponse> {
+  return request.delete(`${endpoints.apiBaseUrl()}/api/notifications/${id}`);
+}
+
+export function createNotification(
+  payload: nt.TNotificationCreateRequest,
+): Promise<nt.TNotificationResponse> {
+  return request.post(`${endpoints.apiBaseUrl()}/api/notifications`, payload);
+}
+
+export function notificationStreamUrl(): string {
+  return `${endpoints.apiBaseUrl()}/api/notifications/stream`;
+}
+
+/* Deep Research */
+export function createDeepResearchPlan(
+  payload: dr.TDeepResearchPlanRequest,
+): Promise<dr.TDeepResearchPlan> {
+  return request.post(endpoints.deepResearchPlan(), payload);
+}
+
+export function deepResearchStepRunUrl(params: dr.TDeepResearchStepRunParams): string {
+  return endpoints.deepResearchStepRun(params);
+}
+
+export function buildDeepResearchReport(
+  payload: dr.TDeepResearchReportRequest,
+): Promise<dr.TDeepResearchReport> {
+  return request.post(endpoints.deepResearchReport(), payload);
+}

@@ -22,6 +22,7 @@ const {
   resolveAssistantToolPermissions,
   resolveDownloadPath,
 } = require('@librechat/api');
+const { validateMagicBytes } = require('~/server/utils/magicBytes');
 const {
   Time,
   isUUID,
@@ -786,6 +787,10 @@ const handleFileUpload = async (req, res) => {
 
   try {
     req.file.originalname = sanitizeFilename(req.file.originalname);
+    const magicError = await validateMagicBytes(req.file.path, req.file.mimetype, req.file.originalname);
+    if (magicError) {
+      return res.status(400).json({ message: magicError });
+    }
     const isAssistants = isAssistantsEndpoint(metadata.endpoint);
 
     /* Authorization runs before anything reads the target agent. Validating against a

@@ -128,4 +128,9 @@ ENV BUILD_DATE=${BUILD_DATE}
 WORKDIR /app/api
 EXPOSE 3080
 ENV HOST=0.0.0.0
+ENV NODE_ENV=production
+# Run as the non-root `node` user provided by the node base image.
+# Mirror the single Dockerfile: everything under /app must be writable by it.
+RUN chown -R node:node /app
+USER node
 CMD ["node", "server/index.js"]

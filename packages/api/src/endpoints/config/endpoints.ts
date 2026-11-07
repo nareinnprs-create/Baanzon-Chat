@@ -11,6 +11,7 @@ import type { AppConfig } from '@librechat/data-schemas';
 import type { ServerRequest, TCustomEndpointsConfig } from '~/types';
 import type { GetAppConfigOptions } from '~/app/service';
 import { loadCustomEndpointsConfig as defaultLoadCustomEndpoints } from '~/endpoints/custom';
+import { filterCustomEndpoints } from '~/endpoints/custom/guards';
 import { getAppConfigOptionsFromUser } from '~/app/service';
 
 type PartialEndpointEntry = Partial<TConfig> & Record<string, unknown>;
@@ -36,7 +37,11 @@ export function createEndpointsConfigService(deps: EndpointsConfigDeps): {
   async function getEndpointsConfig(req: ServerRequest): Promise<TEndpointsConfig> {
     const appConfig = req.config ?? (await getAppConfig(getAppConfigOptionsFromUser(req.user)));
     const defaultEndpointsConfig = await loadDefaultEndpointsConfig(appConfig);
-    const customEndpointsConfig = loadCustomEndpointsConfig(appConfig?.endpoints?.custom);
+    const { endpoints: filteredCustomEndpoints } = filterCustomEndpoints(
+      appConfig?.endpoints?.[EModelEndpoint.custom],
+      appConfig?.config?.customEndpoints,
+    );
+    const customEndpointsConfig = loadCustomEndpointsConfig(filteredCustomEndpoints);
 
     const mergedConfig: MutableEndpointsConfig = {
       ...defaultEndpointsConfig,

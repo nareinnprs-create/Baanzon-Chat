@@ -1,0 +1,266 @@
+# Release — gated continuous deployment (P6.5).
+#
+# WHY THIS SHAPE
+# Every other workflow here runs on `pull_request` plus pushes to b1/dev/main.
+# A deploy must not: releases are version tags, and pushing code to a branch is
+# not a release. This workflow triggers only on `v*` tags (plus a manual
+# workflow_dispatch for verification runs) and never on a branch push. Tag
+# pushes also do NOT trigger the branch workflows — their `push.branches`
+# filters do not match tags — so the build job below is the only CI at the
+# tagged commit: it re-runs the same checks a pull request went through,
+# at the exact commit being released.
+#
+# THE GATE (the point of this file)
+# The deploy job declares `environment: production`. GitHub holds that job until
+# a reviewer approves it, but ONLY once the environment has protection rules:
+# Settings -> Environments -> production -> "Required reviewers". The first run
+# auto-creates the environment with no rules and would deploy unattended, so
+# configuring the reviewers is part of the rollout, not an optional extra
+# (docs/deployment.md). The environment is also where the registry credentials
+# belong: a secret stored on the environment is visible to this job alone, not
+# to the build job or to pull-request workflows.
+#
+# WHAT THE BUILD JOB RUNS
+# The existing scripts, by name (root package.json), nothing reinvented:
+#   npm run build:packages, npm run build:client   (build.yml)
+#   npx tsc --noEmit -p <6 projects>               (typecheck.yml, same order/ids)
+#   npm run test:api                              (test.yml, with its env prep)
+#
+# DEPLOY = PUSH THE ONE IMAGE THE COMPOSE FILE BUILDS
+# There is no server to talk to: deploy-compose.yml builds exactly one image
+# (Dockerfile.multi, target api-build -> baanzon-chat-api) and the hosts are
+# provisioned by hand (docs/deployment.md, "Not automated"). So "deploy" here
+# means pushing that image to a registry. No registry configured (any of
+# REGISTRY / REGISTRY_USERNAME / REGISTRY_PASSWORD missing) -> the push steps
+# skip and the job reports a clean no-op instead of failing, so the workflow is
+# safe to merge before the registry exists.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*' # v1.2.3, v1.2.3-rc.1 — any version tag, on any branch it points at
+  workflow_dispatch:
+    # Manual run: executes the build job as a verification run; the deploy job's
+    # `if:` stops it short of deploying. Note the Dispatch button only appears
+    # once this file exists on the default branch (main); a tag push runs the
+    # workflow definition as of the tagged commit, so b1/dev tags need no
+    # merge first.
+
+permissions:
+  contents: read # least privilege for every job; deploy adds packages: write
+
+concurrency:
+  # Same ref supersedes an in-flight run, but a release is never CANCELLED
+  # mid-flight: a half-pushed image set is worse than a queued rerun. This is
+  # the one workflow where cancel-in-progress stays false (the PR workflows
+  # cancel by design — there the newest head is what matters).
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build:packages, build:client, tsc --noEmit (6), test:api
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .nvmrc # 24.16.0
+          cache: npm
+          # package-lock.json is the lockfile of record (packageManager npm@11.13.0).
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # build:packages = data-provider -> data-schemas -> api -> client-package,
+      # in dependency order (root package.json). Also the prerequisite the six
+      # typechecks below need: they resolve cross-workspace imports through the
+      # dist .d.ts files those builds emit (typecheck.yml builds the same three
+      # first — here build:packages already did, so no rebuild step).
+      - name: Build the workspace packages
+        run: npm run build:packages
+
+      - name: Build the client
+        # Same reasoning as build.yml: vite build, NODE_OPTIONS 8 GB heap,
+        # ubuntu-latest has 16 GB. A compile smoke gate, not a typecheck.
+        run: npm run build:client
+
+      # One step per project with continue-on-error + an always() aggregate,
+      # the fail-closed contract typecheck.yml and test.yml both use: every
+      # project reports before the job goes red, and the aggregate is what
+      # actually fails it. Ids match typecheck.yml.
+      - name: packages/data-provider
+        id: tc_data_provider
+        continue-on-error: true
+        run: npx tsc --noEmit -p packages/data-provider/tsconfig.json
+
+      - name: packages/data-schemas
+        id: tc_data_schemas
+        continue-on-error: true
+        run: npx tsc --noEmit -p packages/data-schemas/tsconfig.json
+
+      - name: packages/api
+        id: tc_api
+        continue-on-error: true
+        run: npx tsc --noEmit -p packages/api/tsconfig.json
+
+      - name: packages/client
+        id: tc_packages_client
+        continue-on-error: true
+        run: npx tsc --noEmit -p packages/client/tsconfig.json
+
+      - name: packages/client (specs)
+        id: tc_packages_client_specs
+        continue-on-error: true
+        # packages/client/tsconfig.json excludes specs; tsconfig.test.json covers
+        # them (typecheck.yml has the full rationale).
+        run: npx tsc --noEmit -p packages/client/tsconfig.test.json
+
+      - name: client
+        id: tc_client
+        continue-on-error: true
+        run: npx tsc --noEmit -p client/tsconfig.json
+
+      - name: Aggregate project results (fails the job if any project failed)
+        # continue-on-error records a red project as an outcome instead of an
+        # aborted job; this step restores fail-closed behaviour. Never skipped,
+        # hence always().
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          failed=0
+          check() {
+            local project="$1" outcome="$2"
+            if [ "$outcome" = "success" ]; then
+              printf 'PASS  %s\n' "$project"
+            elif [ "$outcome" = "skipped" ]; then
+              printf 'SKIP  %s\n' "$project"
+            else
+              printf 'FAIL  %s\n' "$project"
+              failed=1
+            fi
+          }
+          check 'packages/data-provider' '${{ steps.tc_data_provider.outcome }}'
+          check 'packages/data-schemas'  '${{ steps.tc_data_schemas.outcome }}'
+          check 'packages/api'           '${{ steps.tc_api.outcome }}'
+          check 'packages/client'        '${{ steps.tc_packages_client.outcome }}'
+          check 'packages/client (specs)' '${{ steps.tc_packages_client_specs.outcome }}'
+          check 'client'                 '${{ steps.tc_client.outcome }}'
+          exit "$failed"
+
+      - name: Prepare the test environment
+        # Same two things test.yml does: api/data/auth.json is read at require
+        # time and api/test/.env.test is gitignored (only the .example is
+        # tracked), so a fresh checkout has neither.
+        shell: bash
+        run: |
+          mkdir -p api/data
+          [ -f api/data/auth.json ] || echo '{}' > api/data/auth.json
+          [ -f api/test/.env.test ] || cp api/test/.env.test.example api/test/.env.test
+
+      - name: test:api
+        # The one suite that runs here. The other six suites live in test.yml
+        # and run on every pull request; re-running all seven per release would
+        # add test.yml's full suite runtime to every tag for suites the tag's
+        # commit already passed on its pull request. `cd api && npm run test:ci`
+        # (root package.json).
+        run: npm run test:api
+
+  # ------------------------------------------------------------------ gated
+  deploy:
+    name: push the api image (production environment gate)
+    needs: build
+    # THE TAG GUARD: deploy runs only for a `v*` tag push. workflow_dispatch
+    # executes the build job above and stops here, so a manual run can never
+    # deploy anything.
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+    runs-on: ubuntu-latest
+    # Cold multi-stage Dockerfile.multi build (npm ci + four workspace builds
+    # inside the image) with no layer cache on a fresh builder. 45 min ≈ 2-3x
+    # headroom on a typical 10-15 min build, matching build.yml's reasoning.
+    timeout-minutes: 45
+    # THE GATE. The job waits here until a required reviewer approves, once the
+    # environment has protection rules configured (see header). Environment
+    # secrets (recommended home for the three registry secrets) become visible
+    # only to this job.
+    environment: production
+    permissions:
+      contents: read
+      packages: write # push packages (e.g. ghcr.io) with the ephemeral GITHUB_TOKEN
+    env:
+      # Must match the `image:` of the one built service in deploy-compose.yml.
+      IMAGE_NAME: baanzon-chat-api
+    steps:
+      - name: Check out the repository
+        # Needed for the build context: Dockerfile.multi and the workspace
+        # sources it COPYs.
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      # ── WHERE THE TEAM CONFIGURES THE REGISTRY ────────────────────────────
+      # All three secrets must be set (docs/deployment.md "Required secrets"):
+      #   REGISTRY           host + optional namespace, e.g. ghcr.io/your-org
+      #   REGISTRY_USERNAME  registry user (or a PAT's owner)
+      #   REGISTRY_PASSWORD  registry token / password
+      # Recommended: repository -> Settings -> Secrets and variables -> Actions,
+      # stored as ENVIRONMENT secrets on `production` so they are exposed only
+      # to this approved job. Any missing value => configured=false and every
+      # push step below skips: no registry is a clean no-op, never a failure.
+      - name: Check whether a registry is configured
+        id: registry
+        env:
+          REGISTRY: ${{ secrets.REGISTRY }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          if [ -n "$REGISTRY" ] && [ -n "$REGISTRY_USERNAME" ] && [ -n "$REGISTRY_PASSWORD" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "Registry '$REGISTRY' configured — the image will be pushed."
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::REGISTRY/REGISTRY_USERNAME/REGISTRY_PASSWORD are not all set — skipping the image push (no-op deploy). Configure them per docs/deployment.md."
+          fi
+
+      - name: Set up Docker Buildx
+        # build-push-action needs a docker-container builder to `push:` — the
+        # default docker driver does not support it.
+        if: steps.registry.outputs.configured == 'true'
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Log in to the registry
+        if: steps.registry.outputs.configured == 'true'
+        env:
+          REGISTRY: ${{ secrets.REGISTRY }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        # REGISTRY may carry a namespace (ghcr.io/your-org, registry:5000/team);
+        # the login endpoint is only the host[:port] before the first slash.
+        # --password-stdin keeps the token out of argv and the log.
+        run: |
+          echo "$REGISTRY_PASSWORD" | docker login "${REGISTRY%%/*}" \
+            --username "$REGISTRY_USERNAME" --password-stdin
+
+      - name: Build and push the API image
+        if: steps.registry.outputs.configured == 'true'
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: Dockerfile.multi
+          target: api-build # the target deploy-compose.yml builds
+          push: true
+          # Plain manifest lists; some self-hosted registries reject OCI
+          # attestations. Re-enable when the registry supports them.
+          provenance: false
+          tags: |
+            ${{ secrets.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+            ${{ secrets.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          build-args: |
+            BUILD_COMMIT=${{ github.sha }}
+            BUILD_BRANCH=${{ github.ref_name }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}

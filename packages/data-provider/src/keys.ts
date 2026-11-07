@@ -11,6 +11,7 @@ export enum QueryKeys {
   searchEnabled = 'searchEnabled',
   langfuseConnection = 'langfuseConnection',
   langfuseSessionLink = 'langfuseSessionLink',
+  adminProviders = 'adminProviders',
   user = 'user',
   name = 'name', // user key name
   models = 'models',
@@ -52,6 +53,11 @@ export enum QueryKeys {
   projects = 'projects',
   project = 'project',
   projectConversations = 'projectConversations',
+  flags = 'flags',
+  billing = 'billing',
+  organizations = 'organizations',
+  workspaces = 'workspaces',
+  trust = 'trust',
   categories = 'categories',
   randomPrompts = 'randomPrompts',
   agentCategories = 'agentCategories',
@@ -82,6 +88,10 @@ export enum QueryKeys {
   skillFiles = 'skillFiles',
   skillFileContent = 'skillFileContent',
   /* Skill tree (phase 2 — filesystem-style node view) */
+  /* DECISION (phase 2): the tree is served by `GET /api/skills/:id/tree` and
+   * the node-content route; `data-service.getSkillTree` /
+   * `getSkillNodeContent` issue real requests, so these reaction-query keys are
+   * live. UI wiring (mounting the tree hooks) is the remaining step. */
   skillTree = 'skillTree',
   skillNodeContent = 'skillNodeContent',
   /* Tool favorites (starred marketplace items) */
@@ -97,6 +107,19 @@ export enum QueryKeys {
   subagentThread = 'subagentThread',
   codeEnvironments = 'codeEnvironments',
   agentQueuedTurns = 'agentQueuedTurns',
+  /* Knowledge collections */
+  knowledgeCollections = 'knowledgeCollections',
+  knowledgeCollection = 'knowledgeCollection',
+  /* Notifications / Activity Center */
+  notifications = 'notifications',
+  notificationsUnreadCount = 'notificationsUnreadCount',
+  /* Deep Research */
+  deepResearchPlan = 'deepResearchPlan',
+  deepResearchReport = 'deepResearchReport',
+  /* Cross-entity palette search */
+  searchAll = 'searchAll',
+  /* Evals (B22) */
+  evalRuns = 'evalRuns',
 }
 
 // Dynamic query keys that require parameters
@@ -111,6 +134,7 @@ export enum MutationKeys {
   cancelAgentQueuedTurn = 'cancelAgentQueuedTurn',
   updateLangfuseConnection = 'updateLangfuseConnection',
   testLangfuseConnection = 'testLangfuseConnection',
+  testAdminProvider = 'testAdminProvider',
   createAgentApiKey = 'createAgentApiKey',
   deleteAgentApiKey = 'deleteAgentApiKey',
   fileUpload = 'fileUpload',
@@ -141,8 +165,9 @@ export enum MutationKeys {
   updateProject = 'updateProject',
   deleteProject = 'deleteProject',
   assignConversationToProject = 'assignConversationToProject',
-  /* Skill mutations from the original UI PR — tree/node operations are
-   * phase 2 and currently stubbed in the data-service layer. */
+  /* DECISION (phase 2): skill-tree node mutations are wired to the backend
+   * (`POST`/`PATCH`/`DELETE /api/skills/:id/tree...`), so these keys are kept.
+   * UI wiring (mounting the tree mutation hooks) is the remaining step. */
   createSkillNode = 'createSkillNode',
   updateSkillNode = 'updateSkillNode',
   deleteSkillNode = 'deleteSkillNode',
@@ -156,4 +181,11 @@ export enum MutationKeys {
   pairCodeEnvironment = 'pairCodeEnvironment',
   updateCodeEnvironmentSettings = 'updateCodeEnvironmentSettings',
   deleteCodeEnvironment = 'deleteCodeEnvironment',
+  /* Knowledge collections */
+  createKnowledgeCollection = 'createKnowledgeCollection',
+  updateKnowledgeCollection = 'updateKnowledgeCollection',
+  deleteKnowledgeCollection = 'deleteKnowledgeCollection',
+  addKnowledgeDocument = 'addKnowledgeDocument',
+  deleteKnowledgeDocument = 'deleteKnowledgeDocument',
+  retrieveKnowledge = 'retrieveKnowledge',
 }

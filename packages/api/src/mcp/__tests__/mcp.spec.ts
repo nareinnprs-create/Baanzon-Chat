@@ -37,8 +37,15 @@ describe('Environment Variable Extraction (MCP)', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
+    /**
+     * Spreading `process.env` yields a plain object, which drops the
+     * case-insensitive lookup Node provides on Windows (`Path` vs `PATH`).
+     * Re-expose the canonical spelling so `${PATH}` resolves the same way here
+     * as it does against the real environment.
+     */
     process.env = {
       ...originalEnv,
+      PATH: originalEnv.PATH,
       TEST_API_KEY: 'test-api-key-value',
       ANOTHER_SECRET: 'another-secret-value',
     };

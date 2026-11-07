@@ -1,0 +1,91 @@
+/**
+ * Feature-local English labels for the Workflow Builder. These are plain
+ * English strings, not i18n keys, so tests assert against these values
+ * directly. Replace with `useLocalize()` keys once promoted.
+ */
+
+// TODO(i18n): promote to translation.json
+export const WORKFLOW_LABELS = {
+  featureTitle: 'Workflow Builder',
+  featureDescription: 'Design, configure, and run workflows with an injected executor.',
+  editorHeading: 'Workflow Editor',
+  workflowNameLabel: 'Workflow name',
+  workflowNamePlaceholder: 'Enter workflow name',
+  workflowDescriptionLabel: 'Description',
+  workflowDescriptionPlaceholder: 'Enter workflow description (optional)',
+  nameRequired: 'Workflow name is required',
+  stepsHeading: 'Steps',
+  runStepsHeading: 'Run steps',
+  addStep: 'Add step',
+  removeStep: 'Remove step',
+  moveStepUp: 'Move step up',
+  moveStepDown: 'Move step down',
+  stepHeader: 'Step',
+  stepIdLabel: 'Step ID',
+  stepIdPlaceholder: 'Enter unique step ID',
+  stepTypeLabel: 'Step type',
+  stepTypeTransform: 'Transform',
+  stepTypeHttp: 'HTTP',
+  stepTypeTool: 'Tool',
+  stepTypeBranch: 'Branch',
+  stepTypeDelay: 'Delay',
+  stepTypeCustom: 'Custom',
+  stepNameLabel: 'Step name',
+  stepNamePlaceholder: 'Enter step name (optional)',
+  stepInputLabel: 'Input config (JSON)',
+  stepInputPlaceholder: '{ "key": "value" }',
+  stepNextLabel: 'Next step ID (optional)',
+  stepNextPlaceholder: 'Next step ID',
+  stepTimeoutLabel: 'Timeout (ms)',
+  stepRetryLabel: 'Max attempts',
+  stepBackoffLabel: 'Backoff (ms)',
+  stepDelayLabel: 'Delay (ms)',
+  stepOnTrueLabel: 'On true step ID',
+  stepOnFalseLabel: 'On false step ID',
+  stepIdRequired: 'Step ID is required',
+  stepIdUniqueError: 'Step IDs must be unique',
+  stepTypeMissingError: 'Step type is required',
+  branchNeedsEdgesError: 'Branch step requires on true and on false step IDs',
+  delayNeedsValueError: 'Delay step requires a delay in ms',
+  stepInputInvalidJson: 'Input must be a valid JSON object',
+  noStepsTitle: 'No steps yet',
+  noStepsDescription: 'Add a step to start building your workflow.',
+  stepsEmptyError: 'Add at least one step',
+  invalidStepsError: 'Fix the highlighted steps before saving or running',
+  saveWorkflow: 'Save workflow',
+  savedMessage: 'Workflow saved',
+  runPanelHeading: 'Run Panel',
+  runStart: 'Start run',
+  runPause: 'Pause',
+  runResume: 'Resume',
+  runCancel: 'Cancel',
+  runInvalid: 'Fix validation errors before running',
+  runStatusQueued: 'Queued',
+  runStatusPending: 'Pending',
+  runStatusRunning: 'Running',
+  runStatusPaused: 'Paused',
+  runStatusCompleted: 'Completed',
+  runStatusFailed: 'Failed',
+  runStatusSkipped: 'Skipped',
+  runStatusCancelled: 'Cancelled',
+  progressLabel: 'Progress',
+  progressSummary: '{completed} of {total} steps completed',
+  runHistoryHeading: 'Run History',
+  historyEmpty: 'No runs yet',
+  selectRun: 'Show run {run}',
+  announceQueued: 'Run queued',
+  announceRunning: 'Running step {current} of {total}: {name}',
+  announcePaused: 'Run paused at step {current} of {total}',
+  announceCompleted: 'Run completed: {completed} of {total} steps',
+  announceFailed: 'Run failed: {error}',
+  announceCancelled: 'Run cancelled',
+} as const;
+
+export type WorkflowLabelKey = keyof typeof WORKFLOW_LABELS;
+
+/** Replaces `{name}` placeholders in a label with the supplied values. */
+export function formatLabel(template: string, params: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (match, key: string) =>
+    key in params ? String(params[key]) : match,
+  );
+}

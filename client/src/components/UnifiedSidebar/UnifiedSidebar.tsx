@@ -20,6 +20,7 @@ import useUnifiedSidebarLinks from '~/hooks/Nav/useUnifiedSidebarLinks';
 import useSidebarToggle from '~/hooks/Nav/useSidebarToggle';
 import useSidebarState from '~/hooks/Nav/useSidebarState';
 import { useChatHelpers, useLocalize } from '~/hooks';
+import { useInterfaceMode } from '~/store/settings';
 import SidePanelNav from '~/components/SidePanel/Nav';
 import Sidebar from './Sidebar';
 import { cn } from '~/utils';
@@ -28,6 +29,15 @@ function getInitialWidth(): number {
   const saved = localStorage.getItem('side:width');
   return saved ? Math.max(Number(saved), EXPANDED_MIN) : EXPANDED_MIN;
 }
+
+/** Atelier (Monolith) rail: the collapsed 52px strip becomes a fixed 64px
+ *  rail that expands to a 280px panel on hover or click. Widths live here so
+ *  the inline width/min/max triple stays in one place; tone stays in CSS
+ *  under [data-atelier]. */
+const ATELIER_RAIL_COLLAPSED = 64;
+const ATELIER_RAIL_EXPANDED = 280;
+const ATELIER_RAIL_TRANSITION = 'width 200ms ease, min-width 200ms ease, max-width 200ms ease';
+const noop = () => undefined;
 
 /**
  * Isolates useChatHelpers Recoil subscriptions from the sidebar layout.
@@ -60,6 +70,10 @@ function UnifiedSidebar() {
   const links = useUnifiedSidebarLinks();
   const isInsightsRoute = location.pathname.startsWith('/insights');
   const panelExpanded = expanded && !isInsightsRoute;
+  /** Atelier rail only restyles the desktop sidebar; the mobile drawer below
+   *  is untouched, and the drag-resize state machine is never engaged. */
+  const atelierRail = useInterfaceMode() === 'atelier';
+  const railWidth = panelExpanded ? ATELIER_RAIL_EXPANDED : ATELIER_RAIL_COLLAPSED;
 
   /** The aside's max width is a viewport percentage, so the announced range has to track
    *  the viewport rather than a render-time snapshot of it. */
@@ -237,26 +251,40 @@ function UnifiedSidebar() {
         <aside
           className="relative flex h-full flex-shrink-0 overflow-hidden"
           style={{
-            width: panelExpanded ? sidebarWidth : COLLAPSED_WIDTH,
-            minWidth: panelExpanded ? EXPANDED_MIN : COLLAPSED_WIDTH,
-            maxWidth: panelExpanded ? '40%' : COLLAPSED_WIDTH,
-            transition: isResizing
-              ? 'none'
-              : `width ${TRANSITION_MS}ms ${EASING}, min-width ${TRANSITION_MS}ms ${EASING}, max-width ${TRANSITION_MS}ms ${EASING}`,
+            width: atelierRail ? railWidth : panelExpanded ? sidebarWidth : COLLAPSED_WIDTH,
+            minWidth: atelierRail
+              ? railWidth
+              : panelExpanded
+                ? EXPANDED_MIN
+                : COLLAPSED_WIDTH,
+            maxWidth: atelierRail ? railWidth : panelExpanded ? '40%' : COLLAPSED_WIDTH,
+            transition: atelierRail
+              ? prefersReducedMotion
+                ? undefined
+                : ATELIER_RAIL_TRANSITION
+              : isResizing
+                ? 'none'
+                : `width ${TRANSITION_MS}ms ${EASING}, min-width ${TRANSITION_MS}ms ${EASING}, max-width ${TRANSITION_MS}ms ${EASING}`,
           }}
           aria-label={localize('com_nav_control_panel')}
+          /** The rail expands on hover as well as click; the click path (rail
+           *  icons, toggle button) is the existing state machine untouched. */
+          onMouseEnter={atelierRail && !panelExpanded ? handleExpand : undefined}
+          onMouseLeave={atelierRail && panelExpanded ? () => handleCollapse() : undefined}
         >
           <Sidebar
             links={links}
             expanded={panelExpanded}
-            width={resizeNow}
-            minWidth={panelExpanded ? EXPANDED_MIN : COLLAPSED_WIDTH}
-            maxWidth={panelExpanded ? resizeMax : COLLAPSED_WIDTH}
+            width={atelierRail ? railWidth : resizeNow}
+            minWidth={atelierRail ? railWidth : panelExpanded ? EXPANDED_MIN : COLLAPSED_WIDTH}
+            maxWidth={atelierRail ? railWidth : panelExpanded ? resizeMax : COLLAPSED_WIDTH}
             onCollapse={handleCollapse}
             onExpand={handlePanelExpand}
             onLeaveInsights={handleLeaveInsights}
-            onResizeStart={handleResizeStart}
-            onResizeKeyboard={handleResizeKeyboard}
+            /** The rail is hover-resized, not drag-resized: the separator is
+             *  hidden in CSS under [data-atelier], so the handlers are inert. */
+            onResizeStart={atelierRail ? noop : handleResizeStart}
+            onResizeKeyboard={atelierRail ? noop : handleResizeKeyboard}
           />
         </aside>
       </ActivePanelProvider>

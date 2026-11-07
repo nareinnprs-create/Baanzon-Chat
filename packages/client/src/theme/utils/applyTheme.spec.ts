@@ -108,7 +108,9 @@ describe('applyTheme', () => {
     expect(document.documentElement.style.getPropertyValue('--status-error')).toBe(
       defaultTheme['rgb-status-error'],
     );
-    expect(document.documentElement.style.getPropertyValue('--surface-overlay')).toBe('89 89 89');
+    expect(document.documentElement.style.getPropertyValue('--surface-overlay')).toBe(
+      defaultTheme['rgb-surface-overlay'],
+    );
   });
 
   it('applies a resolved appearance atomically', () => {
@@ -139,10 +141,11 @@ describe('applyTheme', () => {
 
   it('applies the resolved high-contrast code surface instead of the stock grey', () => {
     const root = document.documentElement;
+    const resolved = resolveTheme(highContrastTheme, 'dark');
 
-    applyResolvedTheme(resolveTheme(highContrastTheme, 'dark'), root);
+    applyResolvedTheme(resolved, root);
 
-    expect(root.style.getPropertyValue('--surface-code')).toBe('0 0 0');
+    expect(root.style.getPropertyValue('--surface-code')).toBe(resolved.colors['rgb-surface-code']);
   });
 
   /** The sweep under an in-flight label is painted in CSS, so it is only

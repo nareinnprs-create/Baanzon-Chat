@@ -25,16 +25,22 @@ import {
   useAgentsMap,
   useFileMap,
 } from '~/hooks';
+import MobileBottomNav, { MOBILE_BOTTOM_NAV_RESERVATION } from '~/components/Nav/MobileBottomNav';
 import KeyboardShortcutsDialog from '~/components/Nav/KeyboardShortcutsDialog';
 import KeyboardDeleteDialog from '~/components/Nav/KeyboardDeleteDialog';
 import { useUserTermsQuery, useGetStartupConfig } from '~/data-provider';
 import { MobileDrawerScrim } from '~/components/UnifiedSidebar/mobile';
+import AtelierShell from '~/components/Atelier';
+import { InConversationFind } from '~/components/InConversationFind';
 import useKeyboardShortcuts from '~/hooks/useKeyboardShortcuts';
+import { NotificationsBell } from '~/components/Notifications';
+import { CommandPalette } from '~/components/CommandPalette';
 import useDrawerDismiss from '~/hooks/Nav/useDrawerDismiss';
 import useSidebarToggle from '~/hooks/Nav/useSidebarToggle';
 import useSidebarState from '~/hooks/Nav/useSidebarState';
 import { TermsAndConditionsModal } from '~/components/ui';
 import useDrawerSwipe from '~/hooks/Nav/useDrawerSwipe';
+import { ExportPdf } from '~/components/ExportPdf';
 import { useHealthCheck } from '~/data-provider';
 import { Banner } from '~/components/Banners';
 import store from '~/store';
@@ -142,8 +148,9 @@ export default function Root() {
         <AssistantsMapContext.Provider value={assistantsMap}>
           <AgentsMapContext.Provider value={agentsMap}>
             <PromptGroupsProvider>
-              <Banner onHeightChange={setBannerHeight} />
-              <div className="flex" style={{ height: `calc(100dvh - ${bannerHeight}px)` }}>
+              <AtelierShell>
+                <Banner onHeightChange={setBannerHeight} />
+                <div className="flex" style={{ height: `calc(100dvh - ${bannerHeight}px)` }}>
                 <div
                   className="relative z-0 flex h-full w-full overflow-hidden"
                   /** The drawer and the pane both read this, so their travel
@@ -168,6 +175,10 @@ export default function Root() {
                        *  drawer without a literal and survives rotation. */
                       transform: isSmallScreen && sidebarExpanded ? MOBILE_PANE_SHIFT : 'none',
                       transition: prefersReducedMotion ? undefined : SIDEBAR_TRANSITION,
+                      /** The bottom bar is fixed to the viewport, so the pane
+                       *  must shrink by its height or the composer (and every
+                       *  route's footer) renders underneath it. */
+                      paddingBottom: isSmallScreen ? MOBILE_BOTTOM_NAV_RESERVATION : undefined,
                     }}
                     /** Recoil's flip is deferred past the opening frames and
                      *  the closing transition outlives it at the other end, so
@@ -192,10 +203,19 @@ export default function Root() {
                       onClick={onScrimClick}
                     />
                   )}
+                  {/* Layers under the drawer when it is open and renders nothing
+                      above the mobile breakpoint; it owns its own breakpoint
+                      reader, so no prop threads through here. */}
+                  <MobileBottomNav />
                 </div>
               </div>
+              </AtelierShell>
             </PromptGroupsProvider>
             <KeyboardShortcutsProvider />
+            <CommandPalette />
+            <InConversationFind />
+            <NotificationsBell />
+            <ExportPdf />
           </AgentsMapContext.Provider>
           {config?.interface?.termsOfService?.modalAcceptance === true && (
             <TermsAndConditionsModal

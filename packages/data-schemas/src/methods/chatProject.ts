@@ -2,7 +2,7 @@ import {
   MAX_CHAT_PROJECT_NAME_LENGTH,
   MAX_CHAT_PROJECT_DESCRIPTION_LENGTH,
 } from 'librechat-data-provider';
-import type { FilterQuery, Model, SortOrder, Types } from 'mongoose';
+import type { FilterQuery, Model, SortOrder, Types, UpdateQuery } from 'mongoose';
 import type { IChatProject, IChatProjectDocument, IConversation } from '~/types';
 import { buildRetentionVisibilityFilter } from '~/utils/retention';
 import { isValidObjectIdString } from '~/utils/objectId';
@@ -15,6 +15,12 @@ export type ChatProjectSortDirection = 'asc' | 'desc';
 export type CreateChatProjectInput = {
   name: string;
   description?: string | null;
+  /**
+   * Owning workspace as its ObjectId hex string. Optional — a project may live
+   * outside any workspace, and every project created before this field existed
+   * has none.
+   */
+  workspaceId?: string | null;
 };
 
 export type UpdateChatProjectInput = Partial<CreateChatProjectInput>;
@@ -25,11 +31,20 @@ export type ListChatProjectsOptions = {
   sortBy?: ChatProjectSortBy;
   sortDirection?: ChatProjectSortDirection;
   search?: string;
+  /** Narrows the list to one workspace, composed with the user scope. */
+  workspaceId?: string | null;
 };
 
 export type ListChatProjectsResult = {
   projects: IChatProject[];
   nextCursor: string | null;
+};
+
+/** Small projection for cross-entity palette search: enough to list and navigate. */
+export type ChatProjectTitleHit = {
+  id: string;
+  name: string;
+  lastConversationAt: Date | null;
 };
 
 export type DeleteChatProjectResult = {
@@ -50,6 +65,17 @@ export interface ChatProjectMethods {
     user: string,
     options?: ListChatProjectsOptions,
   ): Promise<ListChatProjectsResult>;
+  /** Lists every member's projects in one workspace; tenant scope still applies. */
+  listWorkspaceChatProjects(
+    workspaceId: string,
+    options?: ListChatProjectsOptions,
+  ): Promise<ListChatProjectsResult>;
+  /** Cross-entity palette search: bounded case-insensitive name/description hits for one user. */
+  searchChatProjectsByTitle(
+    user: string,
+    query: string,
+    limit?: number,
+  ): Promise<ChatProjectTitleHit[]>;
   updateChatProject(
     user: string,
     projectId: string,
@@ -77,6 +103,9 @@ type ProjectStatsSnapshot = Pick<
 
 const VALID_SORT_FIELDS = new Set<ChatProjectSortBy>(['name', 'createdAt', 'lastConversationAt']);
 const PROJECT_STATS_REFRESH_MAX_ATTEMPTS = 8;
+/** Per-request default and hard cap for `searchChatProjectsByTitle`. */
+const DEFAULT_TITLE_SEARCH_LIMIT = 10;
+const MAX_TITLE_SEARCH_LIMIT = 20;
 
 function normalizeSortBy(sortBy?: string): ChatProjectSortBy {
   return VALID_SORT_FIELDS.has(sortBy as ChatProjectSortBy)
@@ -95,10 +124,26 @@ function normalizeLimit(limit?: number): number {
   return Math.min(Math.max(Math.floor(limit), 1), 100);
 }
 
+/**
+ * Validates a workspace ObjectId string. Absent/null means "no workspace", which
+ * is legal and common (pre-workspace and personal projects).
+ */
+function normalizeWorkspaceId(workspaceId: string | null | undefined): string | undefined {
+  if (workspaceId === undefined || workspaceId === null || workspaceId === '') {
+    return undefined;
+  }
+  if (!isValidObjectIdString(workspaceId)) {
+    throw new Error('A valid workspaceId is required');
+  }
+  return workspaceId;
+}
+
 function sanitizeProjectInput(input: CreateChatProjectInput): CreateChatProjectInput {
+  const workspaceId = normalizeWorkspaceId(input.workspaceId);
   return {
     name: input.name.trim().slice(0, MAX_CHAT_PROJECT_NAME_LENGTH),
     description: input.description?.trim().slice(0, MAX_CHAT_PROJECT_DESCRIPTION_LENGTH) ?? '',
+    ...(workspaceId != null ? { workspaceId } : {}),
   };
 }
 
@@ -210,6 +255,58 @@ function projectStatsSnapshotFilter(
     lastConversationId:
       snapshot.lastConversationId === undefined ? { $exists: false } : snapshot.lastConversationId,
   };
+}
+
+/**
+ * The shared list body behind both list methods: `scope` is the authorization
+ * filter (`{ user }`, or `{ workspaceId }` for a workspace-wide read) and every
+ * other filter composes with it rather than replacing it. Tenant isolation is
+ * injected by the schema plugin, so it holds for both shapes.
+ */
+async function queryProjects(
+  mongoose: typeof import('mongoose'),
+  scope: FilterQuery<IChatProjectDocument>,
+  options: ListChatProjectsOptions,
+): Promise<ListChatProjectsResult> {
+  const ChatProject = mongoose.models.ChatProject as Model<IChatProjectDocument>;
+  const limit = normalizeLimit(options.limit);
+  const sortBy = normalizeSortBy(options.sortBy);
+  const sortDirection = normalizeSortDirection(options.sortDirection);
+  const sortOrder: SortOrder = sortDirection === 'asc' ? 1 : -1;
+  const filters: FilterQuery<IChatProjectDocument>[] = [scope];
+
+  if (options.search?.trim()) {
+    const searchRegex = { $regex: escapeRegExp(options.search.trim()), $options: 'i' };
+    filters.push({ $or: [{ name: searchRegex }, { description: searchRegex }] });
+  }
+
+  const cursorFilter = createCursorFilter(
+    mongoose,
+    parseCursor(options.cursor),
+    sortBy,
+    sortDirection,
+  );
+  if (cursorFilter) {
+    filters.push(cursorFilter);
+  }
+
+  const query =
+    filters.length === 1 ? filters[0] : ({ $and: filters } as FilterQuery<IChatProjectDocument>);
+  const projects = await ChatProject.find(query)
+    .sort({ [sortBy]: sortOrder, _id: sortOrder })
+    .limit(limit + 1)
+    .lean<ProjectLean[]>();
+
+  let nextCursor: string | null = null;
+  if (projects.length > limit) {
+    projects.pop();
+    const lastProject = projects[projects.length - 1];
+    if (lastProject) {
+      nextCursor = encodeCursor(lastProject, sortBy);
+    }
+  }
+
+  return { projects, nextCursor };
 }
 
 export async function refreshChatProjectStatsForUser(
@@ -360,45 +457,24 @@ export function createChatProjectMethods(mongoose: typeof import('mongoose')): C
     user: string,
     options: ListChatProjectsOptions = {},
   ): Promise<ListChatProjectsResult> {
-    const ChatProject = mongoose.models.ChatProject as Model<IChatProjectDocument>;
-    const limit = normalizeLimit(options.limit);
-    const sortBy = normalizeSortBy(options.sortBy);
-    const sortDirection = normalizeSortDirection(options.sortDirection);
-    const sortOrder: SortOrder = sortDirection === 'asc' ? 1 : -1;
-    const filters: FilterQuery<IChatProjectDocument>[] = [{ user }];
-
-    if (options.search?.trim()) {
-      const searchRegex = { $regex: escapeRegExp(options.search.trim()), $options: 'i' };
-      filters.push({ $or: [{ name: searchRegex }, { description: searchRegex }] });
-    }
-
-    const cursorFilter = createCursorFilter(
-      mongoose,
-      parseCursor(options.cursor),
-      sortBy,
-      sortDirection,
-    );
-    if (cursorFilter) {
-      filters.push(cursorFilter);
-    }
-
-    const query =
-      filters.length === 1 ? filters[0] : ({ $and: filters } as FilterQuery<IChatProjectDocument>);
-    const projects = await ChatProject.find(query)
-      .sort({ [sortBy]: sortOrder, _id: sortOrder })
-      .limit(limit + 1)
-      .lean<ProjectLean[]>();
-
-    let nextCursor: string | null = null;
-    if (projects.length > limit) {
-      projects.pop();
-      const lastProject = projects[projects.length - 1];
-      if (lastProject) {
-        nextCursor = encodeCursor(lastProject, sortBy);
+    if (options.workspaceId != null && options.workspaceId !== '') {
+      /** A malformed filter narrows to nothing rather than throwing, matching `listUsageRecords`. */
+      if (!isValidObjectIdString(options.workspaceId)) {
+        return { projects: [], nextCursor: null };
       }
+      return await queryProjects(mongoose, { user, workspaceId: options.workspaceId }, options);
     }
+    return await queryProjects(mongoose, { user }, options);
+  }
 
-    return { projects, nextCursor };
+  async function listWorkspaceChatProjects(
+    workspaceId: string,
+    options: ListChatProjectsOptions = {},
+  ): Promise<ListChatProjectsResult> {
+    if (!isValidObjectIdString(workspaceId)) {
+      return { projects: [], nextCursor: null };
+    }
+    return await queryProjects(mongoose, { workspaceId }, options);
   }
 
   async function updateChatProject(
@@ -411,7 +487,8 @@ export function createChatProjectMethods(mongoose: typeof import('mongoose')): C
     }
 
     const ChatProject = mongoose.models.ChatProject as Model<IChatProjectDocument>;
-    const update: Partial<Pick<IChatProject, 'name' | 'description'>> = {};
+    const update: Partial<Pick<IChatProject, 'name' | 'description' | 'workspaceId'>> = {};
+    const unset: { workspaceId?: '' } = {};
     if (typeof input.name === 'string') {
       const name = input.name.trim().slice(0, MAX_CHAT_PROJECT_NAME_LENGTH);
       if (!name) {
@@ -423,10 +500,23 @@ export function createChatProjectMethods(mongoose: typeof import('mongoose')): C
       update.description =
         input.description?.trim().slice(0, MAX_CHAT_PROJECT_DESCRIPTION_LENGTH) ?? '';
     }
+    /** `null` detaches the project from its workspace; omitted leaves it alone. */
+    if (input.workspaceId !== undefined) {
+      const workspaceId = normalizeWorkspaceId(input.workspaceId);
+      if (workspaceId != null) {
+        update.workspaceId = workspaceId;
+      } else {
+        unset.workspaceId = '';
+      }
+    }
+
+    const mutation = Object.keys(unset).length
+      ? ({ $set: update, $unset: unset } as UpdateQuery<IChatProjectDocument>)
+      : ({ $set: update } as UpdateQuery<IChatProjectDocument>);
 
     return await ChatProject.findOneAndUpdate(
       { _id: new mongoose.Types.ObjectId(projectId), user },
-      { $set: update },
+      mutation,
       { new: true, runValidators: true },
     ).lean<IChatProject>();
   }
@@ -525,10 +615,54 @@ export function createChatProjectMethods(mongoose: typeof import('mongoose')): C
     return await refreshChatProjectStatsForUser(mongoose, user, projectId);
   }
 
+  /**
+   * Cross-entity palette search over project names. The listing path already
+   * filters `name`/`description` with a bounded case-insensitive regex, so this
+   * rides the same pattern on the stored `{ user, workspaceId }` index with a
+   * hard cap (`limit <= 20`), matching only the requesting user's projects.
+   */
+  async function searchChatProjectsByTitle(
+    user: string,
+    query: string,
+    limit?: number,
+  ): Promise<ChatProjectTitleHit[]> {
+    const trimmed = typeof query === 'string' ? query.trim() : '';
+    if (!trimmed) {
+      return [];
+    }
+    const pageSize = Number.isFinite(limit)
+      ? Math.min(Math.max(Math.trunc(limit as number), 1), MAX_TITLE_SEARCH_LIMIT)
+      : DEFAULT_TITLE_SEARCH_LIMIT;
+    try {
+      const ChatProject = mongoose.models.ChatProject as Model<IChatProjectDocument>;
+      const searchRegex = { $regex: escapeRegExp(trimmed), $options: 'i' };
+      return await ChatProject.find({
+        user,
+        $or: [{ name: searchRegex }, { description: searchRegex }],
+      })
+        .select('name lastConversationAt updatedAt')
+        .sort({ updatedAt: -1, _id: -1 })
+        .limit(pageSize)
+        .lean<Array<Pick<ProjectLean, '_id' | 'name' | 'lastConversationAt' | 'updatedAt'>>>()
+        .then((projects) =>
+          projects.map((project) => ({
+            id: project._id.toString(),
+            name: project.name,
+            lastConversationAt: project.lastConversationAt ?? null,
+          })),
+        );
+    } catch (error) {
+      logger.error('[searchChatProjectsByTitle] Error searching project titles', error);
+      throw new Error('Error searching project titles');
+    }
+  }
+
   return {
     createChatProject,
     getChatProject,
     listChatProjects,
+    listWorkspaceChatProjects,
+    searchChatProjectsByTitle,
     updateChatProject,
     deleteChatProject,
     assignConversationToProject,

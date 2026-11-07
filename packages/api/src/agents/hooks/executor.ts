@@ -26,7 +26,10 @@ const STOP_DECISIONS: ReadonlySet<string> = new Set<StopDecision>(['continue', '
 const TOOL_INPUT_DECISIONS: ReadonlySet<string> = new Set([...TOOL_DECISIONS, 'approve', 'block']);
 const STOP_INPUT_DECISIONS: ReadonlySet<string> = STOP_DECISIONS;
 const STDOUT_CONTEXT_EVENTS: ReadonlySet<string> = new Set(['SessionStart', 'UserPromptSubmit']);
-const PASSTHROUGH_ENV_VARS = ['PATH', 'HOME', 'LANG', 'LC_ALL', 'TZ'] as const;
+// PATHEXT is not optional on Windows: PowerShell pairs it with each PATH entry
+// to decide which suffixes are executable, and falls back to .CPL alone when it
+// is missing — so a hook that shells out to `node` or `python` would never run.
+const PASSTHROUGH_ENV_VARS = ['PATH', 'HOME', 'LANG', 'LC_ALL', 'TZ', 'PATHEXT'] as const;
 
 interface EventTraits {
   /** Whether the matcher queries a runtime tool name, enabling alias translation. */

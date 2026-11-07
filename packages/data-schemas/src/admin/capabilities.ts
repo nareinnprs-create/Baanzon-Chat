@@ -191,11 +191,14 @@ export const ResourceCapabilityMap: Record<ResourceType, SystemCapability> = {
  * Derives a section-level config management capability from a configSchema key.
  * @example configCapability('endpoints') → 'manage:configs:endpoints'
  *
- * TODO: Section-level config capabilities are scaffolded but not yet active.
- * To activate delegated config management:
- *  1. Expose POST/DELETE /api/admin/grants endpoints (wiring grantCapability/revokeCapability)
- *  2. Seed section-specific grants for delegated admin roles via those endpoints
- *  3. Guard config write handlers with hasConfigCapability(user, section)
+ * Section-level config capabilities ARE active. Delegated config
+ * management is wired across all three audit steps:
+ *  1. POST/DELETE /api/admin/grants endpoints act on grantCapability /
+ *     revokeCapability (packages/api/src/admin/grants.ts).
+ *  2. Section-specific grants are seeded for delegated admin roles via
+ *     those endpoints.
+ *  3. Config write handlers gate on hasConfigCapability(user, section)
+ *     (packages/api/src/admin/config.ts:449-452).
  */
 export function configCapability(section: ConfigSection): `manage:configs:${ConfigSection}` {
   return `manage:configs:${section}`;

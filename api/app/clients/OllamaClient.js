@@ -133,34 +133,43 @@ class OllamaClient {
     const parameters = ollamaPayloadSchema.parse(payload);
     const messages = OllamaClient.formatOpenAIMessages(payload.messages);
 
-    if (parameters.stream) {
-      const stream = await this.client.chat({
-        messages,
-        ...parameters,
-      });
+    try {
+      // DECISION NEEDED: streaming path preserved as-is; non-streaming
+      // completion now uses client.generate with a flattened prompt.
+      if (parameters.stream) {
+        const stream = await this.client.chat({
+          messages,
+          ...parameters,
+        });
 
-      for await (const chunk of stream) {
-        const token = chunk.message.content;
-        intermediateReply += token;
-        onProgress(token);
-        if (abortController.signal.aborted) {
-          stream.controller.abort();
-          break;
+        for await (const chunk of stream) {
+          const token = chunk.message.content;
+          intermediateReply += token;
+          onProgress(token);
+          if (abortController?.signal.aborted) {
+            stream.controller.abort();
+            break;
+          }
+
+          await sleep(this.streamRate);
         }
-
-        await sleep(this.streamRate);
+      } else {
+        const prompt = messages.map((message) => message.content).join('\n');
+        const images = messages.flatMap((message) => message.images ?? []);
+        const generation = await this.client.generate({
+          ...parameters,
+          stream: false,
+          prompt,
+          ...(images.length > 0 && { images }),
+        });
+        intermediateReply = generation.response ?? '';
       }
-    }
-    // TODO: regular completion
-    else {
-      // const generation = await this.client.generate(payload);
+    } catch (err) {
+      logger.error('[OllamaClient.chatCompletion]', err);
+      throw err;
     }
 
     return intermediateReply;
-  }
-  catch(err) {
-    logger.error('[OllamaClient.chatCompletion]', err);
-    throw err;
   }
 }
 
