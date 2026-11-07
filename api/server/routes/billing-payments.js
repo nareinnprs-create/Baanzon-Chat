@@ -50,7 +50,7 @@ function verifyWebhookSignature(req) {
       return a.length === b.length && crypto.timingSafeEqual(a, b);
     });
   }
-  return !secret || req.headers['webhook-secret'] === secret;
+  return !DODO_WEBHOOK_SECRET || req.headers['webhook-secret'] === DODO_WEBHOOK_SECRET;
 }
 
 /* products (public) */
