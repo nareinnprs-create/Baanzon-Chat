@@ -61,6 +61,10 @@ describe('createOnSearchResults', () => {
         { expectedCreatedAt: 1234 },
       ]);
     }
+    expect(mockEmitChunk.mock.calls[0][1].data.provenance).toEqual({
+      type: 'live_web',
+      retrievedAt: expect.any(String),
+    });
   });
 
   it('keeps repeated search calls owned by their handoff agent through highlights', () => {

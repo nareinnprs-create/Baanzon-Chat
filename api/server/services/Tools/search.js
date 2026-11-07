@@ -39,6 +39,7 @@ function createOnSearchResults(res, streamId = null, jobCreatedAt) {
     attachmentName: undefined,
     messageId: undefined,
     conversationId: undefined,
+    retrievedAt: undefined,
   };
 
   /**
@@ -61,6 +62,7 @@ function createOnSearchResults(res, streamId = null, jobCreatedAt) {
     const turn = runnableConfig.toolCall?.turn ?? 0;
     const data = { turn, ...structuredClone(results.data ?? {}) };
     context.searchResultData = data;
+    context.retrievedAt = new Date().toISOString();
 
     // Map sources to links
     for (let i = 0; i < data.organic.length; i++) {
@@ -139,6 +141,10 @@ function buildAttachment(context) {
     agentId: context.agentId,
     stepId: context.stepId,
     conversationId: context.conversationId,
+    provenance: {
+      type: 'live_web',
+      retrievedAt: context.retrievedAt,
+    },
     name: context.attachmentName,
     type: Tools.web_search,
     [Tools.web_search]: context.searchResultData,
