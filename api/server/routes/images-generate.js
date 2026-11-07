@@ -30,6 +30,16 @@ function limited(userId, cap) {
   return false;
 }
 
+function imageType(buffer) {
+  if (buffer.subarray(0, 2).equals(Buffer.from([0xff, 0xd8]))) {
+    return { mime: 'image/jpeg', extension: 'jpg' };
+  }
+  if (buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
+    return { mime: 'image/png', extension: 'png' };
+  }
+  return { mime: 'application/octet-stream', extension: 'bin' };
+}
+
 async function userTier(userId) {
   const tier = await mongoose.connection.db.collection('users').findOne(
     { _id: new mongoose.Types.ObjectId(String(userId)) },
@@ -79,9 +89,10 @@ router.post('/', requireJwtAuth, async (req, res) => {
       const j = await r.json();
       const b64 = j.result && (j.result.image || j.result.content);
       if (!b64) return res.status(502).json({ message: 'Image generation returned no image' });
-      const buf = Buffer.from(String(b64), 'base64');
-      res.setHeader('Content-Type', 'image/jpeg');
-      res.setHeader('Content-Disposition', 'inline; filename="baanzon-image.jpg"');
+       const buf = Buffer.from(String(b64), 'base64');
+       const type = imageType(buf);
+       res.setHeader('Content-Type', type.mime);
+       res.setHeader('Content-Disposition', `inline; filename="baanzon-image.${type.extension}"`);
       return res.send(buf);
     }
     r = await fetch(runUrl, {
@@ -94,8 +105,9 @@ router.post('/', requireJwtAuth, async (req, res) => {
       return res.status(502).json({ message: 'Image generation failed', detail });
     }
     const buf = Buffer.from(await r.arrayBuffer());
-    res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Content-Disposition', 'inline; filename="baanzon-image.png"');
+    const type = imageType(buf);
+    res.setHeader('Content-Type', type.mime);
+    res.setHeader('Content-Disposition', `inline; filename="baanzon-image.${type.extension}"`);
     return res.send(buf);
   } catch (err) {
     return res.status(502).json({ message: 'Image generation failed', detail: String(err.message).slice(0, 200) });
