@@ -29,17 +29,20 @@ async function passportLogin(req, email, password, done) {
       return done(null, false, { message: validationError });
     }
 
-    const user = await findUser({ email: email.trim() }, '+password');
+    const identifier = email.trim();
+    const user = identifier.includes('@')
+      ? await findUser({ email: identifier }, '+password')
+      : await findUser({ username: identifier }, '+password');
     if (!user) {
       logError('Passport Local Strategy - User Not Found', { email });
       logger.error(`[Login] [Login failed] [Username: ${email}] [Request-IP: ${req.ip}]`);
-      return done(null, false, { message: 'Email does not exist.' });
+      return done(null, false, { message: 'Email or username does not exist.' });
     }
 
     if (!user.password) {
       logError('Passport Local Strategy - User has no password', { email });
       logger.error(`[Login] [Login failed] [Username: ${email}] [Request-IP: ${req.ip}]`);
-      return done(null, false, { message: 'Email does not exist.' });
+      return done(null, false, { message: 'Email or username does not exist.' });
     }
 
     const isMatch = await comparePassword(user, password, { compare: bcrypt.compare });

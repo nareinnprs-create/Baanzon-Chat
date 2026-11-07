@@ -45,7 +45,7 @@ router.post('/', requireJwtAuth, async (req, res) => {
   }
   const tier = await userTier(req.user.id);
   const { model, cap } = DAILY[tier] || DAILY.free;
-  if (limited(`${req.user.id}`)) {
+  if (limited(`${req.user.id}`, MAX_PER_WINDOW)) {
     return res.status(429).json({ message: 'Too many images this minute — try again shortly.' });
   }
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
