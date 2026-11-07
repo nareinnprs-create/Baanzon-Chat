@@ -19,12 +19,16 @@ const buildOptions = (req, endpoint, parsedBody, endpointType) => {
   // the tier comes from the account DB. The brand arrives on the RAW body —
   // the compact agents zod schema strips `model` from parsedBody.
   const requestedModel = String(req.body?.model || model_parameters.model || '');
+  const requestedLane = String(req.body?.lane || model_parameters.lane || '').toLowerCase();
+  delete model_parameters.lane;
   const tier = String(req.user?.subscriptionTier || 'free').toLowerCase();
-  const routedCfg = routeModel(tier, requestedModel) || { model: requestedModel };
+  const routedCfg = routeModel(tier, requestedModel, requestedLane) || { model: requestedModel };
   model_parameters.model = routedCfg.model;
   if (routedCfg.maxContextTokens) model_parameters.maxContextTokens = routedCfg.maxContextTokens;
   if (routedCfg.max_tokens) model_parameters.max_tokens = routedCfg.max_tokens;
-  logger.info(`[modelRouter] tier=${tier} requested=${requestedModel} routed=${model_parameters.model} ctx=${model_parameters.maxContextTokens} out=${model_parameters.max_tokens}`);
+  logger.info(
+    `[modelRouter] tier=${tier} requested=${requestedModel} routed=${model_parameters.model} ctx=${model_parameters.maxContextTokens} out=${model_parameters.max_tokens}`,
+  );
   const agentPromise = loadAgent({
     req,
     spec,

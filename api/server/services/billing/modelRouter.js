@@ -15,22 +15,57 @@ const MATRIX = {
   },
   'baanzon-ara': {
     free: { model: '@cf/zai-org/glm-4.7-flash', maxContextTokens: 120000, max_tokens: 8000 },
-    lite: { model: '@cf/deepseek-ai/deepseek-v4-flash-0731', maxContextTokens: 900000, max_tokens: 12000 },
+    lite: {
+      model: '@cf/deepseek-ai/deepseek-v4-flash-0731',
+      maxContextTokens: 900000,
+      max_tokens: 12000,
+    },
     pro: { model: '@cf/zai-org/glm-5.3', maxContextTokens: 900000, max_tokens: 16000 },
-    enterprise: { model: '@cf/deepseek-ai/deepseek-v4-flash-0731', maxContextTokens: 900000, max_tokens: 16000 },
+    enterprise: {
+      model: '@cf/deepseek-ai/deepseek-v4-flash-0731',
+      maxContextTokens: 900000,
+      max_tokens: 16000,
+    },
   },
   'baanzon-chenni': {
     free: { model: '@cf/zai-org/glm-4.7-flash', maxContextTokens: 120000, max_tokens: 8000 },
-    lite: { model: '@cf/qwen/qwen2.5-coder-32b-instruct', maxContextTokens: 24000, max_tokens: 12000 },
-    pro: { model: '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b', maxContextTokens: 64000, max_tokens: 16000 },
-    enterprise: { model: '@cf/moonshotai/kimi-k2.7-code', maxContextTokens: 240000, max_tokens: 16000 },
+    lite: {
+      model: '@cf/qwen/qwen2.5-coder-32b-instruct',
+      maxContextTokens: 24000,
+      max_tokens: 12000,
+    },
+    pro: {
+      model: '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b',
+      maxContextTokens: 64000,
+      max_tokens: 16000,
+    },
+    enterprise: {
+      model: '@cf/moonshotai/kimi-k2.7-code',
+      maxContextTokens: 240000,
+      max_tokens: 16000,
+    },
   },
 };
 
-const FALLBACK = { model: '@cf/meta/llama-3.1-8b-instruct-fp8', maxContextTokens: 28000, max_tokens: 4000 };
+const FALLBACK = {
+  model: '@cf/meta/llama-3.1-8b-instruct-fp8',
+  maxContextTokens: 28000,
+  max_tokens: 4000,
+};
 
-function routeModel(tier, requested) {
+const CHAT_LANE_BRANDS = {
+  fast: 'baanzon-ai',
+  balanced: 'baanzon-ai',
+  reasoning: 'baanzon-ara',
+  coding: 'baanzon-chenni',
+};
+
+function routeModel(tier, requested, lane) {
   const requestedStr = String(requested || '');
+  const laneBrand = CHAT_LANE_BRANDS[String(lane || '').toLowerCase()];
+  if (laneBrand) {
+    return { ...routeModel(tier, laneBrand), lane: String(lane).toLowerCase() };
+  }
   if (!requestedStr.startsWith('baanzon-')) {
     return null; // concrete model id — no routing, no budget override
   }
@@ -39,4 +74,4 @@ function routeModel(tier, requested) {
   return MATRIX[brand][t] || MATRIX[brand].free;
 }
 
-module.exports = { routeModel, MATRIX, FALLBACK };
+module.exports = { routeModel, MATRIX, FALLBACK, CHAT_LANE_BRANDS };
