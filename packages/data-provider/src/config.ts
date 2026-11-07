@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { modelLaneConfigSchema } from './modelLanes';
 import type { ZodError } from 'zod';
 import type { TEndpointsConfig, TModelsConfig, TConfig } from './types';
 import {
@@ -2807,6 +2808,7 @@ export type CustomEndpointsLeverConfig = z.infer<typeof customEndpointsConfigSch
 export const configSchema = z.object({
   version: z.string(),
   cache: z.boolean().default(true),
+  modelLanes: modelLaneConfigSchema.optional(),
   crossEntitySearch: crossEntitySearchConfigSchema.optional(),
   ocr: ocrSchema.optional(),
   webSearch: webSearchSchema.optional(),

@@ -1228,6 +1228,12 @@ endpoints:
 #     # timeRange: month        # 'day', 'month', or 'year'
 #     # timeout: 10000          # HTTP request timeout in milliseconds (1-120000, default: 10000)
 
+# Model capability lanes. Provider-specific model IDs stay in deployment routing.
+# modelLanes:
+#   enabled: true
+#   defaultLane: balanced
+#   fallbackLane: fast
+
 # Memory configuration for user memories
 # memory:
 #   # (optional) Disable memory functionality
