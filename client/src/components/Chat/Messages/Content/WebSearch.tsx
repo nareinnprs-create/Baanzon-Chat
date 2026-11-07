@@ -238,6 +238,12 @@ export default function WebSearch({
 
   const autoExpand = useRecoilValue(store.autoExpandTools);
   const sourceCount = allSources.length;
+  const retrievedAt = useMemo(
+    () =>
+      attachments?.find((attachment) => attachment.provenance?.retrievedAt)?.provenance
+        ?.retrievedAt,
+    [attachments],
+  );
   const [showDetails, setShowDetails] = useState(false);
   const [showSourceList, setShowSourceList] = useState(() => autoExpand && sourceCount > 0);
   const { style: sourceExpandStyle, ref: sourceExpandRef } = useExpandCollapse(showSourceList);
@@ -351,6 +357,19 @@ export default function WebSearch({
                         { count: sourceCount },
                       )}
                     </div>
+                    {retrievedAt && !Number.isNaN(Date.parse(retrievedAt)) && (
+                      <div className="border-t border-border-light pt-2">
+                        <div className="text-[10px] font-medium uppercase tracking-wide text-text-secondary">
+                          {localize('com_ui_web_search_details')}
+                        </div>
+                        <time
+                          className="mt-0.5 block text-xs text-text-secondary"
+                          dateTime={retrievedAt}
+                        >
+                          {new Date(retrievedAt).toLocaleString()}
+                        </time>
+                      </div>
+                    )}
                     {answerBox && (answerBox.title || answerText) && (
                       <div className="border-t border-border-light pt-2">
                         {answerBox.title && (

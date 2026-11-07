@@ -84,6 +84,7 @@ function makeSearchResults(
 function makeAttachment(turn: number, data: SearchResultData): TAttachment {
   return {
     type: Tools.web_search,
+    provenance: { type: 'live_web', retrievedAt: '2026-11-08T12:00:00.000Z' },
     [Tools.web_search]: { ...data, turn },
   } as unknown as TAttachment;
 }
@@ -312,6 +313,7 @@ describe('WebSearch', () => {
     it('renders snippets and dates in the source list', () => {
       const attachment = {
         type: Tools.web_search,
+        provenance: { type: 'live_web', retrievedAt: '2026-11-08T12:00:00.000Z' },
         [Tools.web_search]: {
           turn: 0,
           organic: [
@@ -338,6 +340,7 @@ describe('WebSearch', () => {
     it('tucks the query and answer box behind the details hover card', async () => {
       const attachment = {
         type: Tools.web_search,
+        provenance: { type: 'live_web', retrievedAt: '2026-11-08T12:00:00.000Z' },
         [Tools.web_search]: {
           turn: 0,
           organic: [{ link: 'https://example.com/context', title: 'Context windows explained' }],
@@ -364,6 +367,11 @@ describe('WebSearch', () => {
       ).toBeInTheDocument();
       expect(screen.getByText('largest context window LLM 2026')).toBeInTheDocument();
       expect(screen.getByText('1 source')).toBeInTheDocument();
+      expect(screen.getByText('Search details')).toBeInTheDocument();
+      expect(document.querySelector('time')).toHaveAttribute(
+        'dateTime',
+        '2026-11-08T12:00:00.000Z',
+      );
     });
 
     it('renders shopping, image, and place verticals in the expanded panel', () => {

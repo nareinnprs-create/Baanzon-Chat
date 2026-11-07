@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { TMessageContentParts, AgentSubagentGraph, FunctionTool } from './types/assistants';
+import type { EvidenceSourceType } from './evidence';
 import type { SearchResultData } from './types/web';
 import type { TFile } from './types/files';
 import { userSubmittedMessageFieldPathSchema } from './filters';
@@ -1032,6 +1033,11 @@ export type WorkspaceChange = {
   path: string;
 };
 
+export type TAttachmentProvenance = {
+  type: EvidenceSourceType;
+  retrievedAt?: string;
+};
+
 export type TAttachmentMetadata = {
   type?: Tools;
   messageId: string;
@@ -1041,6 +1047,7 @@ export type TAttachmentMetadata = {
   /** Host run-step owner when one agent repeats a provider tool-call id. */
   stepId?: string;
   workspaceChange?: WorkspaceChange;
+  provenance?: TAttachmentProvenance;
   [Tools.memory]?: MemoryArtifact;
   [Tools.ui_resources]?: UIResource[];
   [Tools.web_search]?: SearchResultData;
