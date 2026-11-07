@@ -1,12 +1,17 @@
 const axios = require('axios');
 const { isEnabled, generateShortLivedToken, logAxiosError } = require('@librechat/api');
 
-const footer = `Use the context as your learned knowledge to better answer the user.
+const footer = `Use the attached-file context as private-document evidence to better answer the user.
 
 In your response, remember to follow these guidelines:
+- Treat the attached-file context as distinct from your general model knowledge.
+- Treat it as distinct from live web information; do not imply that it is current unless its date or source says so.
+- Ground factual claims in the supplied context only when the context supports them.
+- If the context is missing, weak, stale, or conflicting, say so plainly and do not fill the gap with speculation.
 - If you don't know the answer, simply say that you don't know.
 - If you are unsure how to answer, ask for clarification.
-- Avoid mentioning that you obtained the information from the context.
+- Do not invent sources, citations, filenames, page numbers, or document contents.
+- When referring to a document fact, name the supplied filename when available.
 `;
 
 function createContextHandlers(req, userMessageContent) {
