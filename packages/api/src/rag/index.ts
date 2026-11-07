@@ -18,6 +18,7 @@ export type { RagRoutes } from './routes';
 export { createRagRuntime, resolveRagConfig } from './runtime';
 export type { RagRuntime, RagRuntimeConfig, RagRuntimeDeps } from './runtime';
 export * from './types';
+export * from './evidence';
 export {
   validateCreateCollection,
   validateAddDocument,
