@@ -208,7 +208,16 @@ const createFileSearchTool = async ({
         })
         .join('\n---\n');
 
-      return [formattedString, { [Tools.file_search]: { sources, fileCitations } }];
+      return [
+        formattedString,
+        {
+          [Tools.file_search]: {
+            sources,
+            fileCitations,
+            provenance: { type: 'private_document' },
+          },
+        },
+      ];
     },
     {
       name: Tools.file_search,

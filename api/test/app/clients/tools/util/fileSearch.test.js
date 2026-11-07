@@ -185,6 +185,7 @@ describe('fileSearch.js - tuple return validation', () => {
       expect(artifact).toHaveProperty('file_search');
       expect(artifact.file_search).toHaveProperty('sources');
       expect(artifact.file_search).toHaveProperty('fileCitations', false);
+      expect(artifact.file_search).toHaveProperty('provenance', { type: 'private_document' });
       expect(Array.isArray(artifact.file_search.sources)).toBe(true);
       expect(artifact.file_search.sources.length).toBe(2);
 
