@@ -40,13 +40,14 @@ const vectorStore = new InMemoryVectorStore({
  * provider cannot be rebuilt per request. Unset, the domain ingests and
  * retrieves keyword-only, which is the guaranteed fallback.
  */
-const { embedder, semantic } = createRagIntegration({ vectorStore });
+const { embedder, semantic, reranker } = createRagIntegration({ vectorStore });
 
 const routes = createRagRoutes({
   knowledgeMethods,
   vectorStore,
   ...(semantic ? { semantic } : {}),
   ...(embedder ? { embedder } : {}),
+  ...(reranker ? { reranker } : {}),
 });
 
 /** Auth first (the user limiter keys on the resolved user), then both windows. */

@@ -1,5 +1,9 @@
 const { logger } = require('@librechat/data-schemas');
-const { loadAgent: loadAgentFn } = require('@librechat/api');
+const {
+  loadAgent: loadAgentFn,
+  assertChatModelLane,
+  assertVisionModel,
+} = require('@librechat/api');
 const { isAgentsEndpoint, removeNullishValues, Constants } = require('librechat-data-provider');
 const { getMCPServerTools } = require('~/server/services/Config');
 const { getAccessibleMCPServers } = require('~/server/services/MCP');
@@ -20,6 +24,10 @@ const buildOptions = (req, endpoint, parsedBody, endpointType) => {
   // the compact agents zod schema strips `model` from parsedBody.
   const requestedModel = String(req.body?.model || model_parameters.model || '');
   const requestedLane = String(req.body?.lane || model_parameters.lane || '').toLowerCase();
+  assertChatModelLane(requestedLane || undefined);
+  if (requestedLane === 'vision') {
+    assertVisionModel(requestedModel, req.config?.modelLanes?.visionModels);
+  }
   delete model_parameters.lane;
   const tier = String(req.user?.subscriptionTier || 'free').toLowerCase();
   const routedCfg = routeModel(tier, requestedModel, requestedLane) || { model: requestedModel };

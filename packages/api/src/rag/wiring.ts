@@ -35,6 +35,7 @@ import {
 } from './pgVectorStore';
 import { createSemanticSearchService } from './semanticSearch';
 import { createOpenAIEmbeddings } from './openaiEmbeddings';
+import { createRerankerClient } from '../modelLaneProviders';
 import { InMemoryVectorStore } from './vectorStores';
 import { RAG_DEFAULTS } from './config';
 
@@ -46,6 +47,9 @@ export const RAG_EMBEDDING_API_KEY = 'RAG_EMBEDDING_API_KEY';
 export const RAG_EMBEDDING_MODEL = 'RAG_EMBEDDING_MODEL';
 /** Fixed vector length the provider returns. */
 export const RAG_EMBEDDING_DIMENSION = 'RAG_EMBEDDING_DIMENSION';
+export const RAG_RERANKER_API_URL = 'RAG_RERANKER_API_URL';
+export const RAG_RERANKER_API_KEY = 'RAG_RERANKER_API_KEY';
+export const RAG_RERANKER_MODEL = 'RAG_RERANKER_MODEL';
 
 export const DEFAULT_EMBEDDING_MODEL = 'text-embedding-3-small';
 export const DEFAULT_EMBEDDING_DIMENSION = 1536;
@@ -56,6 +60,12 @@ export interface RagIntegration {
   embedder?: ChunkEmbedder;
   /** Retrieval-side semantic client, or absent for keyword-only retrieval. */
   semantic?: { search(collectionId: string, query: string, limit: number): Promise<VectorChunk[]> };
+  reranker?: {
+    rerank(
+      query: string,
+      snippets: import('./types').RetrievedSnippet[],
+    ): Promise<import('./types').RetrievedSnippet[]>;
+  };
 }
 
 export interface RagIntegrationOptions {
@@ -107,22 +117,40 @@ export function createRagIntegration(options: RagIntegrationOptions): RagIntegra
   }
 
   const env = options.env ?? process.env;
-  const baseURL = (env[RAG_EMBEDDING_API_URL] ?? '').trim();
-  if (baseURL.length === 0) {
-    return {};
+  const embeddingURL = (env[RAG_EMBEDDING_API_URL] ?? '').trim();
+  const rerankerURL = (env[RAG_RERANKER_API_URL] ?? '').trim();
+  const integration: RagIntegration = {};
+  if (embeddingURL.length > 0) {
+    const { chunkEmbedder, queryEmbedder } = createOpenAIEmbeddings({
+      baseURL: embeddingURL,
+      apiKey: env[RAG_EMBEDDING_API_KEY] ?? '',
+      model: (env[RAG_EMBEDDING_MODEL] ?? '').trim() || DEFAULT_EMBEDDING_MODEL,
+      dimension: positiveDimension(env[RAG_EMBEDDING_DIMENSION], DEFAULT_EMBEDDING_DIMENSION),
+    });
+    integration.embedder = chunkEmbedder;
+    integration.semantic = createSemanticSearchService({
+      config: options.config ?? RAG_DEFAULTS,
+      vectorStore: store,
+      embeddings: queryEmbedder,
+    });
   }
-  const { chunkEmbedder, queryEmbedder } = createOpenAIEmbeddings({
-    baseURL,
-    apiKey: env[RAG_EMBEDDING_API_KEY] ?? '',
-    model: (env[RAG_EMBEDDING_MODEL] ?? '').trim() || DEFAULT_EMBEDDING_MODEL,
-    dimension: positiveDimension(env[RAG_EMBEDDING_DIMENSION], DEFAULT_EMBEDDING_DIMENSION),
-  });
-  const semantic = createSemanticSearchService({
-    config: options.config ?? RAG_DEFAULTS,
-    vectorStore: store,
-    embeddings: queryEmbedder,
-  });
-  return { embedder: chunkEmbedder, semantic };
+  if (rerankerURL.length > 0) {
+    const client = createRerankerClient({
+      baseURL: rerankerURL,
+      apiKey: env[RAG_RERANKER_API_KEY] ?? '',
+      model: (env[RAG_RERANKER_MODEL] ?? '').trim() || 'rerank-v3.5',
+    });
+    integration.reranker = {
+      async rerank(query, snippets) {
+        const ranked = await client.rerank({
+          query,
+          documents: snippets.map((snippet) => snippet.text),
+        });
+        return ranked.flatMap(({ index }) => (snippets[index] ? [snippets[index]] : []));
+      },
+    };
+  }
+  return integration;
 }
 
 export interface InitializeRagVectorStoreOptions {

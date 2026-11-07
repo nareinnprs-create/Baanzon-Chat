@@ -11,9 +11,8 @@
  * supplies, and the batching, concurrency and timeout a network call on
  * `addDocument` needs to survive a provider that is slow, flaky or absent.
  *
- * There is deliberately no provider implementation here. Which embeddings
- * backend a deployment uses is a new argument, not a new branch in shared code,
- * and choosing one is a decision this repository has not made.
+ * The provider implementation lives in `openaiEmbeddings.ts`; this module keeps
+ * batching and degradation provider-agnostic so another backend remains an injected argument.
  *
  * Two embedder shapes live in this package and they are not interchangeable.
  * `EmbeddingsProvider` (`./semanticSearch`) embeds one *query* per call, at

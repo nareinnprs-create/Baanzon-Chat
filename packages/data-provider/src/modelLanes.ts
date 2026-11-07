@@ -20,6 +20,8 @@ export const modelLaneConfigSchema = z
     enabled: z.boolean().optional().default(true),
     defaultLane: modelLaneSchema.optional().default('balanced'),
     fallbackLane: modelLaneSchema.optional().default('fast'),
+    /** Exact provider model IDs verified by the deployment as multimodal. */
+    visionModels: z.array(z.string().min(1)).optional().default([]),
   })
   .strict();
 

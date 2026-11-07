@@ -23,6 +23,7 @@ describe('model lanes', () => {
       enabled: true,
       defaultLane: 'balanced',
       fallbackLane: 'fast',
+      visionModels: [],
     });
     expect(modelLaneConfigSchema.safeParse({ unknown: true }).success).toBe(false);
   });

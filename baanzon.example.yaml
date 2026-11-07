@@ -1233,6 +1233,8 @@ endpoints:
 #   enabled: true
 #   defaultLane: balanced
 #   fallbackLane: fast
+#   # Exact IDs only; prevents the vision lane from routing images to text models.
+#   visionModels: []
 
 # Memory configuration for user memories
 # memory:
@@ -1309,6 +1311,12 @@ endpoints:
 #   # (optional) Chunks held by the default in-memory vector store, which only
 #   # applies when no other vector store is supplied
 #   inMemoryMaxChunks: 20000
+#
+# Semantic provider environment variables (boot-time, OpenAI-compatible):
+#   RAG_EMBEDDING_API_URL, RAG_EMBEDDING_API_KEY, RAG_EMBEDDING_MODEL,
+#   RAG_EMBEDDING_DIMENSION
+# Optional reranking provider (`/rerank`, Cohere/Jina-compatible):
+#   RAG_RERANKER_API_URL, RAG_RERANKER_API_KEY, RAG_RERANKER_MODEL
 
 # Notifications / Activity Center. Drives the in-app notification feed served at
 # `/api/notifications` and the realtime push stream at
