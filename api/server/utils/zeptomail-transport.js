@@ -22,7 +22,7 @@ function zeptoMailTransport(apiKey, fromAddress, fromName) {
       });
       const req = https.request(
         {
-          hostname: 'transactional.zeptomail.in',
+          hostname: 'api.zeptomail.in',
           path: '/v1.1/email',
           method: 'POST',
           headers: {
