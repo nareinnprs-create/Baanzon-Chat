@@ -43,6 +43,7 @@ module.exports = {
     '^~/(.*)$': '<rootDir>/src/$1',
     '^librechat-data-provider/react-query$':
       '<rootDir>/../node_modules/librechat-data-provider/src/react-query',
+    '^@testing-library/jest-dom/extend-expect$': '@testing-library/jest-dom',
   },
   maxWorkers: '50%',
   /** Coverage maps accumulate for the life of a worker, so a long run can push
