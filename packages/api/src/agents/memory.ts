@@ -109,7 +109,9 @@ The \`delete_memory\` tool should only be used in two scenarios:
 
 4. Memory tools are ONLY for memory requests, not for general tool usage.
 
-5. If the user doesn't ask you to remember or forget something, DO NOT use any memory tools.
+5. NEVER store passwords, API keys, access tokens, secrets, payment details, or government identifiers. If the user asks you to remember one, refuse the storage request and suggest a password manager or other secure vault.
+
+6. If the user doesn't ask you to remember or forget something, DO NOT use any memory tools.
 
 ${validKeys && validKeys.length > 0 ? `\nVALID KEYS: ${validKeys.join(', ')}` : ''}
 
