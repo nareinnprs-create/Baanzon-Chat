@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { useAtomValue } from 'jotai';
 import { replaceSpecialVars } from 'librechat-data-provider';
-import type { TMessage } from 'librechat-data-provider';
+import type { ModelLane, TMessage } from 'librechat-data-provider';
 import { useChatContext, useChatFormContext, useAddedChatContext } from '~/Providers';
 import { useGetStartupConfig } from '~/data-provider';
 import { pickSmartModel } from '~/utils/smartRoute';
@@ -22,7 +22,7 @@ export default function useSubmitMessage() {
   const offline = useOfflineQueue({
     conversationId: conversation?.conversationId ?? null,
     send: async (item) => {
-      const submitted = ask({ text: item.text });
+      const submitted = ask({ text: item.text }, { overrideLane: item.lane });
       if (submitted === false) {
         /** Refused, not accepted: keep the item queued rather than silently dropping it. */
         throw new Error('Queued message was not accepted');
@@ -48,6 +48,7 @@ export default function useSubmitMessage() {
       overrideRecoverySteerId?: string;
       overrideExpectedPredecessorCreatedAt?: number;
       overrideQueuedMessageOrigin?: unknown;
+      overrideLane?: ModelLane;
     }) => {
       if (!data) {
         return console.warn('No data provided to submitMessage');
@@ -56,7 +57,7 @@ export default function useSubmitMessage() {
        *  so the text is restored on the next mount and the queue drains on reconnect.
        *  Attachments are not queued by this slice — only the text travels. */
       if (offline.isOnline === false) {
-        void offline.enqueueSend({ text: data.text });
+        void offline.enqueueSend({ text: data.text, lane: data.overrideLane });
         return false;
       }
       const latestMessage = getLatestMessage();
@@ -79,13 +80,14 @@ export default function useSubmitMessage() {
           addedConvo: addedConvo ?? undefined,
           overrideModel:
             smartRouteOn && startupConfig?.modelSpecs?.list
-              ? pickSmartModel(
+              ? (pickSmartModel(
                   data.text,
                   startupConfig.modelSpecs.list,
                   conversation?.endpoint,
                   conversation?.model,
-                ) ?? undefined
+                ) ?? undefined)
               : undefined,
+          overrideLane: data.overrideLane,
           // Queued during-run messages carry their own consumed attachments,
           // quote chips, and manual skill picks (undefined = drain composer).
           overrideFiles: data.overrideFiles,

@@ -37,6 +37,14 @@ describe('offline queue', () => {
     expect(pending[0].text).toBe('hello offline');
   });
 
+  it('persists the selected lane while a send waits offline', async () => {
+    const { queue } = makeHarness({ online: () => false });
+
+    await queue.enqueue({ text: 'vision prompt', lane: 'vision', conversationId: 'convo-1' });
+
+    expect((await queue.list())[0].lane).toBe('vision');
+  });
+
   it('does not drain while offline and leaves every item queued', async () => {
     const { queue, send } = makeHarness({ online: () => false });
     await queue.enqueue({ text: 'one', conversationId: 'convo-1' });

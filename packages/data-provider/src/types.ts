@@ -23,6 +23,7 @@ import type { SettingDefinition } from './generate';
 import type { TMinimalFeedback } from './feedback';
 import type { ContentTypes } from './types/runs';
 import type { ProviderId } from './providers';
+import type { ModelLane } from './modelLanes';
 
 export * from './schemas';
 export * from './types/subagents';
@@ -108,6 +109,8 @@ export type TEndpointOption = Pick<
   agent?: Promise<Agent>;
   // Client-specific options
   clientOptions?: Record<string, unknown>;
+  /** Per-request capability lane; never persisted on the conversation. */
+  lane?: ModelLane;
 };
 
 export type TEphemeralAgent = {

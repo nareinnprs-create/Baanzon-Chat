@@ -382,6 +382,8 @@ export type TOptions = {
   overrideQueuedMessageOrigin?: unknown;
   /** X5 Smart Route: per-turn model override; the selector's choice stays untouched. */
   overrideModel?: string;
+  /** Per-turn capability lane; the conversation's stored model remains untouched. */
+  overrideLane?: t.ModelLane;
 };
 
 export type TAskFunction = (props: TAskProps, options?: TOptions) => false | void;

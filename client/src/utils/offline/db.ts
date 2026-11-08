@@ -8,6 +8,7 @@
  * in-memory fallback where IndexedDB is unavailable (private windows, older
  * webviews, jsdom).
  */
+import type { ModelLane } from 'librechat-data-provider';
 
 export const OFFLINE_DB_NAME = 'baanzon-offline';
 export const OFFLINE_DB_VERSION = 1;
@@ -19,6 +20,7 @@ export type OfflineDraftRecord = {
   id: string;
   conversationId: string | null;
   text: string;
+  lane?: ModelLane;
   updatedAt: number;
 };
 

@@ -138,6 +138,20 @@ describe('useSubmitMessage', () => {
     expect(ask).toHaveBeenCalled();
   });
 
+  it('forwards a per-turn model lane without changing conversation state', () => {
+    ask.mockReturnValue(true);
+    const { result } = renderHook(() => useSubmitMessage());
+
+    act(() => {
+      result.current.submitMessage({ text: 'inspect this', overrideLane: 'vision' });
+    });
+
+    expect(ask).toHaveBeenCalledWith(
+      expect.objectContaining({ text: 'inspect this' }),
+      expect.objectContaining({ overrideLane: 'vision' }),
+    );
+  });
+
   it('uses the recovery source as the stable user row and forwards the attempt fields', () => {
     ask.mockReturnValue(true);
     const { result } = renderHook(() => useSubmitMessage());

@@ -305,6 +305,7 @@ export default function useChatFunctions({
       overrideExpectedPredecessorCreatedAt,
       overrideQueuedMessageOrigin,
       overrideModel,
+      overrideLane,
     } = {},
   ) => {
     text = text.trim();
@@ -535,6 +536,7 @@ export default function useChatFunctions({
       },
       convo,
       chatProjectId ? { chatProjectId } : {},
+      overrideLane ? { lane: overrideLane } : {},
     ) as TEndpointOption;
     if (endpoint !== EModelEndpoint.agents) {
       endpointOption.key = getExpiry();

@@ -12,11 +12,7 @@
  * inside the same conversation. `flush()` can be called again to retry.
  */
 
-import type {
-  OfflinePendingSendRecord,
-  OfflinePendingSendStatus,
-  OfflineStore,
-} from './db';
+import type { OfflinePendingSendRecord, OfflinePendingSendStatus, OfflineStore } from './db';
 import { getOfflineStore } from './db';
 
 export type OfflineSendStatus = OfflinePendingSendStatus;
@@ -26,6 +22,7 @@ export type OfflineSendItem = {
   draftId: string;
   conversationId: string | null;
   text: string;
+  lane?: OfflinePendingSendRecord['lane'];
   files?: string[];
   createdAt: number;
   attempts: number;
@@ -35,6 +32,7 @@ export type OfflineSendItem = {
 
 export type OfflineSendInput = {
   text: string;
+  lane?: OfflinePendingSendRecord['lane'];
   conversationId?: string | null;
   draftId?: string;
   files?: string[];
@@ -101,6 +99,7 @@ const toRecord = (item: OfflineSendItem): OfflinePendingSendRecord => ({
   draftId: item.draftId,
   conversationId: item.conversationId,
   text: item.text,
+  ...(item.lane != null ? { lane: item.lane } : {}),
   ...(item.files != null ? { files: [...item.files] } : {}),
   createdAt: item.createdAt,
   attempts: item.attempts,
@@ -201,6 +200,7 @@ export const createOfflineQueue = ({
         draftId: input.draftId ?? conversationId ?? '',
         conversationId,
         text: input.text,
+        ...(input.lane != null ? { lane: input.lane } : {}),
         ...(input.files != null && input.files.length > 0 ? { files: [...input.files] } : {}),
         createdAt: now(),
         attempts: 0,
