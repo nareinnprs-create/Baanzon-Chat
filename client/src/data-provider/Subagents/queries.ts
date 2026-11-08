@@ -27,7 +27,9 @@ export const useParentSubagentsQuery = (
     [QueryKeys.parentSubagents, parentConversationId],
     () => dataService.getParentSubagents(parentConversationId),
     {
+      ...config,
       enabled:
+        (config?.enabled ?? true) &&
         parentConversationId !== '' &&
         parentConversationId !== Constants.NEW_CONVO &&
         parentConversationId !== Constants.PENDING_CONVO,
@@ -35,7 +37,6 @@ export const useParentSubagentsQuery = (
       refetchOnWindowFocus: true,
       refetchInterval: parentSubagentsRefetchInterval,
       refetchIntervalInBackground: false,
-      ...config,
     },
   );
 

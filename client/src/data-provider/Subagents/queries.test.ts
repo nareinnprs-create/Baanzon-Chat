@@ -152,4 +152,14 @@ describe('subagent thread refresh policy', () => {
       }),
     );
   });
+
+  it('never requests subagents for a new conversation even when enabled is passed in', () => {
+    mockUseQuery.mockReturnValue({ data: undefined, error: null, refetch: jest.fn() });
+
+    renderHook(() => useParentSubagentsQuery('new', { enabled: true }));
+
+    expect(mockUseQuery.mock.calls.at(-1)?.[2]).toEqual(
+      expect.objectContaining({ enabled: false }),
+    );
+  });
 });
