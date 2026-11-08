@@ -196,3 +196,4 @@ scripts/activity-labels/results/
 
 .eslintcache
 vite-build-log.txt
+node-v2*
