@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { modelLaneConfigSchema } from './modelLanes';
+import type { ModelLaneConfig } from './modelLanes';
 import type { ZodError } from 'zod';
 import type { TEndpointsConfig, TModelsConfig, TConfig } from './types';
 import {
@@ -2156,6 +2157,7 @@ export type TStartupConfig = {
   adminPanelURL?: string;
   customFooter?: string;
   modelSpecs?: TSpecsConfig;
+  modelLanes?: Pick<ModelLaneConfig, 'enabled' | 'defaultLane' | 'fallbackLane' | 'visionModels'>;
   modelDescriptions?: Record<string, Record<string, string>>;
   sharedLinksEnabled: boolean;
   publicSharedLinksEnabled: boolean;

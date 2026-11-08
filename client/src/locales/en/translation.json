@@ -1,4 +1,11 @@
 {
+  "com_ui_model_lane": "Model lane",
+  "com_ui_model_lane_default": "Default model lane",
+  "com_ui_model_lane_fast": "Fast",
+  "com_ui_model_lane_balanced": "Balanced",
+  "com_ui_model_lane_reasoning": "Reasoning",
+  "com_ui_model_lane_vision": "Vision",
+  "com_ui_model_lane_coding": "Coding",
   "com_ui_code_approval_mode": "Code approval mode",
   "com_ui_code_workspace": "Code workspace",
   "com_ui_code_workspace_choose": "Choose workspace",

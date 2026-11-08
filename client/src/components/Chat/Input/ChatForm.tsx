@@ -1,5 +1,6 @@
 import { memo, useRef, useMemo, useEffect, useState, useCallback } from 'react';
 import { useWatch } from 'react-hook-form';
+import { useAtom } from 'jotai';
 import { useRecoilState, useRecoilValue, useRecoilCallback } from 'recoil';
 import { Constants, isAssistantsEndpoint, isAgentsEndpoint } from 'librechat-data-provider';
 import { composerSurfaceClasses, composerSurfaceShadow, TextareaAutosize } from '@librechat/client';
@@ -72,6 +73,7 @@ import EditBadges from './EditBadges';
 import BadgeRow from './BadgeRow';
 import Mention from './Mention';
 import store from '~/store';
+import { selectedModelLaneAtom } from '~/store/modelLane';
 
 interface ChatFormProps {
   index: number;
@@ -154,6 +156,9 @@ const ChatForm = memo(function ChatForm({
   } = useAddedChatContext();
   const assistantMap = useAssistantsMapContext();
   const { data: startupConfig } = useGetStartupConfig();
+  const [selectedModelLane, setSelectedModelLane] = useAtom(selectedModelLaneAtom);
+  const chatLanes = ['fast', 'balanced', 'reasoning', 'vision', 'coding'] as const;
+  const laneConfig = startupConfig?.modelLanes;
 
   const endpoint = useMemo(
     () => conversation?.endpointType ?? conversation?.endpoint,
@@ -674,9 +679,7 @@ const ChatForm = memo(function ChatForm({
               {project ? <ProjectLandingChip project={project} /> : null}
               {/* Quiet streaming affordance: a 2px iris filament across the top
                   edge while a run is live. Stop stays accessible in the action row. */}
-              {isSubmitting && (
-                <span className="composer-sig-streaming" aria-hidden="true" />
-              )}
+              {isSubmitting && <span className="composer-sig-streaming" aria-hidden="true" />}
               <TextareaHeader addedConvo={addedConvo} setAddedConvo={setAddedConvo} />
               <PendingManualSkillsChips conversationId={conversationId} />
               {quotesEnabled && (
@@ -803,6 +806,35 @@ const ChatForm = memo(function ChatForm({
                     Array.isArray(conversation?.messages) && conversation.messages.length >= 1
                   }
                 />
+                {laneConfig?.enabled !== false && (
+                  <label className="flex items-center" htmlFor="model-lane-select">
+                    <span className="sr-only">{localize('com_ui_model_lane')}</span>
+                    <select
+                      id="model-lane-select"
+                      aria-label={localize('com_ui_model_lane')}
+                      className="rounded-md border border-border-medium bg-transparent px-2 py-1 text-xs text-text-primary"
+                      value={selectedModelLane ?? ''}
+                      onChange={(event) =>
+                        setSelectedModelLane(
+                          (event.target.value || null) as typeof selectedModelLane,
+                        )
+                      }
+                    >
+                      <option value="">{localize('com_ui_model_lane_default')}</option>
+                      {chatLanes.map((lane) => (
+                        <option
+                          key={lane}
+                          value={lane}
+                          disabled={
+                            lane === 'vision' && (laneConfig?.visionModels?.length ?? 0) === 0
+                          }
+                        >
+                          {localize(`com_ui_model_lane_${lane}`)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
                 <CodeApprovalMenu
                   conversation={conversation}
                   addedConversation={addedConvo}

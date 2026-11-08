@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { useAtomValue } from 'jotai';
 import { replaceSpecialVars } from 'librechat-data-provider';
 import type { ModelLane, TMessage } from 'librechat-data-provider';
 import { useChatContext, useChatFormContext, useAddedChatContext } from '~/Providers';
@@ -12,6 +11,8 @@ import useOfflineQueue from '~/hooks/useOfflineQueue';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { mainTextareaId } from '~/common';
 import store from '~/store';
+import { useAtomValue } from 'jotai';
+import { selectedModelLaneAtom } from '~/store/modelLane';
 
 export default function useSubmitMessage() {
   const { user } = useAuthContext();
@@ -37,6 +38,7 @@ export default function useSubmitMessage() {
    *  the heuristic always sees the exact text being submitted. */
   const smartRouteOn = useAtomValue(smartRouteEnabled);
   const { data: startupConfig } = useGetStartupConfig();
+  const selectedModelLane = useAtomValue(selectedModelLaneAtom);
 
   const submitMessage = useCallback(
     (data?: {
@@ -57,7 +59,10 @@ export default function useSubmitMessage() {
        *  so the text is restored on the next mount and the queue drains on reconnect.
        *  Attachments are not queued by this slice — only the text travels. */
       if (offline.isOnline === false) {
-        void offline.enqueueSend({ text: data.text, lane: data.overrideLane });
+        void offline.enqueueSend({
+          text: data.text,
+          lane: data.overrideLane ?? selectedModelLane ?? undefined,
+        });
         return false;
       }
       const latestMessage = getLatestMessage();
@@ -87,7 +92,7 @@ export default function useSubmitMessage() {
                   conversation?.model,
                 ) ?? undefined)
               : undefined,
-          overrideLane: data.overrideLane,
+          overrideLane: data.overrideLane ?? selectedModelLane ?? undefined,
           // Queued during-run messages carry their own consumed attachments,
           // quote chips, and manual skill picks (undefined = drain composer).
           overrideFiles: data.overrideFiles,
@@ -114,6 +119,9 @@ export default function useSubmitMessage() {
       index,
       conversation,
       offline,
+      selectedModelLane,
+      smartRouteOn,
+      startupConfig?.modelSpecs?.list,
     ],
   );
 
