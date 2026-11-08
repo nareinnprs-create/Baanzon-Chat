@@ -39,6 +39,7 @@ export default function useSubmitMessage() {
   const smartRouteOn = useAtomValue(smartRouteEnabled);
   const { data: startupConfig } = useGetStartupConfig();
   const selectedModelLane = useAtomValue(selectedModelLaneAtom);
+  const modelSpecsList = startupConfig?.modelSpecs?.list;
 
   const submitMessage = useCallback(
     (data?: {
@@ -84,10 +85,10 @@ export default function useSubmitMessage() {
         {
           addedConvo: addedConvo ?? undefined,
           overrideModel:
-            smartRouteOn && startupConfig?.modelSpecs?.list
+            smartRouteOn && modelSpecsList
               ? (pickSmartModel(
                   data.text,
-                  startupConfig.modelSpecs.list,
+                  modelSpecsList,
                   conversation?.endpoint,
                   conversation?.model,
                 ) ?? undefined)
@@ -116,12 +117,11 @@ export default function useSubmitMessage() {
       setMessages,
       getMessages,
       getLatestMessage,
-      index,
       conversation,
       offline,
       selectedModelLane,
       smartRouteOn,
-      startupConfig?.modelSpecs?.list,
+      modelSpecsList,
     ],
   );
 
