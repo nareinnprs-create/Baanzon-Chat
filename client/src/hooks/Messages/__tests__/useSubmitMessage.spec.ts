@@ -8,6 +8,17 @@ import useSubmitMessage from '../useSubmitMessage';
 const mockSetActivePrompt = jest.fn();
 
 jest.mock('recoil', () => ({
+  ...jest.requireActual('recoil'),
+  atom: (options: Record<string, unknown>) =>
+    jest.requireActual('recoil').atom({
+      ...options,
+      key: options.key || `use-submit-message-test-${Math.random()}`,
+    }),
+  atomFamily: (options: Record<string, unknown>) =>
+    jest.requireActual('recoil').atomFamily({
+      ...options,
+      key: options.key || `use-submit-message-family-test-${Math.random()}`,
+    }),
   useRecoilValue: jest.fn(),
   useSetRecoilState: jest.fn(),
 }));
@@ -20,7 +31,60 @@ jest.mock('@librechat/client', () => ({
 }));
 
 jest.mock('librechat-data-provider', () => ({
+  ...jest.requireActual('librechat-data-provider'),
   replaceSpecialVars: jest.fn(({ text }) => text),
+  fileConfig: { checkType: jest.fn(() => true) },
+  ResourceType: {
+    AGENT: 'agent',
+    PROMPTGROUP: 'promptGroup',
+    MCPSERVER: 'mcpServer',
+    REMOTE_AGENT: 'remoteAgent',
+    SKILL: 'skill',
+    SHARED_LINK: 'sharedLink',
+  },
+  AccessRoleIds: {
+    AGENT_VIEWER: 'agent_viewer',
+    AGENT_EDITOR: 'agent_editor',
+    AGENT_OWNER: 'agent_owner',
+    PROMPTGROUP_VIEWER: 'promptGroup_viewer',
+    PROMPTGROUP_EDITOR: 'promptGroup_editor',
+    PROMPTGROUP_OWNER: 'promptGroup_owner',
+    MCPSERVER_VIEWER: 'mcpServer_viewer',
+    MCPSERVER_EDITOR: 'mcpServer_editor',
+    MCPSERVER_OWNER: 'mcpServer_owner',
+    REMOTE_AGENT_VIEWER: 'remoteAgent_viewer',
+    REMOTE_AGENT_EDITOR: 'remoteAgent_editor',
+    REMOTE_AGENT_OWNER: 'remoteAgent_owner',
+    SKILL_VIEWER: 'skill_viewer',
+    SKILL_EDITOR: 'skill_editor',
+    SKILL_OWNER: 'skill_owner',
+    SHARED_LINK_VIEWER: 'sharedLink_viewer',
+    SHARED_LINK_OWNER: 'sharedLink_owner',
+  },
+  ContentTypes: {
+    TEXT: 'text',
+    THINK: 'think',
+    TEXT_DELTA: 'text_delta',
+    TOOL_CALL: 'tool_call',
+    IMAGE_FILE: 'image_file',
+    IMAGE_URL: 'image_url',
+    VIDEO_URL: 'video_url',
+    INPUT_AUDIO: 'input_audio',
+    AGENT_UPDATE: 'agent_update',
+    SUMMARY: 'summary',
+    ACTIVITY_LABEL: 'activity_label',
+    STEER: 'steer',
+    ERROR: 'error',
+  },
+  LocalStorageKeys: {
+    LAST_MCP_: 'last_mcp_',
+    LAST_CODE_TOGGLE_: 'last_code_toggle_',
+    LAST_WEB_SEARCH_TOGGLE_: 'last_web_search_toggle_',
+    LAST_FILE_SEARCH_TOGGLE_: 'last_file_search_toggle_',
+    LAST_ARTIFACTS_TOGGLE_: 'last_artifacts_toggle_',
+    LAST_MEMORY_TOGGLE_: 'last_memory_toggle_',
+    PIN_MCP_: 'pin_mcp_',
+  },
 }));
 
 jest.mock('~/Providers', () => ({
@@ -35,6 +99,10 @@ jest.mock('~/hooks/AuthContext', () => ({
 
 jest.mock('~/hooks/Messages/useLatestMessage', () => ({
   useGetLatestMessage: jest.fn(),
+}));
+
+jest.mock('~/data-provider', () => ({
+  useGetStartupConfig: jest.fn(() => ({ data: undefined })),
 }));
 
 jest.mock('~/store', () => ({

@@ -740,6 +740,16 @@ function currencyFormatter(code: string, minDigits: number, maxDigits: number): 
   return formatter;
 }
 
+function formatCurrency(
+  code: string,
+  minDigits: number,
+  maxDigits: number,
+  amount: number,
+): string {
+  const formatted = currencyFormatter(code, minDigits, maxDigits).format(amount);
+  return code === 'USD' ? formatted.replace(/^US\$/, '$') : formatted;
+}
+
 export function formatCost(usd: number, currency: CurrencyConfig = DEFAULT_CURRENCY): string {
   /** Resolve to a safe (code, rate): an unsupported code falls back to USD AND
    *  rate 1 — never present a converted amount under the wrong symbol. A
@@ -758,15 +768,15 @@ export function formatCost(usd: number, currency: CurrencyConfig = DEFAULT_CURRE
   const smallest = Math.pow(10, -base);
 
   if (amount <= 0) {
-    return currencyFormatter(code, base, base).format(0);
+    return formatCurrency(code, base, base, 0);
   }
   if (amount < smallest) {
-    return `<${currencyFormatter(code, base, base).format(smallest)}`;
+    return `<${formatCurrency(code, base, base, smallest)}`;
   }
   if (amount < 1 && base > 0) {
     /** Extra precision for sub-unit costs; trailing zeros trim to the currency's
      *  own scale (min = base). */
-    return currencyFormatter(code, base, base + 2).format(amount);
+    return formatCurrency(code, base, base + 2, amount);
   }
-  return currencyFormatter(code, base, base).format(amount);
+  return formatCurrency(code, base, base, amount);
 }

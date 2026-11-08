@@ -9,6 +9,7 @@ jest.mock('librechat-data-provider/react-query', () => ({
 }));
 
 jest.mock('~/utils', () => ({
+  cn: (...classes: Array<string | undefined>) => classes.filter(Boolean).join(' '),
   logger: { log: jest.fn() },
 }));
 
