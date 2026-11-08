@@ -44,7 +44,6 @@ export default function StarterGallery() {
             <button
               type="button"
               onClick={() => applyTemplate(template)}
-              aria-label={`${localize('com_ui_gallery_use')}: ${template.title}`}
               className={cardClassName}
             >
               <span aria-hidden="true">{template.icon}</span>
