@@ -2,7 +2,7 @@ const { logger } = require('@librechat/data-schemas');
 const {
   loadAgent: loadAgentFn,
   assertChatModelLane,
-  assertVisionModel,
+  resolveVisionModel,
 } = require('@librechat/api');
 const { isAgentsEndpoint, removeNullishValues, Constants } = require('librechat-data-provider');
 const { getMCPServerTools } = require('~/server/services/Config');
@@ -25,12 +25,13 @@ const buildOptions = (req, endpoint, parsedBody, endpointType) => {
   const requestedModel = String(req.body?.model || model_parameters.model || '');
   const requestedLane = String(req.body?.lane || model_parameters.lane || '').toLowerCase();
   assertChatModelLane(requestedLane || undefined);
-  if (requestedLane === 'vision') {
-    assertVisionModel(requestedModel, req.config?.modelLanes?.visionModels);
-  }
+  const routedModel =
+    requestedLane === 'vision'
+      ? resolveVisionModel(requestedModel || undefined, req.config?.modelLanes?.visionModels)
+      : requestedModel;
   delete model_parameters.lane;
   const tier = String(req.user?.subscriptionTier || 'free').toLowerCase();
-  const routedCfg = routeModel(tier, requestedModel, requestedLane) || { model: requestedModel };
+  const routedCfg = routeModel(tier, routedModel, requestedLane) || { model: routedModel };
   model_parameters.model = routedCfg.model;
   if (routedCfg.maxContextTokens) model_parameters.maxContextTokens = routedCfg.maxContextTokens;
   if (routedCfg.max_tokens) model_parameters.max_tokens = routedCfg.max_tokens;

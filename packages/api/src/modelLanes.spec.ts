@@ -1,5 +1,10 @@
 import type { ModelLane } from 'librechat-data-provider';
-import { assertChatModelLane, assertVisionModel, UnsupportedModelLaneError } from './modelLanes';
+import {
+  assertChatModelLane,
+  assertVisionModel,
+  resolveVisionModel,
+  UnsupportedModelLaneError,
+} from './modelLanes';
 
 describe('assertChatModelLane', () => {
   it.each(['fast', 'balanced', 'reasoning', 'vision', 'coding'] satisfies ModelLane[])(
@@ -25,5 +30,10 @@ describe('assertChatModelLane', () => {
     expect(() =>
       assertVisionModel('@cf/meta/vision-model', ['@cf/meta/vision-model']),
     ).not.toThrow();
+  });
+
+  it('selects the configured vision model when the request only names the lane', () => {
+    expect(resolveVisionModel('baanzon-ai', ['vision-model'])).toBe('vision-model');
+    expect(resolveVisionModel('vision-model', ['vision-model'])).toBe('vision-model');
   });
 });

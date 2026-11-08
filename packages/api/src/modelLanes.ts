@@ -39,3 +39,24 @@ export function assertVisionModel(
     );
   }
 }
+
+/** Resolve a vision lane without ever substituting a text model. */
+export function resolveVisionModel(
+  requestedModel: string | undefined,
+  configuredModels: readonly string[] = [],
+): string {
+  if (requestedModel && configuredModels.includes(requestedModel)) {
+    return requestedModel;
+  }
+  if (!requestedModel || requestedModel.startsWith('baanzon-')) {
+    const configured = configuredModels[0];
+    if (configured) {
+      return configured;
+    }
+  }
+  assertVisionModel(requestedModel, configuredModels);
+  if (!requestedModel) {
+    throw new Error('Vision lane requires a configured multimodal provider model');
+  }
+  return requestedModel;
+}
