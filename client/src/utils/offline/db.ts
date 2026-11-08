@@ -20,7 +20,6 @@ export type OfflineDraftRecord = {
   id: string;
   conversationId: string | null;
   text: string;
-  lane?: ModelLane;
   updatedAt: number;
 };
 
@@ -31,6 +30,7 @@ export type OfflinePendingSendRecord = {
   draftId: string;
   conversationId: string | null;
   text: string;
+  lane?: ModelLane;
   /** Attachment ids that travel with the message. Upload draining is out of scope for P5.5. */
   files?: string[];
   createdAt: number;
