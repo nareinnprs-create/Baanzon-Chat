@@ -19,8 +19,13 @@ const buildOptions = (req, endpoint, parsedBody, endpointType) => {
   // the tier comes from the account DB. The brand arrives on the RAW body —
   // the compact agents zod schema strips `model` from parsedBody.
   const requestedModel = String(req.body?.model || model_parameters.model || '');
+  const promptText = String(req.body?.text || req.body?.prompt || req.body?.message || '').toLowerCase();
+  let effectiveRequestedModel = requestedModel;
+  if (/image|photo|picture|draw|generate an image|painting|artwork/i.test(promptText)) {
+    effectiveRequestedModel = '@cf/black-forest-labs/flux-1-schnell';
+  }
   const tier = String(req.user?.subscriptionTier || 'free').toLowerCase();
-  const routedCfg = routeModel(tier, requestedModel) || { model: requestedModel };
+  const routedCfg = routeModel(tier, effectiveRequestedModel) || { model: effectiveRequestedModel };
   model_parameters.model = routedCfg.model;
   if (routedCfg.maxContextTokens) model_parameters.maxContextTokens = routedCfg.maxContextTokens;
   if (routedCfg.max_tokens) model_parameters.max_tokens = routedCfg.max_tokens;
