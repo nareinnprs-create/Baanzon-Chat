@@ -1,6 +1,6 @@
-# LibreChat Data Schemas Package
+# Baanzon Chat Data Schemas Package
 
-This package provides the database schemas, models, types, and methods for LibreChat using Mongoose ODM.
+This package provides the database schemas, models, types, and methods for Baanzon Chat using Mongoose ODM.
 
 ## 📁 Package Structure
 

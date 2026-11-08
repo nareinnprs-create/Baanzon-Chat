@@ -35,7 +35,10 @@ function Message(props: TMessageProps) {
 
   return (
     <MessageContainer handleScroll={handleScroll}>
-      <div className="m-auto justify-center px-4 py-3 sm:px-0">
+      <div
+        className="m-auto justify-center px-4 py-3 sm:px-0"
+        data-message-role={message.isCreatedByUser ? 'user' : 'assistant'}
+      >
         <MessageRender {...props} isSubmitting={effectiveIsSubmitting} chatContext={chatContext} />
       </div>
     </MessageContainer>

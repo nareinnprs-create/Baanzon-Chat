@@ -2,7 +2,13 @@ const bcrypt = require('bcryptjs');
 const { logger } = require('@librechat/data-schemas');
 const { errorsToString } = require('librechat-data-provider');
 const { Strategy: PassportLocalStrategy } = require('passport-local');
-const { isEnabled, checkEmailConfig, comparePassword } = require('@librechat/api');
+const {
+  isEnabled,
+  checkEmailConfig,
+  comparePassword,
+  isEmailVerificationRequired,
+} = require('@librechat/api');
+const { getAppConfig } = require('~/server/services/Config');
 const { findUser, updateUser } = require('~/models');
 const { loginSchema } = require('./validators');
 
@@ -23,17 +29,20 @@ async function passportLogin(req, email, password, done) {
       return done(null, false, { message: validationError });
     }
 
-    const user = await findUser({ email: email.trim() }, '+password');
+    const identifier = email.trim();
+    const user = identifier.includes('@')
+      ? await findUser({ email: identifier }, '+password')
+      : await findUser({ username: identifier }, '+password');
     if (!user) {
       logError('Passport Local Strategy - User Not Found', { email });
       logger.error(`[Login] [Login failed] [Username: ${email}] [Request-IP: ${req.ip}]`);
-      return done(null, false, { message: 'Email does not exist.' });
+      return done(null, false, { message: 'Email or username does not exist.' });
     }
 
     if (!user.password) {
       logError('Passport Local Strategy - User has no password', { email });
       logger.error(`[Login] [Login failed] [Username: ${email}] [Request-IP: ${req.ip}]`);
-      return done(null, false, { message: 'Email does not exist.' });
+      return done(null, false, { message: 'Email or username does not exist.' });
     }
 
     const isMatch = await comparePassword(user, password, { compare: bcrypt.compare });
@@ -61,9 +70,18 @@ async function passportLogin(req, email, password, done) {
     }
 
     if (!user.emailVerified && !unverifiedAllowed) {
-      logError('Passport Local Strategy - Email not verified', { email });
-      logger.error(`[Login] [Login failed] [Username: ${email}] [Request-IP: ${req.ip}]`);
-      return done(null, user, { message: 'Email not verified.' });
+      const appConfig = await getAppConfig({});
+      const verificationRequired = isEmailVerificationRequired({
+        registration: appConfig?.registration,
+        emailEnabled,
+        isProduction: process.env.NODE_ENV === 'production',
+      });
+
+      if (verificationRequired) {
+        logError('Passport Local Strategy - Email not verified', { email });
+        logger.error(`[Login] [Login failed] [Username: ${email}] [Request-IP: ${req.ip}]`);
+        return done(null, user, { message: 'Email not verified.' });
+      }
     }
 
     logger.info(`[Login] [Login successful] [Username: ${email}] [Request-IP: ${req.ip}]`);

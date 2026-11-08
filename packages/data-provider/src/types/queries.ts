@@ -55,6 +55,7 @@ export type ProjectListParams = {
   sortBy?: 'name' | 'createdAt' | 'lastConversationAt';
   sortDirection?: 'asc' | 'desc';
   search?: string;
+  workspaceId?: string;
 };
 
 export type ProjectListResponse = {
@@ -63,6 +64,15 @@ export type ProjectListResponse = {
 };
 
 export type ProjectData = InfiniteData<ProjectListResponse>;
+
+/* Tenancy lists the workspace picker reads */
+export type OrganizationListResponse = {
+  organizations: t.TOrganization[];
+};
+
+export type WorkspaceListResponse = {
+  workspaces: t.TWorkspace[];
+};
 
 /* Messages */
 export type MessagesListParams = {

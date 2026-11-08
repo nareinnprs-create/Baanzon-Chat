@@ -11,6 +11,9 @@ const OPTIONS = [
   { value: '24h', label: '24-hour' },
 ];
 
+/** These cases assert the accessible name only, so selection is never exercised. */
+const noSelection = () => {};
+
 describe('Dropdown accessible name', () => {
   it('announces the selected value alongside the field label', () => {
     // `aria-labelledby` REPLACES the trigger's child text, and that text is the
@@ -19,7 +22,12 @@ describe('Dropdown accessible name', () => {
     render(
       <>
         <span id="clock-label">{'Clock Format'}</span>
-        <Dropdown value="24h" options={OPTIONS} aria-labelledby="clock-label" />
+        <Dropdown
+          value="24h"
+          options={OPTIONS}
+          onChange={noSelection}
+          aria-labelledby="clock-label"
+        />
       </>,
     );
 
@@ -32,7 +40,13 @@ describe('Dropdown accessible name', () => {
     render(
       <>
         <span id="clock-label">{'Clock Format'}</span>
-        <Dropdown value="24h" options={OPTIONS} aria-labelledby="clock-label" iconOnly />
+        <Dropdown
+          value="24h"
+          options={OPTIONS}
+          onChange={noSelection}
+          aria-labelledby="clock-label"
+          iconOnly
+        />
       </>,
     );
 
@@ -41,7 +55,9 @@ describe('Dropdown accessible name', () => {
   });
 
   it('falls back to the value alone when no label is supplied', () => {
-    render(<Dropdown value="12h" options={OPTIONS} ariaLabel="Clock Format" />);
+    render(
+      <Dropdown value="12h" options={OPTIONS} onChange={noSelection} ariaLabel="Clock Format" />,
+    );
 
     // `ariaLabel` names it outright, so the labelled-by relationship stays off.
     expect(screen.getByRole('combobox', { name: 'Clock Format' })).toBeInTheDocument();

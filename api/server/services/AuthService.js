@@ -59,6 +59,11 @@ const AuthTokenTypes = Object.freeze({
 
 const latestAuthTokenOptions = Object.freeze({ sort: { createdAt: -1 } });
 const genericVerificationMessage = 'Please check your email to verify your email address.';
+const genericCreatedMessage = 'Account created. You can now sign in.';
+/** Both register outcomes must return the same message per configuration so the
+ *  response never reveals whether the email was already registered. */
+const registrationSuccessMessage = () =>
+  checkEmailConfig() ? genericVerificationMessage : genericCreatedMessage;
 const invalidEmailVerificationMessage = 'Invalid or expired email verification token';
 const OPENID_SESSION_ID_TOKEN_EXPIRY_BUFFER_SECONDS = 30;
 
@@ -270,7 +275,7 @@ const sendVerificationEmail = async (user) => {
     email,
     subject: 'Verify your email',
     payload: {
-      appName: process.env.APP_TITLE || 'LibreChat',
+      appName: process.env.APP_TITLE || 'Baanzon Chat',
       name: user.name || user.username || email,
       verificationLink: verificationLink,
       year: new Date().getFullYear(),
@@ -409,7 +414,7 @@ const registerUser = async (user, additionalData = {}) => {
 
       // Sleep for 1 second
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      return { status: 200, message: genericVerificationMessage };
+      return { status: 200, message: registrationSuccessMessage() };
     }
 
     // Only the first user in the unscoped, single-tenant deployment bootstraps ADMIN.
@@ -434,11 +439,16 @@ const registerUser = async (user, additionalData = {}) => {
     const newUser = await createUser(newUserData, appConfig.balance, disableTTL, true);
     newUserId = newUser._id;
     if (emailEnabled && !newUser.emailVerified) {
-      await sendVerificationEmail({
-        _id: newUserId,
-        email,
-        name,
-      });
+      try {
+        await sendVerificationEmail({
+          _id: newUserId,
+          email,
+          name,
+        });
+      } catch (emailError) {
+        if (!isEnabled(process.env.ALLOW_UNVERIFIED_EMAIL_LOGIN)) throw emailError;
+        logger.error('[registerUser] Verification email unavailable; keeping account unverified', emailError);
+      }
     } else {
       await updateUser(newUserId, { emailVerified: true });
     }
@@ -446,7 +456,7 @@ const registerUser = async (user, additionalData = {}) => {
     /** `userCreated` separates this from the identical 200 returned when the email is
      * already in use, so a caller can act on an account having actually been created
      * without the response body revealing which of the two happened. */
-    return { status: 200, message: genericVerificationMessage, userCreated: true };
+    return { status: 200, message: registrationSuccessMessage(), userCreated: true };
   } catch (err) {
     logger.error('[registerUser] Error in registering user:', err);
     if (newUserId) {
@@ -539,7 +549,7 @@ const requestPasswordReset = async (req) => {
       email: user.email,
       subject: 'Password Reset Request',
       payload: {
-        appName: process.env.APP_TITLE || 'LibreChat',
+        appName: process.env.APP_TITLE || 'Baanzon Chat',
         name: user.name || user.username || user.email,
         link: link,
         year: new Date().getFullYear(),
@@ -590,7 +600,7 @@ const resetPassword = async (userId, token, password) => {
       email: user.email,
       subject: 'Password Reset Successfully',
       payload: {
-        appName: process.env.APP_TITLE || 'LibreChat',
+        appName: process.env.APP_TITLE || 'Baanzon Chat',
         name: user.name || user.username || user.email,
         year: new Date().getFullYear(),
       },
@@ -979,7 +989,7 @@ const resendVerificationEmail = async (req) => {
       email: user.email,
       subject: 'Verify your email',
       payload: {
-        appName: process.env.APP_TITLE || 'LibreChat',
+        appName: process.env.APP_TITLE || 'Baanzon Chat',
         name: user.name || user.username || user.email,
         verificationLink: verificationLink,
         year: new Date().getFullYear(),

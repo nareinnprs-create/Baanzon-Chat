@@ -11,14 +11,34 @@ const adminGroups = require('./admin/groups');
 const adminRoles = require('./admin/roles');
 const adminSkills = require('./admin/skills');
 const adminUsers = require('./admin/users');
+const adminProviders = require('./admin/providers');
 const adminAuditLog = require('./admin/audit');
 const endpoints = require('./endpoints');
 const staticRoute = require('./static');
 const messages = require('./messages');
 const memories = require('./memories');
+const knowledge = require('./knowledge');
+const notifications = require('./notifications');
+const devices = require('./devices');
+const subscriptions = require('./subscriptions');
+const usageRecords = require('./usage-records');
+const feedback = require('./feedback');
+const workflows = require('./workflows');
 const presets = require('./presets');
 const projects = require('./projects');
+const deepResearch = require('./deepResearch');
+const flags = require('./flags');
+const billing = require('./billing');
+const billingPayments = require('./billing-payments');
+const imagesGenerate = require('./images-generate');
+const evals = require('./evals');
+const trust = require('./trust');
+const searchAll = require('./search-all');
+const organizations = require('./organizations');
+const workspaces = require('./workspaces');
 const prompts = require('./prompts');
+const rewrite = require('./rewrite');
+const recall = require('./recall');
 const schedules = require('./schedules');
 const skills = require('./skills');
 const balance = require('./balance');
@@ -57,6 +77,7 @@ module.exports = {
   adminRoles,
   adminSkills,
   adminUsers,
+  adminProviders,
   adminAuditLog,
   keys,
   apiKeys,
@@ -73,7 +94,19 @@ module.exports = {
   config,
   models,
   prompts,
+  rewrite,
+  recall,
   projects,
+  deepResearch,
+  flags,
+  billing,
+  billingPayments,
+  imagesGenerate,
+  evals,
+  trust,
+  searchAll,
+  organizations,
+  workspaces,
   schedules,
   skills,
   actions,
@@ -81,6 +114,13 @@ module.exports = {
   balance,
   messages,
   memories,
+  knowledge,
+  notifications,
+  devices,
+  subscriptions,
+  usageRecords,
+  feedback,
+  workflows,
   endpoints,
   assistants,
   categories,

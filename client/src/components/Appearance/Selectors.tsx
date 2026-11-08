@@ -108,6 +108,12 @@ export const LangSelector = ({
     { value: 'sl', label: localize('com_nav_lang_slovenian') },
     { value: 'bo', label: localize('com_nav_lang_tibetan') },
     { value: 'uk-UA', label: localize('com_nav_lang_ukrainian') },
+    { value: 'gu', label: localize('com_nav_lang_gujarati') },
+    { value: 'kn', label: localize('com_nav_lang_kannada') },
+    { value: 'ml', label: localize('com_nav_lang_malayalam') },
+    { value: 'ne', label: localize('com_nav_lang_nepali') },
+    { value: 'si', label: localize('com_nav_lang_sinhala') },
+    { value: 'ta', label: localize('com_nav_lang_tamil') },
   ];
 
   const labelId = 'language-selector-label';

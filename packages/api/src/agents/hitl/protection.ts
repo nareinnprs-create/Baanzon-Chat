@@ -53,9 +53,9 @@ import {
 import { getResumeAgentSnapshot, getResumeContentInspection } from './inspection';
 import { extractStoredMessageContent } from '~/protection/adapters/submissions';
 import { agentHasInlineMemoryTools, getMemoryAgentId } from '../memory';
-import { BAANZON_CHECKPOINT_NAMESPACE_KEY } from '../checkpointer';
 import { AttachmentObjectNotFoundError } from '~/files/encode/utils';
 import { ASK_USER_QUESTION_TOOL_NAME } from './askUserQuestionTool';
+import { BAANZON_CHECKPOINT_NAMESPACE_KEY } from '../checkpointer';
 import { ContentFilterError } from '~/middleware/contentFilter';
 import { hasActiveFilePolicy } from '~/protection/files';
 import { parseSkillMarkdown } from '../../skills/parse';

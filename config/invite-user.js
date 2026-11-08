@@ -61,7 +61,7 @@ const connect = require('./connect');
 
   const inviteLink = `${process.env.DOMAIN_CLIENT}/register?token=${token}`;
 
-  const appName = process.env.APP_TITLE || 'LibreChat';
+  const appName = process.env.APP_TITLE || 'Baanzon Chat';
 
   if (!checkEmailConfig()) {
     coloredConsole.green(`Send this link to the user: ${inviteLink}`);

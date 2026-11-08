@@ -154,8 +154,8 @@ export default defineConfig(({ command }) => ({
         name: 'Baanzon Chat',
         short_name: 'Baanzon',
         display: 'standalone',
-        background_color: '#F7FAF8',
-        theme_color: '#087F83',
+        background_color: '#0B0B0F',
+        theme_color: '#0B0B0F',
         icons: [
           {
             src: 'assets/favicon-32x32.png',

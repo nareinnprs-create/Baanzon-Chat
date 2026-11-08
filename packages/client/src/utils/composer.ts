@@ -7,7 +7,13 @@ import { cn } from './utils';
  * padding, and feature-specific overrides stay with each owner.
  */
 export const composerSurfaceClasses = (): string =>
-  cn('border border-border-light bg-surface-chat text-text-primary transition-all duration-200');
+  cn(
+    'border border-border-light bg-surface-chat text-text-primary transition-all duration-200',
+    /** Focus signal: the border steps to iris at half strength over the
+     *  graphite fill, with a one-pixel iris halo at even lower alpha — a
+     *  quiet "this surface is live" cue rather than a shout. */
+    'focus-within:border-ring-primary/50 focus-within:ring-1 focus-within:ring-ring-primary/25',
+  );
 
 /** Elevation states for the composer surface. `within` is the CSS-only
  *  equivalent of the managed focused/blurred pair for surfaces that do not

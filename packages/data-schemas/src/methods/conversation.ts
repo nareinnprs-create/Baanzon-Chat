@@ -47,6 +47,7 @@ import { isAgentFadingTier, isAgentFadingTierEntries } from '~/utils/fading';
 import { isCompactionSemanticIndexProjection } from '~/types/compaction';
 import { tenantSafeBulkWrite } from '~/utils/tenantBulkWrite';
 import { isValidObjectIdString } from '~/utils/objectId';
+import { escapeRegExp } from '~/utils/string';
 import { decrementTagCounts } from './conversationTag';
 import logger from '~/config/winston';
 
@@ -56,6 +57,10 @@ const ACTOR_CHECKPOINT_FIELDS = [
   'agentEventActorReconciliations',
   'agentEventActorSuspension',
 ] as const;
+
+/** Per-request default and hard cap for `searchConversationsByTitle`. */
+const DEFAULT_TITLE_SEARCH_LIMIT = 10;
+const MAX_TITLE_SEARCH_LIMIT = 20;
 
 function stripActorCheckpointFields(record: Record<string, unknown>): void {
   for (const key of Object.keys(record)) {
@@ -286,6 +291,8 @@ export interface ConversationMethods {
     pinned: boolean,
   ): Promise<IConversation | null>;
   bulkSaveConvos(conversations: Array<Record<string, unknown>>): Promise<unknown>;
+  /** Cross-entity palette search: bounded case-insensitive title hits for one user. */
+  searchConversationsByTitle(user: string, query: string, limit?: number): Promise<IConversation[]>;
   getConvosByCursor(
     user: string,
     options?: {
@@ -544,6 +551,44 @@ export function createConversationMethods(
     } catch (error) {
       logger.error('[searchConversation] Error searching conversation', error);
       throw new Error('Error searching conversation');
+    }
+  }
+
+  /**
+   * Cross-entity palette search over conversation titles. The upstream search
+   * path is MeiliSearch-backed, so with `SEARCH` disabled there is no text
+   * index to ride: this fallback uses the stored `{ user, _id }` index with a
+   * bounded case-insensitive substring regex over `title` and a hard cap
+   * (`limit <= 20`), matching only the requesting user's non-archived, human,
+   * retention-visible conversations.
+   */
+  async function searchConversationsByTitle(user: string, query: string, limit?: number) {
+    const trimmed = typeof query === 'string' ? query.trim() : '';
+    if (!trimmed) {
+      return [];
+    }
+    const pageSize = Number.isFinite(limit)
+      ? Math.min(Math.max(Math.trunc(limit as number), 1), MAX_TITLE_SEARCH_LIMIT)
+      : DEFAULT_TITLE_SEARCH_LIMIT;
+    try {
+      const Conversation = mongoose.models.Conversation as Model<IConversation>;
+      const filters: FilterQuery<IConversation>[] = [
+        { user } as FilterQuery<IConversation>,
+        { title: { $regex: escapeRegExp(trimmed), $options: 'i' } } as FilterQuery<IConversation>,
+        {
+          $or: [{ isArchived: false }, { isArchived: { $exists: false } }],
+        } as FilterQuery<IConversation>,
+        getVisibleConversationRetentionFilter(),
+        getHumanConversationFilter(),
+      ];
+      return await Conversation.find({ $and: filters })
+        .select('conversationId title updatedAt createdAt')
+        .sort({ updatedAt: -1, _id: -1 })
+        .limit(pageSize)
+        .lean<IConversation[]>();
+    } catch (error) {
+      logger.error('[searchConversationsByTitle] Error searching conversation titles', error);
+      throw new Error('Error searching conversation titles');
     }
   }
 
@@ -3342,6 +3387,7 @@ export function createConversationMethods(
   return {
     getConvoFiles,
     searchConversation,
+    searchConversationsByTitle,
     deleteNullOrEmptyConversations,
     saveConvo,
     setConvoPinned,

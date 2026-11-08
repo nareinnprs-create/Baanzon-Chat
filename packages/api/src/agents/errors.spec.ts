@@ -1,4 +1,4 @@
-import { ErrorTypes } from 'librechat-data-provider';
+import { ErrorTypes, EModelEndpoint } from 'librechat-data-provider';
 import { GraphRecursionError } from '@langchain/langgraph';
 import {
   GENERIC_PROVIDER_ERROR,
@@ -9,7 +9,54 @@ import {
   AGENT_ATTACHMENT_LIMIT_EXCEEDED,
   AGENT_EXPECTED_MCP_TOOLS_UNAVAILABLE,
   isStepLimitError,
+  resolveProviderAuthError,
+  ProviderAuthError,
 } from './errors';
+
+describe('resolveProviderAuthError', () => {
+  it('normalizes a 401 into a typed error naming the provider and status', () => {
+    const error = Object.assign(new Error('Unauthorized'), { status: 401 });
+    const normalized = resolveProviderAuthError(error, { provider: 'openAI', endpoint: 'Mistral' });
+    expect(normalized).toBeInstanceOf(ProviderAuthError);
+    expect(normalized?.provider).toBe('Mistral');
+    expect(normalized?.status).toBe(401);
+    expect(normalized?.message).toBe('Invalid API key — Mistral rejected the key (401)');
+  });
+
+  it('normalizes a 403 as an access-denied message', () => {
+    const error = Object.assign(new Error('Forbidden'), { response: { status: 403 } });
+    const normalized = resolveProviderAuthError(error, { provider: 'openAI', endpoint: 'Mistral' });
+    expect(normalized?.status).toBe(403);
+    expect(normalized?.message).toBe('Mistral rejected the request (403)');
+  });
+
+  it('falls back to the provider name when the endpoint is the agents endpoint', () => {
+    const error = Object.assign(new Error('Unauthorized'), { status: 401 });
+    const normalized = resolveProviderAuthError(error, {
+      provider: 'openAI',
+      endpoint: EModelEndpoint.agents,
+    });
+    expect(normalized?.provider).toBe('openAI');
+    expect(normalized?.message).toBe('Invalid API key — openAI rejected the key (401)');
+  });
+
+  it('recovers the status from a wrapped cause and defaults the fallback name', () => {
+    const wrapped = new Error('Request failed', {
+      cause: Object.assign(new Error('Unauthorized'), { status: 401 }),
+    });
+    const normalized = resolveProviderAuthError(wrapped, {});
+    expect(normalized).toBeInstanceOf(ProviderAuthError);
+    expect(normalized?.message).toBe('Invalid API key — The provider rejected the key (401)');
+  });
+
+  it.each([
+    Object.assign(new Error('rate limited'), { status: 429 }),
+    new Error('Unauthorized'),
+    { message: 'Unauthorized', status: '401' },
+  ])('returns undefined for non-auth failures (%p)', (error) => {
+    expect(resolveProviderAuthError(error, { provider: 'Mistral' })).toBeUndefined();
+  });
+});
 
 describe('isFatalAgentInitializationError', () => {
   it.each([

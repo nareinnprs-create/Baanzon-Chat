@@ -22,7 +22,7 @@ FerretDB with `postgres-documentdb` does **not** create separate PostgreSQL sche
 
 ### 2. Schema & Index Compatibility
 
-All 29 LibreChat Mongoose models and 98 custom indexes work on FerretDB v2.7.0:
+All 29 Baanzon Chat Mongoose models and 98 custom indexes work on FerretDB v2.7.0:
 
 | Index Type | Count | Status |
 |---|---|---|

@@ -8,6 +8,7 @@ const {
   verifyEmailController,
   deleteUserController,
   getUserController,
+  exportUserDataController,
 } = require('~/server/controllers/UserController');
 const {
   verifyEmailLimiter,
@@ -28,6 +29,7 @@ const updateUserPreferences = createUserPreferencesHandler({
 
 router.use('/settings', settings);
 router.get('/', requireJwtAuth, getUserController);
+router.get('/export', requireJwtAuth, exportUserDataController);
 router.patch('/preferences', requireJwtAuth, configMiddleware, updateUserPreferences);
 router.get('/terms', requireJwtAuth, getTermsStatusController);
 router.post('/terms/accept', requireJwtAuth, acceptTermsController);

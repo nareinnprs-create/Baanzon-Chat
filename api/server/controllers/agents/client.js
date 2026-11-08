@@ -168,6 +168,7 @@ const {
   createContextMetaPublisher,
   selectRunContextMetaToPublish,
   resolveToolRoleGrants,
+  resolveProviderAuthError,
 } = require('@librechat/api');
 const {
   Run,
@@ -5087,25 +5088,42 @@ class AgentClient extends BaseClient {
           },
         );
       } else {
-        logger.error(
-          '[api/server/controllers/agents/client.js #sendCompletion] Unhandled error type',
-          getSafeErrorMetadata(err),
-        );
-        const videoError = resolveGoogleVideoError({
-          error: err,
+        /** Provider rejection (401/403): surface a typed, human message naming
+         *  the provider and status instead of the generic unhandled-error path. */
+        const providerAuthError = resolveProviderAuthError(err, {
           provider: this.options.agent?.provider,
-          hasYouTubeVideo: this.injectedYouTubeVideo,
+          endpoint: this.options.agent?.endpoint,
         });
-        this.contentParts.push({
-          type: ContentTypes.ERROR,
-          [ContentTypes.ERROR]:
-            videoError ??
-            getUserFacingRequestError(
-              'An error occurred while processing the request',
-              err,
-              this.options.req.config,
-            ),
-        });
+        if (providerAuthError) {
+          logger.warn(
+            `[api/server/controllers/agents/client.js #sendCompletion] ${providerAuthError.message}`,
+            getSafeErrorMetadata(err),
+          );
+          this.contentParts.push({
+            type: ContentTypes.ERROR,
+            [ContentTypes.ERROR]: providerAuthError.message,
+          });
+        } else {
+          logger.error(
+            '[api/server/controllers/agents/client.js #sendCompletion] Unhandled error type',
+            getSafeErrorMetadata(err),
+          );
+          const videoError = resolveGoogleVideoError({
+            error: err,
+            provider: this.options.agent?.provider,
+            hasYouTubeVideo: this.injectedYouTubeVideo,
+          });
+          this.contentParts.push({
+            type: ContentTypes.ERROR,
+            [ContentTypes.ERROR]:
+              videoError ??
+              getUserFacingRequestError(
+                'An error occurred while processing the request',
+                err,
+                this.options.req.config,
+              ),
+          });
+        }
       }
     } finally {
       /** An aborted/erroring run can still have completed compaction before
@@ -6077,10 +6095,21 @@ class AgentClient extends BaseClient {
 
       return sanitizeTitle(titleResult.title);
     } catch (err) {
-      logger.error(
-        '[api/server/controllers/agents/client.js #titleConvo] Error',
-        getSafeErrorMetadata(err),
-      );
+      const providerAuthError = resolveProviderAuthError(err, {
+        provider: agent.provider,
+        endpoint,
+      });
+      if (providerAuthError) {
+        logger.warn(
+          `[api/server/controllers/agents/client.js #titleConvo] ${providerAuthError.message}`,
+          getSafeErrorMetadata(err),
+        );
+      } else {
+        logger.error(
+          '[api/server/controllers/agents/client.js #titleConvo] Error',
+          getSafeErrorMetadata(err),
+        );
+      }
       return;
     }
   }

@@ -11,9 +11,11 @@ const {
   extractBaseURL,
   getProxyDispatcher,
   applyAxiosProxyConfig,
+  getBalanceConfig,
+  getTransactionsConfig,
 } = require('@librechat/api');
 const { getStrategyFunctions } = require('~/server/services/Files/strategies');
-const { getFiles } = require('~/models');
+const { getFiles, spendTokens } = require('~/models');
 
 const displayMessage =
   "The tool displayed an image. All generated images are already plainly visible, so don't repeat the descriptions in detail. Do not list download links as they are available in the UI already. The user may download the images by clicking on them, but do not mention anything about downloading to the user.";
@@ -46,6 +48,152 @@ function createAbortHandler() {
   return function () {
     logger.debug('[ImageGenOAI] Image generation aborted');
   };
+}
+
+/**
+ * Records image-generation token usage against the user balance (gpt-image-1
+ * returns `usage` on generate/edit responses; dall-e responses do not).
+ * Mirrors the Gemini image tool's spendTokens pattern.
+ * @param {Object} params
+ * @param {{ prompt_tokens?: number; completion_tokens?: number; total_tokens?: number } | undefined} params.usage
+ * @param {ServerRequest} params.req
+ * @param {string} params.userId
+ * @param {string} [params.conversationId]
+ * @param {string} params.model
+ * @param {string} [params.messageId]
+ */
+async function recordTokenUsage({ usage, req, userId, conversationId, model, messageId }) {
+  if (!usage) {
+    return;
+  }
+
+  const appConfig = req?.config;
+  const balance = getBalanceConfig(appConfig);
+  const transactions = getTransactionsConfig(appConfig);
+
+  if (!balance?.enabled && transactions?.enabled === false) {
+    return;
+  }
+
+  let promptTokens = usage.prompt_tokens;
+  let completionTokens = usage.completion_tokens;
+  if (promptTokens === undefined && completionTokens === undefined) {
+    promptTokens = usage.total_tokens;
+  }
+
+  if ((promptTokens ?? 0) === 0 && (completionTokens ?? 0) === 0) {
+    logger.debug('[ImageGenOAI] No token usage to record');
+    return;
+  }
+
+  try {
+    await spendTokens(
+      {
+        user: userId,
+        model,
+        messageId,
+        conversationId,
+        context: 'image_generation',
+        balance,
+        transactions,
+      },
+      {
+        promptTokens: promptTokens ?? 0,
+        ...(completionTokens !== undefined ? { completionTokens } : {}),
+      },
+    );
+  } catch (error) {
+    logger.error('[ImageGenOAI] Error recording token usage:', error);
+  }
+}
+
+/**
+ * Resolves file objects for the given file ids, preferring the request-scoped
+ * image files and fetching the remainder from the database.
+ * @param {string[]} ids
+ * @param {ServerRequest} req
+ * @param {MongoFile[]} requestImageFiles
+ * @returns {Promise<Array<MongoFile | undefined>>}
+ */
+async function resolveImageFilesByIds(ids, req, requestImageFiles = []) {
+  const requestFilesMap = Object.fromEntries(requestImageFiles.map((f) => [f.file_id, { ...f }]));
+  const orderedFiles = new Array(ids.length);
+  const idsToFetch = [];
+  const indexOfMissing = Object.create(null);
+
+  for (let i = 0; i < ids.length; i++) {
+    const id = ids[i];
+    const file = requestFilesMap[id];
+
+    if (file) {
+      orderedFiles[i] = file;
+    } else {
+      idsToFetch.push(id);
+      indexOfMissing[id] = i;
+    }
+  }
+
+  if (idsToFetch.length && req?.user?.id) {
+    const fetchedFiles = await getFiles(
+      {
+        user: req.user.id,
+        file_id: { $in: idsToFetch },
+        height: { $exists: true },
+        width: { $exists: true },
+      },
+      {},
+      {},
+    );
+
+    for (const file of fetchedFiles) {
+      requestFilesMap[file.file_id] = file;
+      orderedFiles[indexOfMissing[file.file_id]] = file;
+    }
+  }
+
+  return orderedFiles;
+}
+
+/**
+ * Streams a resolved image file into the multipart form under `fieldName`.
+ * @param {FormData} formData
+ * @param {MongoFile | undefined} imageFile
+ * @param {string} fieldName
+ * @param {Record<FileSources, undefined | NodeStreamDownloader<File>>} streamMethods
+ * @param {ServerRequest} req
+ * @param {string | undefined} appFileStrategy
+ */
+async function appendImageFileToForm(
+  formData,
+  imageFile,
+  fieldName,
+  streamMethods,
+  req,
+  appFileStrategy,
+) {
+  if (!imageFile) {
+    return;
+  }
+  const source = imageFile.source || appFileStrategy;
+  if (!source) {
+    throw new Error('No source found for image file');
+  }
+  let getDownloadStream = streamMethods[source];
+  if (!getDownloadStream) {
+    ({ getDownloadStream } = getStrategyFunctions(source));
+    streamMethods[source] = getDownloadStream;
+  }
+  if (!getDownloadStream) {
+    throw new Error(`No download stream method found for source: ${source}`);
+  }
+  const stream = await getDownloadStream(req, imageFile.filepath);
+  if (!stream) {
+    throw new Error('Failed to get download stream for image file');
+  }
+  formData.append(fieldName, stream, {
+    filename: imageFile.filename,
+    contentType: imageFile.type,
+  });
 }
 
 /**
@@ -196,32 +344,44 @@ Error Message: ${error.message}`);
         );
       }
 
-      // For gpt-image-1, the response contains base64-encoded images
-      // TODO: handle cost in `resp.usage`
-      const base64Image = resp.data[0].b64_json;
+      // For gpt-image-1, the response contains base64-encoded images and a
+      // `usage` object with prompt_tokens/completion_tokens for balance costs.
+      const base64Images = (resp.data ?? []).map((image) => image?.b64_json).filter((b64) => !!b64);
 
-      if (!base64Image) {
+      if (base64Images.length === 0) {
         return returnValue(
           'No image data returned from OpenAI API. There may be a problem with the API or your configuration.',
         );
       }
 
-      const content = [
-        {
-          type: ContentTypes.IMAGE_URL,
-          image_url: {
-            url: `data:image/${output_format};base64,${base64Image}`,
-          },
+      const content = base64Images.map((base64Image) => ({
+        type: ContentTypes.IMAGE_URL,
+        image_url: {
+          url: `data:image/${output_format};base64,${base64Image}`,
         },
-      ];
+      }));
 
-      const file_ids = [v4()];
+      const file_ids = base64Images.map(() => v4());
       const response = [
         {
           type: ContentTypes.TEXT,
-          text: displayMessage + `\n\ngenerated_image_id: "${file_ids[0]}"`,
+          text: displayMessage + `\n\ngenerated_image_id: "${file_ids.join('", "')}"`,
         },
       ];
+
+      recordTokenUsage({
+        usage: resp.usage,
+        req,
+        userId: req?.user?.id,
+        conversationId: runnableConfig?.configurable?.thread_id,
+        messageId:
+          runnableConfig?.configurable?.run_id ??
+          runnableConfig?.configurable?.requestBody?.messageId,
+        model: imageModel,
+      }).catch((error) => {
+        logger.error('[ImageGenOAI] Failed to record token usage:', error);
+      });
+
       return [response, { content, file_ids }];
     },
     oaiToolkit.image_gen_oai,
@@ -231,9 +391,21 @@ Error Message: ${error.message}`);
    * Image Editing Tool
    */
   const imageEditTool = tool(
-    async ({ prompt, image_ids, quality = 'auto', size = 'auto' }, runnableConfig) => {
+    async (
+      { prompt, image_ids, mask_ids = [], quality = 'auto', size = 'auto', n = 1 },
+      runnableConfig,
+    ) => {
       if (!prompt) {
         throw new Error('Missing required field: prompt');
+      }
+      if (!Array.isArray(image_ids) || image_ids.length === 0) {
+        throw new Error('Missing required field: image_ids');
+      }
+      if (!Number.isInteger(n) || n < 1 || n > 10) {
+        throw new Error('`n` must be an integer between 1 and 10.');
+      }
+      if (!Array.isArray(mask_ids) || mask_ids.length > 1) {
+        throw new Error('A maximum of one `mask_ids` image is supported.');
       }
 
       const clientConfig = { ...closureConfig };
@@ -247,79 +419,49 @@ Error Message: ${error.message}`);
       const formData = new FormData();
       formData.append('model', imageModel);
       formData.append('prompt', replaceUnwantedChars(prompt));
-      // TODO: `mask` support
-      // TODO: more than 1 image support
-      // formData.append('n', n.toString());
+      formData.append('n', n.toString());
       formData.append('quality', quality);
       formData.append('size', size);
 
       /** @type {Record<FileSources, undefined | NodeStreamDownloader<File>>} */
       const streamMethods = {};
 
-      const requestFilesMap = Object.fromEntries(imageFiles.map((f) => [f.file_id, { ...f }]));
-
-      const orderedFiles = new Array(image_ids.length);
-      const idsToFetch = [];
-      const indexOfMissing = Object.create(null);
-
-      for (let i = 0; i < image_ids.length; i++) {
-        const id = image_ids[i];
-        const file = requestFilesMap[id];
-
-        if (file) {
-          orderedFiles[i] = file;
-        } else {
-          idsToFetch.push(id);
-          indexOfMissing[id] = i;
-        }
-      }
-
-      if (idsToFetch.length) {
-        const fetchedFiles = await getFiles(
-          {
-            user: req.user.id,
-            file_id: { $in: idsToFetch },
-            height: { $exists: true },
-            width: { $exists: true },
-          },
-          {},
-          {},
-        );
-
-        for (const file of fetchedFiles) {
-          requestFilesMap[file.file_id] = file;
-          orderedFiles[indexOfMissing[file.file_id]] = file;
-        }
-      }
+      const orderedFiles = await resolveImageFilesByIds(image_ids, req, imageFiles);
       for (const imageFile of orderedFiles) {
-        if (!imageFile) {
-          continue;
+        await appendImageFileToForm(
+          formData,
+          imageFile,
+          'image[]',
+          streamMethods,
+          req,
+          appFileStrategy,
+        );
+      }
+
+      if (mask_ids.length > 0) {
+        const orderedMasks = await resolveImageFilesByIds(mask_ids, req, imageFiles);
+        const maskFile = orderedMasks.find((file) => !!file);
+        if (!maskFile) {
+          throw new Error('Failed to resolve mask image file');
         }
-        /** @type {NodeStream<File>} */
-        let stream;
-        /** @type {NodeStreamDownloader<File>} */
-        let getDownloadStream;
-        const source = imageFile.source || appFileStrategy;
-        if (!source) {
-          throw new Error('No source found for image file');
+        const primaryFile = orderedFiles.find((file) => !!file);
+        if (
+          primaryFile?.height !== undefined &&
+          primaryFile?.width !== undefined &&
+          maskFile?.height !== undefined &&
+          maskFile?.width !== undefined &&
+          (maskFile.height !== primaryFile.height || maskFile.width !== primaryFile.width)
+        ) {
+          throw new Error('Mask dimensions must match the source image dimensions.');
         }
-        if (streamMethods[source]) {
-          getDownloadStream = streamMethods[source];
-        } else {
-          ({ getDownloadStream } = getStrategyFunctions(source));
-          streamMethods[source] = getDownloadStream;
-        }
-        if (!getDownloadStream) {
-          throw new Error(`No download stream method found for source: ${source}`);
-        }
-        stream = await getDownloadStream(req, imageFile.filepath);
-        if (!stream) {
-          throw new Error('Failed to get download stream for image file');
-        }
-        formData.append('image[]', stream, {
-          filename: imageFile.filename,
-          contentType: imageFile.type,
-        });
+        await appendImageFileToForm(
+          formData,
+          maskFile,
+          'mask',
+          streamMethods,
+          req,
+          appFileStrategy,
+        );
       }
 
       /** @type {import('axios').RawAxiosHeaders} */
@@ -369,31 +511,46 @@ Error Message: ${error.message}`);
           );
         }
 
-        const base64Image = response.data.data[0].b64_json;
-        if (!base64Image) {
+        const base64Images = (response.data.data ?? [])
+          .map((image) => image?.b64_json)
+          .filter((b64) => !!b64);
+
+        if (base64Images.length === 0) {
           return returnValue(
             'No image data returned from OpenAI API. There may be a problem with the API or your configuration.',
           );
         }
 
-        const content = [
-          {
-            type: ContentTypes.IMAGE_URL,
-            image_url: {
-              url: `data:image/${imageOutputType};base64,${base64Image}`,
-            },
+        const content = base64Images.map((base64Image) => ({
+          type: ContentTypes.IMAGE_URL,
+          image_url: {
+            url: `data:image/${imageOutputType};base64,${base64Image}`,
           },
-        ];
+        }));
 
-        const file_ids = [v4()];
+        const file_ids = base64Images.map(() => v4());
         const textResponse = [
           {
             type: ContentTypes.TEXT,
             text:
               displayMessage +
-              `\n\ngenerated_image_id: "${file_ids[0]}"\nreferenced_image_ids: ["${image_ids.join('", "')}"]`,
+              `\n\ngenerated_image_id: "${file_ids.join('", "')}"\nreferenced_image_ids: ["${image_ids.join('", "')}"]`,
           },
         ];
+
+        recordTokenUsage({
+          usage: response.data.usage,
+          req,
+          userId: req?.user?.id,
+          conversationId: runnableConfig?.configurable?.thread_id,
+          messageId:
+            runnableConfig?.configurable?.run_id ??
+            runnableConfig?.configurable?.requestBody?.messageId,
+          model: imageModel,
+        }).catch((error) => {
+          logger.error('[image_edit_oai] Failed to record token usage:', error);
+        });
+
         return [textResponse, { content, file_ids }];
       } catch (error) {
         const message = '[image_edit_oai] Problem editing the image:';

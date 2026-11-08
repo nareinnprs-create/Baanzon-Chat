@@ -12,6 +12,13 @@ jest.mock('recoil', () => ({
   useSetRecoilState: jest.fn(),
 }));
 
+/** `@librechat/client` resolves through the real barrel here, which needs the
+ *  data-provider's `ProviderId` — mocked away in this suite. The offline queue
+ *  only consumes the toast context, so a stub keeps the module graph loadable. */
+jest.mock('@librechat/client', () => ({
+  useToastContext: () => ({ showToast: jest.fn() }),
+}));
+
 jest.mock('librechat-data-provider', () => ({
   replaceSpecialVars: jest.fn(({ text }) => text),
 }));

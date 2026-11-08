@@ -9,6 +9,8 @@ import {
   validateThemeDefinition,
 } from '../registry';
 import { highContrastDarkTheme, highContrastLightTheme } from './highContrast';
+import { defaultTheme } from './default';
+import { darkTheme } from './dark';
 
 type Rgb = [number, number, number];
 
@@ -168,14 +170,17 @@ describe.each([
   });
 
   it('uses the mode canvas for code blocks instead of the stock grey', () => {
-    const expected = theme === highContrastDarkTheme ? '0 0 0' : '255 255 255';
-    const source =
+    /** The dark mode's canvas is the Baanzon deep-ocean ink every surface in the
+     *  palette is built on, not pure black, so the canvas is read off the theme
+     *  rather than restated as a literal here. */
+    const canvas =
       theme === highContrastDarkTheme
         ? theme['rgb-presentation']
         : theme['rgb-surface-primary-alt'];
+    const stock = theme === highContrastDarkTheme ? darkTheme : defaultTheme;
 
-    expect(theme['rgb-surface-code']).toBe(expected);
-    expect(theme['rgb-surface-code']).toBe(source);
+    expect(theme['rgb-surface-code']).toBe(canvas);
+    expect(theme['rgb-surface-code']).not.toBe(stock['rgb-surface-code']);
   });
 
   it('keeps neutral text at WCAG AAA on every canvas and hover fill', () => {
@@ -197,10 +202,10 @@ describe.each([
     expect(below(theme, WCAG_AAA_NORMAL, textTokens, activeFills)).toEqual([]);
   });
 
-  /** The standard palettes are deliberately not held to this: their dark
-   *  `syntax-attr` and `syntax-title` measure 3.71:1 and 3.99:1 on the code
-   *  surface, a pre-existing gap that restyling every dark-mode code block
-   *  inside a contrast PR would not be the right way to close. */
+  /** The standard palettes are deliberately not held to this AAA threshold:
+   *  their dark `syntax-attr` and `syntax-title` are stepped to the graphite
+   *  code surface and measure 9.53:1 and 9.02:1 — past AA, but the bundled
+   *  themes are asserted at the app's own AA contract, not AAA. */
   it('keeps every syntax colour at WCAG AAA on the code surface', () => {
     expect(below(theme, WCAG_AAA_NORMAL, syntaxTokens, codeSurfaces)).toEqual([]);
   });
@@ -273,9 +278,10 @@ describe.each([
   });
 
   it('paints its status labels in the ink of the opposing canvas', () => {
-    expect(theme['rgb-text-on-status']).toBe(
-      theme === highContrastDarkTheme ? '0 0 0' : '255 255 255',
-    );
+    /** Fills sit on the far side of the mode's own canvas, so the label is that
+     *  canvas: white in the light mode, the deep-ocean ink in the dark one. The
+     *  AAA ratio this buys is asserted by the test above. */
+    expect(theme['rgb-text-on-status']).toBe(theme['rgb-surface-primary']);
   });
 
   /** The track is a UI component boundary under WCAG 1.4.11, and it has to stay
@@ -312,8 +318,22 @@ describe('high contrast theme definition', () => {
   it('inverts the canvas and the ink between its two modes', () => {
     expect(highContrastLightTheme['rgb-surface-primary']).toBe('255 255 255');
     expect(highContrastLightTheme['rgb-text-primary']).toBe('0 0 0');
-    expect(highContrastDarkTheme['rgb-surface-primary']).toBe('0 0 0');
-    expect(highContrastDarkTheme['rgb-text-primary']).toBe('255 255 255');
+    /** The dark canvas is the Baanzon deep-ocean ink rather than pure black —
+     *  18.9:1 under white ink, so the headroom AAA asks for is intact — and the
+     *  ink is the light mode's canvas, which is what "inverted" has to mean once
+     *  the two canvases are no longer the same colour. */
+    expect(highContrastDarkTheme['rgb-surface-primary']).toBe(
+      highContrastDarkTheme['rgb-presentation'],
+    );
+    expect(highContrastDarkTheme['rgb-text-primary']).toBe(
+      highContrastLightTheme['rgb-surface-primary'],
+    );
+    expect(
+      contrast(
+        toRgb(highContrastDarkTheme, 'rgb-text-primary'),
+        toRgb(highContrastDarkTheme, 'rgb-surface-primary'),
+      ),
+    ).toBeGreaterThanOrEqual(WCAG_AAA_NORMAL);
   });
 
   /** A provider avatar is a brand fill carrying a glyph, so it owes the same two

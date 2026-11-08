@@ -23,7 +23,7 @@ const AuthorHeader = memo(function AuthorHeader({
       >
         {icon}
       </div>
-      <h2 className="min-w-0 select-none truncate text-sm font-semibold text-text-primary">
+      <h2 className="min-w-0 select-none truncate text-xs font-medium uppercase tracking-wider text-text-secondary">
         {label}
       </h2>
     </div>

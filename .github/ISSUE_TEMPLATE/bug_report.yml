@@ -1,0 +1,96 @@
+name: Bug report
+description: Something in Baanzon Chat behaves differently from what it should.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Two things make a bug report actionable here:
+
+        - **Node.js v24.16.0** and a MongoDB instance are the supported setup
+          (`.nvmrc`, `Dockerfile`). Say which you ran on if it differs.
+        - **Redact secrets.** Paste logs with API keys, tokens, connection strings
+          and user data removed. A report that leaks a key has to be rotated first,
+          which is slower than the bug was.
+
+        `Fixes #N` does not close issues on this repository: pull requests merge to
+        `dev`, not the default branch, so linked issues are closed by hand.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happens
+      description: What breaks, and what you expected instead.
+      placeholder: |
+        Expected: clicking Retry re-runs the query and shows the results.
+        Actual: the button is greyed out after the first failure and never
+        re-enables, so the page stays in its error state.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: workspace
+    attributes:
+      label: Where
+      description: Which part of the repo the behavior belongs to.
+      options:
+        - Client UI (`client/`)
+        - Backend API (`api/`)
+        - packages/api
+        - packages/client
+        - packages/data-provider
+        - packages/data-schemas
+        - Config or startup (`config/`, `baanzon.yaml`, Docker)
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Data loss or corruption
+        - Security or auth defect
+        - Feature unusable, no workaround
+        - Feature degraded, workaround exists
+        - Cosmetic
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: The version in `package.json`, or the commit SHA.
+      placeholder: v0.8.8-rc2
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Exact steps, from a clean state if possible.
+      placeholder: |
+        1. Sign in as a user with the Agent permission disabled.
+        2. Open Settings -> Agents.
+        3. Click Save.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: |
+        Backend: `npm run backend` output. Frontend: the browser console.
+        Redact keys, tokens, connection strings and user data.
+
+  - type: input
+    id: related
+    attributes:
+      label: Related pull request or issue
+      description: Optional. A link, or `#123`.

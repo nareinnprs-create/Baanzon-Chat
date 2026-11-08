@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const handlebars = require('handlebars');
 const { logger } = require('@librechat/data-schemas');
 const { logAxiosError, isEnabled, readFileAsString } = require('@librechat/api');
+const createZeptoMailTransport = require('./zeptomail-transport');
 
 /**
  * Sends an email using Mailgun API.
@@ -101,6 +102,21 @@ const sendEmail = async ({ email, subject, payload, template, throwError = true 
     const fromEmail = process.env.EMAIL_FROM;
     const fromAddress = `"${fromName}" <${fromEmail}>`;
     const toAddress = `"${payload.name}" <${email}>`;
+
+    if (process.env.EMAIL_SERVICE?.toLowerCase() === 'zeptomail' && process.env.EMAIL_PASSWORD) {
+      logger.debug('[sendEmail] Using ZeptoMail provider');
+      const transporter = createZeptoMailTransport({
+        pass: process.env.EMAIL_PASSWORD,
+        fromAddress: fromEmail,
+        fromName,
+      });
+      return await transporter.sendMail({
+        from: fromAddress,
+        to: toAddress,
+        subject,
+        html,
+      });
+    }
 
     // Check if Mailgun is configured
     if (process.env.MAILGUN_API_KEY && process.env.MAILGUN_DOMAIN) {
