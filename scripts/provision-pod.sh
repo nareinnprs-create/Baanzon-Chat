@@ -86,7 +86,7 @@ stdout_logfile=/workspace/baanzon/logs/searxng.log
 redirect_stderr=true
 
 [program:baanzon-api]
-command=/bin/bash -lc 'set -a; source /workspace/baanzon/.env; exec node api/server/index.js'
+command=node api/server/index.js
 directory=/workspace/baanzon
 autostart=true
 autorestart=true
