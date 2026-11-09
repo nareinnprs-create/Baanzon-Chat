@@ -1,37 +1,8 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="aurora-orb" x1="96" y1="64" x2="416" y2="448" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#063C45"/>
-      <stop offset="0.35" stop-color="#087F83"/>
-      <stop offset="0.7" stop-color="#35D6C7"/>
-      <stop offset="1" stop-color="#9B8AFB"/>
-    </linearGradient>
-    <linearGradient id="aurora-halo" x1="176" y1="112" x2="352" y2="400" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#35D6C7" stop-opacity="0"/>
-      <stop offset="0.5" stop-color="#35D6C7" stop-opacity="0.18"/>
-      <stop offset="1" stop-color="#9B8AFB" stop-opacity="0"/>
-    </linearGradient>
-    <radialGradient id="pearl-shine" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(176 176) rotate(45) scale(1)">
-      <stop stop-color="#FFFFFF" stop-opacity="0.55"/>
-      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-
-  <!-- Outer calm halo -->
-  <circle cx="256" cy="256" r="208" fill="url(#aurora-halo)"/>
-
-  <!-- Signature Baanzon orb -->
-  <circle cx="256" cy="256" r="148" fill="url(#aurora-orb)"/>
-
-  <!-- Pearl highlight -->
-  <circle cx="256" cy="256" r="148" fill="url(#pearl-shine)"/>
-
-  <!-- Inner Pearl core -->
-  <ellipse cx="232" cy="216" rx="76" ry="62" fill="#F4F7F3" opacity="0.92"/>
-
-  <!-- Aurora stream over the pearl -->
-  <path d="M148 300 C 196 236 224 232 264 268 C 304 304 332 292 368 236" stroke="url(#aurora-orb)" stroke-width="10" stroke-linecap="round" fill="none" opacity="0.9"/>
-
-  <!-- Complementary aqua whisper -->
-  <path d="M136 344 C 188 296 244 296 292 336 C 340 376 392 368 432 316" stroke="#35D6C7" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.45"/>
+<svg width="640" height="180" viewBox="0 0 640 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Baanzon Chat</title>
+  <path d="M70 22h40c9 0 17 5 22 13l25 42c5 8 5 18 0 26l-25 42c-5 8-13 13-22 13H70c-9 0-17-5-22-13L23 103c-5-8-5-18 0-26l25-42c5-8 13-13 22-13Z" fill="#303438"/>
+  <path d="M77 43h26c5 0 9 3 12 8l16 27c3 5 3 9 0 14l-16 27c-3 5-7 8-12 8H77c-5 0-9-3-12-8L49 92c-3-5-3-9 0-14l16-27c3-5 7-8 12-8Z" fill="#B7D6C3"/>
+  <path d="M84 51h12v78H84c-5 0-9-3-12-8L57 94c-3-5-3-9 0-14l15-21c3-5 7-8 12-8Z" fill="#F0F0E9"/>
+  <text x="190" y="87" fill="#303438" font-family="Arial, sans-serif" font-size="46" font-weight="700" letter-spacing="2">BAANZON</text>
+  <text x="193" y="123" fill="#70777B" font-family="Arial, sans-serif" font-size="23" font-weight="600" letter-spacing="9">CHAT</text>
 </svg>

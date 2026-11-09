@@ -60,10 +60,10 @@ function AuthLayout({
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-surface-primary">
+    <div className="auth-brand-shell relative flex min-h-screen flex-col bg-surface-primary">
       <Banner />
       <BlinkAnimation active={isFetching}>
-        <div className="mt-6 h-10 w-full bg-cover">
+        <div className="auth-brand-logo mt-8 h-14 w-full bg-cover px-6">
           <img
             src="assets/logo.svg"
             className="h-full w-full object-contain"
@@ -76,8 +76,8 @@ function AuthLayout({
         <ThemeSelector />
       </div>
 
-      <main className="flex flex-grow items-center justify-center">
-        <div className="w-authPageWidth overflow-hidden bg-surface-primary px-6 py-4 sm:max-w-md sm:rounded-lg">
+      <main className="flex flex-grow items-center justify-center px-4 py-10">
+        <div className="w-authPageWidth overflow-hidden rounded-2xl border border-border-light bg-surface-primary px-6 py-7 shadow-lg sm:max-w-md">
           {!hasStartupConfigError && !isFetching && header && (
             <h1
               className="mb-4 text-center text-3xl font-semibold text-text-primary"

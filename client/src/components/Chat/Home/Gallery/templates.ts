@@ -12,7 +12,7 @@ export type StarterCategory = (typeof GALLERY_CATEGORIES)[number];
 export type StarterTemplate = {
   id: string;
   title: string;
-  /** Decorative emoji; the card's accessible name is "Use template: {title}". */
+  /** Decorative emoji shown in the starter card. */
   icon: string;
   category: StarterCategory;
   /** Ready-to-edit composer text; bracketed placeholders mark what to fill in. */

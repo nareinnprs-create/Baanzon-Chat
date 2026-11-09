@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useLocalize } from '~/hooks';
 import { useChatFormContext } from '~/Providers';
 import { STARTER_TEMPLATES, type StarterTemplate } from './templates';
@@ -14,6 +14,7 @@ const cardClassName =
 export default function StarterGallery() {
   const localize = useLocalize();
   const { setValue } = useChatFormContext();
+  const [expanded, setExpanded] = useState(false);
 
   const applyTemplate = useCallback(
     (template: StarterTemplate) => {
@@ -39,7 +40,7 @@ export default function StarterGallery() {
         aria-label={localize('com_ui_gallery')}
         className="grid w-full grid-cols-2 gap-2 md:grid-cols-4"
       >
-        {STARTER_TEMPLATES.map((template) => (
+        {STARTER_TEMPLATES.slice(0, expanded ? STARTER_TEMPLATES.length : 6).map((template) => (
           <li key={template.id}>
             <button
               type="button"
@@ -53,6 +54,14 @@ export default function StarterGallery() {
           </li>
         ))}
       </ul>
+      <button
+        type="button"
+        className="mx-auto min-h-10 rounded-lg px-3 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary"
+        onClick={() => setExpanded((value) => !value)}
+        aria-expanded={expanded}
+      >
+        {localize(expanded ? 'com_ui_show_less' : 'com_ui_show_more')}
+      </button>
     </div>
   );
 }
