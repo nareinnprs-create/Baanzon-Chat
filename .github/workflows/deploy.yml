@@ -100,7 +100,7 @@ jobs:
         run: |
           echo "$SSH_KEY" > pod_key
           chmod 600 pod_key
-          SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null)
+          SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30 -o ServerAliveCountMax=20 -o ConnectTimeout=30)
           ssh -i pod_key -p "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" "root@${{ secrets.POD_SSH_HOST }}" \
             "mkdir -p /workspace/_release"
           scp -q -i pod_key -P "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" \
@@ -114,7 +114,7 @@ jobs:
         run: |
           echo "$SSH_KEY" > pod_key
           chmod 600 pod_key
-          SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null)
+          SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30 -o ServerAliveCountMax=20 -o ConnectTimeout=30)
           ssh -i pod_key -p "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" \
             "root@${{ secrets.POD_SSH_HOST }}" \
             "chmod +x /workspace/_release/pod-apply-release.sh && /workspace/_release/pod-apply-release.sh"
