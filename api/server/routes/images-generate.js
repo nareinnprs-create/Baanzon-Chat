@@ -1,7 +1,7 @@
 /**
  * Image generation via Cloudflare Workers AI. Tier-based models + daily caps:
- * Free 3/day (flux-1-schnell), Lite 10/day (SDXL-lightning), Pro 50/day (flux-2-klein),
- * Enterprise 200/day (flux-2-dev). Requires CF_ACCOUNT_ID + CF_API_TOKEN in .env.
+ * Free 5/day (flux-1-schnell), Lite 15/day (SDXL-lightning), Pro 75/day (flux-2-klein),
+ * Enterprise 300/day (flux-2-dev). Requires CF_ACCOUNT_ID + CF_API_TOKEN in .env.
  */
 const express = require('express');
 const mongoose = require('mongoose');
@@ -67,6 +67,13 @@ router.post('/', requireJwtAuth, async (req, res) => {
   }
   const tier = await userTier(req.user.id);
   const { model, cap } = DAILY[tier] || DAILY.free;
+  const account = process.env.CF_ACCOUNT_ID;
+  const token = process.env.CF_API_TOKEN;
+  if (!account || !token) {
+    return res
+      .status(501)
+      .json({ message: 'Image generation is not configured on this deployment.' });
+  }
   if (limited(`${req.user.id}`, MAX_PER_WINDOW)) {
     return res.status(429).json({ message: 'Too many images this minute — try again shortly.' });
   }
@@ -86,13 +93,6 @@ router.post('/', requireJwtAuth, async (req, res) => {
       { $setOnInsert: { userId: req.user.id, date: today, kind: 'image' }, $inc: { count: 1 } },
       { upsert: true },
     );
-  const account = process.env.CF_ACCOUNT_ID;
-  const token = process.env.CF_API_TOKEN;
-  if (!account || !token) {
-    return res
-      .status(501)
-      .json({ message: 'Image generation is not configured on this deployment.' });
-  }
   try {
     const isFlux2 = model.includes('flux-2');
     const runUrl = `https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/${model}`;

@@ -33,6 +33,19 @@ done
 # data dirs: live OUTSIDE the app dir at /workspace/data/{mongodb,meili_data}
 # (mongod/meili supervisor conf point there) so releases never touch them.
 
+if [ ! -f "$APP_DIR/.env" ]; then
+  echo "[apply] REQUIRED: $APP_DIR/.env is missing"
+  exit 1
+fi
+set -a
+# shellcheck disable=SC1091
+source "$APP_DIR/.env"
+set +a
+if [ -z "${OPRAIZ_API_KEY:-}" ] || [ -z "${OPRAIZ_BASEURL:-}" ]; then
+  echo "[apply] REQUIRED: OPRAIZ_API_KEY and OPRAIZ_BASEURL must be configured"
+  exit 1
+fi
+
 echo "[apply] validating Cloudflare provider routing"
 node "$NEW_DIR/scripts/validate-provider-routing.js" "$NEW_DIR/baanzon.yaml"
 
