@@ -69,7 +69,12 @@
   --blue-800: 30 64 175;
   --blue-900: 30 58 138;
   --blue-950: 23 37 84;
-  --brand-purple: 126 34 206;
+  /* Official Baanzon Chat brand palette from the approved brand kit. */
+  --brand-graphite: 48 52 56;
+  --brand-celadon: 183 214 195;
+  --brand-soft-white: 240 240 233;
+  --brand-steel: 112 119 123;
+  --brand-purple: var(--brand-graphite);
   --gizmo-gray-500: 153 153 153;
   --gizmo-gray-600: 102 102 102;
   --gizmo-gray-950: 15 15 15;
@@ -199,8 +204,8 @@
 }
 
 html {
-  --brand-purple: 155 138 251; /* #9B8AFB Soft Orchid */
-  --presentation: var(--white);
+  --brand-purple: var(--brand-graphite);
+  --presentation: var(--brand-soft-white);
   --text-primary: var(--gray-800);
   --text-secondary: var(--gray-600);
   --text-secondary-alt: 107 107 117; /* #6B6B75 (Muted Text, WCAG AA) */
@@ -210,12 +215,12 @@ html {
   --shimmer-dip-alpha: 0.18;
   --text-warning: var(--amber-700);
   --text-destructive: var(--red-600);
-  --link: 91 75 212; /* #5B4BD4 Velvet Iris, stepped for the paper canvas */
-  --link-hover: 74 59 191; /* #4A3BBF Iris darker */
-  --link-visited: 106 62 200; /* #6A3EC8 Iris visited */
-  --accent-primary: 109 92 230; /* #6D5CE6 Velvet Iris */
-  --accent-primary-hover: 91 75 212; /* #5B4BD4 */
-  --ring-primary: 109 92 230; /* #6D5CE6 Velvet Iris */
+  --link: var(--brand-graphite);
+  --link-hover: 35 39 42;
+  --link-visited: var(--brand-steel);
+  --accent-primary: var(--brand-graphite);
+  --accent-primary-hover: 35 39 42;
+  --ring-primary: var(--brand-graphite);
   --header-primary: var(--white);
   --header-hover: var(--gray-50);
   --header-button-hover: var(--gray-50);
@@ -235,8 +240,8 @@ html {
   --surface-tertiary-alt: var(--white);
   --surface-dialog: var(--white);
   --surface-overlay: 23 23 28;
-  --surface-submit: 109 92 230; /* #6D5CE6 Velvet Iris */
-  --surface-submit-hover: 91 75 212; /* #5B4BD4 */
+  --surface-submit: var(--brand-graphite);
+  --surface-submit-hover: 35 39 42;
   --surface-destructive: var(--red-700);
   --surface-destructive-hover: var(--red-800);
   --surface-chat: var(--white);
@@ -292,8 +297,8 @@ html {
   --syntax-attr: 109 92 230; /* #6D5CE6 Velvet Iris */
   --syntax-title: 190 18 60; /* #BE123C Rose */
 
-  /* Signature brand gradient — champagne into velvet iris. */
-  --brand-sig-gradient: linear-gradient(135deg, #EAD9FF, #8E7CFF);
+  /* Signature brand gradient — celadon into graphite. */
+  --brand-sig-gradient: linear-gradient(135deg, #B7D6C3, #303438);
 
   --surface-inverted: var(--gray-800);
   --surface-inverted-hover: 91 75 212; /* #5B4BD4 */
@@ -324,7 +329,7 @@ html {
   --provider-foreground: #ffffff;
 }
 .dark {
-  --brand-purple: 183 165 255; /* #B7A5FF Iris, velvet-stepped for graphite */
+  --brand-purple: var(--brand-celadon);
   --presentation: var(--gray-850);
   --text-primary: 245 245 247; /* #F5F5F7 */
   --text-secondary: 161 161 170; /* #A1A1AA */
@@ -337,12 +342,12 @@ html {
   --shimmer-dip-alpha: 0.25;
   --text-warning: var(--amber-300);
   --text-destructive: var(--red-400); /* #FF5C6C */
-  --link: 169 154 255; /* #A99AFF */
-  --link-hover: 196 182 255; /* #C4B6FF */
-  --link-visited: 234 217 255; /* #EAD9FF Champagne */
-  --accent-primary: 142 124 255; /* #8E7CFF Velvet Iris */
-  --accent-primary-hover: 169 154 255; /* #A99AFF */
-  --ring-primary: 142 124 255; /* #8E7CFF Velvet Iris */
+  --link: var(--brand-celadon);
+  --link-hover: 209 231 216;
+  --link-visited: var(--brand-soft-white);
+  --accent-primary: var(--brand-celadon);
+  --accent-primary-hover: 209 231 216;
+  --ring-primary: var(--brand-celadon);
   --header-primary: var(--gray-850); /* #15151B */
   --header-hover: 28 28 35; /* #1C1C23 */
   --header-button-hover: var(--gray-850);
@@ -362,8 +367,8 @@ html {
   --surface-tertiary-alt: 28 28 35; /* #1C1C23 */
   --surface-dialog: var(--gray-850); /* #15151B */
   --surface-overlay: 0 0 0;
-  --surface-submit: 142 124 255; /* #8E7CFF Velvet Iris */
-  --surface-submit-hover: 169 154 255; /* #A99AFF */
+  --surface-submit: var(--brand-graphite);
+  --surface-submit-hover: 35 39 42;
   --surface-destructive: var(--red-800);
   --surface-destructive-hover: var(--red-900);
   --surface-chat: var(--gray-850);
@@ -415,8 +420,8 @@ html {
   --syntax-attr: 196 176 255; /* #C4B0FF Iris */
   --syntax-title: 255 154 165; /* #FF9AA5 */
 
-  /* Signature brand gradient — champagne into velvet iris. */
-  --brand-sig-gradient: linear-gradient(135deg, #EAD9FF, #8E7CFF);
+  /* Signature brand gradient — celadon into soft white. */
+  --brand-sig-gradient: linear-gradient(135deg, #B7D6C3, #F0F0E9);
 
   --surface-inverted: 245 245 247;
   --surface-inverted-hover: 161 161 170; /* #A1A1AA */
@@ -432,6 +437,33 @@ html {
   --provider-azure: linear-gradient(0.375turn, #61bde2, #4389d0);
   --provider-bedrock: #268672;
   --provider-foreground: #ffffff;
+}
+
+/* Brand expression is quiet on purpose: one mark, one accent, and content first. */
+.auth-brand-shell {
+  background:
+    radial-gradient(circle at 50% 0%, rgb(var(--brand-celadon) / 0.26), transparent 34rem),
+    rgb(var(--surface-primary));
+}
+
+.auth-brand-logo img {
+  filter: drop-shadow(0 10px 24px rgb(var(--brand-graphite) / 0.12));
+}
+
+.brand-surface {
+  background:
+    linear-gradient(180deg, rgb(var(--brand-soft-white) / 0.72), rgb(var(--surface-primary)) 80%);
+}
+
+.dark .auth-brand-shell {
+  background:
+    radial-gradient(circle at 50% 0%, rgb(var(--brand-celadon) / 0.16), transparent 34rem),
+    rgb(var(--surface-primary));
+}
+
+.dark .brand-surface {
+  background:
+    linear-gradient(180deg, rgb(var(--brand-graphite) / 0.48), rgb(var(--surface-primary)) 80%);
 }
 .gizmo {
   --text-primary: var(--gizmo-gray-950);
