@@ -56,15 +56,15 @@ echo "[apply] preparing prod deps (lockfile cache)"
 cd "$NEW_DIR"
 LOCK_SHA=$(sha256sum package-lock.json | cut -d' ' -f1)
 DEPS_ROOT=/workspace/.prod-deps
-DEPS_DIR="$DEPS_ROOT/$LOCK_SHA"
-DEPS_TMP="$DEPS_ROOT/.install-$LOCK_SHA-$$"
+DEPS_DIR="$DEPS_ROOT/$LOCK_SHA-workspaces-v2"
+DEPS_TMP="$DEPS_ROOT/.install-$LOCK_SHA-workspaces-v2-$$"
 mkdir -p "$DEPS_ROOT"
 if [ ! -f "$DEPS_DIR/.ready" ]; then
   rm -rf "$DEPS_TMP"
   mkdir -p "$DEPS_TMP"
-  cp package.json package-lock.json "$DEPS_TMP/"
-  (cd "$DEPS_TMP" && NPM_CONFIG_CACHE=/workspace/.npm-cache npm ci --omit=dev --no-audit --no-fund) >/workspace/npminstall.log 2>&1 \
+  (NPM_CONFIG_CACHE=/workspace/.npm-cache npm ci --omit=dev --no-audit --no-fund) >/workspace/npminstall.log 2>&1 \
     || { echo "[apply] npm ci FAILED"; tail -5 /workspace/npminstall.log; rm -rf "$DEPS_TMP"; exit 1; }
+  mv node_modules "$DEPS_TMP/node_modules"
   touch "$DEPS_TMP/.ready"
   rm -rf "$DEPS_DIR"
   mv "$DEPS_TMP" "$DEPS_DIR"
@@ -78,6 +78,10 @@ if [ -d "$APP_DIR" ]; then mv "$APP_DIR" "$OLD_DIR"; fi
 mv "$NEW_DIR" "$APP_DIR"
 
 echo "[apply] restarting api under supervisord"
+SUPERVISOR_CONF=/etc/supervisor/conf.d/baanzon.conf
+if [ -f "$SUPERVISOR_CONF" ]; then
+  sed -i "s#command=/bin/bash -lc 'set -a; source /workspace/baanzon/.env; exec node api/server/index.js'#command=node api/server/index.js#" "$SUPERVISOR_CONF"
+fi
 supervisorctl reread >/dev/null 2>&1 || true
 supervisorctl restart all >/dev/null 2>&1 || true
 supervisorctl restart baanzon-api 2>/dev/null || supervisorctl start baanzon-api 2>/dev/null || echo "[apply] WARN supervisor missing - manual remediation needed"
@@ -92,7 +96,7 @@ if [ -d "$OLD_DIR" ]; then
   echo "[apply] health gate FAILED - rolling back to previous release"
   mv "$APP_DIR" "$APP_DIR-tmp" 2>/dev/null || true
   mv "$OLD_DIR" "$APP_DIR"
-  rm -rf "$APP_DIR-tmp"
   supervisorctl restart baanzon-api || true
+  rm -rf "$APP_DIR-tmp" 2>/dev/null || true
 fi
 exit 1
