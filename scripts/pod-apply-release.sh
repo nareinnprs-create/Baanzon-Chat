@@ -54,25 +54,8 @@ node "$NEW_DIR/scripts/validate-provider-routing.js" "$NEW_DIR/baanzon.yaml"
 
 echo "[apply] preparing prod deps (lockfile cache)"
 cd "$NEW_DIR"
-LOCK_SHA=$(sha256sum package-lock.json | cut -d' ' -f1)
-DEPS_ROOT=/workspace/.prod-deps
-DEPS_DIR="$DEPS_ROOT/$LOCK_SHA-workspaces-v2"
-DEPS_TMP="$DEPS_ROOT/.install-$LOCK_SHA-workspaces-v2-$$"
-mkdir -p "$DEPS_ROOT"
-if [ ! -f "$DEPS_DIR/.ready" ]; then
-  rm -rf "$DEPS_TMP"
-  mkdir -p "$DEPS_TMP"
-  (NPM_CONFIG_CACHE=/workspace/.npm-cache npm ci --omit=dev --no-audit --no-fund) >/workspace/npminstall.log 2>&1 \
-    || { echo "[apply] npm ci FAILED"; tail -5 /workspace/npminstall.log; rm -rf "$DEPS_TMP"; exit 1; }
-  mv node_modules "$DEPS_TMP/node_modules"
-  touch "$DEPS_TMP/.ready"
-  rm -rf "$DEPS_DIR"
-  mv "$DEPS_TMP" "$DEPS_DIR"
-else
-  echo "[apply] reusing prod deps for lockfile $LOCK_SHA"
-fi
-rm -rf node_modules
-ln -s "$DEPS_DIR/node_modules" node_modules
+(NPM_CONFIG_CACHE=/workspace/.npm-cache npm ci --omit=dev --no-audit --no-fund) >/workspace/npminstall.log 2>&1 \
+  || { echo "[apply] npm ci FAILED"; tail -20 /workspace/npminstall.log; exit 1; }
 echo "[apply] deps ready: $(ls node_modules | wc -l) top-level packages"
 if [ -d "$APP_DIR" ]; then mv "$APP_DIR" "$OLD_DIR"; fi
 mv "$NEW_DIR" "$APP_DIR"
