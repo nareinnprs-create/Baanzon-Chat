@@ -66,6 +66,9 @@ jobs:
             --exclude .eslintcache \
             --exclude node_modules \
             --exclude vite-build-log.txt \
+            --exclude data-node \
+            --exclude data \
+            --exclude api/data \
             .
           ls -la dist-artifact/
 
