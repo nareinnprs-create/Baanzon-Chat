@@ -37,11 +37,13 @@ if [ ! -f "$APP_DIR/.env" ]; then
   echo "[apply] REQUIRED: $APP_DIR/.env is missing"
   exit 1
 fi
-set -a
-# shellcheck disable=SC1091
-source "$APP_DIR/.env"
-set +a
-if [ -z "${OPRAIZ_API_KEY:-}" ] || [ -z "${OPRAIZ_BASEURL:-}" ]; then
+
+# Read only the two required keys; do not source the file because provider URLs
+# and secrets may contain shell metacharacters or unrelated dotenv lines.
+env_value() {
+  awk -F= -v key="$1" '$1 == key { sub(/^[^=]*=/, ""); sub(/[[:space:]]*\r?$/, ""); print; exit }' "$APP_DIR/.env"
+}
+if [ -z "$(env_value OPRAIZ_API_KEY)" ] || [ -z "$(env_value OPRAIZ_BASEURL)" ]; then
   echo "[apply] REQUIRED: OPRAIZ_API_KEY and OPRAIZ_BASEURL must be configured"
   exit 1
 fi
