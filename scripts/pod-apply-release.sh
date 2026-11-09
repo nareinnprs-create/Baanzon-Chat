@@ -80,7 +80,7 @@ mv "$NEW_DIR" "$APP_DIR"
 echo "[apply] restarting api under supervisord"
 SUPERVISOR_CONF=/etc/supervisor/conf.d/baanzon.conf
 if [ -f "$SUPERVISOR_CONF" ]; then
-  sed -i "s#command=/bin/bash -lc 'set -a; source /workspace/baanzon/.env; exec node api/server/index.js'#command=node api/server/index.js#" "$SUPERVISOR_CONF"
+  sed -i "/\[program:baanzon-api\]/,/^\[/ s#^command=.*#command=/bin/bash -lc 'exec node api/server/index.js'#" "$SUPERVISOR_CONF"
 fi
 supervisorctl reread >/dev/null 2>&1 || true
 supervisorctl restart all >/dev/null 2>&1 || true
