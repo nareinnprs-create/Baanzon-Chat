@@ -84,7 +84,13 @@ if [ -f "$SUPERVISOR_CONF" ]; then
 fi
 supervisorctl reread >/dev/null 2>&1 || true
 supervisorctl restart all >/dev/null 2>&1 || true
-supervisorctl restart baanzon-api 2>/dev/null || supervisorctl start baanzon-api 2>/dev/null || echo "[apply] WARN supervisor missing - manual remediation needed"
+if ! supervisorctl restart baanzon-api; then
+  echo "[apply] baanzon-api supervisor start failed"
+  supervisorctl status baanzon-api || true
+  if [ -f "$APP_DIR/logs/supervisor-api.log" ]; then
+    tail -80 "$APP_DIR/logs/supervisor-api.log" || true
+  fi
+fi
 
 echo "[apply] health-gate node http://127.0.0.1:3080/readyz"
 for i in $(seq 1 60); do
