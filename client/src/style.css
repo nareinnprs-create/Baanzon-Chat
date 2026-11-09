@@ -2835,10 +2835,10 @@ html[data-input-modality='keyboard']
     width: 100%;
   }
 
-  /* No bubbles (G3): user turns carry a 2px iris left edge; assistant turns
+  /* No bubbles (G3): user turns carry a 2px celadon left edge; assistant turns
      sit plain on the canvas. */
   [data-atelier='true'] [data-message-role='user'] {
-    border-left: 2px solid #8e7cff;
+    border-left: 2px solid rgb(var(--brand-celadon));
     padding-left: 1rem;
   }
 
@@ -2846,29 +2846,9 @@ html[data-input-modality='keyboard']
     padding-left: calc(1rem + 2px);
   }
 
-  /* Breadcrumb strip (G1): header hides in atelier and reveals as a solid
-     strip only while scroll-up is detected (data-atelier-reveal on wrapper). */
+  /* Keep location and primary controls available while reading. */
   [data-atelier='true'] [data-chat-header] {
-    transition:
-      opacity 200ms ease,
-      transform 200ms ease;
-  }
-
-  [data-atelier='true']:not([data-atelier-reveal='true']) [data-chat-header] {
-    opacity: 0;
-    transform: translateY(-100%);
-    pointer-events: none;
-  }
-
-  [data-atelier='true'][data-atelier-reveal='true'] [data-chat-header] {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    [data-atelier='true'] [data-chat-header] {
-      transition: none;
-    }
+    background-color: rgb(var(--surface-primary));
   }
 
   @media (prefers-reduced-motion: reduce) {
