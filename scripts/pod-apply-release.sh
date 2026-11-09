@@ -49,6 +49,7 @@ if [ -z "$(env_value OPRAIZ_API_KEY)" ] || [ -z "$(env_value OPRAIZ_BASEURL)" ];
 fi
 
 echo "[apply] validating Cloudflare provider routing"
+node "$NEW_DIR/scripts/validate-provider-routing.js" "$NEW_DIR/baanzon.yaml" --fix
 node "$NEW_DIR/scripts/validate-provider-routing.js" "$NEW_DIR/baanzon.yaml"
 
 echo "[apply] preparing prod deps (lockfile cache)"
