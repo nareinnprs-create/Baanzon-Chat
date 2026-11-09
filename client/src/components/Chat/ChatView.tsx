@@ -111,7 +111,9 @@ function ChatView({ index = 0, project }: { index?: number; project?: TChatProje
   } else if (!isLandingPage) {
     content = <MessagesView messagesTree={messagesTree} messages={messages} />;
   } else {
-    content = <Landing centerFormOnLanding={centerFormOnLanding} showOnboarding={!isProjectLandingPage} />;
+    content = (
+      <Landing centerFormOnLanding={centerFormOnLanding} showOnboarding={!isProjectLandingPage} />
+    );
   }
 
   const chatFormPlaceholder =
@@ -151,7 +153,7 @@ function ChatView({ index = 0, project }: { index?: number; project?: TChatProje
                       className={cn(
                         'flex flex-col',
                         isLandingPage
-                          ? 'flex-1 items-center justify-end sm:justify-center'
+                          ? 'flex-1 items-center justify-end sm:[justify-content:safe_center]'
                           : 'h-full overflow-y-auto',
                       )}
                     >

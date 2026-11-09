@@ -30,6 +30,7 @@ jest.mock('@librechat/client', () => ({
 
 jest.mock('~/Providers', () => ({
   useChatContext: () => ({ conversation: mockConversation }),
+  useChatFormContext: () => ({ setValue: jest.fn() }),
   useAgentsMapContext: () => mockAgentsMap,
   useAssistantsMapContext: () => mockAssistantMap,
 }));

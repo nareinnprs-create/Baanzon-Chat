@@ -18,7 +18,7 @@ const MODE_ICON: Record<string, typeof MessageCircle> = {
 };
 
 const chipClassName =
-  'flex cursor-pointer items-center gap-2 rounded-full border border-border-medium bg-surface-secondary px-4 py-2 text-sm text-text-secondary shadow-sm transition-colors duration-200 hover:border-border-heavy hover:bg-surface-tertiary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary';
+  'group flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-border-light bg-surface-primary px-4 py-2.5 text-sm font-medium text-text-secondary shadow-sm transition-[border-color,background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-border-heavy hover:bg-surface-secondary hover:text-text-primary hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary motion-reduce:transform-none';
 
 /**
  * Light onboarding shown on the Home / new-conversation landing.
@@ -51,16 +51,27 @@ export default function HomeOnboarding() {
   return (
     <section
       aria-labelledby={headingId}
-      className="animate-fadeIn mt-6 flex w-full flex-col items-center gap-3 px-4"
+      data-baanzon-home="true"
+      className="animate-fadeIn mt-8 flex w-full max-w-3xl flex-col items-center gap-5 px-4"
     >
-      <h2 id={headingId} className="text-center text-base font-medium text-text-primary">
-        {localize('com_ui_home_heading')}
-      </h2>
-      <p className="max-w-md text-center text-sm text-text-secondary">
+      <div className="flex flex-col items-center gap-2 text-center">
+        <h2
+          id={headingId}
+          className="text-center text-xl font-semibold tracking-tight text-text-primary sm:text-2xl"
+        >
+          {localize('com_ui_home_heading')}
+        </h2>
+      </div>
+      <p className="max-w-lg text-center text-sm leading-6 text-text-secondary">
         {localize('com_ui_home_subcopy')}
       </p>
       {isLoading ? (
-        <div role="status" aria-live="polite" aria-busy="true" className="flex flex-wrap justify-center gap-2">
+        <div
+          role="status"
+          aria-live="polite"
+          aria-busy="true"
+          className="flex flex-wrap justify-center gap-2"
+        >
           <span className="sr-only">{localize('com_ui_home_modes_loading')}</span>
           {HOME_MODES.map((mode) => (
             <span
@@ -72,17 +83,19 @@ export default function HomeOnboarding() {
         </div>
       ) : (
         <ul
-          role="list"
           aria-label={localize('com_ui_home_modes_label')}
-          className="flex w-full flex-wrap items-stretch justify-center gap-2"
+          className="grid w-full grid-cols-2 gap-3 sm:grid-cols-4"
         >
           {HOME_MODES.map((mode) => {
             const Icon = MODE_ICON[mode.id] ?? MessageCircle;
             return (
-              <li key={mode.id}>
+              <li key={mode.id} className="min-w-0">
                 <button type="button" onClick={() => handleSelect(mode)} className={chipClassName}>
-                  <Icon aria-hidden="true" className="h-4 w-4" />
-                  <span>{localize(mode.labelKey)}</span>
+                  <Icon
+                    aria-hidden="true"
+                    className="h-4 w-4 shrink-0 text-text-primary transition-transform duration-200 group-hover:scale-110 motion-reduce:transform-none"
+                  />
+                  <span className="truncate">{localize(mode.labelKey)}</span>
                 </button>
               </li>
             );

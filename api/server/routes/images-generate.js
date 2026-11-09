@@ -8,7 +8,6 @@ const mongoose = require('mongoose');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
 
 const router = express.Router();
-const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 5;
 const hits = new Map(); // userId -> [timestamps] (burst guard)
 const DAILY = {
@@ -18,13 +17,10 @@ const DAILY = {
   enterprise: { model: '@cf/black-forest-labs/flux-2-dev', cap: 300 },
 };
 
-/** Day boundary for image caps: midnight IST, matching usage caps. */
-const imgDay = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
-
 function limited(userId, cap) {
   const day = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
   const key = `${userId}:${day}`;
-  const used = (hits.get(key) || 0);
+  const used = hits.get(key) || 0;
   if (used >= cap) return true;
   hits.set(key, used + 1);
   return false;
@@ -40,16 +36,32 @@ function imageType(buffer) {
   return { mime: 'application/octet-stream', extension: 'bin' };
 }
 
+function decodeImage(value) {
+  const encoded = String(value || '').replace(/^data:image\/[^;]+;base64,/, '');
+  return Buffer.from(encoded, 'base64');
+}
+
+function sendImage(res, buffer) {
+  const type = imageType(buffer);
+  res.setHeader('Content-Type', type.mime);
+  res.setHeader('Content-Disposition', `inline; filename="baanzon-image.${type.extension}"`);
+  return res.send(buffer);
+}
+
 async function userTier(userId) {
-  const tier = await mongoose.connection.db.collection('users').findOne(
-    { _id: new mongoose.Types.ObjectId(String(userId)) },
-    { projection: { subscriptionTier: 1 } },
-  );
+  const tier = await mongoose.connection.db
+    .collection('users')
+    .findOne(
+      { _id: new mongoose.Types.ObjectId(String(userId)) },
+      { projection: { subscriptionTier: 1 } },
+    );
   return String(tier?.subscriptionTier || 'free').toLowerCase();
 }
 
 router.post('/', requireJwtAuth, async (req, res) => {
-  const prompt = String(req.body?.prompt || '').slice(0, 2000).trim();
+  const prompt = String(req.body?.prompt || '')
+    .slice(0, 2000)
+    .trim();
   if (!prompt) {
     return res.status(400).json({ message: 'prompt is required' });
   }
@@ -59,19 +71,27 @@ router.post('/', requireJwtAuth, async (req, res) => {
     return res.status(429).json({ message: 'Too many images this minute — try again shortly.' });
   }
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
-  const usedToday = await mongoose.connection.db.collection('usage_counters').findOne({ key: `img:${req.user.id}:${today}` });
+  const usedToday = await mongoose.connection.db
+    .collection('usage_counters')
+    .findOne({ key: `img:${req.user.id}:${today}` });
   if ((usedToday?.count || 0) >= cap) {
-    return res.status(402).json({ message: `Daily image limit reached (${cap}/day on your plan) — resets tonight.` });
+    return res
+      .status(402)
+      .json({ message: `Daily image limit reached (${cap}/day on your plan) — resets tonight.` });
   }
-  await mongoose.connection.db.collection('usage_counters').updateOne(
-    { key: `img:${req.user.id}:${today}` },
-    { $setOnInsert: { userId: req.user.id, date: today, kind: 'image' }, $inc: { count: 1 } },
-    { upsert: true },
-  );
+  await mongoose.connection.db
+    .collection('usage_counters')
+    .updateOne(
+      { key: `img:${req.user.id}:${today}` },
+      { $setOnInsert: { userId: req.user.id, date: today, kind: 'image' }, $inc: { count: 1 } },
+      { upsert: true },
+    );
   const account = process.env.CF_ACCOUNT_ID;
   const token = process.env.CF_API_TOKEN;
   if (!account || !token) {
-    return res.status(501).json({ message: 'Image generation is not configured on this deployment.' });
+    return res
+      .status(501)
+      .json({ message: 'Image generation is not configured on this deployment.' });
   }
   try {
     const isFlux2 = model.includes('flux-2');
@@ -81,7 +101,11 @@ router.post('/', requireJwtAuth, async (req, res) => {
       // flux-2 family requires multipart/form-data input
       const fd = new FormData();
       fd.append('prompt', prompt);
-      r = await fetch(runUrl, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd });
+      r = await fetch(runUrl, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd,
+      });
       if (!r.ok) {
         const detail = (await r.text()).slice(0, 300);
         return res.status(502).json({ message: 'Image generation failed', detail });
@@ -89,11 +113,7 @@ router.post('/', requireJwtAuth, async (req, res) => {
       const j = await r.json();
       const b64 = j.result && (j.result.image || j.result.content);
       if (!b64) return res.status(502).json({ message: 'Image generation returned no image' });
-       const buf = Buffer.from(String(b64), 'base64');
-       const type = imageType(buf);
-       res.setHeader('Content-Type', type.mime);
-       res.setHeader('Content-Disposition', `inline; filename="baanzon-image.${type.extension}"`);
-      return res.send(buf);
+      return sendImage(res, decodeImage(b64));
     }
     r = await fetch(runUrl, {
       method: 'POST',
@@ -104,13 +124,18 @@ router.post('/', requireJwtAuth, async (req, res) => {
       const detail = (await r.text()).slice(0, 300);
       return res.status(502).json({ message: 'Image generation failed', detail });
     }
-    const buf = Buffer.from(await r.arrayBuffer());
-    const type = imageType(buf);
-    res.setHeader('Content-Type', type.mime);
-    res.setHeader('Content-Disposition', `inline; filename="baanzon-image.${type.extension}"`);
-    return res.send(buf);
+    const contentType = r.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const j = await r.json();
+      const b64 = j.result && (j.result.image || j.result.content);
+      if (!b64) return res.status(502).json({ message: 'Image generation returned no image' });
+      return sendImage(res, decodeImage(b64));
+    }
+    return sendImage(res, Buffer.from(await r.arrayBuffer()));
   } catch (err) {
-    return res.status(502).json({ message: 'Image generation failed', detail: String(err.message).slice(0, 200) });
+    return res
+      .status(502)
+      .json({ message: 'Image generation failed', detail: String(err.message).slice(0, 200) });
   }
 });
 

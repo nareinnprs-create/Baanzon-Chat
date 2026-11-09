@@ -90,6 +90,30 @@ function UnifiedSidebar() {
   const resizeNow = panelExpanded
     ? Math.min(Math.max(sidebarWidth, EXPANDED_MIN), resizeMax)
     : COLLAPSED_WIDTH;
+  const getPanelWidth = (expandedWidth: number | string, collapsedWidth: number | string) => {
+    if (atelierRail) {
+      return railWidth;
+    }
+    return panelExpanded ? expandedWidth : collapsedWidth;
+  };
+  const getPanelNumberWidth = (expandedWidth: number, collapsedWidth: number) => {
+    if (atelierRail) {
+      return railWidth;
+    }
+    return panelExpanded ? expandedWidth : collapsedWidth;
+  };
+  const panelWidth = getPanelWidth(sidebarWidth, COLLAPSED_WIDTH);
+  const panelMinWidth = getPanelNumberWidth(EXPANDED_MIN, COLLAPSED_WIDTH);
+  const panelMaxWidth = getPanelWidth('40%', COLLAPSED_WIDTH);
+  const sidebarMaxWidth = getPanelNumberWidth(resizeMax, COLLAPSED_WIDTH);
+  let panelTransition: string | undefined;
+  if (atelierRail) {
+    panelTransition = prefersReducedMotion ? undefined : ATELIER_RAIL_TRANSITION;
+  } else if (isResizing) {
+    panelTransition = 'none';
+  } else {
+    panelTransition = `width ${TRANSITION_MS}ms ${EASING}, min-width ${TRANSITION_MS}ms ${EASING}, max-width ${TRANSITION_MS}ms ${EASING}`;
+  }
 
   const handleCollapse = useCallback(
     (afterSlide?: () => void) => {
@@ -249,22 +273,12 @@ function UnifiedSidebar() {
     <SidebarChatProvider>
       <ActivePanelProvider>
         <aside
-          className="relative flex h-full flex-shrink-0 overflow-hidden"
+          className="relative flex h-full flex-shrink-0 overflow-hidden bg-surface-primary-alt"
           style={{
-            width: atelierRail ? railWidth : panelExpanded ? sidebarWidth : COLLAPSED_WIDTH,
-            minWidth: atelierRail
-              ? railWidth
-              : panelExpanded
-                ? EXPANDED_MIN
-                : COLLAPSED_WIDTH,
-            maxWidth: atelierRail ? railWidth : panelExpanded ? '40%' : COLLAPSED_WIDTH,
-            transition: atelierRail
-              ? prefersReducedMotion
-                ? undefined
-                : ATELIER_RAIL_TRANSITION
-              : isResizing
-                ? 'none'
-                : `width ${TRANSITION_MS}ms ${EASING}, min-width ${TRANSITION_MS}ms ${EASING}, max-width ${TRANSITION_MS}ms ${EASING}`,
+            width: panelWidth,
+            minWidth: panelMinWidth,
+            maxWidth: panelMaxWidth,
+            transition: panelTransition,
           }}
           aria-label={localize('com_nav_control_panel')}
           /** The rail expands on hover as well as click; the click path (rail
@@ -276,8 +290,8 @@ function UnifiedSidebar() {
             links={links}
             expanded={panelExpanded}
             width={atelierRail ? railWidth : resizeNow}
-            minWidth={atelierRail ? railWidth : panelExpanded ? EXPANDED_MIN : COLLAPSED_WIDTH}
-            maxWidth={atelierRail ? railWidth : panelExpanded ? resizeMax : COLLAPSED_WIDTH}
+            minWidth={panelMinWidth}
+            maxWidth={sidebarMaxWidth}
             onCollapse={handleCollapse}
             onExpand={handlePanelExpand}
             onLeaveInsights={handleLeaveInsights}

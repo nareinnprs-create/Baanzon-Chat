@@ -812,7 +812,7 @@ const ChatForm = memo(function ChatForm({
                     <select
                       id="model-lane-select"
                       aria-label={localize('com_ui_model_lane')}
-                      className="rounded-md border border-border-medium bg-transparent px-2 py-1 text-xs text-text-primary"
+                      className="min-h-10 rounded-lg border border-border-light bg-surface-secondary px-3 py-1.5 text-sm font-medium text-text-primary shadow-sm transition-colors hover:border-border-heavy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary"
                       value={selectedModelLane ?? ''}
                       onChange={(event) =>
                         setSelectedModelLane(

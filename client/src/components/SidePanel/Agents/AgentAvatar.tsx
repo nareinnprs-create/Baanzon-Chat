@@ -70,7 +70,9 @@ function Avatar({ avatar }: { avatar: AgentAvatar | null }) {
   const handleReset = useCallback(() => {
     const remoteAvatarExists = Boolean(avatar?.filepath);
     setValue('avatar_preview', '', { shouldDirty: true });
-    setValue('avatar_file', null, { shouldDirty: true });
+    // RHF cannot diff a File against null when marking this field dirty; the
+    // avatar_action update below still marks the form dirty for remote resets.
+    setValue('avatar_file', null, { shouldDirty: false });
     setValue('avatar_action', remoteAvatarExists ? 'reset' : null, { shouldDirty: true });
   }, [avatar?.filepath, setValue]);
 

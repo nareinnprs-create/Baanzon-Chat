@@ -1,5 +1,6 @@
 import React from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
+import { RecoilRoot } from 'recoil';
 import { render, waitFor } from '@testing-library/react';
 import type { SandpackPreviewRef } from '@codesandbox/sandpack-react/unstyled';
 import type { Artifact } from '~/common';
@@ -57,6 +58,12 @@ jest.mock('~/Providers/EditorContext', () => ({
 
 jest.mock('~/Providers', () => ({
   useShareContext: () => ({ shareId: undefined }),
+  useArtifactsContext: () => ({
+    isSubmitting: false,
+    latestMessageId: undefined,
+    latestMessageText: undefined,
+    conversationId: undefined,
+  }),
 }));
 
 jest.mock('~/data-provider', () => ({
@@ -75,9 +82,11 @@ const previewRef: React.MutableRefObject<SandpackPreviewRef> = { current: previe
 
 function renderArtifact(artifact: Artifact, activeTab: 'code' | 'preview' = 'code') {
   return render(
-    <Tabs.Root value={activeTab}>
-      <ArtifactTabs artifact={artifact} previewRef={previewRef} />
-    </Tabs.Root>,
+    <RecoilRoot>
+      <Tabs.Root value={activeTab}>
+        <ArtifactTabs artifact={artifact} previewRef={previewRef} />
+      </Tabs.Root>
+    </RecoilRoot>,
   );
 }
 
@@ -283,17 +292,21 @@ describe('ArtifactTabs Mermaid editing', () => {
     };
 
     const { rerender, getByTestId } = render(
-      <Tabs.Root value="preview">
-        <ArtifactTabs artifact={artifact} previewRef={previewRef} />
-      </Tabs.Root>,
+      <RecoilRoot>
+        <Tabs.Root value="preview">
+          <ArtifactTabs artifact={artifact} previewRef={previewRef} />
+        </Tabs.Root>
+      </RecoilRoot>,
     );
     const initialInstance = getByTestId('mermaid-renderer').getAttribute('data-instance');
 
     mockCurrentCode = 'graph TD\nA-->C';
     rerender(
-      <Tabs.Root value="preview">
-        <ArtifactTabs artifact={{ ...artifact, lastUpdateTime: 2 }} previewRef={previewRef} />
-      </Tabs.Root>,
+      <RecoilRoot>
+        <Tabs.Root value="preview">
+          <ArtifactTabs artifact={{ ...artifact, lastUpdateTime: 2 }} previewRef={previewRef} />
+        </Tabs.Root>
+      </RecoilRoot>,
     );
 
     expect(getByTestId('mermaid-renderer').getAttribute('data-instance')).toBe(initialInstance);
