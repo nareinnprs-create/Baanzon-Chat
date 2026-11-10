@@ -1,6 +1,8 @@
 import { useState, memo, useRef } from 'react';
+import { Sparkles } from 'lucide-react';
 import { useSetRecoilState } from 'recoil';
 import * as Menu from '@ariakit/react/menu';
+import { useNavigate } from 'react-router-dom';
 import { GearIcon, DropdownMenuSeparator, Avatar } from '@librechat/client';
 import {
   Archive,
@@ -98,6 +100,7 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
     enabled: !!isAuthenticated && startupConfig?.balance?.enabled,
   });
   const [showSettings, setShowSettings] = useState(false);
+  const navigate = useNavigate();
   const setShowShortcutsDialog = useSetRecoilState(store.showShortcutsDialog);
   const [showArchived, setShowArchived] = useState(false);
   const accountSettingsButtonRef = useRef<HTMLButtonElement>(null);
@@ -168,6 +171,14 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
         >
           <GearIcon className="icon-md" aria-hidden="true" />
           {localize('com_nav_settings')}
+        </Menu.MenuItem>
+        <Menu.MenuItem
+          onClick={() => navigate('/pricing')}
+          className="select-item text-sm"
+          data-testid="nav-pricing"
+        >
+          <Sparkles className="icon-md" aria-hidden="true" />
+          {localize('com_nav_pricing')}
         </Menu.MenuItem>
         <DropdownMenuSeparator />
         <Menu.MenuItem onClick={() => logout()} className="select-item text-sm">

@@ -66,6 +66,11 @@ const loadVoiceRoute = () =>
     Component: m.default,
   }));
 
+const loadPricingView = () =>
+  import('~/components/Pricing').then((m) => ({
+    Component: m.PricingView,
+  }));
+
 const loadWorkflowRoute = () =>
   import('./WorkflowRoute').then((m) => ({
     Component: m.default,
@@ -220,6 +225,10 @@ export const router = createBrowserRouter(
             {
               path: 'voice',
               lazy: loadVoiceRoute,
+            },
+            {
+              path: 'pricing',
+              lazy: loadPricingView,
             },
             {
               path: 'workflow',

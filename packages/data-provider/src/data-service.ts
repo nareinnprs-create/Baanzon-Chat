@@ -1041,6 +1041,16 @@ export function setEntitlement(
   return request.put(`${endpoints.billingEntitlements()}/${plan}/${resource}`, payload);
 }
 
+/** Public pricing catalog: plan tiers and credit packs, no product IDs. */
+export function getBillingProducts(): Promise<bl.TBillingProductsResponse> {
+  return request.get(endpoints.billingProducts());
+}
+
+/** Opens a Dodo hosted checkout for a plan subscription or a credit pack. */
+export function createCheckoutSession(payload: bl.TCheckoutRequest): Promise<bl.TCheckoutResponse> {
+  return request.post(endpoints.billingCheckout(), payload);
+}
+
 export function createEvalRun(payload: ev.TCreateEvalRunRequest): Promise<ev.TEvalRun> {
   return request.post(endpoints.evalRuns(), payload);
 }

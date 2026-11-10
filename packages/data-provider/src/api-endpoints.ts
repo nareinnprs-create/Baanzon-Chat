@@ -187,6 +187,14 @@ const billingEntitlementsRoot = `${BASE_URL}/api/billing/entitlements`;
 
 export const billingEntitlements = () => billingEntitlementsRoot;
 
+const billingProductsRoot = `${BASE_URL}/api/billing/products`;
+
+export const billingProducts = () => billingProductsRoot;
+
+const billingCheckoutRoot = `${BASE_URL}/api/billing/checkout`;
+
+export const billingCheckout = () => billingCheckoutRoot;
+
 const evalRunsRoot = `${BASE_URL}/api/evals/runs`;
 
 export const evalRuns = () => evalRunsRoot;

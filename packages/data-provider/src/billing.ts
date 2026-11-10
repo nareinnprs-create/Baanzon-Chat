@@ -115,3 +115,37 @@ export type TSetEntitlementRequest = {
   scope?: TEntitlementScope;
   scopeId?: string;
 };
+
+/** One purchasable plan tier from `GET /api/billing/products`. */
+export type TPlanProduct = {
+  tier: string;
+  label: string;
+  inrMonthly: number;
+  inrYearly: number | null;
+};
+
+/** One purchasable credit pack from `GET /api/billing/products`. */
+export type TPackProduct = {
+  pack: string;
+  label: string;
+  inr: number;
+  credits: number;
+};
+
+/** `GET /api/billing/products` response — public catalog, no product IDs. */
+export type TBillingProductsResponse = {
+  products: TPlanProduct[];
+  packs: TPackProduct[];
+};
+
+/** `POST /api/billing/checkout` body — a plan tier + cycle, or a credit pack. */
+export type TCheckoutRequest = {
+  tier?: string;
+  cycle?: 'monthly' | 'yearly';
+  pack?: string;
+};
+
+/** `POST /api/billing/checkout` response — the hosted checkout URL to open. */
+export type TCheckoutResponse = {
+  url: string;
+};

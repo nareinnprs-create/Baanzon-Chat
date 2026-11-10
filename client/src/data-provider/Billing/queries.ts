@@ -3,6 +3,8 @@ import { getDefaultStore } from 'jotai';
 import { dataService, QueryKeys } from 'librechat-data-provider';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
+  TBillingProductsResponse,
+  TCheckoutRequest,
   TEntitlementPlan,
   TEntitlementResource,
   TGetEntitlementsResponse,
@@ -51,3 +53,26 @@ export const useSetEntitlementMutation = (): UseMutationResult<
     },
   );
 };
+
+/** Public pricing catalog: plan tiers and credit packs with INR prices. */
+export const useBillingProducts = (
+  config?: UseQueryOptions<TBillingProductsResponse>,
+): ReturnType<typeof useQuery<TBillingProductsResponse>> =>
+  useQuery<TBillingProductsResponse>(
+    [QueryKeys.billingProducts],
+    () => dataService.getBillingProducts(),
+    {
+      // Prices move only with a deploy; refetching on focus is noise.
+      staleTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      ...config,
+    },
+  );
+
+/** Opens a Dodo hosted checkout (a mock redirect under DODO_MODE=mock) for the selection. */
+export const useCreateCheckout = (): UseMutationResult<
+  Awaited<ReturnType<typeof dataService.createCheckoutSession>>,
+  unknown,
+  TCheckoutRequest,
+  unknown
+> => useMutation((payload) => dataService.createCheckoutSession(payload));
