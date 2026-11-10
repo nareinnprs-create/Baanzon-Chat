@@ -316,19 +316,17 @@ export const StdioOptionsSchema = BaseOptionsSchema.extend({
    * the outermost schema — undefined short-circuits past the transform, which
    * is exactly the v3 parse behavior. */
   env: z.optional(
-    z
-      .record(z.string(), z.string())
-      .transform((env) => {
-        if (!env) {
-          return env;
-        }
+    z.record(z.string(), z.string()).transform((env) => {
+      if (!env) {
+        return env;
+      }
 
-        const processedEnv: Record<string, string> = {};
-        for (const [key, value] of Object.entries(env)) {
-          processedEnv[key] = extractEnvVariable(value);
-        }
-        return processedEnv;
-      }),
+      const processedEnv: Record<string, string> = {};
+      for (const [key, value] of Object.entries(env)) {
+        processedEnv[key] = extractEnvVariable(value);
+      }
+      return processedEnv;
+    }),
   ),
   /**
    * How to handle stderr of the child process.

@@ -1,9 +1,5 @@
 import { z } from 'zod';
-import type {
-  AgentSubagentGraph,
-  AgentSubagentGraphEdge,
-  AgentSubagentsConfig,
-} from 'librechat-data-provider';
+import type {} from 'librechat-data-provider';
 import { agentCreateSchema, agentUpdateSchema } from './validation';
 
 const MAX_LIST_LIMIT = 100;
@@ -168,6 +164,7 @@ const agentManagementSubagentsResponseSchema = z
   .optional();
 
 /** The externally supported Agent shape. Persistence and ownership fields are intentionally absent. */
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- the extended/strict object type is not annotation-expressible under v4 variance */
 export const agentManagementResponseSchema: z.ZodType<any> = agentUpdateSchema
   .extend({
     id: z.string().min(1),
