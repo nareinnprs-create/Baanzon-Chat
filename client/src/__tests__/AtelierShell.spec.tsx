@@ -1,9 +1,9 @@
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { getDefaultStore } from 'jotai';
-import AtelierShell from '~/components/Atelier';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { interfaceMode, atelierFocusMode } from '~/store/settings';
+import AtelierShell from '~/components/Atelier';
 
 /** `useInterfaceMode` reads the startup config through this hook; stubbed so
  *  the spec never opens a network query and only the local override decides. */

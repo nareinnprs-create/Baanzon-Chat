@@ -34,8 +34,8 @@ import {
   DEFAULT_PG_VECTOR_DIMENSIONS,
 } from './pgVectorStore';
 import { createSemanticSearchService } from './semanticSearch';
-import { createOpenAIEmbeddings } from './openaiEmbeddings';
 import { createRerankerClient } from '../modelLaneProviders';
+import { createOpenAIEmbeddings } from './openaiEmbeddings';
 import { InMemoryVectorStore } from './vectorStores';
 import { RAG_DEFAULTS } from './config';
 

@@ -1,8 +1,7 @@
 import { z } from 'zod';
-import { modelLaneConfigSchema } from './modelLanes';
-import type { ModelLaneConfig } from './modelLanes';
 import type { ZodError } from 'zod';
 import type { TEndpointsConfig, TModelsConfig, TConfig } from './types';
+import type { ModelLaneConfig } from './modelLanes';
 import {
   filtersConfigSchema,
   MAX_PII_CUSTOM_REGEX_CHARACTERS,
@@ -24,6 +23,7 @@ import { MAX_SUBAGENTS, MAX_SUBAGENTS_CEILING } from './limits';
 import { STATEFUL_CODE_ENVIRONMENTS } from './stateful-code';
 import { crossEntitySearchConfigSchema } from './searchAll';
 import { specsConfigSchema, TSpecsConfig } from './models';
+import { modelLaneConfigSchema } from './modelLanes';
 import { featureFlagsConfigSchema } from './flags';
 import { isActionTool } from './types/assistants';
 import { REFILL_INTERVAL_UNITS } from './balance';

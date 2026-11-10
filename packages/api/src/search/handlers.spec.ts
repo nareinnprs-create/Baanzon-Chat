@@ -1,6 +1,6 @@
 import type { Response } from 'express';
-import type { SearchStore } from './types';
 import type { ServerRequest } from '~/types/http';
+import type { SearchStore } from './types';
 import { createSearchHandlers } from './handlers';
 
 const USER_ID = '507f1f77bcf86cd7994390aa';

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { useInterfaceMode } from '~/store/settings';
 import useAtelierFocusMode from './useAtelierFocusMode';
+import { useInterfaceMode } from '~/store/settings';
 
 /**
  * G2 — Monolith atelier shell. Visual only: a tone layer behind the EXISTING

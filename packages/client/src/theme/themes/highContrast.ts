@@ -154,7 +154,7 @@ export const highContrastDarkTheme: IThemeRGB = {
   'rgb-ring-primary': '255 255 255', // #ffffff
 
   // Header colors
-  'rgb-header-primary': '6 19 22', // #061316 (Deep Ocean background)
+  'rgb-header-primary': '11 11 15', // #0b0b0f (Deep Ocean background)
   'rgb-header-hover': '29 58 61', // #1D3A3D
   'rgb-header-button-hover': '29 58 61', // #1D3A3D
 
@@ -164,26 +164,26 @@ export const highContrastDarkTheme: IThemeRGB = {
   'rgb-surface-hover': '29 58 61', // #1D3A3D
   'rgb-surface-hover-alt': '53 83 87', // #355357
   'rgb-surface-composer-hover': '29 58 61', // #1D3A3D
-  'rgb-surface-primary': '6 19 22', // #061316
-  'rgb-chart-widget-surface': '6 19 22', // #061316
+  'rgb-surface-primary': '11 11 15', // #0B0B0F (mirrors darkTheme — one dark canvas)
+  'rgb-chart-widget-surface': '11 11 15', // #0b0b0f
   'rgb-chart-widget-stroke': '255 255 255', // #ffffff
-  'rgb-surface-primary-alt': '6 19 22', // #061316
-  'rgb-surface-primary-contrast': '6 19 22', // #061316
-  'rgb-surface-secondary': '6 19 22', // #061316
-  'rgb-surface-secondary-alt': '6 19 22', // #061316
-  'rgb-surface-tertiary': '6 19 22', // #061316
-  'rgb-surface-tertiary-alt': '6 19 22', // #061316
-  'rgb-surface-dialog': '6 19 22', // #061316
+  'rgb-surface-primary-alt': '11 11 15', // #0b0b0f
+  'rgb-surface-primary-contrast': '11 11 15', // #0b0b0f
+  'rgb-surface-secondary': '11 11 15', // #0b0b0f
+  'rgb-surface-secondary-alt': '11 11 15', // #0b0b0f
+  'rgb-surface-tertiary': '11 11 15', // #0b0b0f
+  'rgb-surface-tertiary-alt': '11 11 15', // #0b0b0f
+  'rgb-surface-dialog': '11 11 15', // #0b0b0f
   'rgb-surface-overlay': '0 0 0', // #000000
   'rgb-surface-submit': '70 226 210', // #46E2D2
   'rgb-surface-submit-hover': '120 240 230', // #78F0E6
   'rgb-surface-destructive': '255 143 143', // #ff8f8f
   'rgb-surface-destructive-hover': '255 179 179', // #ffb3b3
-  'rgb-surface-chat': '6 19 22', // #061316
-  'rgb-surface-code': '6 19 22', // #061316
+  'rgb-surface-chat': '11 11 15', // #0b0b0f
+  'rgb-surface-code': '11 11 15', // #0b0b0f
   'rgb-surface-inverted': '255 255 255', // #ffffff
   'rgb-surface-inverted-hover': '212 212 212', // #d4d4d4
-  'rgb-text-inverted': '6 19 22', // #061316
+  'rgb-text-inverted': '11 11 15', // #0b0b0f
   'rgb-surface-fixed': '255 255 255', // #ffffff
   'rgb-surface-fixed-hover': '212 212 212', // #d4d4d4
   'rgb-text-fixed': '0 0 0', // #000000
@@ -198,25 +198,25 @@ export const highContrastDarkTheme: IThemeRGB = {
 
   // Status colors
   'rgb-status-success': '70 226 210', // #46E2D2
-  'rgb-status-success-subtle': '6 19 22', // #061316
+  'rgb-status-success-subtle': '11 11 15', // #0b0b0f
   'rgb-status-success-border': '70 226 210', // #46E2D2
   'rgb-status-success-strong': '70 226 210', // #46E2D2
   'rgb-status-info': '70 226 210', // #46E2D2
-  'rgb-status-info-subtle': '6 19 22', // #061316
+  'rgb-status-info-subtle': '11 11 15', // #0b0b0f
   'rgb-status-info-border': '70 226 210', // #46E2D2
   'rgb-status-info-strong': '70 226 210', // #46E2D2
   'rgb-status-warning': '255 201 77', // #ffc94d
-  'rgb-status-warning-subtle': '6 19 22', // #061316
+  'rgb-status-warning-subtle': '11 11 15', // #0b0b0f
   'rgb-status-warning-border': '255 201 77', // #ffc94d
   'rgb-status-warning-strong': '255 201 77', // #ffc94d
   'rgb-status-error': '255 143 143', // #ff8f8f
-  'rgb-status-error-subtle': '6 19 22', // #061316
+  'rgb-status-error-subtle': '11 11 15', // #0b0b0f
   'rgb-status-error-border': '255 143 143', // #ff8f8f
   'rgb-status-error-strong': '255 143 143', // #ff8f8f
   'rgb-status-neutral': '255 255 255', // #ffffff
-  'rgb-status-neutral-subtle': '6 19 22', // #061316
+  'rgb-status-neutral-subtle': '11 11 15', // #0b0b0f
   'rgb-status-neutral-border': '255 255 255', // #ffffff
-  'rgb-text-on-status': '6 19 22', // #061316
+  'rgb-text-on-status': '11 11 15', // #0b0b0f
 
   // Brand colors
   'rgb-brand-purple': '189 178 255', // #BDB2FF
@@ -246,5 +246,5 @@ export const highContrastDarkTheme: IThemeRGB = {
   'rgb-switch-unchecked': '128 128 128', // #808080
 
   // Presentation
-  'rgb-presentation': '6 19 22', // #061316
+  'rgb-presentation': '11 11 15', // #0b0b0f
 };

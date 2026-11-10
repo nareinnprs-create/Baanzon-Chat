@@ -290,20 +290,24 @@ describe('Server Configuration', () => {
     expect(response.headers['referrer-policy']).toBe('no-referrer');
   });
 
-  it('should set baseline security headers on the index page without a CSP', async () => {
+  it('should set baseline security headers on the index page with a report-only CSP', async () => {
     const response = await request(app).get('/');
 
     expect(response.status).toBe(200);
     expect(response.headers['x-frame-options']).toBe('SAMEORIGIN');
     expect(response.headers['x-content-type-options']).toBe('nosniff');
+    /** CSP defaults on in report-only mode, so the enforcing header stays absent
+     *  and the nonce-bearing policy rides the report-only header. */
     expect(response.headers['content-security-policy']).toBeUndefined();
-    expect(response.headers['content-security-policy-report-only']).toBeUndefined();
+    expect(response.headers['content-security-policy-report-only']).toContain("default-src 'self'");
   });
 
   it('should not cache index page', async () => {
     const response = await request(app).get('/');
     expect(response.status).toBe(200);
-    expect(response.headers['cache-control']).toBe('no-cache, no-store, must-revalidate');
+    /** With CSP on, the shell is forced non-storable: a cached response would
+     *  reuse one nonce across page loads and users. */
+    expect(response.headers['cache-control']).toBe('no-store');
     expect(response.headers['pragma']).toBe('no-cache');
     expect(response.headers['expires']).toBe('0');
   });

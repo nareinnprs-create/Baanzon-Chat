@@ -1,6 +1,6 @@
 import React from 'react';
-import * as Tabs from '@radix-ui/react-tabs';
 import { RecoilRoot } from 'recoil';
+import * as Tabs from '@radix-ui/react-tabs';
 import { render, waitFor } from '@testing-library/react';
 import type { SandpackPreviewRef } from '@codesandbox/sandpack-react/unstyled';
 import type { Artifact } from '~/common';

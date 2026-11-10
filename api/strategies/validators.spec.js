@@ -13,13 +13,13 @@ describe('Zod Schemas', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should invalidate an incorrect email', () => {
+    it('accepts any login identifier so usernames work alongside emails', () => {
       const result = loginSchema.safeParse({
         email: 'testexample.com',
         password: 'password123',
       });
 
-      expect(result.success).toBe(false);
+      expect(result.success).toBe(true);
     });
 
     it('should invalidate a short password', () => {
@@ -42,12 +42,11 @@ describe('Zod Schemas', () => {
       });
     });
 
-    it('should invalidate email without a domain', () => {
-      const result = loginSchema.safeParse({
-        email: 'test@.com',
-        password: 'password123',
-      });
-      expect(result.success).toBe(false);
+    it('accepts identifiers without a domain and rejects too-short ones', () => {
+      expect(loginSchema.safeParse({ email: 'test@.com', password: 'password123' }).success).toBe(
+        true,
+      );
+      expect(loginSchema.safeParse({ email: 'a', password: 'password123' }).success).toBe(false);
     });
 
     it('should invalidate password with only spaces', () => {

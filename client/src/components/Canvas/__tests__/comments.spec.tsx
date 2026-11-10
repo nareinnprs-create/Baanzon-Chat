@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import type { CanvasComment, CanvasSelection } from '../types';
 import type { TOptions } from 'i18next';
-import { CANVAS_LABELS } from '../labels';
+import type { CanvasComment, CanvasSelection } from '../types';
 import CommentsPanel from '../CommentsPanel';
+import { CANVAS_LABELS } from '../labels';
 import i18n from '~/locales/i18n';
 
 const t = i18n.t.bind(i18n) as (key: string, options?: TOptions) => string;

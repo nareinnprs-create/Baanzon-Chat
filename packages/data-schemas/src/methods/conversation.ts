@@ -47,8 +47,8 @@ import { isAgentFadingTier, isAgentFadingTierEntries } from '~/utils/fading';
 import { isCompactionSemanticIndexProjection } from '~/types/compaction';
 import { tenantSafeBulkWrite } from '~/utils/tenantBulkWrite';
 import { isValidObjectIdString } from '~/utils/objectId';
-import { escapeRegExp } from '~/utils/string';
 import { decrementTagCounts } from './conversationTag';
+import { escapeRegExp } from '~/utils/string';
 import logger from '~/config/winston';
 
 const ACTOR_CHECKPOINT_FIELDS = [

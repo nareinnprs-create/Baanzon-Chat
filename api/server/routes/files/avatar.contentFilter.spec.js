@@ -49,8 +49,12 @@ jest.mock('~/server/utils/getFileStrategy', () => ({
 jest.mock('~/server/services/Files/process', () => ({
   filterFile: jest.fn(),
 }));
+jest.mock('~/server/utils/magicBytes', () => ({
+  validateMagicBytes: jest.fn(),
+}));
 
 const fs = require('fs').promises;
+const { validateMagicBytes } = require('~/server/utils/magicBytes');
 const {
   inspectContent,
   extractFileContent,
@@ -90,6 +94,7 @@ describe('profile avatar filename content filtering', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    validateMagicBytes.mockResolvedValue(null);
     readFileSpy = jest.spyOn(fs, 'readFile').mockResolvedValue(Buffer.from('image'));
     unlinkSpy = jest.spyOn(fs, 'unlink').mockResolvedValue();
     processAvatar = jest.fn().mockResolvedValue('https://example.com/avatar.png');

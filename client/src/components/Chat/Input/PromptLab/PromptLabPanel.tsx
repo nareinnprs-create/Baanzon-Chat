@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
 import { Spinner } from '@librechat/client';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { promptLabAtom } from './atoms';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
-import { promptLabAtom } from './atoms';
 
 interface PromptLabPanelProps {
   /** Writes the rewrite into the composer (host supplies the set-value path). */

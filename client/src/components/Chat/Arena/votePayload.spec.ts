@@ -1,5 +1,5 @@
-import { buildArenaVotePayload, getArenaLaneLabel } from './votePayload';
 import type { ArenaLaneState } from './votePayload';
+import { buildArenaVotePayload, getArenaLaneLabel } from './votePayload';
 
 const readyLane = (over: Partial<ArenaLaneState> = {}): ArenaLaneState => ({
   model: 'gpt-4o',

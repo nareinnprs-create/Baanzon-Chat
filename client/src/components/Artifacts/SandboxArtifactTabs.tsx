@@ -1,21 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import * as Tabs from '@radix-ui/react-tabs';
 import { GitCompare } from 'lucide-react';
+import * as Tabs from '@radix-ui/react-tabs';
+import { TooltipAnchor, Button } from '@librechat/client';
 import type { SandpackPreviewRef } from '@codesandbox/sandpack-react/unstyled';
 import type { editor } from 'monaco-editor';
-import { TooltipAnchor, Button } from '@librechat/client';
 import type { Artifact } from '~/common';
-import store from '~/store';
 import { useGetSharedStartupConfig, useGetStartupConfig } from '~/data-provider';
 import useArtifactProps from '~/hooks/Artifacts/useArtifactProps';
 import useArtifacts from '~/hooks/Artifacts/useArtifacts';
 import { ArtifactCodeEditor } from './ArtifactCodeEditor';
-import ArtifactDiff from './ArtifactDiff';
 import { useCodeState } from '~/Providers/EditorContext';
-import { useLocalize } from '~/hooks';
 import { ArtifactPreview } from './ArtifactPreview';
 import { useShareContext } from '~/Providers';
+import ArtifactDiff from './ArtifactDiff';
+import { useLocalize } from '~/hooks';
+import store from '~/store';
 
 export default function SandboxArtifactTabs({
   artifact,

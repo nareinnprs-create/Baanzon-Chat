@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { getDefaultStore } from 'jotai';
-import { QueryKeys, dataService } from 'librechat-data-provider';
 import { useQuery } from '@tanstack/react-query';
+import { QueryKeys, dataService } from 'librechat-data-provider';
 import type { TTrustRequest, TTrustResponse } from 'librechat-data-provider';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { trustAtom } from './atoms';

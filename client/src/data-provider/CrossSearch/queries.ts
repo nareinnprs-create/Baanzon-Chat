@@ -1,6 +1,6 @@
+import { useQuery } from '@tanstack/react-query';
 import { dataService, QueryKeys } from 'librechat-data-provider';
 import type { TSearchAllResponse } from 'librechat-data-provider';
-import { useQuery } from '@tanstack/react-query';
 import type { UseQueryOptions } from '@tanstack/react-query';
 
 /** The palette starts searching at two characters; matching server-side discs. */

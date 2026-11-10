@@ -759,7 +759,11 @@ async function findUnusedI18nKeys(): Promise<CheckOutcome> {
   const isReferenced = (key: string): boolean => {
     if (tokens.has(key)) return true;
     tokenList ??= [...tokens];
-    return tokenList.some((token) => token.includes(key));
+    // `localize(\`prefix_${x}\`)` tokenizes to `prefix_`, so a token ending in
+    // `_` covers every key dynamically composed with that prefix.
+    return tokenList.some(
+      (token) => token.includes(key) || (token.endsWith('_') && key.startsWith(token)),
+    );
   };
 
   // i18next resolves `key_one`/`key_other` from a bare `t('key', { count })`

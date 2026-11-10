@@ -1,9 +1,9 @@
 import { logger } from '@librechat/data-schemas';
 import { type TTrustRequest, type TTrustWeights } from 'librechat-data-provider';
 import type { Response } from 'express';
+import type { TrustHandlers, TrustHandlersDeps, TrustQuery } from './types';
 import type { ServerRequest } from '~/types/http';
 import { asTrustEntityType } from './service';
-import type { TrustHandlers, TrustHandlersDeps, TrustQuery } from './types';
 
 const AUTH_REQUIRED = 'Authentication required';
 const UNKNOWN_ENTITY_TYPE = 'Unknown trust entity type';

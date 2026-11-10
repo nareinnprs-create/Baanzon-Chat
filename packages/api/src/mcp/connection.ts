@@ -1380,7 +1380,18 @@ export class MCPConnection extends EventEmitter {
           requestIds: getJSONRPCRequestIds(currentInit?.body),
         };
 
-        if (!isMethodPreservingRedirect || redirects >= MAX_REDIRECTS) {
+        /**
+         * A method-preserving redirect at the cap must throw rather than
+         * return: handing the transport a redirect response makes it retry,
+         * and the retry invokes this fetch again with a fresh counter, so an
+         * arbitrary-length chain would complete instead of being bounded.
+         */
+        if (isMethodPreservingRedirect && redirects >= MAX_REDIRECTS) {
+          await response.body?.cancel().catch(() => undefined);
+          throw new Error(`${logPrefix} Exceeded ${MAX_REDIRECTS} 307/308 redirects`);
+        }
+
+        if (!isMethodPreservingRedirect) {
           return guardStreamableHTTPResponses
             ? guardMCPStreamableHTTPResponse(response, responseContext)
             : response;

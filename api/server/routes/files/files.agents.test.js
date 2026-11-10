@@ -32,6 +32,12 @@ jest.mock('~/server/services/Files/strategies', () => ({
   getStrategyFunctions: jest.fn(() => ({})),
 }));
 
+/** Uploads inject a fake `req.file.path`; magic-byte validation reads real
+ *  bytes from disk and is covered by its own dedicated tests. */
+jest.mock('~/server/utils/magicBytes', () => ({
+  validateMagicBytes: jest.fn(),
+}));
+
 jest.mock('~/server/controllers/assistants/helpers', () => ({
   getOpenAIClient: jest.fn(),
 }));
@@ -73,6 +79,7 @@ jest.mock('fs', () => {
 });
 
 const { processAgentFileUpload } = require('~/server/services/Files/process');
+const { validateMagicBytes } = require('~/server/utils/magicBytes');
 const { UninspectableFileError } = require('@librechat/api');
 
 // Import the router
@@ -387,6 +394,7 @@ describe('File Routes - Agent Files Endpoint', () => {
     beforeEach(async () => {
       agentCustomId = `agent_${uuidv4().replace(/-/g, '').substring(0, 21)}`;
       jest.clearAllMocks();
+      validateMagicBytes.mockResolvedValue(null);
     });
 
     /**

@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import type { CanvasDocument, CanvasEditOperation, CanvasSelection } from '../types';
 import type { TOptions } from 'i18next';
+import type { CanvasDocument, CanvasEditOperation, CanvasSelection } from '../types';
 import type { EditSelectionFn } from '../api';
-import { CANVAS_LABELS } from '../labels';
 import CanvasEditor from '../CanvasEditor';
+import { CANVAS_LABELS } from '../labels';
 import i18n from '~/locales/i18n';
 
 const t = i18n.t.bind(i18n) as (key: string, options?: TOptions) => string;

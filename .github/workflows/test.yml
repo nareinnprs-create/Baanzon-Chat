@@ -98,6 +98,10 @@ jobs:
       - name: test:api
         id: suite_api
         continue-on-error: true
+        # Mongo-heavy suites (tags, files) spike past the default ~4 GB
+        # old-space cap on 4-core runners and crash the jest worker mid-run.
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         run: npm run test:api
 
       - name: test:config

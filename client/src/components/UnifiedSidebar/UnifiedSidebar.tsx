@@ -20,8 +20,8 @@ import useUnifiedSidebarLinks from '~/hooks/Nav/useUnifiedSidebarLinks';
 import useSidebarToggle from '~/hooks/Nav/useSidebarToggle';
 import useSidebarState from '~/hooks/Nav/useSidebarState';
 import { useChatHelpers, useLocalize } from '~/hooks';
-import { useInterfaceMode } from '~/store/settings';
 import SidePanelNav from '~/components/SidePanel/Nav';
+import { useInterfaceMode } from '~/store/settings';
 import Sidebar from './Sidebar';
 import { cn } from '~/utils';
 

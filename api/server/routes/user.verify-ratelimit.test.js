@@ -12,6 +12,7 @@ jest.mock('~/server/controllers/UserController', () => ({
   getTermsStatusController: jest.fn((req, res) => res.status(204).end()),
   updateUserPluginsController: jest.fn((req, res) => res.status(204).end()),
   resendVerificationController: jest.fn((req, res) => res.status(204).end()),
+  exportUserDataController: jest.fn((req, res) => res.status(204).end()),
 }));
 
 jest.mock('~/server/middleware', () => {

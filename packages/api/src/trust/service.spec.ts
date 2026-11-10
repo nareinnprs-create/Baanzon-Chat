@@ -3,6 +3,8 @@ import {
   TRUST_RECENCY_HALF_LIFE_DAYS_DEFAULT,
   TRUST_SOURCE_WEIGHT_DEFAULT,
 } from 'librechat-data-provider';
+import type { TTrustScoreInput } from 'librechat-data-provider';
+import type { TrustService } from './types';
 import {
   asTrustEntityType,
   createTrustService,
@@ -11,8 +13,6 @@ import {
   sanitizeSource,
   scoreTrust,
 } from './service';
-import type { TTrustScoreInput } from 'librechat-data-provider';
-import type { TrustService } from './types';
 
 describe('resolveTrustWeights', () => {
   it('resolves the ship defaults when no lever block exists', () => {

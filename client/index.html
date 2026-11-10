@@ -45,11 +45,11 @@
        * loadingCanvas.spec.ts holds the shipped script to the registry, so a
        * palette change fails there instead of flashing here. */
       if (theme === 'high-contrast-dark') {
-        backgroundColor = '#061316';
+        backgroundColor = '#0b0b0f';
       } else if (theme === 'high-contrast-light') {
         backgroundColor = '#ffffff';
       } else if (theme === 'dark') {
-        backgroundColor = '#061316';
+        backgroundColor = '#0b0b0f';
       } else if (theme === 'light') {
         backgroundColor = '#ffffff';
       } else {
@@ -61,7 +61,7 @@
          * canvas its own value has to bring the prefers-contrast and
          * forced-colors queries back here to go with it. */
         backgroundColor = window.matchMedia('(prefers-color-scheme: dark)').matches
-          ? '#061316'
+          ? '#0b0b0f'
           : '#ffffff';
       }
 

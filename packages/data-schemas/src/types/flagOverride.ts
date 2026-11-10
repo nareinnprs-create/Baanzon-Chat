@@ -1,5 +1,5 @@
-import type { Document } from 'mongoose';
 import type { TFeatureFlagKey, TFeatureFlagScope } from 'librechat-data-provider';
+import type { Document } from 'mongoose';
 
 /**
  * A runtime feature-flag override row (blueprint B23/W15). Plain collection:
