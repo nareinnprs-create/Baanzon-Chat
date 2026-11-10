@@ -87,8 +87,11 @@ jobs:
     # Every spec defaults these to the same values, but the two
     # ServerConfigsCacheRedis specs prefer a cluster topology (`?? 'true'`), so the
     # job pins them explicitly instead of relying on each spec's fallback.
+    # USE_REDIS must be on: cacheConfig only builds the shared Redis clients when
+    # it is set, and the MCPFlow cross-instance suite asserts a real client.
     env:
       REDIS_URI: redis://127.0.0.1:6379
+      USE_REDIS: 'true'
       USE_REDIS_CLUSTER: 'false'
 
     services:
