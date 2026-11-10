@@ -42,7 +42,7 @@ jobs:
           node-version-file: .nvmrc # 24.16.0
 
       - name: Audit the dependency tree
-        # No `npm ci` here: `npm audit` reads package-lock.json, and installing
+        # No `npm ci` here: the audit reads package-lock.json, and installing
         # 1.7 MB of lockfile's worth of dependencies only to throw them away would
         # double the job's time.
         #
@@ -50,7 +50,13 @@ jobs:
         # this gate audits package-lock.json. `packageManager` is npm@11.13.0,
         # config/update.js runs `npm ci`, and both Dockerfiles copy package.json +
         # package-lock.json; supporting bun would add a second audit run.
-        run: npm audit --level=high
+        #
+        # audit-ci instead of plain `npm audit`: npm audit has no allowlist, so
+        # advisories with no patched release (majors pending a migration, dev-only
+        # tool chains) would gate forever. The allowlist lives in
+        # `.audit-ci.jsonc` with review notes per entry; anything NOT listed
+        # still fails the job on high/critical.
+        run: npx --yes audit-ci@7.1.0 --high --config .audit-ci.jsonc
 
   secret-scan:
     name: gitleaks

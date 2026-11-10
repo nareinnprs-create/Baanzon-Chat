@@ -1,0 +1,20 @@
+{
+  // Allowlist for the high/critical dependency gate (security.yml runs
+  // `audit-ci --high`). Every advisory NOT listed here still fails the build.
+  // Entries carry a reason and a review note; remove an entry as soon as a
+  // patched release lands in the tree.
+  "allowlist": [
+    // GHSA-c475-qrg2-pj4r — basic-ftp quadratic-time CPU DoS in Client.list().
+    // Enters only through @lhci/cli's proxy-agent → pac-proxy-agent → get-uri
+    // chain, which is dev-only Lighthouse CI tooling. No patched release
+    // exists; the offered "fix" downgrades @lhci to 0.13.0 (a backwards major).
+    // Review: when @lhci ships a patched proxy-agent chain.
+    "GHSA-c475-qrg2-pj4r",
+    // GHSA-mrhx-c7xc-m3w5 — zod memory exhaustion while validating oversized
+    // constrained collections. Fixed in zod@4.6.6+; the whole tree (runtime +
+    // transitive) sits on zod@3 and the zod@4 major migration is deferred by
+    // decision.
+    // Review: at the zod@4 migration, or if a 3.x patched release lands.
+    "GHSA-mrhx-c7xc-m3w5"
+  ]
+}
