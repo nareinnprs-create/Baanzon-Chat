@@ -489,6 +489,10 @@ export function copyPublicAssets(): Plugin {
         path.join(publicDir, 'robots.txt'),
         path.join(outDir, 'robots.txt'),
       );
+      await fs.promises.copyFile(
+        path.join(publicDir, 'favicon.svg'),
+        path.join(outDir, 'favicon.svg'),
+      );
     },
   };
 }

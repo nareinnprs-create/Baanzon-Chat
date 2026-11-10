@@ -123,6 +123,29 @@ jobs:
         # point at `dist`, so the packages must be built first. Prerequisite, not a check.
         run: npm run build:packages
 
+      - name: Start Redis cluster for cluster-specific suites
+        shell: bash
+        run: |
+          sudo sysctl -w vm.overcommit_memory=1
+          for port in 7001 7002 7003; do
+            docker run -d --network host --name "redis-cluster-$port" redis:7-alpine \
+              redis-server --port "$port" --cluster-enabled yes \
+              --cluster-config-file "/data/nodes-$port.conf" \
+              --cluster-node-timeout 5000 --appendonly no \
+              --cluster-announce-ip 127.0.0.1 \
+              --cluster-announce-port "$port" \
+              --cluster-announce-bus-port "$((port + 10000))"
+          done
+          for attempt in {1..30}; do
+            if docker run --rm --network host redis:7-alpine redis-cli -p 7001 ping >/dev/null 2>&1; then
+              break
+            fi
+            sleep 1
+          done
+          docker run --rm --network host redis:7-alpine redis-cli --cluster create \
+            127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 \
+            --cluster-replicas 0 --cluster-yes
+
       - name: test:cache-integration:core
         id: integ_cache_core
         continue-on-error: true

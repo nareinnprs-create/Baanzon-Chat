@@ -66,7 +66,7 @@ if [ -f "$SUPERVISOR_CONF" ]; then
   sed -i "/\[program:baanzon-api\]/,/^\[/ s#^command=.*#command=/bin/bash -lc 'exec node api/server/index.js'#" "$SUPERVISOR_CONF"
 fi
 supervisorctl reread >/dev/null 2>&1 || true
-supervisorctl restart all >/dev/null 2>&1 || true
+supervisorctl update >/dev/null 2>&1 || true
 if ! supervisorctl restart baanzon-api; then
   echo "[apply] baanzon-api supervisor start failed"
   supervisorctl status baanzon-api || true

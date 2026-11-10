@@ -19,14 +19,23 @@ FAILS=$((FAILS + 1))
 echo "$FAILS" > "$STATE"
 if [ "$FAILS" -eq 3 ]; then
   # 3 consecutive failures -> alert once (resets when healthy again)
-  source .env 2>/dev/null
-  KEY="${ZEPTOMAIL_API_KEY:-${EMAIL_PASSWORD:-}}"
-  FROM="${EMAIL_FROM:-}"
-  TO="${ALERT_EMAIL:-${EMAIL_FROM:-}}"
+  env_value() {
+    awk -F= -v key="$1" '$1 == key { sub(/^[^=]*=/, ""); sub(/[[:space:]]*\r?$/, ""); print; exit }' .env
+  }
+  KEY="$(env_value ZEPTOMAIL_API_KEY)"
+  [ -n "$KEY" ] || KEY="$(env_value EMAIL_PASSWORD)"
+  FROM="$(env_value EMAIL_FROM)"
+  TO="$(env_value ALERT_EMAIL)"
+  [ -n "$TO" ] || TO="$FROM"
   if [ -n "$KEY" ] && [ -n "$FROM" ] && [ -n "$TO" ]; then
+    payload=$(jq -n \
+      --arg from "$FROM" \
+      --arg to "$TO" \
+      --arg body "/readyz has failed $FAILS consecutive checks. https://baanzonchat.opraiz.com is degraded or down. Check: ssh pod -> supervisorctl status" \
+      '{from:{address:$from,name:"Baanzon Monitor"},to:[{email_address:{address:$to}}],subject:"BAANZON DOWN",htmlbody:$body}')
     curl -s -m 30 -X POST https://transactional.zeptomail.in/v1.1/email \
       -H "Authorization: Zoho-enczapikey $KEY" -H "Content-Type: application/json" \
-      -d "{\"from\":{\"address\":\"$FROM\",\"name\":\"Baanzon Monitor\"},\"to\":[{\"email_address\":{\"address\":\"$TO\"}}],\"subject\":\"BAANZON DOWN\",\"htmlbody\":\"/readyz has failed $FAILS consecutive checks. https://baanzonchat.opraiz.com is degraded or down. Check: ssh pod -> supervisorctl status\"}" \
+      -d "$payload" \
       > /dev/null
   fi
 fi

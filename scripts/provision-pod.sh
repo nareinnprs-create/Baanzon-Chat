@@ -4,7 +4,7 @@ set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update -qq
-apt-get install -y -qq ca-certificates curl gnupg supervisor jq rsync git
+apt-get install -y -qq ca-certificates curl gnupg openssl supervisor jq rsync git
 
 # ---- Node 24 (matches .nvmrc 24.16.0) ----
 if ! command -v node >/dev/null || [ "$(node -v | cut -c2.)" != 24 ]; then
@@ -23,9 +23,13 @@ if [ ! -d /opt/searxng-src ]; then
   pip install -q -r /opt/searxng-src/requirements.txt 2>/dev/null
   pip install -q --ignore-installed blinker 2>/dev/null
   pip uninstall -y -q searxng 2>/dev/null
-  mkdir -p /etc/searxng
-  printf 'use_default_settings: true\nserver:\n  secret_key: "baanzon-searxng-2026"\n  limiter: false\n  port: 8888\n  bind_address: "127.0.0.1"\nsearch:\n  formats:\n    - html\n    - json\n' > /etc/searxng/settings.yml
 fi
+mkdir -p /etc/searxng
+if [ ! -f /etc/searxng/secret_key ]; then
+  umask 077
+  openssl rand -hex 32 > /etc/searxng/secret_key
+fi
+printf 'use_default_settings: true\nserver:\n  secret_key: "%s"\n  limiter: false\n  port: 8888\n  bind_address: "127.0.0.1"\nsearch:\n  formats:\n    - html\n    - json\n' "$(cat /etc/searxng/secret_key)" > /etc/searxng/settings.yml
 
 # Cron for nightly backups
 apt-get install -y -qq cron > /dev/null 2>&1 || true
