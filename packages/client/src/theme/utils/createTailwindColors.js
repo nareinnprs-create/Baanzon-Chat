@@ -18,20 +18,25 @@
  */
 
 const palette = {
+  // Baanzon Velvet Nocturne graphite ramp — endpoints are the theme tokens:
+  // 900 is the dark canvas (rgb-surface-primary #0B0B0F), 850/800 are the dark
+  // active surfaces (#15151B/#24242C), 400/600 are the secondary/muted inks
+  // (#A1A1AA/#6E6E79), and 20 is the light canvas ink (#F5F5F7). The retired
+  // teal-tinted Deep Ocean ramp lived here before the rebrand.
   gray: {
-    20: '#f0f4f2',
-    50: '#f7faf8',
-    100: '#eff6f3',
-    200: '#dde9e5',
-    300: '#c8dad6',
-    400: '#a0b9b4',
-    500: '#6e7f80',
-    600: '#52686a',
-    650: '#3f5254',
-    700: '#2e4245',
-    800: '#102a2d',
-    850: '#0a1c20',
-    900: '#061316',
+    20: '#f5f5f7',
+    50: '#f7f7f9',
+    100: '#ececef',
+    200: '#d9d9de',
+    300: '#bfbfc7',
+    400: '#a1a1aa',
+    500: '#85858f',
+    600: '#6e6e79',
+    650: '#55555f',
+    700: '#3f3f49',
+    800: '#24242c',
+    850: '#15151b',
+    900: '#0b0b0f',
   },
   green: {
     50: '#f0faf9',
