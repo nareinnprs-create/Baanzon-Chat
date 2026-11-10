@@ -21,24 +21,32 @@ const DODO_WEBHOOK_SECRET = process.env.DODO_WEBHOOK_SECRET || '';
  * 5-minute timestamp tolerance; falls back to the legacy plain-secret header.
  */
 function verifyWebhookSignature(req) {
-  const raw = typeof req.body === 'string'
-    ? req.body
-    : Buffer.isBuffer(req.body)
-      ? req.body.toString('utf8')
-      : JSON.stringify(req.body || {});
+  let raw;
+  if (typeof req.body === 'string') {
+    raw = req.body;
+  } else if (Buffer.isBuffer(req.body)) {
+    raw = req.body.toString('utf8');
+  } else {
+    raw = JSON.stringify(req.body || {});
+  }
   const id = req.headers['webhook-id'];
   const ts = req.headers['webhook-timestamp'];
   const sigHeader = req.headers['webhook-signature'];
 
   if (id && ts && sigHeader) {
-    const key = DODO_WEBHOOK_SECRET.startsWith('whsec_') ? DODO_WEBHOOK_SECRET.slice(6) : DODO_WEBHOOK_SECRET;
+    const key = DODO_WEBHOOK_SECRET.startsWith('whsec_')
+      ? DODO_WEBHOOK_SECRET.slice(6)
+      : DODO_WEBHOOK_SECRET;
     let keyBuf;
     try {
       keyBuf = Buffer.from(key, 'base64');
     } catch {
       keyBuf = Buffer.from(key, 'utf8');
     }
-    const expected = crypto.createHmac('sha256', keyBuf).update(`${id}.${ts}.${raw}`).digest('base64');
+    const expected = crypto
+      .createHmac('sha256', keyBuf)
+      .update(`${id}.${ts}.${raw}`)
+      .digest('base64');
     const age = Math.abs(Date.now() / 1000 - Number(ts));
     if (Number.isNaN(age) || age > 300) {
       return false;
@@ -56,25 +64,54 @@ function verifyWebhookSignature(req) {
 /* products (public) */
 router.get('/products', (req, res) => {
   const products = Object.entries(PRODUCTS).map(([tier, p]) => ({
-    tier, label: p.label, inrMonthly: p.inr, inrYearly: p.yearlyInr || null,
+    tier,
+    label: p.label,
+    inrMonthly: p.inr,
+    inrYearly: p.yearlyInr || null,
   }));
-  const packs = Object.entries(PACKS).map(([key, p]) => ({ pack: key, label: p.label, inr: p.priceInr, credits: p.credits }));
+  const packs = Object.entries(PACKS).map(([key, p]) => ({
+    pack: key,
+    label: p.label,
+    inr: p.priceInr,
+    credits: p.credits,
+  }));
   res.json({ products, packs });
 });
 
 /* checkout (authed) — creates a Dodo checkout session or mock redirect */
 router.post('/checkout', authed, async (req, res) => {
   try {
-    const { tier: rawTier, cycle = 'monthly' } = req.body || {};
+    const { tier: rawTier, cycle = 'monthly', pack: rawPack } = req.body || {};
+    const packKey = rawPack && PACKS[rawPack] ? rawPack : null;
     const product = PRODUCTS[(rawTier || '').toLowerCase()];
-    if (!product) return res.status(400).json({ message: 'Unknown tier' });
+    if (!packKey && !product) return res.status(400).json({ message: 'Unknown tier' });
 
     if (isMock()) {
-      return res.json({ mock: true, url: `/pricing?mock_checkout=${rawTier}&cycle=${cycle}`, tier: rawTier, cycle });
+      if (packKey)
+        return res.json({ mock: true, url: `/pricing?mock_checkout=${packKey}`, pack: packKey });
+      return res.json({
+        mock: true,
+        url: `/pricing?mock_checkout=${rawTier}&cycle=${cycle}`,
+        tier: rawTier,
+        cycle,
+      });
     }
 
-    const productId = cycle === 'yearly' ? product.dodoProductIdYearly : product.dodoProductId;
+    let productId;
+    if (packKey) {
+      productId = PACKS[packKey].dodoProductId;
+    } else {
+      productId = cycle === 'yearly' ? product.dodoProductIdYearly : product.dodoProductId;
+    }
     if (!productId) return res.status(400).json({ message: 'Product not configured' });
+
+    const metadata = { userId: String(req.user?.id || '') };
+    if (packKey) {
+      metadata.pack = packKey;
+    } else {
+      metadata.tier = rawTier;
+      metadata.cycle = cycle;
+    }
 
     const cr = await fetch(`${DODO_BASE}/checkouts`, {
       method: 'POST',
@@ -84,11 +121,12 @@ router.post('/checkout', authed, async (req, res) => {
         customer: { email: req.user?.email || '', name: req.user?.name || '' },
         billing_currency: 'INR',
         return_url: (process.env.DOMAIN_CLIENT || '') + '/settings?billing=return',
-        metadata: { userId: String(req.user?.id || ''), tier: rawTier, cycle },
+        metadata,
       }),
     });
     const cb = await cr.json().catch(() => ({}));
-    if (!cr.ok || !cb.checkout_url) return res.status(cr.status || 500).json({ message: cb.message || 'Checkout failed' });
+    if (!cr.ok || !cb.checkout_url)
+      return res.status(cr.status || 500).json({ message: cb.message || 'Checkout failed' });
     return res.json({ url: cb.checkout_url });
   } catch (err) {
     return res.status(500).json({ message: err.message });
@@ -119,7 +157,9 @@ router.post('/webhook', express.raw({ type: '*/*', limit: '256kb' }), async (req
     }
     // Checkout-based subscriptions/renewals fire payment.succeeded with the tier
     // in metadata (Dodo may not create a subscription object for manual renewals).
-    const metaTier = String(payload?.metadata?.tier || payload?.subscription?.metadata?.tier || '').toLowerCase();
+    const metaTier = String(
+      payload?.metadata?.tier || payload?.subscription?.metadata?.tier || '',
+    ).toLowerCase();
     if (metaTier && (type === 'payment.succeeded' || payload?.status === 'succeeded')) {
       if (resolved?.pack) {
         await usage.grantPack(userId, resolved.credits, PACKS[resolved.pack].validDays);
@@ -149,7 +189,9 @@ router.get('/admin/recent-dodo', authed, async (req, res) => {
     if (isMock()) return res.json({ items: [], mock: true });
     const key = process.env.DODO_API_KEY || '';
     const base = DODO_BASE;
-    const cr = await fetch(`${base}/payments?limit=20`, { headers: { Authorization: `Bearer ${key}` } });
+    const cr = await fetch(`${base}/payments?limit=20`, {
+      headers: { Authorization: `Bearer ${key}` },
+    });
     const body = await cr.json();
     const items = (body.items || []).map((p) => ({
       paymentId: p.payment_id,
@@ -173,10 +215,14 @@ router.post('/admin/apply-payment', authed, async (req, res) => {
     const { paymentId } = req.body || {};
     if (!paymentId) return res.status(400).json({ message: 'paymentId required' });
     const key = process.env.DODO_API_KEY || '';
-    const pr = await fetch(`${DODO_BASE}/payments/${paymentId}`, { headers: { Authorization: `Bearer ${key}` } });
+    const pr = await fetch(`${DODO_BASE}/payments/${paymentId}`, {
+      headers: { Authorization: `Bearer ${key}` },
+    });
     const p = await pr.json();
-    if (!pr.ok) return res.status(p.status || 502).json({ message: p.message || 'Dodo fetch failed' });
-    if (p.status !== 'succeeded') return res.status(400).json({ message: `payment status is ${p.status}` });
+    if (!pr.ok)
+      return res.status(p.status || 502).json({ message: p.message || 'Dodo fetch failed' });
+    if (p.status !== 'succeeded')
+      return res.status(400).json({ message: `payment status is ${p.status}` });
     const userId = p.metadata?.userId;
     if (!userId) return res.status(400).json({ message: 'payment has no userId metadata' });
     const metaTier = String(p.metadata?.tier || '').toLowerCase();
