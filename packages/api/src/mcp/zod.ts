@@ -1010,18 +1010,18 @@ export function convertJsonSchemaToZod(
     }
 
     /** v4: optional()/nullable() wrappers do not surface the registry description of
- *  the wrapped schema, so the description is re-registered on the wrapper. */
-function describeWrapper<T extends z.ZodType>(
-  schema: T,
-  source: { description?: string | null },
-): T {
-  if (source.description != null && source.description !== '') {
-    return schema.describe(source.description) as T;
-  }
-  return schema;
-}
+     *  the wrapped schema, so the description is re-registered on the wrapper. */
+    function describeWrapper<T extends z.ZodType>(
+      schema: T,
+      source: { description?: string | null },
+    ): T {
+      if (source.description != null && source.description !== '') {
+        return schema.describe(source.description) as T;
+      }
+      return schema;
+    }
 
-let objectSchema = z.object(shape);
+    let objectSchema = z.object(shape);
 
     if (Array.isArray(schema.required) && schema.required.length > 0) {
       const partial = Object.fromEntries(
