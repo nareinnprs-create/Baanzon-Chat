@@ -288,8 +288,8 @@ describe('high contrast mermaid palette', () => {
     expect(light.nodeBorder).toBe('#000000');
 
     const dark = contrastMermaidVariables(true, true)!;
-    expect(dark.background).toBe('#061316');
-    expect(dark.mainBkg).toBe('#061316');
+    expect(dark.background).toBe('#0b0b0f');
+    expect(dark.mainBkg).toBe('#0b0b0f');
     expect(dark.lineColor).toBe('#ffffff');
     expect(dark.textColor).toBe('#ffffff');
     expect(dark.nodeBorder).toBe('#ffffff');
@@ -306,7 +306,7 @@ describe('high contrast mermaid palette', () => {
     const contrastComponent = contrast['/components/ui/MermaidDiagram.tsx'];
     expect(contrastComponent).toContain('theme: "base"');
     expect(contrastComponent).toContain('"lineColor":"#ffffff"');
-    expect(contrast['mermaid.css']).toContain('#061316');
+    expect(contrast['mermaid.css']).toContain('#0b0b0f');
   });
 
   it('builds the artifact controls from the contrast palette', () => {
@@ -351,8 +351,8 @@ describe('high contrast mermaid palette', () => {
       critBkgColor: '#ff8f8f',
       critBorderColor: '#ff8f8f',
       gridColor: '#ffffff',
-      taskTextColor: '#061316',
-      taskTextDarkColor: '#061316',
+      taskTextColor: '#0b0b0f',
+      taskTextDarkColor: '#0b0b0f',
       taskTextOutsideColor: '#ffffff',
     });
   });
@@ -432,7 +432,7 @@ describe('high contrast mermaid palette', () => {
     expect(light.pieLegendTextColor).toBe('#000000');
 
     const dark = contrastMermaidVariables(true, true)!;
-    expect(dark.pieSectionTextColor).toBe('#061316');
+    expect(dark.pieSectionTextColor).toBe('#0b0b0f');
     expect(dark.pieTitleTextColor).toBe('#ffffff');
     expect(dark.pieLegendTextColor).toBe('#ffffff');
   });

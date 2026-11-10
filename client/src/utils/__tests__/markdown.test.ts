@@ -142,12 +142,12 @@ describe('markdown artifacts', () => {
     it('appends a contrast override that outranks the media query', () => {
       const standard = getMarkdownFiles('# Test')['index.html'];
       expect(standard).toContain('prefers-color-scheme: dark');
-      expect(standard).not.toContain('background-color: #061316');
+      expect(standard).not.toContain('background-color: #0b0b0f');
 
       const contrastDark = getMarkdownFiles('# Test', true, true)['index.html'];
       const overrideIndex = contrastDark.lastIndexOf('.markdown-body { color: #ffffff');
       expect(overrideIndex).toBeGreaterThan(contrastDark.indexOf('prefers-color-scheme: dark'));
-      expect(contrastDark).toContain('background-color: #061316');
+      expect(contrastDark).toContain('background-color: #0b0b0f');
       expect(contrastDark).toContain('color: #46e2d2');
 
       const contrastLight = getMarkdownFiles('# Test', false, true)['index.html'];

@@ -90,7 +90,7 @@ describe('useMermaid cache key', () => {
 
     const [config] = mermaidMock.initialize.mock.calls[0];
     expect(config.theme).toBe('base');
-    expect(config.themeVariables).toEqual(expect.objectContaining({ primaryColor: '#061316' }));
+    expect(config.themeVariables).toEqual(expect.objectContaining({ primaryColor: '#0b0b0f' }));
   });
 
   it('rerenders a custom-themed diagram when the scheme changes', async () => {
