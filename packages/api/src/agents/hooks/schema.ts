@@ -90,42 +90,42 @@ export const pluginHookHandlerSchema: z.ZodType<PluginHookHandler> = z
   .superRefine((handler, context) => {
     if (handler.type === 'command' && !handler.command?.trim()) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['command'],
         message: 'Command hooks require a non-empty command',
       });
     }
     if (handler.type === 'prompt' && !handler.prompt?.trim()) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['prompt'],
         message: 'Prompt hooks require a non-empty prompt',
       });
     }
     if (handler.type === 'agent' && !handler.prompt?.trim()) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['prompt'],
         message: 'Agent hooks require a non-empty prompt',
       });
     }
     if (handler.type === 'http' && !handler.url) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['url'],
         message: 'HTTP hooks require a non-empty URL',
       });
     }
     if (handler.type === 'mcp_tool' && !handler.server) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['server'],
         message: 'MCP tool hooks require a non-empty server',
       });
     }
     if (handler.type === 'mcp_tool' && !handler.tool) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['tool'],
         message: 'MCP tool hooks require a non-empty tool',
       });
@@ -162,8 +162,8 @@ export const pluginHooksDocumentSchema: z.ZodType<PluginHooksDocument> = z
           continue;
         }
         context.addIssue({
-          code: z.ZodIssueCode.too_big,
-          type: 'array',
+          code: 'too_big',
+          origin: 'array',
           maximum: MAX_TOTAL_HANDLERS,
           inclusive: true,
           path: ['hooks'],

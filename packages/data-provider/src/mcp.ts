@@ -20,7 +20,7 @@ const validateOAuthClientCredentials = (
 ): void => {
   if (oauth.client_secret && !oauth.client_id) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       path: ['client_secret'],
       message: 'OAuth client_secret requires client_id',
     });
@@ -28,7 +28,7 @@ const validateOAuthClientCredentials = (
 
   if (oauth.client_id && oauth.client_secret && (!oauth.authorization_url || !oauth.token_url)) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       path: ['client_secret'],
       message: 'OAuth client_secret with client_id requires both authorization_url and token_url',
     });
@@ -311,20 +311,25 @@ export const StdioOptionsSchema = BaseOptionsSchema.extend({
    * If not specified, the result of getDefaultEnvironment() will be used.
    * Environment variables can be referenced using ${VAR_NAME} syntax.
    */
-  env: z
-    .record(z.string(), z.string())
-    .optional()
-    .transform((env) => {
-      if (!env) {
-        return env;
-      }
+  /* v4: `.optional().transform()` hides the optionality from the object shape
+   * (the transform pipe makes the key required), so the optional wrapper is
+   * the outermost schema — undefined short-circuits past the transform, which
+   * is exactly the v3 parse behavior. */
+  env: z.optional(
+    z
+      .record(z.string(), z.string())
+      .transform((env) => {
+        if (!env) {
+          return env;
+        }
 
-      const processedEnv: Record<string, string> = {};
-      for (const [key, value] of Object.entries(env)) {
-        processedEnv[key] = extractEnvVariable(value);
-      }
-      return processedEnv;
-    }),
+        const processedEnv: Record<string, string> = {};
+        for (const [key, value] of Object.entries(env)) {
+          processedEnv[key] = extractEnvVariable(value);
+        }
+        return processedEnv;
+      }),
+  ),
   /**
    * How to handle stderr of the child process.
    * Accepts: 'pipe' | 'ignore' | 'inherit' | file descriptor number.

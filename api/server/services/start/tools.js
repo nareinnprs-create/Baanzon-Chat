@@ -115,12 +115,17 @@ function loadAndFormatTools({ directory, adminFilter = [], adminIncluded = [] })
 }
 
 /**
- * Checks if a schema is a Zod schema by looking for the _def property
+ * Checks if a schema is a Zod schema: v3 schemas carry `_def`, v4 schemas
+ * carry `_zod`. Tools come from both worlds (langchain peers pin v3 while
+ * this repo's own tool schemas use the root zod).
  * @param {unknown} schema - The schema to check
  * @returns {boolean} True if it's a Zod schema
  */
 function isZodSchema(schema) {
-  return schema && typeof schema === 'object' && '_def' in schema;
+  if (!schema || typeof schema !== 'object') {
+    return false;
+  }
+  return '_def' in schema || '_zod' in schema;
 }
 
 /**

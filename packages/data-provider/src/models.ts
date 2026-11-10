@@ -94,7 +94,7 @@ export const modelSpecSubagentsSchema = z
     const maxSubagents = getMaxSubagents();
     if ((subagents.agent_ids?.length ?? 0) > maxSubagents) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['agent_ids'],
         message: `agent_ids must contain at most ${maxSubagents} item(s)`,
       });

@@ -241,9 +241,9 @@ export function generateDynamicSchema(settings: SettingsConfiguration) {
 }
 
 const ZodTypeToSettingType: Record<string, string | undefined> = {
-  ZodString: 'string',
-  ZodNumber: 'number',
-  ZodBoolean: 'boolean',
+  string: 'string',
+  number: 'number',
+  boolean: 'boolean',
 };
 
 const minColumns = 1;
@@ -503,7 +503,19 @@ export function validateSettingDefinitions(settings: SettingsConfiguration): voi
           path: ['optionType'],
         });
       } else {
-        const zodType = conversationSchema._def.typeName;
+        /* v4 introspection: `_zod.def.type` names the core kind ('string',
+         * 'number', …); optional wrappers are unwrapped one level so the
+         * settings surface keeps comparing the underlying type. */
+        const def = (
+          conversationSchema as unknown as {
+            _zod?: { def?: { type?: string; innerType?: unknown } };
+          }
+        )._zod?.def;
+        const zodType =
+          def?.type === 'optional'
+            ? ((def.innerType as { _zod?: { def?: { type?: string } } } | undefined)?._zod?.def
+                ?.type ?? '')
+            : (def?.type ?? '');
         const settingTypeEquivalent = ZodTypeToSettingType[zodType] || null;
         if (settingTypeEquivalent !== setting.type) {
           errors.push({

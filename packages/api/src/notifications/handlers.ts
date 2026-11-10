@@ -26,7 +26,7 @@ const createNotificationSchema = z.object({
   title: z.string().trim().min(1).max(200),
   body: z.string().trim().max(2000).optional(),
   link: z.string().trim().max(2048).optional(),
-  data: z.record(z.unknown()).optional(),
+  data: z.record(z.string(), z.unknown()).optional(),
 });
 
 function resolveUserId(req: ServerRequest): string | null {

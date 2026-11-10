@@ -66,7 +66,7 @@ function parseSkillSyncConfig(
   const parsed = skillSyncConfigSchema.safeParse(raw);
   if (!parsed.success) {
     logger.warn('[GitHubSkillSync] Ignoring invalid skill sync config', {
-      issues: parsed.error.flatten(),
+      issues: parsed.error.issues,
     });
     return undefined;
   }

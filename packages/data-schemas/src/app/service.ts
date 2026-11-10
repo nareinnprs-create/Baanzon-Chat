@@ -52,7 +52,7 @@ export function loadSummarizationConfig(
 
   const parsed = summarizationConfigSchema.safeParse(raw);
   if (!parsed.success) {
-    logger.warn('[AppService] Invalid summarization config', parsed.error.flatten());
+    logger.warn('[AppService] Invalid summarization config', parsed.error.issues);
     return undefined;
   }
 
@@ -70,7 +70,7 @@ export function loadSkillSyncConfig(config: DeepPartial<TCustomConfig>): AppConf
 
   const parsed = skillSyncConfigSchema.safeParse(raw);
   if (!parsed.success) {
-    logger.warn('[AppService] Invalid skill sync config', parsed.error.flatten());
+    logger.warn('[AppService] Invalid skill sync config', parsed.error.issues);
     return undefined;
   }
 
@@ -85,7 +85,7 @@ export function loadLangfuseConfig(config: DeepPartial<TCustomConfig>): AppConfi
 
   const parsed = langfuseConfigSchema.safeParse(raw);
   if (!parsed.success) {
-    logger.warn('[AppService] Invalid Langfuse config', parsed.error.flatten());
+    logger.warn('[AppService] Invalid Langfuse config', parsed.error.issues);
     return undefined;
   }
 
@@ -100,7 +100,7 @@ export function loadFiltersConfig(config: DeepPartial<TCustomConfig>): AppConfig
 
   const parsed = filtersConfigSchema.safeParse(raw);
   if (!parsed.success) {
-    logger.warn('[AppService] Invalid filters config', parsed.error.flatten());
+    logger.warn('[AppService] Invalid filters config', parsed.error.issues);
     throw new Error('Invalid filters config');
   }
 

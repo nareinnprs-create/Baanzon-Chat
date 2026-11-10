@@ -6,21 +6,19 @@ import { Constants } from 'librechat-data-provider';
  * Only allows fields that users should be able to modify.
  * Sensitive fields like author, authorName, _id, productionId, etc. are excluded.
  */
-export const updatePromptGroupSchema: z.ZodObject<
-  {
-    /** The name of the prompt group */
-    name: z.ZodOptional<z.ZodString>;
-    /** Short description/oneliner for the prompt group */
-    oneliner: z.ZodOptional<z.ZodString>;
-    /** Category for organizing prompt groups */
-    category: z.ZodOptional<z.ZodString>;
-    /** Command shortcut for the prompt group */
-    command: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-  },
-  'strict'
-> = z
+export type TUpdatePromptGroupSchema = {
+  /** The name of the prompt group */
+  name?: string;
+  /** Short description/oneliner for the prompt group */
+  oneliner?: string;
+  /** Category for organizing prompt groups */
+  category?: string;
+  /** Command shortcut for the prompt group */
+  command?: string | null;
+};
+
+export const updatePromptGroupSchema: z.ZodType<TUpdatePromptGroupSchema> = z
   .object({
-    /** The name of the prompt group */
     name: z.string().min(1).max(255).optional(),
     /** Short description/oneliner for the prompt group */
     oneliner: z.string().max(500).optional(),
@@ -38,8 +36,6 @@ export const updatePromptGroupSchema: z.ZodObject<
   })
   .strict();
 
-export type TUpdatePromptGroupSchema = z.infer<typeof updatePromptGroupSchema>;
-
 /**
  * Validates and sanitizes a prompt group update payload.
  * Returns only the allowed fields, stripping any sensitive fields.
@@ -56,19 +52,8 @@ export function validatePromptGroupUpdate(data: unknown): TUpdatePromptGroupSche
  * @param data - The raw request body to validate
  * @returns A SafeParseResult with either the validated data or validation errors
  */
-export function safeValidatePromptGroupUpdate(data: unknown): z.SafeParseReturnType<
-  {
-    name?: string | undefined;
-    category?: string | undefined;
-    command?: string | null | undefined;
-    oneliner?: string | undefined;
-  },
-  {
-    name?: string | undefined;
-    category?: string | undefined;
-    command?: string | null | undefined;
-    oneliner?: string | undefined;
-  }
-> {
+export function safeValidatePromptGroupUpdate(
+  data: unknown,
+): ReturnType<typeof updatePromptGroupSchema.safeParse> {
   return updatePromptGroupSchema.safeParse(data);
 }

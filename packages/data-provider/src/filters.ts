@@ -355,19 +355,19 @@ export const filtersConfigSchema = z
     }
     if (customPatterns > MAX_PII_CUSTOM_PATTERNS_TOTAL) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: `At most ${MAX_PII_CUSTOM_PATTERNS_TOTAL} custom PII patterns may be configured in total`,
       });
     }
     if (regexCharacters > MAX_PII_CUSTOM_REGEX_CHARACTERS) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: `Custom PII regexes may contain at most ${MAX_PII_CUSTOM_REGEX_CHARACTERS} characters in total`,
       });
     }
     if (regexInstructions > MAX_PII_CUSTOM_REGEX_INSTRUCTIONS) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: `Custom PII regexes may compile to at most ${MAX_PII_CUSTOM_REGEX_INSTRUCTIONS} instructions in total`,
       });
     }

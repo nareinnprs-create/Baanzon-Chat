@@ -451,14 +451,14 @@ export const skillSyncGitHubSourceSchema = z
   .superRefine((source, ctx) => {
     if (!source.credentialKey && !source.token) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['credentialKey'],
         message: 'Either credentialKey or token is required',
       });
     }
     if (source.credentialKey && source.token) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['token'],
         message: 'Use either credentialKey or token, not both',
       });
@@ -482,7 +482,7 @@ export const skillSyncConfigSchema = z
       .superRefine((github, ctx) => {
         if (github.enabled && github.sources.length === 0) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             path: ['sources'],
             message: 'At least one GitHub source is required when skill sync is enabled',
           });
@@ -491,7 +491,7 @@ export const skillSyncConfigSchema = z
         for (const source of github.sources) {
           if (seen.has(source.id)) {
             ctx.addIssue({
-              code: z.ZodIssueCode.custom,
+              code: 'custom',
               path: ['sources'],
               message: `Duplicate GitHub skill sync source id "${source.id}"`,
             });
@@ -510,8 +510,7 @@ export type SkillSyncGitHubSourceConfig = z.infer<typeof skillSyncGitHubSourceSc
 type SchemaShape<T> = T extends z.ZodObject<infer U> ? U : never;
 
 // Helper type to determine the default value or undefined based on whether the field has a default
-type DefaultValue<T> =
-  T extends z.ZodDefault<z.ZodTypeAny> ? ReturnType<T['_def']['defaultValue']> : undefined;
+type DefaultValue<T> = T extends z.ZodDefault<infer Inner> ? z.output<Inner> : undefined;
 
 // Extract default values or undefined from the schema shape
 type ExtractDefaults<T> = {
@@ -522,14 +521,14 @@ export type SchemaDefaults<T> = ExtractDefaults<SchemaShape<T>>;
 
 export type TConfigDefaults = SchemaDefaults<typeof configSchema>;
 
-export function getSchemaDefaults<Schema extends z.AnyZodObject>(
+export function getSchemaDefaults<Schema extends z.ZodObject>(
   schema: Schema,
 ): ExtractDefaults<SchemaShape<Schema>> {
   const shape = schema.shape;
   const entries = Object.entries(shape).map(([key, value]) => {
     if (value instanceof z.ZodDefault) {
-      // Extract default value if it exists
-      return [key, value._def.defaultValue()];
+      // Extract default value if it exists (v4: value on def, not a thunk)
+      return [key, (value as unknown as { _def: { defaultValue: unknown } })._def.defaultValue];
     }
     return [key, undefined];
   });
@@ -560,19 +559,17 @@ const paramValueSchema: z.ZodType<unknown> = z.lazy(() =>
 );
 
 /** Validates addParams while keeping web_search aligned with current runtime boolean handling. */
-const addParamsSchema: z.ZodType<Record<string, unknown>> = z
-  .record(z.string(), paramValueSchema)
-  .superRefine((params, ctx) => {
-    if (params.web_search === undefined || typeof params.web_search === 'boolean') {
-      return;
-    }
+const addParamsSchema = z.record(z.string(), paramValueSchema).superRefine((params, ctx) => {
+  if (params.web_search === undefined || typeof params.web_search === 'boolean') {
+    return;
+  }
 
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['web_search'],
-      message: '`web_search` must be a boolean in addParams',
-    });
+  ctx.addIssue({
+    code: 'custom',
+    path: ['web_search'],
+    message: '`web_search` must be a boolean in addParams',
   });
+});
 
 export const azureBaseSchema = z.object({
   apiKey: z.string(),
@@ -584,7 +581,7 @@ export const azureBaseSchema = z.object({
   dropParams: z.array(z.string()).optional(),
   version: z.string().optional(),
   baseURL: z.string().optional(),
-  additionalHeaders: z.record(z.string()).optional(),
+  additionalHeaders: z.record(z.string(), z.string()).optional(),
 });
 
 export type TAzureBaseSchema = z.infer<typeof azureBaseSchema>;
@@ -679,7 +676,7 @@ export const baseEndpointSchema = z.object({
    * providers through an AI gateway / reverse proxy that consumes metadata
    * headers (provider-native request shaping is preserved).
    */
-  headers: z.record(z.string()).optional(),
+  headers: z.record(z.string(), z.string()).optional(),
   titlePrompt: z.string().optional(),
   titleModel: z.string().optional(),
   titleConvo: z.boolean().optional(),
@@ -807,7 +804,7 @@ export const assistantEndpointSchema = baseEndpointSchema.merge(
         userIdQuery: z.boolean().optional(),
       })
       .optional(),
-    headers: z.record(z.string()).optional(),
+    headers: z.record(z.string(), z.string()).optional(),
   }),
 );
 
@@ -869,14 +866,14 @@ function validateEnabledOidc(
 ): void {
   if (oidc.enabled === true && !oidc.issuer) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       path: ['issuer'],
       message: 'issuer is required when OIDC auth is enabled',
     });
   }
   if (oidc.enabled === true && !oidc.audience) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       path: ['audience'],
       message: 'audience is required when OIDC auth is enabled',
     });
@@ -931,7 +928,7 @@ const managementApiAuthSchema = z
   .superRefine((auth, ctx) => {
     if (auth.oidc.enabled === true && auth.clients.length === 0) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['clients'],
         message: 'at least one client binding is required when management auth is enabled',
       });
@@ -942,7 +939,7 @@ const managementApiAuthSchema = z
       const client = auth.clients[index];
       if (clientIds.has(client.clientId)) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           path: ['clients', index, 'clientId'],
           message: 'client IDs must be unique',
         });
@@ -1002,7 +999,7 @@ export const toolApprovalHookConfigSchema = z.object({
   /** Optional regex matched against the tool name; omit to run for every tool. */
   matcher: z.string().optional(),
   /** Static options forwarded to the module's builder; the hook's own per-call config. */
-  options: z.record(z.unknown()).optional(),
+  options: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type TToolApprovalHookConfig = z.infer<typeof toolApprovalHookConfigSchema>;
@@ -1118,7 +1115,7 @@ const codeEnvironmentPermissionFieldSchema = z
   .superRefine((field, context) => {
     if (!field.allowed.includes(field.default)) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['default'],
         message: 'Permission default must be included in allowed values',
       });
@@ -1178,7 +1175,7 @@ export const agentsEndpointSchema = baseEndpointSchema
       /** Per-tool overrides of `maxToolCallArgBytes`, keyed by model-facing tool name; `0`
        * disables the guard for that tool only. Merged over LibreChat's shipped default of
        * `{ create_file: 131072 }`. */
-      maxToolCallArgBytesByTool: z.record(z.number()).optional(),
+      maxToolCallArgBytesByTool: z.record(z.string(), z.number()).optional(),
       maxCitations: z.number().min(1).max(50).optional().default(30),
       maxCitationsPerFile: z.number().min(1).max(10).optional().default(7),
       minRelevanceScore: z.number().min(0.0).max(1.0).optional().default(0.45),
@@ -1251,7 +1248,7 @@ export const agentsEndpointSchema = baseEndpointSchema
                       return;
                     }
                     pairingContext.addIssue({
-                      code: z.ZodIssueCode.custom,
+                      code: 'custom',
                       message: 'Pairing requires a workerId or principal workers',
                     });
                   })
@@ -1272,14 +1269,14 @@ export const agentsEndpointSchema = baseEndpointSchema
               environment.workerId == null;
             if (environment.pairing != null && environment.type !== 'attached') {
               context.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message: 'Only attached code environments may configure pairing',
                 path: ['environments', environment.id, 'pairing'],
               });
             }
             if (environment.pairing != null && environment.owner !== 'deployment') {
               context.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message: 'Only deployment-owned code environments may configure pairing',
                 path: ['environments', environment.id, 'pairing'],
               });
@@ -1289,7 +1286,7 @@ export const agentsEndpointSchema = baseEndpointSchema
               !isSecureCodeEnvironmentControlURL(environment.baseURL)
             ) {
               context.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message: 'Paired code environments require HTTPS outside loopback development',
                 path: ['environments', environment.id, 'baseURL'],
               });
@@ -1300,21 +1297,21 @@ export const agentsEndpointSchema = baseEndpointSchema
               environment.workerId !== environment.pairing.workerId
             ) {
               context.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message: 'Code environment workerId must match pairing.workerId',
                 path: ['environments', environment.id, 'workerId'],
               });
             }
             if (pairingOnly && environment.default === true) {
               context.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message: 'Pairing-only code control planes cannot be execution defaults',
                 path: ['environments', environment.id, 'default'],
               });
             }
             if (ids.has(environment.id)) {
               context.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message: `Duplicate code environment id: ${environment.id}`,
                 path: ['environments'],
               });
@@ -1327,7 +1324,7 @@ export const agentsEndpointSchema = baseEndpointSchema
           }
           if (executableEnvironments > 0 && defaults !== 1) {
             context.addIssue({
-              code: z.ZodIssueCode.custom,
+              code: 'custom',
               message: 'Exactly one stateful code environment must be the default',
               path: ['environments'],
             });
@@ -1395,7 +1392,7 @@ export const paramDefinitionSchema = z.object({
       path: ['positiveMin'],
     })
     .optional(),
-  enumMappings: z.record(z.union([z.number(), z.boolean(), z.string()])).optional(),
+  enumMappings: z.record(z.string(), z.union([z.number(), z.boolean(), z.string()])).optional(),
   component: z.nativeEnum(ComponentTypes).optional(),
   optionType: z.nativeEnum(OptionTypes).optional(),
   columnSpan: z.number().int().nonnegative().optional(),
@@ -1447,7 +1444,7 @@ export const endpointSchema = baseEndpointSchema.merge(
      * OpenAI-compatible endpoints.
      */
     provider: z.literal(EModelEndpoint.anthropic).optional(),
-    headers: z.record(z.string()).optional(),
+    headers: z.record(z.string(), z.string()).optional(),
     addParams: addParamsSchema.optional(),
     dropParams: z.array(z.string()).optional(),
     customParams: z
@@ -1468,6 +1465,7 @@ export const endpointSchema = baseEndpointSchema.merge(
     /** Static per-model token config: context window and per-million-token rates */
     tokenConfig: z
       .record(
+        z.string(),
         z.object({
           prompt: z.number(),
           completion: z.number(),
@@ -1798,7 +1796,7 @@ const termsOfServiceSchema = z.object({
 export type TTermsOfService = z.infer<typeof termsOfServiceSchema>;
 
 // Schema for localized string (either simple string or language-keyed object)
-const localizedStringSchema = z.union([z.string(), z.record(z.string())]);
+const localizedStringSchema = z.union([z.string(), z.record(z.string(), z.string())]);
 export type LocalizedString = z.infer<typeof localizedStringSchema>;
 
 export const mcpRefreshDefaults = {
@@ -1965,6 +1963,11 @@ export const interfaceSchema = z
       .optional(),
   })
   .default({
+    /* v4 requires the outer default to satisfy the full output shape; these
+     * two mirror the inner field defaults (mode 'atelier', retentionMode
+     * TEMPORARY) so the parsed result is identical to the v3 partial. */
+    mode: 'atelier',
+    retentionMode: RetentionMode.TEMPORARY,
     modelSelect: true,
     parameters: true,
     presets: true,
@@ -2085,7 +2088,12 @@ export const registrationConfigSchema = z
      */
     emailVerificationRequiredInProduction: z.boolean().default(true),
   })
-  .default({ socialLogins: defaultSocialLogins });
+  .default({
+    inviteOnly: false,
+    requireEmailVerification: true,
+    emailVerificationRequiredInProduction: true,
+    socialLogins: defaultSocialLogins,
+  });
 
 export type TRegistrationConfig = z.infer<typeof registrationConfigSchema>;
 
@@ -2318,7 +2326,7 @@ export const webSearchSchema = z.object({
       formats: z.array(z.string()).optional(),
       includeTags: z.array(z.string()).optional(),
       excludeTags: z.array(z.string()).optional(),
-      headers: z.record(z.string()).optional(),
+      headers: z.record(z.string(), z.string()).optional(),
       waitFor: z.number().optional(),
       timeout: z.number().int().nonnegative().optional(),
       maxAge: z.number().optional(),
@@ -2339,7 +2347,7 @@ export const webSearchSchema = z.object({
       changeTrackingOptions: z
         .object({
           modes: z.array(z.string()).optional(),
-          schema: z.record(z.unknown()).optional(),
+          schema: z.record(z.string(), z.unknown()).optional(),
           prompt: z.string().optional(),
           tag: z.string().nullable().optional(),
         })
@@ -2445,7 +2453,9 @@ export const memorySchema = z.object({
         provider: z.string(),
         model: z.string(),
         instructions: z.string().optional(),
-        model_parameters: z.record(z.union([z.string(), z.number(), z.boolean()])).optional(),
+        model_parameters: z
+          .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+          .optional(),
       }),
     ])
     .optional(),
@@ -2485,7 +2495,9 @@ export const summarizationConfigSchema = z.object({
   enabled: z.boolean().optional(),
   provider: z.string().optional(),
   model: z.string().optional(),
-  parameters: z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])).optional(),
+  parameters: z
+    .record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()]))
+    .optional(),
   trigger: summarizationTriggerSchema.optional(),
   prompt: z.string().optional(),
   updatePrompt: z.string().optional(),
@@ -2560,7 +2572,7 @@ export const messageFilterPiiSchema = z
       const supported = typeof result === 'boolean' ? result : result.supported;
       if (!supported) {
         context.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           path: ['customPatterns', index, 'regex'],
           message:
             'Unsupported regex: not compatible with the RE2 engine (no backreferences, lookaround, or control escapes)',
@@ -2573,14 +2585,14 @@ export const messageFilterPiiSchema = z
     }
     if (regexCharacters > MAX_PII_CUSTOM_REGEX_CHARACTERS) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['customPatterns'],
         message: `Custom PII regexes may contain at most ${MAX_PII_CUSTOM_REGEX_CHARACTERS} characters in total`,
       });
     }
     if (regexInstructions > MAX_PII_CUSTOM_REGEX_INSTRUCTIONS) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['customPatterns'],
         message: `Custom PII regexes may compile to at most ${MAX_PII_CUSTOM_REGEX_INSTRUCTIONS} instructions in total`,
       });
@@ -2689,7 +2701,7 @@ export const langfuseConfigSchema = z.object({
    * schema does not yet express — and note the fanout collector forwards only
    * `Authorization` upstream regardless.
    */
-  headers: z.record(z.string()).optional(),
+  headers: z.record(z.string(), z.string()).optional(),
   /** Trace user identity and allowlisted user/request metadata. */
   trace: langfuseTraceConfigSchema.optional(),
 });

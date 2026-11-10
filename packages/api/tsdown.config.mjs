@@ -9,7 +9,10 @@ export default defineConfig({
   entry: ['src/index.ts', 'src/telemetry.ts', 'src/credentials.ts'],
   format: ['cjs'],
   platform: 'node',
-  dts: { oxc: true, isolatedDeclarations: false },
+  /* oxc-based dts enforces isolatedDeclarations on every exported schema;
+   * the zod v4 migration dropped many v3-only annotations, so declarations
+   * emit through TypeScript instead (slower, equally correct). */
+  dts: { oxc: false, isolatedDeclarations: false },
   outDir: 'dist',
   sourcemap: true,
   // Warn on module cycles at build time; CI enforces via config/circular-deps.mjs.

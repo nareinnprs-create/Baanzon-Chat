@@ -839,8 +839,16 @@ export function createSchedulesHandlers(deps: SchedulesHandlersDeps): SchedulesH
     }
     // The fence input is not a schedule field: strip it before the emptiness check
     // and the update spread below, or it would count as an edit and be written to
-    // the row.
-    const { expectedConfigRevision, ...editedFields } = parsed.data;
+    // the row. v4 applies field defaults (target/enabled) even to a field-less
+    // payload, so "submitted" means present in the request body, not merely
+    // defined in the parsed output.
+    const { expectedConfigRevision, ...parsedFields } = parsed.data;
+    const submittedKeys = new Set(Object.keys(req.body ?? {}));
+    const editedFields = Object.fromEntries(
+      Object.entries(parsedFields).filter(
+        ([key, value]) => value !== undefined && submittedKeys.has(key),
+      ),
+    );
     // A field-less PATCH is not a harmless no-op: updateScheduleById rotates the claim
     // token and bumps the config revision on every write, so an empty update would
     // fence a legitimate in-flight occurrence — its terminal bookkeeping revision-

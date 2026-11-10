@@ -315,7 +315,7 @@ export type AgentGitIdentity = {
   email: string;
 };
 
-export const agentGitIdentitySchema: z.ZodType<AgentGitIdentity | undefined> = z
+export const agentGitIdentitySchema = z
   .object({
     name: z
       .string()

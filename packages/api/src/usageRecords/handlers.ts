@@ -18,13 +18,13 @@ const createUsageRecordSchema = z.object({
   value: z.number().min(0),
   unit: z.string().trim().min(1).max(50).optional(),
   recordedAt: z.coerce.date().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 const updateUsageRecordSchema = z.object({
   value: z.number().min(0).optional(),
   unit: z.string().trim().min(1).max(50).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 interface Actor {

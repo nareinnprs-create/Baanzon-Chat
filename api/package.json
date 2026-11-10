@@ -105,7 +105,7 @@
     "node-fetch": "^2.7.0",
     "nodemailer": "^10.0.13",
     "ollama": "^0.5.0",
-    "openai": "5.8.2",
+    "openai": "7.55.0",
     "openid-client": "^6.8.8",
     "passport": "^0.6.0",
     "passport-apple": "^2.0.2",
@@ -128,7 +128,7 @@
     "winston-daily-rotate-file": "^5.0.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "yauzl": "^3.2.1",
-    "zod": "^3.22.4"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.29.5",

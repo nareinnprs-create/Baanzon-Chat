@@ -19,13 +19,13 @@ import { resolveRequestTenantId } from '~/middleware/tenant';
 const createOrganizationSchema = z.object({
   name: z.string().trim().min(1).max(200),
   slug: z.string().trim().min(1).max(200).optional(),
-  settings: z.record(z.unknown()).optional(),
+  settings: z.record(z.string(), z.unknown()).optional(),
 });
 
 const updateOrganizationSchema = z.object({
   name: z.string().trim().min(1).max(200).optional(),
   status: z.enum(['active', 'suspended']).optional(),
-  settings: z.record(z.unknown()).optional(),
+  settings: z.record(z.string(), z.unknown()).optional(),
 });
 
 /** `owner` is excluded: ownership comes from the organization document, never an invite. */

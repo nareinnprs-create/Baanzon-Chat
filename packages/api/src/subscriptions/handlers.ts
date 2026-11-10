@@ -31,7 +31,7 @@ const createSubscriptionSchema = z.object({
   canceledAt: z.coerce.date().optional(),
   trialEndsAt: z.coerce.date().optional(),
   quantity: z.number().int().min(0).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 const updateSubscriptionSchema = createSubscriptionSchema

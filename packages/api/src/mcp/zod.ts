@@ -66,7 +66,7 @@ function dropSchemaFields(
 function convertToZodUnion(
   schemas: Record<string, unknown>[],
   options: ConvertJsonSchemaToZodOptions,
-): z.ZodType | undefined {
+): z.ZodType<any> | undefined {
   if (!Array.isArray(schemas) || schemas.length === 0) {
     return undefined;
   }
@@ -830,7 +830,7 @@ export function sanitizeGeminiSchema<T extends Record<string, unknown>>(schema: 
 export function convertJsonSchemaToZod(
   schema: JsonSchemaType & Record<string, unknown>,
   options: ConvertJsonSchemaToZodOptions = {},
-): z.ZodType | undefined {
+): z.ZodType<any> | undefined {
   const { allowEmptyObject = true, dropFields, transformOneOfAnyOf = false } = options;
 
   // Handle oneOf/anyOf if transformOneOfAnyOf is enabled
@@ -919,7 +919,7 @@ export function convertJsonSchemaToZod(
     return undefined;
   }
 
-  let zodSchema: z.ZodType;
+  let zodSchema: z.ZodType<any>;
 
   // Handle primitive types
   if (schema.type === 'string') {
@@ -1015,13 +1015,26 @@ export function convertJsonSchemaToZod(
       const partial = Object.fromEntries(
         Object.entries(shape).map(([key, value]) => [
           key,
-          schema.required?.includes(key) === true ? value : value.optional().nullable(),
+          /* v4: optional()/nullable() wrappers no longer surface the registry
+           * description of the wrapped schema, so re-describe after wrapping. */
+          schema.required?.includes(key) === true
+            ? value
+            : value
+                .optional()
+                .nullable()
+                .describe(value.description ?? undefined),
         ]),
       );
       objectSchema = z.object(partial);
     } else {
       const partialNullable = Object.fromEntries(
-        Object.entries(shape).map(([key, value]) => [key, value.optional().nullable()]),
+        Object.entries(shape).map(([key, value]) => [
+          key,
+          value
+            .optional()
+            .nullable()
+            .describe(value.description ?? undefined),
+        ]),
       );
       objectSchema = z.object(partialNullable);
     }
@@ -1064,7 +1077,7 @@ export function convertJsonSchemaToZod(
 export function convertWithResolvedRefs(
   schema: JsonSchemaType & Record<string, unknown>,
   options?: ConvertJsonSchemaToZodOptions,
-): z.ZodType | undefined {
+): z.ZodType<any> | undefined {
   const resolved = resolveJsonSchemaRefs(schema);
   return convertJsonSchemaToZod(resolved, options);
 }

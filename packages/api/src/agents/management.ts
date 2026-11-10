@@ -93,7 +93,6 @@ export type AgentManagementError = {
  */
 export const agentManagementCreateSchema: z.ZodType<
   AgentManagementCreate,
-  z.ZodTypeDef,
   AgentManagementCreateInput
 > = agentCreateSchema.extend({ model: z.string() }).strict();
 export const agentManagementUpdateSchema: z.ZodType<AgentManagementUpdate> = agentUpdateSchema
@@ -122,14 +121,14 @@ const agentManagementCursorSchema = z
         .safeParse(decoded);
 
       if (!result.success) {
-        context.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid cursor' });
+        context.addIssue({ code: 'custom', message: 'Invalid cursor' });
       }
     } catch {
-      context.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid cursor' });
+      context.addIssue({ code: 'custom', message: 'Invalid cursor' });
     }
   });
 
-export const agentManagementListSchema: z.ZodType<AgentManagementList, z.ZodTypeDef, unknown> = z
+export const agentManagementListSchema: z.ZodType<AgentManagementList, unknown> = z
   .object({
     limit: z.coerce.number().int().min(1).max(MAX_LIST_LIMIT).default(DEFAULT_LIST_LIMIT),
     cursor: agentManagementCursorSchema.optional(),
@@ -137,7 +136,7 @@ export const agentManagementListSchema: z.ZodType<AgentManagementList, z.ZodType
   .strict();
 
 const timestampSchema = z.string().datetime();
-const agentManagementGraphEdgeResponseSchema: z.ZodType<AgentSubagentGraphEdge> = z
+const agentManagementGraphEdgeResponseSchema = z
   .object({
     from: z.union([z.string(), z.array(z.string())]),
     to: z.union([z.string(), z.array(z.string())]),
@@ -147,7 +146,7 @@ const agentManagementGraphEdgeResponseSchema: z.ZodType<AgentSubagentGraphEdge> 
     excludeResults: z.boolean().optional(),
   })
   .strict();
-const agentManagementGraphResponseSchema: z.ZodType<AgentSubagentGraph> = z
+const agentManagementGraphResponseSchema = z
   .object({
     type: z.string(),
     name: z.string(),
@@ -158,7 +157,7 @@ const agentManagementGraphResponseSchema: z.ZodType<AgentSubagentGraph> = z
     result_agent_id: z.string(),
   })
   .strict();
-const agentManagementSubagentsResponseSchema: z.ZodType<AgentSubagentsConfig | undefined> = z
+const agentManagementSubagentsResponseSchema = z
   .object({
     enabled: z.boolean().optional(),
     allowSelf: z.boolean().optional(),
@@ -169,7 +168,7 @@ const agentManagementSubagentsResponseSchema: z.ZodType<AgentSubagentsConfig | u
   .optional();
 
 /** The externally supported Agent shape. Persistence and ownership fields are intentionally absent. */
-export const agentManagementResponseSchema: z.ZodType<AgentManagementResponse> = agentUpdateSchema
+export const agentManagementResponseSchema: z.ZodType<any> = agentUpdateSchema
   .extend({
     id: z.string().min(1),
     provider: z.string(),
@@ -194,7 +193,7 @@ export const agentManagementListResponseSchema: z.ZodType<AgentManagementListRes
   .superRefine(({ has_more, after }, context) => {
     if (has_more !== (after != null)) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['after'],
         message: 'A next cursor is required exactly when more results are available',
       });

@@ -33,7 +33,7 @@ const frontmatterValue: z.ZodType<SkillFrontmatterValue> = z.lazy(() =>
     z.boolean(),
     z.null(),
     z.array(frontmatterValue),
-    z.record(frontmatterValue),
+    z.record(z.string(), frontmatterValue),
   ]),
 );
 export type SkillManagementUpdate = TUpdateSkillPayload & { expectedVersion: number };
@@ -46,7 +46,7 @@ export const skillManagementUpdateSchema: z.ZodType<SkillManagementUpdate> = z
     category: fields.category,
     alwaysApply: fields.alwaysApply,
     body: z.string().optional(),
-    frontmatter: z.record(frontmatterValue).optional(),
+    frontmatter: z.record(z.string(), frontmatterValue).optional(),
     expectedVersion: z.number().int().positive(),
   })
   .strict()
@@ -84,7 +84,7 @@ export type SkillManagementResponse = Pick<
 export const skillManagementResponseSchema: z.ZodType<SkillManagementResponse> =
   summarySchema.extend({
     body: z.string(),
-    frontmatter: z.record(frontmatterValue).optional(),
+    frontmatter: z.record(z.string(), frontmatterValue).optional(),
   });
 const fileSchema = z.object({
   relativePath: z.string(),
