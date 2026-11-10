@@ -20,10 +20,7 @@ function toLines(text: string | undefined): string[] {
   return lines;
 }
 
-export function diffLines(
-  previous: string | undefined,
-  current: string | undefined,
-): DiffRow[] {
+export function diffLines(previous: string | undefined, current: string | undefined): DiffRow[] {
   const a = toLines(previous);
   const b = toLines(current);
   const n = a.length;
@@ -33,7 +30,8 @@ export function diffLines(
   const table: number[][] = Array.from({ length: n + 1 }, () => new Array<number>(m + 1).fill(0));
   for (let i = n - 1; i >= 0; i--) {
     for (let j = m - 1; j >= 0; j--) {
-      table[i][j] = a[i] === b[j] ? table[i + 1][j + 1] + 1 : Math.max(table[i + 1][j], table[i][j + 1]);
+      table[i][j] =
+        a[i] === b[j] ? table[i + 1][j + 1] + 1 : Math.max(table[i + 1][j], table[i][j + 1]);
     }
   }
 

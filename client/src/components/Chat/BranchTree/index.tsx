@@ -1,14 +1,18 @@
 import { useMemo } from 'react';
+import { GitBranch } from 'lucide-react';
 import * as Ariakit from '@ariakit/react';
+import { useParams } from 'react-router-dom';
 import { useAtomValue, useStore } from 'jotai';
 import { useQueryClient } from '@tanstack/react-query';
 import { QueryKeys, buildTree } from 'librechat-data-provider';
 import type { TMessage } from 'librechat-data-provider';
-import { GitBranch } from 'lucide-react';
-import { cn } from '~/utils';
+import {
+  siblingIdxFamily,
+  siblingIndexesAtom,
+  siblingKey,
+} from '~/components/Chat/Messages/Thread/state';
 import { useLocalize } from '~/hooks';
-import { useParams } from 'react-router-dom';
-import { siblingIdxFamily, siblingIndexesAtom, siblingKey } from '~/components/Chat/Messages/Thread/state';
+import { cn } from '~/utils';
 
 /**
  * X2 — visible conversation branch tree. Reads the same message tree the
@@ -41,10 +45,19 @@ function toRows(nodes: TMessage[] | undefined | null, parent: TreeRow | null = n
 function snippet(message: TMessage): string {
   const text = Array.isArray(message.content)
     ? message.content
-        .map((part) => (typeof part === 'object' && part != null && 'text' in part ? String((part as { text?: { value?: string } }).text?.value ?? '') : ''))
+        .map((part) =>
+          typeof part === 'object' && part != null && 'text' in part
+            ? String((part as { text?: { value?: string } }).text?.value ?? '')
+            : '',
+        )
         .join(' ')
     : String(message.text ?? '');
-  return text.replace(/<[^>]*>/g, ' ').trim().slice(0, 64) || '…';
+  return (
+    text
+      .replace(/<[^>]*>/g, ' ')
+      .trim()
+      .slice(0, 64) || '…'
+  );
 }
 
 export default function BranchTree({ readOnly = false }: { readOnly?: boolean }) {

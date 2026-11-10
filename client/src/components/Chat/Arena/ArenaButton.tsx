@@ -3,8 +3,8 @@ import { GitCompare } from 'lucide-react';
 import * as Ariakit from '@ariakit/react';
 import { TooltipAnchor } from '@librechat/client';
 import type { TStartupConfig } from 'librechat-data-provider';
-import { useLocalize } from '~/hooks';
 import { arenaOpenAtom } from './atoms';
+import { useLocalize } from '~/hooks';
 import ArenaPanel from './ArenaPanel';
 
 /** Header entry point for the Model Arena: opens the lane-2 / vote panel over
@@ -33,7 +33,7 @@ export default function ArenaButton({
             type="button"
             data-testid="arena-button"
             aria-label={localize('com_ui_arena')}
-            className="inline-flex size-9 flex-shrink-0 items-center justify-center rounded-xl border border-border-light bg-presentation text-text-primary transition-colors ease-in-out hover:bg-surface-tertiary aria-expanded:bg-surface-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary"
+            className="inline-flex size-9 flex-shrink-0 items-center justify-center rounded-xl border border-border-light bg-presentation text-text-primary transition-colors ease-in-out hover:bg-surface-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary aria-expanded:bg-surface-tertiary"
           >
             <GitCompare className="icon-sm" aria-hidden="true" />
           </Ariakit.PopoverDisclosure>

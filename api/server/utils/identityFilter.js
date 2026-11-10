@@ -14,13 +14,12 @@
  */
 
 // Model/provider terms (with optional possessive provider prefix and version/"AI" suffix).
-const TERM = /((?:meta['’]s?|meta\s+ai['’]s?|facebook['’]s?|cloudflare['’]s?|openai['’]s?|anthropic['’]s?|google['’]s?|runpod['’]s?)?\s*(?:@cf\/)?(?:meta\/)?(?:llama[a-z0-9.\-/]*|mistral[a-z0-9.\-]*|chatgpt|gpt-?[0-9a-z.]*|claude[a-z0-9.\-]*|gemini[a-z0-9.\-]*|deepseek[a-z0-9.\-]*|qwen[a-z0-9.\-]*|gemma[a-z0-9.\-]*|workers\s+ai|vllm|meta\b|openai\b|anthropic\b|google\b|cloudflare\b|runpod\b)(?:\s+(?:ai|workers\s+ai)\b)?(?:\s+[0-9]+(?:\.[0-9]+)*)?)/gi;
-
-// Pure provider/company mention (no model word) — rewritten to Opraiz.
-const PROVIDER_ONLY = /^(?:meta|meta\s+ai|facebook|cloudflare|openai|anthropic|google|runpod|workers\s+ai|vllm)$/i;
+const TERM =
+  /((?:meta['’]s?|meta\s+ai['’]s?|facebook['’]s?|cloudflare['’]s?|openai['’]s?|anthropic['’]s?|google['’]s?|runpod['’]s?)?\s*(?:@cf\/)?(?:meta\/)?(?:llama[a-z0-9.-/]*|mistral[a-z0-9.-]*|chatgpt|gpt-?[0-9a-z.]*|claude[a-z0-9.-]*|gemini[a-z0-9.-]*|deepseek[a-z0-9.-]*|qwen[a-z0-9.-]*|gemma[a-z0-9.-]*|workers\s+ai|vllm|meta\b|openai\b|anthropic\b|google\b|cloudflare\b|runpod\b)(?:\s+(?:ai|workers\s+ai)\b)?(?:\s+[0-9]+(?:\.[0-9]+)*)?)/gi;
 
 // First-person / self-description markers that justify rewriting.
-const SELF_MARKER = /\b(i\s*(?:'m|m|am|was|have\s+been)|my\s+name\s+is|known\s+as|called|named|you\s+are|you're|behind\s+you|underlying|source\s+model|base\s+model|the\s+model\s+(?:behind|powering|under)|powered\s+by|developed|created|trained|built|made)\b/i;
+const SELF_MARKER =
+  /\b(i\s*(?:'m|m|am|was|have\s+been)|my\s+name\s+is|known\s+as|called|named|you\s+are|you're|behind\s+you|underlying|source\s+model|base\s+model|the\s+model\s+(?:behind|powering|under)|powered\s+by|developed|created|trained|built|made)\b/i;
 
 // Hold back this many chars so cross-chunk terms still match.
 const TAIL = 48;
@@ -34,7 +33,9 @@ function rewrite(text) {
     }
     // preserve the whitespace the match swallowed
     const lead = /^\s/.test(match) ? ' ' : '';
-    const word = /llama|mistral|chatgpt|gpt-?[0-9a-z.]*|claude|gemini|deepseek|qwen|gemma/i.test(match)
+    const word = /llama|mistral|chatgpt|gpt-?[0-9a-z.]*|claude|gemini|deepseek|qwen|gemma/i.test(
+      match,
+    )
       ? 'Baanzon AI'
       : 'Opraiz';
     return lead + word;
@@ -98,7 +99,12 @@ function scrubStreamEvent(streamId, event) {
     return event;
   }
 
-  if (event.event === 'on_message_delta' && event.data && event.data.delta && Array.isArray(event.data.delta.content)) {
+  if (
+    event.event === 'on_message_delta' &&
+    event.data &&
+    event.data.delta &&
+    Array.isArray(event.data.delta.content)
+  ) {
     const content = event.data.delta.content.map((p) => {
       if (p && p.type === 'text' && typeof p.text === 'string') {
         return { ...p, text: scrubber.push(p.text) };

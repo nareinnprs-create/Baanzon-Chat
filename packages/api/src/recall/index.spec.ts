@@ -96,15 +96,21 @@ describe('mergeRecallHits', () => {
 });
 
 describe('runRecall', () => {
-  const search = jest.fn(async (index: string, _q: string, params: { filter?: string }) => {
-    expect(params.filter).toBe('user = "u1"');
+  const search = jest.fn(async (index: string, _q: string, _params: { filter?: string }) => {
     if (index === 'convos') {
       return { hits: [{ conversationId: 'a', title: 'A', _formatted: { title: 'A…' } }] };
     }
-    return { hits: [{ conversationId: 'a', text: 'a body' }, { conversationId: 'b', text: 'b body', _formatted: { text: 'b…' } }] };
+    return {
+      hits: [
+        { conversationId: 'a', text: 'a body' },
+        { conversationId: 'b', text: 'b body', _formatted: { text: 'b…' } },
+      ],
+    };
   });
   const getConvoMap = jest.fn(async (_userId: string, ids: string[]) =>
-    Object.fromEntries(ids.map((id) => [id, { title: `${id} title`, updatedAt: new Date('2026-01-02T03:04:05Z') }])),
+    Object.fromEntries(
+      ids.map((id) => [id, { title: `${id} title`, updatedAt: new Date('2026-01-02T03:04:05Z') }]),
+    ),
   );
 
   it('scopes searches to the user and hydrates metadata', async () => {
@@ -117,7 +123,10 @@ describe('runRecall', () => {
     });
     expect(status).toBe(200);
     expect(search).toHaveBeenCalledTimes(2);
-    const hits = (body as { hits: Array<{ conversationId: string; title: string; updatedAt: string | null }> }).hits;
+    expect(search.mock.calls.every((call) => call[2]?.filter === 'user = "u1"')).toBe(true);
+    const hits = (
+      body as { hits: Array<{ conversationId: string; title: string; updatedAt: string | null }> }
+    ).hits;
     expect(hits).toHaveLength(2);
     expect(hits[0]).toEqual({
       conversationId: 'a',

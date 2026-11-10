@@ -120,9 +120,10 @@ describe('admin providers handlers', () => {
     const handlers = createAdminProvidersHandlers({
       getAppConfig: jest.fn().mockResolvedValue(appConfig),
       cache,
-      fetchImpl: jest
-        .fn()
-        .mockResolvedValue({ status: 200, json: async () => ({ data: [{ id: 'a' }, { id: 'b' }] }) }),
+      fetchImpl: jest.fn().mockResolvedValue({
+        status: 200,
+        json: async () => ({ data: [{ id: 'a' }, { id: 'b' }] }),
+      }),
     });
     const res = mockRes();
     await handlers.testProvider(req(probe()), res as unknown as Response);
@@ -155,10 +156,7 @@ describe('admin providers handlers', () => {
 
   it('serves repeated probes from the cache within the TTL window', async () => {
     const cache = {
-      get: jest
-        .fn()
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValue(['cached-model']),
+      get: jest.fn().mockResolvedValueOnce(undefined).mockResolvedValue(['cached-model']),
       set: jest.fn().mockResolvedValue(undefined),
     };
     const fetchImpl = jest
@@ -171,9 +169,7 @@ describe('admin providers handlers', () => {
     });
     const res = mockRes();
     await handlers.testProvider(req(probe()), res as unknown as Response);
-    expect(res.json).toHaveBeenLastCalledWith(
-      expect.objectContaining({ status: 'ok', count: 1 }),
-    );
+    expect(res.json).toHaveBeenLastCalledWith(expect.objectContaining({ status: 'ok', count: 1 }));
     expect(fetchImpl).toHaveBeenCalledTimes(1);
 
     await handlers.testProvider(req(probe()), res as unknown as Response);
@@ -196,13 +192,8 @@ describe('admin providers handlers', () => {
         .mockResolvedValue({ status: 200, json: async () => ({ data: [{ id: 'live' }] }) }),
     });
     const res = mockRes();
-    await handlers.testProvider(
-      req(probe({ skipCache: true })),
-      res as unknown as Response,
-    );
+    await handlers.testProvider(req(probe({ skipCache: true })), res as unknown as Response);
     expect(cache.get).not.toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ models: ['live'] }),
-    );
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ models: ['live'] }));
   });
 });

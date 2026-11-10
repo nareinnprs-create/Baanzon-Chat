@@ -1,7 +1,7 @@
 import { createStore, Provider as JotaiProvider } from 'jotai';
 import { render, screen, fireEvent } from '@testing-library/react';
-import type { CanvasWorkspaceProps } from '../CanvasWorkspace';
 import type { TOptions } from 'i18next';
+import type { CanvasWorkspaceProps } from '../CanvasWorkspace';
 import type { CanvasBlock, CanvasDocument } from '../types';
 import type { EditSelectionFn } from '../api';
 import CanvasWorkspace from '../CanvasWorkspace';

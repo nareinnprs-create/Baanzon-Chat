@@ -56,9 +56,7 @@ export type RecallGetConvoMap = (
   conversationIds: string[],
 ) => Promise<Record<string, RecallConvoMeta>>;
 
-export type ValidateRecallQueryResult =
-  | { ok: true; value: string }
-  | { ok: false; error: string };
+export type ValidateRecallQueryResult = { ok: true; value: string } | { ok: false; error: string };
 
 /**
  * Validates and normalizes the `q` query parameter. Pure — exercised by spec.
@@ -201,13 +199,14 @@ export async function runRecall(params: {
     return { status: 502, body: { message: 'Recall search failed' } };
   }
   if (messageResult.status === 'rejected') {
-    logger.warn('[recall] Message search failed, returning title matches only', messageResult.reason);
+    logger.warn(
+      '[recall] Message search failed, returning title matches only',
+      messageResult.reason,
+    );
   }
 
-  const convoHits =
-    convoResult.status === 'fulfilled' ? (convoResult.value.hits ?? []) : [];
-  const messageHits =
-    messageResult.status === 'fulfilled' ? (messageResult.value.hits ?? []) : [];
+  const convoHits = convoResult.status === 'fulfilled' ? (convoResult.value.hits ?? []) : [];
+  const messageHits = messageResult.status === 'fulfilled' ? (messageResult.value.hits ?? []) : [];
   const merged = mergeRecallHits(convoHits, messageHits, limit);
   if (merged.length === 0) {
     return { status: 200, body: { hits: [] } };
@@ -227,9 +226,10 @@ export async function runRecall(params: {
     const meta = convoMap[hit.conversationId];
     return {
       conversationId: hit.conversationId,
-      title: meta?.title != null && typeof meta.title === 'string' && meta.title.length > 0
-        ? meta.title
-        : hit.title,
+      title:
+        meta?.title != null && typeof meta.title === 'string' && meta.title.length > 0
+          ? meta.title
+          : hit.title,
       snippet: hit.snippet,
       updatedAt: asUpdatedAt(meta?.updatedAt),
     };

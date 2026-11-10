@@ -221,11 +221,7 @@ export async function initializeCustom(
    *  `${VAR}` text when the env var is unset, so the regex only matches an
    *  *unresolved* placeholder — a literal admin key can never match. The key
    *  throw fires only when neither a user key nor a resolved env key exists. */
-  if (
-    CUSTOM_API_KEY.match(envVarRegex) &&
-    !userProvidesKey &&
-    userValues?.apiKey == null
-  ) {
+  if (CUSTOM_API_KEY.match(envVarRegex) && !userProvidesKey && userValues?.apiKey == null) {
     throw new Error(`Missing API Key for ${endpoint}.`);
   }
 
@@ -233,7 +229,8 @@ export async function initializeCustom(
     throw new Error(`Missing Base URL for ${endpoint}.`);
   }
 
-  const apiKey = userProvidesKey || userProvidesURL ? userValues?.apiKey : userValues?.apiKey || CUSTOM_API_KEY;
+  const apiKey =
+    userProvidesKey || userProvidesURL ? userValues?.apiKey : userValues?.apiKey || CUSTOM_API_KEY;
   const baseURL = userProvidesURL ? userValues?.baseURL : CUSTOM_BASE_URL;
 
   if ((userProvidesKey || userProvidesURL) && !apiKey) {

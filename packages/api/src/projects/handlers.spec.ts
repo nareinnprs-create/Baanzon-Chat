@@ -89,12 +89,14 @@ function listResult(projects: ChatProjectRecord[]): ChatProjectListResult {
 describe('createProjectHandlers', () => {
   describe('workspace-scoped reads', () => {
     it('excludes projects belonging to another workspace from a scoped list', async () => {
-      const listChatProjects = jest.fn().mockResolvedValue(
-        listResult([
-          project({ workspaceId: WORKSPACE_ID }),
-          project({ _id: OTHER_PROJECT_ID, workspaceId: OTHER_WORKSPACE_ID }),
-        ]),
-      );
+      const listChatProjects = jest
+        .fn()
+        .mockResolvedValue(
+          listResult([
+            project({ workspaceId: WORKSPACE_ID }),
+            project({ _id: OTHER_PROJECT_ID, workspaceId: OTHER_WORKSPACE_ID }),
+          ]),
+        );
       const handlers = createProjectHandlers({ ...dataSource(), listChatProjects });
       const response = mockResponse();
 
@@ -147,13 +149,15 @@ describe('createProjectHandlers', () => {
     });
 
     it('returns every project of the caller when no workspace is supplied', async () => {
-      const listChatProjects = jest.fn().mockResolvedValue(
-        listResult([
-          project({ workspaceId: WORKSPACE_ID }),
-          project({ _id: OTHER_PROJECT_ID, workspaceId: OTHER_WORKSPACE_ID }),
-          project({ _id: '507f1f77bcf86cd799439013' }),
-        ]),
-      );
+      const listChatProjects = jest
+        .fn()
+        .mockResolvedValue(
+          listResult([
+            project({ workspaceId: WORKSPACE_ID }),
+            project({ _id: OTHER_PROJECT_ID, workspaceId: OTHER_WORKSPACE_ID }),
+            project({ _id: '507f1f77bcf86cd799439013' }),
+          ]),
+        );
       const handlers = createProjectHandlers({ ...dataSource(), listChatProjects });
       const response = mockResponse();
 
@@ -198,7 +202,9 @@ describe('createProjectHandlers', () => {
     });
 
     it('answers 404 for a project that belongs to another workspace', async () => {
-      const getChatProject = jest.fn().mockResolvedValue(project({ workspaceId: OTHER_WORKSPACE_ID }));
+      const getChatProject = jest
+        .fn()
+        .mockResolvedValue(project({ workspaceId: OTHER_WORKSPACE_ID }));
       const handlers = createProjectHandlers({ ...dataSource(), getChatProject });
       const response = mockResponse();
 
@@ -250,9 +256,7 @@ describe('createProjectHandlers', () => {
 
   describe('create', () => {
     it('stores the workspace the body names', async () => {
-      const createChatProject = jest
-        .fn()
-        .mockResolvedValue(project({ workspaceId: WORKSPACE_ID }));
+      const createChatProject = jest.fn().mockResolvedValue(project({ workspaceId: WORKSPACE_ID }));
       const handlers = createProjectHandlers({ ...dataSource(), createChatProject });
       const response = mockResponse();
 
@@ -337,7 +341,11 @@ describe('createProjectHandlers', () => {
     it('consults the access guard with the caller and the named workspace before creating', async () => {
       const createChatProject = jest.fn().mockResolvedValue(project({ workspaceId: WORKSPACE_ID }));
       const assertWorkspaceAccess = jest.fn();
-      const handlers = createProjectHandlers({ ...dataSource(), createChatProject, assertWorkspaceAccess });
+      const handlers = createProjectHandlers({
+        ...dataSource(),
+        createChatProject,
+        assertWorkspaceAccess,
+      });
       const response = mockResponse();
 
       await handlers.createProject(
@@ -352,7 +360,11 @@ describe('createProjectHandlers', () => {
     it('refuses a create into a workspace the guard denies, writing nothing', async () => {
       const createChatProject = jest.fn();
       const assertWorkspaceAccess = jest.fn().mockRejectedValue(new Error('denied'));
-      const handlers = createProjectHandlers({ ...dataSource(), createChatProject, assertWorkspaceAccess });
+      const handlers = createProjectHandlers({
+        ...dataSource(),
+        createChatProject,
+        assertWorkspaceAccess,
+      });
       const response = mockResponse();
 
       await handlers.createProject(
@@ -368,7 +380,11 @@ describe('createProjectHandlers', () => {
     it('creates an unscoped project without consulting the guard', async () => {
       const createChatProject = jest.fn().mockResolvedValue(project());
       const assertWorkspaceAccess = jest.fn();
-      const handlers = createProjectHandlers({ ...dataSource(), createChatProject, assertWorkspaceAccess });
+      const handlers = createProjectHandlers({
+        ...dataSource(),
+        createChatProject,
+        assertWorkspaceAccess,
+      });
 
       const response = mockResponse();
       await handlers.createProject(projectRequest({ body: { name: 'Roadmap' } }), response.res);
@@ -396,7 +412,11 @@ describe('createProjectHandlers', () => {
     it('refuses an update into a workspace the guard denies, writing nothing', async () => {
       const updateChatProject = jest.fn();
       const assertWorkspaceAccess = jest.fn().mockRejectedValue(new Error('denied'));
-      const handlers = createProjectHandlers({ ...dataSource(), updateChatProject, assertWorkspaceAccess });
+      const handlers = createProjectHandlers({
+        ...dataSource(),
+        updateChatProject,
+        assertWorkspaceAccess,
+      });
       const response = mockResponse();
 
       await handlers.updateProject(
@@ -544,7 +564,9 @@ describe('createProjectHandlers', () => {
     });
 
     it('keeps a foreign-workspace project readable when no workspace is requested', async () => {
-      const getChatProject = jest.fn().mockResolvedValue(project({ workspaceId: OTHER_WORKSPACE_ID }));
+      const getChatProject = jest
+        .fn()
+        .mockResolvedValue(project({ workspaceId: OTHER_WORKSPACE_ID }));
       const handlers = createProjectHandlers({ ...dataSource(), getChatProject });
       const response = mockResponse();
 

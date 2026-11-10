@@ -424,7 +424,10 @@ class FluxAPI extends Tool {
       const cost = endpointKey != null ? FluxAPI.PRICING[endpointKey] : null;
       if (cost == null) {
         if (!pricingWarned) {
-          logger.warn('[FluxAPI] No PRICING entry for endpoint, skipping cost recording:', endpoint);
+          logger.warn(
+            '[FluxAPI] No PRICING entry for endpoint, skipping cost recording:',
+            endpoint,
+          );
           pricingWarned = true;
         }
       } else {

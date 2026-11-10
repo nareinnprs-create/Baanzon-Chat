@@ -1,11 +1,6 @@
 import { randomUUID } from 'crypto';
+import type { TDeepResearchPlan, TDeepResearchStatus } from 'librechat-data-provider';
 import type {
-  TDeepResearchPlan,
-  TDeepResearchReport,
-  TDeepResearchStatus,
-} from 'librechat-data-provider';
-import type {
-  DeepResearchEmittedEvent,
   DeepResearchEventEmitter,
   DeepResearchPlanInput,
   DeepResearchRunInput,
@@ -65,9 +60,7 @@ export function createDeepResearchRunner(deps: DeepResearchRunnerDeps): DeepRese
   ) {
     const { step } = input;
 
-    emit(
-      progress(0.1, 'Searching sources', { code: 'search_started', stepId: step.id }),
-    );
+    emit(progress(0.1, 'Searching sources', { code: 'search_started', stepId: step.id }));
 
     let sources: DeepResearchSearchResult[] = [];
     if (searchProvider == null) {
@@ -87,9 +80,7 @@ export function createDeepResearchRunner(deps: DeepResearchRunnerDeps): DeepRese
       );
     }
 
-    emit(
-      progress(0.85, 'Synthesizing findings', { code: 'synthesize_started', stepId: step.id }),
-    );
+    emit(progress(0.85, 'Synthesizing findings', { code: 'synthesize_started', stepId: step.id }));
     return synthesize(step, sources, signal);
   }
 

@@ -66,7 +66,9 @@ export function createFlagOverrideMethods(
     return await FlagOverride().find(filter).lean<IFlagOverride[]>();
   }
 
-  async function deleteFlagOverride(input: UpsertFlagOverrideInput): Promise<DeleteFlagOverrideResult> {
+  async function deleteFlagOverride(
+    input: UpsertFlagOverrideInput,
+  ): Promise<DeleteFlagOverrideResult> {
     validateInput(input);
 
     const { key, scope } = input;

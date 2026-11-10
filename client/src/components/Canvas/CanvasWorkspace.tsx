@@ -9,8 +9,8 @@ import type {
   CanvasSelection,
   CanvasVersion,
 } from './types';
-import type { CanvasLabelKey } from './labels';
 import type { MoveBlockDirection } from './state';
+import type { CanvasLabelKey } from './labels';
 import type { EditSelectionFn } from './api';
 import {
   canvasCanRedoAtom,
@@ -26,10 +26,10 @@ import {
 } from './atoms';
 import VersionHistory from './VersionHistory';
 import { CANVAS_LABELS as L } from './labels';
-import { toErrorMessage } from './utils';
-import { useLocalize } from '~/hooks';
 import CommentsPanel from './CommentsPanel';
 import CanvasEditor from './CanvasEditor';
+import { toErrorMessage } from './utils';
+import { useLocalize } from '~/hooks';
 import SplitView from './SplitView';
 import { cn } from '~/utils';
 

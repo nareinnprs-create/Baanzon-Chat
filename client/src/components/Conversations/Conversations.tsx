@@ -261,17 +261,19 @@ const Conversations: FC<ConversationsProps> = ({
 
       /** Search answered with nothing, and no page is in flight: leave one inviting
        *  row instead of silent empty space beneath the query. */
-      if (
-        search.query &&
-        !isLoading &&
-        !isSearchLoading &&
-        groupedConversations.length === 0
-      ) {
+      if (search.query && !isLoading && !isSearchLoading && groupedConversations.length === 0) {
         items.push({ type: 'search-empty' });
       }
     }
     return items;
-  }, [groupedConversations, isLoading, isChatsExpanded, shouldShowFavorites, search.query, isSearchLoading]);
+  }, [
+    groupedConversations,
+    isLoading,
+    isChatsExpanded,
+    shouldShowFavorites,
+    search.query,
+    isSearchLoading,
+  ]);
 
   // Store flattenedItems in a ref for keyMapper to access without recreating cache
   const flattenedItemsRef = useRef(flattenedItems);

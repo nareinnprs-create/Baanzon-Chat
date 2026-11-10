@@ -1,5 +1,5 @@
+import { useSetAtom } from 'jotai';
 import { Switch } from '@librechat/client';
-import { useAtomValue, useSetAtom } from 'jotai';
 import { interfaceMode, useInterfaceMode } from '~/store/settings';
 import { useLocalize } from '~/hooks';
 

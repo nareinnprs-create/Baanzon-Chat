@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Check, MessageSquare, RotateCcw, Trash2 } from 'lucide-react';
 import { Button, EmptyState, Label, Textarea } from '@librechat/client';
 import type { CanvasComment, CanvasSelection } from './types';
-import { CANVAS_LABELS as L } from './labels';
 import { countUnresolvedComments } from './state';
-import { useLocalize } from '~/hooks';
 import { formatTimestamp } from '~/utils/canvas';
+import { CANVAS_LABELS as L } from './labels';
+import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
 export type CommentsPanelProps = {

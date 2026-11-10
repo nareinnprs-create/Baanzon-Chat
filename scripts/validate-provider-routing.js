@@ -8,26 +8,36 @@ const repair = process.argv.includes('--fix');
 const source = fs.readFileSync(configPath, 'utf8');
 const endpointStart = source.indexOf("- name: 'Opraiz'");
 const nextEndpoint = source.indexOf('\n     - name:', endpointStart + 1);
-const endpoint = endpointStart >= 0
-  ? source.slice(endpointStart, nextEndpoint >= 0 ? nextEndpoint : source.length)
-  : '';
+const endpoint =
+  endpointStart >= 0
+    ? source.slice(endpointStart, nextEndpoint >= 0 ? nextEndpoint : source.length)
+    : '';
 
 if (!endpoint) {
   throw new Error('Opraiz custom endpoint is missing from baanzon.yaml');
 }
 
 const routedModels = [
-  ...new Set(Object.values(MATRIX).flatMap((tier) => Object.values(tier).map(({ model }) => model))),
+  ...new Set(
+    Object.values(MATRIX).flatMap((tier) => Object.values(tier).map(({ model }) => model)),
+  ),
 ];
 const missingModels = routedModels.filter((model) => !endpoint.includes(`'${model}'`));
 const maxRoutedContext = Math.max(
-  ...Object.values(MATRIX).flatMap((tier) => Object.values(tier).map(({ maxContextTokens }) => maxContextTokens)),
+  ...Object.values(MATRIX).flatMap((tier) =>
+    Object.values(tier).map(({ maxContextTokens }) => maxContextTokens),
+  ),
 );
 const maxContextTokens = Number(endpoint.match(/^\s*maxContextTokens:\s*(\d+)/m)?.[1]);
 
-if (repair && (missingModels.length > 0 || !Number.isFinite(maxContextTokens) || maxContextTokens < maxRoutedContext)) {
+if (
+  repair &&
+  (missingModels.length > 0 ||
+    !Number.isFinite(maxContextTokens) ||
+    maxContextTokens < maxRoutedContext)
+) {
   let repairedEndpoint = endpoint;
-  const fetchMatch = repairedEndpoint.match(/\r?\n(        fetch:)/);
+  const fetchMatch = repairedEndpoint.match(/\r?\n( {8}fetch:)/);
   if (missingModels.length > 0 && fetchMatch) {
     const additions = missingModels.map((model) => `         - '${model}'`).join('\n');
     repairedEndpoint = repairedEndpoint.replace(fetchMatch[0], `\n${additions}\n${fetchMatch[1]}`);
@@ -39,7 +49,9 @@ if (repair && (missingModels.length > 0 || !Number.isFinite(maxContextTokens) ||
     );
   }
   fs.writeFileSync(configPath, source.replace(endpoint, repairedEndpoint));
-  console.log(`[provider-check] repaired pod config: ${missingModels.length} models, maxContextTokens=${maxRoutedContext}`);
+  console.log(
+    `[provider-check] repaired pod config: ${missingModels.length} models, maxContextTokens=${maxRoutedContext}`,
+  );
   process.exit(0);
 }
 

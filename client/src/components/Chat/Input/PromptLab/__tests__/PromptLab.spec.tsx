@@ -26,7 +26,6 @@ const setStateIn = (state: PromptLabState) => {
   );
 };
 
-
 describe('PromptLabPanel', () => {
   beforeEach(() => {
     onApplyMock.mockClear();

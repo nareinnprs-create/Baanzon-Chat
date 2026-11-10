@@ -1,10 +1,10 @@
 import { Button, EmptyState } from '@librechat/client';
 import { History, RotateCcw, Save, Trash2 } from 'lucide-react';
 import type { CanvasDocument, CanvasVersion } from './types';
-import { CANVAS_LABELS as L } from './labels';
 import { formatTimestamp } from '~/utils/canvas';
-import { useLocalize } from '~/hooks';
+import { CANVAS_LABELS as L } from './labels';
 import { describeVersionDiff } from './state';
+import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
 export type VersionHistoryProps = {

@@ -676,7 +676,7 @@ export function createRagService(deps: RagServiceDeps): RagService {
             params.query,
             deps.config.candidateK,
           );
-        } catch (error) {
+        } catch (_error) {
           semantic = [];
         }
       }

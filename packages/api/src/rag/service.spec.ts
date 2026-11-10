@@ -1724,7 +1724,7 @@ describe('rag service retrieve', () => {
     };
 
     /** The answer with no client injected: the keyword half is the whole score. */
-    const keywordOnly = (minScore = RAG_DEFAULTS.minScore) =>
+    const keywordOnly = (minScore: number = RAG_DEFAULTS.minScore) =>
       ranked({ minScore, hybridAlpha: RAG_DEFAULTS.hybridAlpha });
 
     it('returns, at full keyword score, exactly what keyword search alone returned', async () => {
@@ -1750,8 +1750,8 @@ describe('rag service retrieve', () => {
     it('leaves the keyword-only path byte-identical, since nothing above touches it', async () => {
       // No client, so the floor still cuts exactly where the keyword score says it
       // does — including on the chunk whose score is the floor itself.
-      expect(await keywordOnly(0.2 as any)).toEqual([['doc-0', 0.2, 'keyword']]);
-      expect(await keywordOnly(0.2001 as any)).toEqual([]);
+      expect(await keywordOnly(0.2)).toEqual([['doc-0', 0.2, 'keyword']]);
+      expect(await keywordOnly(0.2001)).toEqual([]);
     });
 
     /**

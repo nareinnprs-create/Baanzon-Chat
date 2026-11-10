@@ -1,9 +1,5 @@
 import { chatProjectWorkspaceMigration, runMigrations } from '@librechat/data-schemas';
-import type {
-  Migration,
-  MigrationConnection,
-  MigrationRunResult,
-} from '@librechat/data-schemas';
+import type { Migration, MigrationConnection, MigrationRunResult } from '@librechat/data-schemas';
 
 /**
  * Boot-time Mongo migrations, applied once per deployment through the ledger

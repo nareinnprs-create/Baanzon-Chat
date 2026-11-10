@@ -26,7 +26,9 @@ if (!process.env.MEILI_HOST || !process.env.MEILI_MASTER_KEY) {
   process.exit(1);
 }
 if (process.env.SEARCH?.toLowerCase() !== 'true') {
-  console.error('[backfill-meili] SEARCH=true is required (the plugin only attaches when it is set)');
+  console.error(
+    '[backfill-meili] SEARCH=true is required (the plugin only attaches when it is set)',
+  );
   process.exit(1);
 }
 
@@ -35,7 +37,10 @@ createModels(mongoose);
 async function main() {
   const Message = mongoose.models.Message;
   const Conversation = mongoose.models.Conversation;
-  for (const [name, Model] of [['messages', Message], ['convos', Conversation]]) {
+  for (const [name, Model] of [
+    ['messages', Message],
+    ['convos', Conversation],
+  ]) {
     if (typeof Model.syncWithMeili !== 'function') {
       throw new Error(`${name} index plugin not registered — check MEILI_* env vars`);
     }

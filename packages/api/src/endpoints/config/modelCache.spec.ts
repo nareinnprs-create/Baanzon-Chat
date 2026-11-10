@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import {
   createModelListCache,
   createCachedModelListFetcher,
@@ -50,7 +49,7 @@ describe('createModelListCache', () => {
   });
 
   it('evicts the least-recently-used entry at capacity', async () => {
-    let now = 0;
+    const now = 0;
     const cache = createModelListCache({ now: () => now, maxEntries: 2 });
     await cache.set('a', ['a']);
     await cache.set('b', ['b']);

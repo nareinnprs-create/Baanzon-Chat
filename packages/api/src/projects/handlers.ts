@@ -152,9 +152,7 @@ export function createProjectHandlers(deps: ProjectDataSource): ProjectHandlers 
       const projects = scope.workspaceId
         ? result.projects.filter((project) => inWorkspace(project, scope.workspaceId))
         : result.projects;
-      return res
-        .status(200)
-        .json({ ...result, projects: projects.map(serializeChatProject) });
+      return res.status(200).json({ ...result, projects: projects.map(serializeChatProject) });
     } catch (error) {
       logger.error('[projects] Error listing projects', error);
       return res.status(500).json({ error: 'Error listing projects' });

@@ -13,11 +13,7 @@ export interface TRewriteResponse {
 }
 
 /** Fork-local route (POST /api/rewrite → `{ text }`), inline until it lands in data-provider. */
-export const useRewriteMutation = (): UseMutationResult<
-  TRewriteResponse,
-  Error,
-  TRewriteRequest
-> =>
+export const useRewriteMutation = (): UseMutationResult<TRewriteResponse, Error, TRewriteRequest> =>
   useMutation(async ({ text, mode, endpoint, model }) => {
     const response = await fetch('/api/rewrite', {
       method: 'POST',

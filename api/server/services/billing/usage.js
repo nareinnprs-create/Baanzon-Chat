@@ -22,7 +22,9 @@ function users() {
 async function getUserSlim(userId) {
   const user = await users().findOne(
     { _id: new mongoose.Types.ObjectId(String(userId)) },
-    { projection: { subscriptionTier: 1, subscriptionStatus: 1, packCredits: 1, packExpiresAt: 1 } },
+    {
+      projection: { subscriptionTier: 1, subscriptionStatus: 1, packCredits: 1, packExpiresAt: 1 },
+    },
   );
   const expired = !!user?.packExpiresAt && new Date() > new Date(user.packExpiresAt);
   return {
@@ -62,7 +64,8 @@ const enforce = () => async (req, res, next) => {
     if (overCap && packsRemaining <= 0) {
       return res.status(402).json({
         code: 'cap_reached',
-        message: "You've used today's allowance — it resets tonight. Upgrade or add a pack for more.",
+        message:
+          "You've used today's allowance — it resets tonight. Upgrade or add a pack for more.",
       });
     }
     const inc = { count: 1 };
@@ -81,7 +84,7 @@ const enforce = () => async (req, res, next) => {
     req.tier = tier;
     req.fromPack = overCap;
     return next();
-  } catch (err) {
+  } catch (_err) {
     return next();
   }
 };

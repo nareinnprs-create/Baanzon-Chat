@@ -3,10 +3,10 @@ import { useSetAtom } from 'jotai';
 import { GitCompare } from 'lucide-react';
 import * as Ariakit from '@ariakit/react';
 import type { TConversation } from 'librechat-data-provider';
-import { useLocalize } from '~/hooks';
 import { useRewriteMutation } from '~/data-provider';
-import { cn } from '~/utils';
 import { promptLabAtom } from './atoms';
+import { useLocalize } from '~/hooks';
+import { cn } from '~/utils';
 
 interface PromptLabProps {
   conversation: TConversation | null;
@@ -61,7 +61,7 @@ const PromptLab = ({ conversation, getText }: PromptLabProps) => {
               'text-text-secondary transition-colors duration-theme-normal',
               'hover:bg-surface-composer-hover hover:text-text-primary',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-xheavy',
-              'animate-in fade-in duration-200 motion-reduce:transition-none motion-reduce:animate-none',
+              'duration-200 animate-in fade-in motion-reduce:animate-none motion-reduce:transition-none',
             )}
           >
             <GitCompare className="size-4" aria-hidden="true" />

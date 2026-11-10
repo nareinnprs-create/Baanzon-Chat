@@ -1,11 +1,7 @@
 import { createStore, Provider } from 'jotai';
 import userEvent from '@testing-library/user-event';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import {
-  ACTIVE_HIGHLIGHT_NAME,
-  MATCH_HIGHLIGHT_NAME,
-  collectMatchRanges,
-} from './dom';
+import { ACTIVE_HIGHLIGHT_NAME, MATCH_HIGHLIGHT_NAME, collectMatchRanges } from './dom';
 import { inConversationFindOpenAtom, inConversationFindQueryAtom } from './state';
 import InConversationFind from './InConversationFind';
 
@@ -131,12 +127,12 @@ describe('InConversationFind', () => {
     await user.type(screen.getByRole('textbox', { name: 'Find in conversation' }), 'the');
 
     await screen.findByText('1 of 3 matches');
-    const highlights = (
-      globalThis as unknown as { CSS: { highlights: Map<string, Set<Range>> } }
-    ).CSS.highlights;
+    const highlights = (globalThis as unknown as { CSS: { highlights: Map<string, Set<Range>> } })
+      .CSS.highlights;
     const all = highlights.get(MATCH_HIGHLIGHT_NAME);
     const firstActiveSet = highlights.get(ACTIVE_HIGHLIGHT_NAME);
-    const firstActive = firstActiveSet && firstActiveSet.size > 0 ? [...firstActiveSet][0] : undefined;
+    const firstActive =
+      firstActiveSet && firstActiveSet.size > 0 ? [...firstActiveSet][0] : undefined;
     expect(all?.size).toBe(3);
     expect(firstActive).toBeDefined();
     expect((firstActive?.startContainer as Text | null)?.data).toBe('the quick brown fox');

@@ -72,6 +72,7 @@ function sanitizeIdentifier(value: unknown): string | undefined {
   }
   /** Control characters and padding out, hard cap in — identifiers go into
    *  provider config lookups and logs, never into model prompts. */
+  // eslint-disable-next-line no-control-regex -- the pattern deliberately matches control characters in order to strip them
   const cleaned = value.replace(/[\u0000-\u001f\u007f]/g, '').trim();
   return cleaned.length > 0 ? cleaned.slice(0, REWRITE_MAX_ID_LENGTH) : undefined;
 }
@@ -149,13 +150,11 @@ function extractRewriteText(response: unknown): string {
   }
   if (Array.isArray(content)) {
     return content
-      .map((part) =>
-        typeof part === 'string'
-          ? part
-          : typeof (part as { text?: unknown })?.text === 'string'
-            ? (part as { text: string }).text
-            : '',
-      )
+      .map((part) => {
+        if (typeof part === 'string') return part;
+        const text = (part as { text?: unknown })?.text;
+        return typeof text === 'string' ? text : '';
+      })
       .join('')
       .trim();
   }

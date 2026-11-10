@@ -36,7 +36,11 @@ export async function createChatProjectWorkspaceIndex(
 ): Promise<{ name: string }> {
   const collection = connection.db!.collection(CHAT_PROJECT_WORKSPACE_INDEX.collection);
   const name = await buildIndexWithRetry(
-    () => collection.createIndex(CHAT_PROJECT_WORKSPACE_INDEX.keys, CHAT_PROJECT_WORKSPACE_INDEX.options),
+    () =>
+      collection.createIndex(
+        CHAT_PROJECT_WORKSPACE_INDEX.keys,
+        CHAT_PROJECT_WORKSPACE_INDEX.options,
+      ),
     `createIndex(${CHAT_PROJECT_WORKSPACE_INDEX.collection}.${CHAT_PROJECT_WORKSPACE_INDEX.options.name})`,
   );
   return { name };
@@ -59,7 +63,11 @@ export const chatProjectWorkspaceMigration: Migration = {
     }
     const collection = db.collection(CHAT_PROJECT_WORKSPACE_INDEX.collection);
     await buildIndexWithRetry(
-      () => collection.createIndex(CHAT_PROJECT_WORKSPACE_INDEX.keys, CHAT_PROJECT_WORKSPACE_INDEX.options),
+      () =>
+        collection.createIndex(
+          CHAT_PROJECT_WORKSPACE_INDEX.keys,
+          CHAT_PROJECT_WORKSPACE_INDEX.options,
+        ),
       `createIndex(${CHAT_PROJECT_WORKSPACE_INDEX.collection}.${CHAT_PROJECT_WORKSPACE_INDEX.options.name})`,
     );
   },

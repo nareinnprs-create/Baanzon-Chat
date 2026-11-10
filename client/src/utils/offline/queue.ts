@@ -111,8 +111,10 @@ const toRecord = (item: OfflineSendItem): OfflinePendingSendRecord => ({
 const normalizeStatus = (status: OfflinePendingSendStatus): OfflineSendStatus =>
   status === 'sending' ? 'pending' : status;
 
-const orderByCreatedAt = (a: OfflinePendingSendRecord, b: OfflinePendingSendRecord): number =>
-  a.createdAt - b.createdAt || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+const orderByCreatedAt = (a: OfflinePendingSendRecord, b: OfflinePendingSendRecord): number => {
+  if (a.createdAt !== b.createdAt) return a.createdAt - b.createdAt;
+  return a.id < b.id ? -1 : 1;
+};
 
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);

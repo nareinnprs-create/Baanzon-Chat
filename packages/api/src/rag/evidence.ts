@@ -1,7 +1,10 @@
 import type { EvidenceSource } from 'librechat-data-provider';
 import type { RetrievedSnippet } from './types';
 
-const stringMetadata = (metadata: Record<string, unknown> | undefined, key: string): string | undefined => {
+const stringMetadata = (
+  metadata: Record<string, unknown> | undefined,
+  key: string,
+): string | undefined => {
   const value = metadata?.[key];
   return typeof value === 'string' && value.length > 0 ? value : undefined;
 };

@@ -81,9 +81,7 @@ function extractHeaderName(endpoint: TEndpoint): string | undefined {
 }
 
 /** Maps the configured custom block into the sanitized admin UI list. */
-export function sanitizeCustomProviders(
-  customEndpoints: unknown,
-): SanitizedCustomProvider[] {
+export function sanitizeCustomProviders(customEndpoints: unknown): SanitizedCustomProvider[] {
   if (!Array.isArray(customEndpoints)) {
     return [];
   }
@@ -125,7 +123,8 @@ export function createAdminProvidersHandlers(deps: AdminProvidersDeps): AdminPro
   const cache = deps.cache ?? modelListCache;
   const fetchImpl: AdminProvidersDeps['fetchImpl'] =
     deps.fetchImpl ??
-    ((url, init) => axios.get(url, init) as unknown as ReturnType<NonNullable<AdminProvidersDeps['fetchImpl']>>);
+    ((url, init) =>
+      axios.get(url, init) as unknown as ReturnType<NonNullable<AdminProvidersDeps['fetchImpl']>>);
 
   async function listProviders(req: ServerRequest, res: Response) {
     const appConfig = await deps.getAppConfig({
@@ -160,7 +159,9 @@ export function createAdminProvidersHandlers(deps: AdminProvidersDeps): AdminPro
     const timeout = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
     const bodyRecord = body as { skipCache?: boolean };
     if (!bodyRecord.skipCache) {
-      const cached = await cache.get(modelListCacheKey({ baseURL: baseURL, apiKey: body.apiKey ?? '' }));
+      const cached = await cache.get(
+        modelListCacheKey({ baseURL: baseURL, apiKey: body.apiKey ?? '' }),
+      );
       if (cached != null && cached.length > 0) {
         clearTimeout(timeout);
         return res.json({
@@ -182,10 +183,13 @@ export function createAdminProvidersHandlers(deps: AdminProvidersDeps): AdminPro
       }
       let response: { status: number; json: () => Promise<unknown> };
       try {
-        response = await (fetchImpl as NonNullable<AdminProvidersDeps['fetchImpl']>)(`${baseURL.replace(/\/$/, '')}/models`, {
-          headers,
-          signal: controller.signal,
-        });
+        response = await (fetchImpl as NonNullable<AdminProvidersDeps['fetchImpl']>)(
+          `${baseURL.replace(/\/$/, '')}/models`,
+          {
+            headers,
+            signal: controller.signal,
+          },
+        );
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         return res.json({ status: 'error', error: message });
@@ -212,7 +216,11 @@ export function createAdminProvidersHandlers(deps: AdminProvidersDeps): AdminPro
         : [];
       const key = modelListCacheKey({ baseURL: baseURL, apiKey: body.apiKey ?? '' });
       await cache.set(key, models, DEFAULT_MODEL_LIST_TTL_MS);
-      return res.json({ status: 'ok', count: models.length, models: models.slice(0, MAX_PREVIEW_MODELS) });
+      return res.json({
+        status: 'ok',
+        count: models.length,
+        models: models.slice(0, MAX_PREVIEW_MODELS),
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       return res.json({ status: 'error', error: message });

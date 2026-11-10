@@ -173,7 +173,7 @@ describe('resolveRagConfig', () => {
       embeddingTimeoutMs: RAG_DEFAULTS.embeddingTimeoutMs,
       embeddingBatchSize: RAG_DEFAULTS.embeddingBatchSize,
       embeddingConcurrency: RAG_DEFAULTS.embeddingConcurrency,
-      semanticEnabled: (RAG_DEFAULTS as any).semanticEnabled ?? false,
+      semanticEnabled: (RAG_DEFAULTS as { semanticEnabled?: boolean }).semanticEnabled ?? false,
     });
   });
 
@@ -319,7 +319,10 @@ describe('createRagRuntime', () => {
     };
 
     /** Retrieve with a query matching nothing in the stored text, on purpose. */
-    const topHit = async (deps: RagRuntimeDeps, config: any = { semanticEnabled: true }) => {
+    const topHit = async (
+      deps: RagRuntimeDeps,
+      config: RagRuntimeConfig = { semanticEnabled: true },
+    ) => {
       const runtime = createRagRuntime(deps, config);
       const created = await runtime.domainHandlers.createCollection({
         userId: 'u-1',

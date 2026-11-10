@@ -1,12 +1,12 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import type { IChatProject, IConversation } from '~/types';
-import { tenantStorage } from '~/config/tenantContext';
 import {
   createChatProjectMethods,
   updateChatProjectLastConversationForUser,
   type ChatProjectMethods,
 } from './chatProject';
+import { tenantStorage } from '~/config/tenantContext';
 import { createModels } from '~/models';
 
 jest.mock('~/config/winston', () => ({
@@ -646,7 +646,10 @@ describe('ChatProject workspace link', () => {
 
   describe('searchChatProjectsByTitle', () => {
     it('returns bounded user-scoped hits for name and description matches', async () => {
-      await methods.createChatProject(user, { name: 'Customer Alpha', description: 'Support work' });
+      await methods.createChatProject(user, {
+        name: 'Customer Alpha',
+        description: 'Support work',
+      });
       await methods.createChatProject(user, {
         name: 'Internal Tools',
         description: 'Overflow menu test',

@@ -20,7 +20,9 @@ const searchProvider = {
     const r = await fetch(`${url}${url.includes('?') ? '&' : '?'}format=json`, { signal });
     if (!r.ok) return [];
     const j = await r.json();
-    return (j.results || []).slice(0, 8).map((x) => ({ title: x.title, url: x.url, snippet: x.content }));
+    return (j.results || [])
+      .slice(0, 8)
+      .map((x) => ({ title: x.title, url: x.url, snippet: x.content }));
   },
 };
 
@@ -34,7 +36,11 @@ const llm = {
       method: 'POST',
       signal,
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], max_tokens: 4000 }),
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 4000,
+      }),
     });
     if (!r.ok) throw new Error(`LLM ${r.status}`);
     const j = await r.json();
@@ -42,7 +48,9 @@ const llm = {
   },
 };
 
-const handlers = createDeepResearchHandlers({ runner: createDeepResearchRunner({ searchProvider, llm }) });
+const handlers = createDeepResearchHandlers({
+  runner: createDeepResearchRunner({ searchProvider, llm }),
+});
 
 router.use(requireJwtAuth);
 router.use(projectsLimiter);

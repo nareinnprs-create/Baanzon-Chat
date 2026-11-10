@@ -1,14 +1,6 @@
 const axios = require('axios');
-const fetch = require('node-fetch');
 const { v4: uuidv4 } = require('uuid');
 const { logger } = require('@librechat/data-schemas');
-const { Tool } = require('@librechat/agents/langchain/tools');
-const {
-  applyAxiosProxyConfig,
-  createMinimalRetentionRequest,
-  getHttpsProxyAgent,
-} = require('@librechat/api');
-const { FileContext, ContentTypes } = require('librechat-data-provider');
 
 jest.mock('axios');
 jest.mock('node-fetch');
@@ -164,7 +156,7 @@ describe('FluxAPI', () => {
       // Fast forward timers to complete polling
       await jest.runAllTimersAsync();
 
-      const result = await resultPromise;
+      await resultPromise;
 
       expect(axios.post).toHaveBeenCalled();
       expect(axios.get).toHaveBeenCalled();

@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useRef } from 'react';
-import type { RefObject } from 'react';
 import { useAtom } from 'jotai';
-import { Mic, Volume2, VolumeX } from 'lucide-react';
 import * as Ariakit from '@ariakit/react';
-import { useLocalize } from '~/hooks';
-import { useChatFormContext } from '~/Providers';
+import { Mic, Volume2, VolumeX } from 'lucide-react';
+import type { RefObject } from 'react';
+import useSpeechRecognition, { isSpeechRecognitionSupported } from './useSpeechRecognition';
 import { useLatestMessage } from '~/hooks/Messages/useLatestMessage';
+import { applyTranscript, type InsertionSlot } from './speech';
+import useSpeechSynthesis from './useSpeechSynthesis';
+import { useChatFormContext } from '~/Providers';
 import { getLatestText, cn } from '~/utils';
 import { voiceActivityAtom } from './atoms';
-import useSpeechRecognition, { isSpeechRecognitionSupported } from './useSpeechRecognition';
-import useSpeechSynthesis from './useSpeechSynthesis';
-import { applyTranscript, type InsertionSlot } from './speech';
+import { useLocalize } from '~/hooks';
 
 const controlClasses = cn(
   'flex size-theme-control items-center justify-center rounded-theme-control-round border border-border-light',
@@ -49,7 +49,7 @@ function TooltipButton({
             {ring && (
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 rounded-full border-2 border-current opacity-60 animate-ping motion-reduce:animate-none"
+                className="pointer-events-none absolute inset-0 animate-ping rounded-full border-2 border-current opacity-60 motion-reduce:animate-none"
               />
             )}
             <button
@@ -97,7 +97,7 @@ function VoiceMic({ textAreaRef }: { textAreaRef: RefObject<HTMLTextAreaElement>
       }
       const current = methods.getValues('text') ?? '';
       const caret =
-        slotRef.current == null ? textAreaRef.current?.selectionStart ?? undefined : undefined;
+        slotRef.current == null ? (textAreaRef.current?.selectionStart ?? undefined) : undefined;
       const next = applyTranscript(current, dictation, slotRef.current, caret);
       slotRef.current = next.slot;
       methods.setValue('text', next.text, { shouldValidate: true });
@@ -223,7 +223,13 @@ function ReadAloud({ index }: { index: number }) {
 }
 
 /** Voice in/out for the composer: dictation mic + read-aloud of the latest reply. */
-function VoiceControls({ index, textAreaRef }: { index: number; textAreaRef: RefObject<HTMLTextAreaElement> }) {
+function VoiceControls({
+  index,
+  textAreaRef,
+}: {
+  index: number;
+  textAreaRef: RefObject<HTMLTextAreaElement>;
+}) {
   return (
     <>
       <VoiceMic textAreaRef={textAreaRef} />

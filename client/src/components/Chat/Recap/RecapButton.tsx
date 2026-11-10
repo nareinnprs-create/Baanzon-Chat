@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import * as Ariakit from '@ariakit/react';
-import { useQueryClient } from '@tanstack/react-query';
-import { QueryKeys } from 'librechat-data-provider';
-import type { TMessage } from 'librechat-data-provider';
 import { ScrollText } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 import { TooltipAnchor } from '@librechat/client';
-import { useLocalize } from '~/hooks';
+import { QueryKeys } from 'librechat-data-provider';
+import { useQueryClient } from '@tanstack/react-query';
+import type { TMessage } from 'librechat-data-provider';
 import { useRewriteMutation } from '~/data-provider';
+import { useLocalize } from '~/hooks';
 
 /** X7 Session recap: one-shot summarize of the active-branch transcript. */
 export default function RecapButton() {
@@ -64,7 +64,7 @@ export default function RecapButton() {
           </p>
         )}
         {rewrite.isError && (
-          <p role="alert" className="text-sm text-status-destructive">
+          <p role="alert" className="text-status-destructive text-sm">
             {localize('com_ui_error')}
           </p>
         )}

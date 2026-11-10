@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
-import { useLocalize } from '~/hooks';
-import { useChatFormContext } from '~/Providers';
 import { STARTER_TEMPLATES, type StarterTemplate } from './templates';
+import { useChatFormContext } from '~/Providers';
+import { useLocalize } from '~/hooks';
 
 const cardClassName =
   'flex min-h-[44px] w-full cursor-pointer flex-col items-start gap-1 rounded-xl border border-border-medium bg-surface-secondary px-3 py-2.5 text-left shadow-sm transition-colors duration-200 hover:border-border-heavy hover:bg-surface-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary';
@@ -36,17 +36,12 @@ export default function StarterGallery() {
         {localize('com_ui_gallery')}
       </h3>
       <ul
-        role="list"
         aria-label={localize('com_ui_gallery')}
         className="grid w-full grid-cols-2 gap-2 md:grid-cols-4"
       >
         {STARTER_TEMPLATES.slice(0, expanded ? STARTER_TEMPLATES.length : 6).map((template) => (
           <li key={template.id}>
-            <button
-              type="button"
-              onClick={() => applyTemplate(template)}
-              className={cardClassName}
-            >
+            <button type="button" onClick={() => applyTemplate(template)} className={cardClassName}>
               <span aria-hidden="true">{template.icon}</span>
               <span className="text-sm font-medium text-text-primary">{template.title}</span>
               <span className="text-xs capitalize text-text-tertiary">{template.category}</span>

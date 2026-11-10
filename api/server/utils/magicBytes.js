@@ -14,7 +14,8 @@ const SIGNATURES = {
   'application/pdf': [[0, [0x25, 0x50, 0x44, 0x46]]],
 };
 
-const TEXTISH = /\.(txt|md|json|csv|xml|html?|js|ts|jsx|tsx|py|css|ya?ml|sh|sql|rb|go|java|c|cpp)$/i;
+const TEXTISH =
+  /\.(txt|md|json|csv|xml|html?|js|ts|jsx|tsx|py|css|ya?ml|sh|sql|rb|go|java|c|cpp)$/i;
 
 async function validateMagicBytes(filePath, mimetype, originalname = '') {
   const sigs = SIGNATURES[mimetype];

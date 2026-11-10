@@ -21,7 +21,11 @@ router.post('/', async (req, res) => {
   try {
     const appConfig = req.config;
     filterFile({ req, file: req.file, image: true, isAvatar: true });
-    const magicError = await validateMagicBytes(req.file.path, req.file.mimetype, req.file.originalname);
+    const magicError = await validateMagicBytes(
+      req.file.path,
+      req.file.mimetype,
+      req.file.originalname,
+    );
     if (magicError) {
       return res.status(400).json({ message: magicError });
     }

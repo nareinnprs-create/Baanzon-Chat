@@ -155,7 +155,7 @@ describe('sandbox', () => {
 
   test('defaults to attached mode and delegates to the injected runner', async () => {
     const attached = jest.fn(
-      async (code: string, options?: SandboxRunOptions): Promise<SandboxResult> => ({
+      async (code: string, _options?: SandboxRunOptions): Promise<SandboxResult> => ({
         stdout: `attached:${code}`,
         stderr: '',
         exitCode: 0,

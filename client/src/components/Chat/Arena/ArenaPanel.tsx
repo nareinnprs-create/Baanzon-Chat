@@ -124,7 +124,7 @@ export default function ArenaPanel({ startupConfig }: { startupConfig: TStartupC
           {lane0Label}
         </span>
         <span className="text-text-secondary" aria-hidden="true">
-          vs
+          {localize('com_ui_arena_vs')}
         </span>
         <select
           aria-label={localize('com_ui_arena_pick')}
@@ -174,8 +174,9 @@ export default function ArenaPanel({ startupConfig }: { startupConfig: TStartupC
           </div>
           {voted != null && (
             <p role="status" className="text-xs text-text-secondary">
-              ✓ {localize('com_ui_arena_vote')}
-              {voted.winner != null ? `: ${voted.winner.label}` : ''}
+              {voted.winner != null
+                ? localize('com_ui_arena_vote_result', { 0: voted.winner.label })
+                : localize('com_ui_arena_vote')}
             </p>
           )}
         </div>

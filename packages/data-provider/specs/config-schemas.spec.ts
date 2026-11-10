@@ -1458,12 +1458,9 @@ describe('interfaceSchema', () => {
     expect(interfaceSchema.parse({}).mode).toBe('atelier');
   });
 
-  it.each(['modern', 'Atelier', null, 1])(
-    'rejects invalid interface mode: %s',
-    (mode) => {
-      expect(interfaceSchema.safeParse({ mode }).success).toBe(false);
-    },
-  );
+  it.each(['modern', 'Atelier', null, 1])('rejects invalid interface mode: %s', (mode) => {
+    expect(interfaceSchema.safeParse({ mode }).success).toBe(false);
+  });
 
   it('accepts mode: atelier set in baanzon.yaml and flows it through configSchema', () => {
     const result = configSchema.safeParse({

@@ -19,10 +19,23 @@ const dir = process.argv[2] || 'client/dist/assets';
 const KNOWN_EXTERNAL = new Set([
   // sandpack bundles emit templated require() helpers for language toolchains;
   // these specifiers are only touched inside never-mounted sandbox editors.
-  'preact', 'react', 'vue', 'solid-js', 'vite', 'mermaid', 'vaul',
-  'class-variance-authority', 'clsx', 'embla-carousel-react', 'lucide-react',
-  'react-day-picker', 'react-zoom-pan-pinch', 'tailwind-merge',
-  'jsdom-testing-mocks', 'RouterProvider', '${module}',
+  'preact',
+  'react',
+  'vue',
+  'solid-js',
+  'vite',
+  'mermaid',
+  'vaul',
+  'class-variance-authority',
+  'clsx',
+  'embla-carousel-react',
+  'lucide-react',
+  'react-day-picker',
+  'react-zoom-pan-pinch',
+  'tailwind-merge',
+  'jsdom-testing-mocks',
+  'RouterProvider',
+  '${module}',
 ]);
 
 const files = fs.readdirSync(dir).filter((f) => f.endsWith('.js'));

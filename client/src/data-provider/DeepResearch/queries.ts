@@ -1,12 +1,12 @@
-import { dataService, QueryKeys } from 'librechat-data-provider';
 import { useMutation } from '@tanstack/react-query';
-import type { UseMutationResult } from '@tanstack/react-query';
+import { dataService, QueryKeys } from 'librechat-data-provider';
 import type {
   TDeepResearchPlan,
   TDeepResearchPlanRequest,
   TDeepResearchReport,
   TDeepResearchReportRequest,
 } from 'librechat-data-provider';
+import type { UseMutationResult } from '@tanstack/react-query';
 
 export const useCreateDeepResearchPlanMutation = (): UseMutationResult<
   TDeepResearchPlan,
@@ -14,9 +14,12 @@ export const useCreateDeepResearchPlanMutation = (): UseMutationResult<
   TDeepResearchPlanRequest,
   unknown
 > => {
-  return useMutation((payload: TDeepResearchPlanRequest) => dataService.createDeepResearchPlan(payload), {
-    mutationKey: [QueryKeys.deepResearchPlan],
-  });
+  return useMutation(
+    (payload: TDeepResearchPlanRequest) => dataService.createDeepResearchPlan(payload),
+    {
+      mutationKey: [QueryKeys.deepResearchPlan],
+    },
+  );
 };
 
 export const useBuildDeepResearchReportMutation = (): UseMutationResult<

@@ -447,7 +447,10 @@ const registerUser = async (user, additionalData = {}) => {
         });
       } catch (emailError) {
         if (!isEnabled(process.env.ALLOW_UNVERIFIED_EMAIL_LOGIN)) throw emailError;
-        logger.error('[registerUser] Verification email unavailable; keeping account unverified', emailError);
+        logger.error(
+          '[registerUser] Verification email unavailable; keeping account unverified',
+          emailError,
+        );
       }
     } else {
       await updateUser(newUserId, { emailVerified: true });

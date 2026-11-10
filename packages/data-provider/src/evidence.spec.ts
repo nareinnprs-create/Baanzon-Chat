@@ -8,10 +8,15 @@ describe('evidence sources', () => {
   });
 
   it('requires stable identity and valid confidence', () => {
-    expect(evidenceSourceSchema.safeParse({ id: 'doc:1', type: 'private_document' }).success).toBe(true);
-    expect(evidenceSourceSchema.safeParse({ id: '', type: 'private_document' }).success).toBe(false);
+    expect(evidenceSourceSchema.safeParse({ id: 'doc:1', type: 'private_document' }).success).toBe(
+      true,
+    );
+    expect(evidenceSourceSchema.safeParse({ id: '', type: 'private_document' }).success).toBe(
+      false,
+    );
     expect(
-      evidenceSourceSchema.safeParse({ id: 'doc:1', type: 'private_document', confidence: 2 }).success,
+      evidenceSourceSchema.safeParse({ id: 'doc:1', type: 'private_document', confidence: 2 })
+        .success,
     ).toBe(false);
   });
 });

@@ -131,7 +131,6 @@ function ProviderRow({
   onDelete?: () => void;
   children?: ReactNode;
 }) {
-  const localize = useLocalize();
   return (
     <li className="rounded-lg border border-border-light bg-surface-secondary p-3">
       <div className="flex items-center justify-between gap-3">
@@ -147,9 +146,21 @@ function ProviderRow({
           <p className="truncate text-xs text-text-secondary">{baseURL}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {labels?.test && <Button size="sm" variant="outline" onClick={onTest}>{labels.test}</Button>}
-          {labels?.edit && <Button size="sm" variant="outline" onClick={onEdit}>{labels.edit}</Button>}
-          {labels?.delete && <Button size="sm" variant="outline" onClick={onDelete}>{labels.delete}</Button>}
+          {labels?.test && (
+            <Button size="sm" variant="outline" onClick={onTest}>
+              {labels.test}
+            </Button>
+          )}
+          {labels?.edit && (
+            <Button size="sm" variant="outline" onClick={onEdit}>
+              {labels.edit}
+            </Button>
+          )}
+          {labels?.delete && (
+            <Button size="sm" variant="outline" onClick={onDelete}>
+              {labels.delete}
+            </Button>
+          )}
         </div>
       </div>
       {children}
@@ -230,7 +241,10 @@ export default function ProvidersManagement() {
       return;
     }
     if (!testKey.trim()) {
-      showToast({ message: String(localize('com_ui_providers_test_key_required')), status: 'error' });
+      showToast({
+        message: String(localize('com_ui_providers_test_key_required')),
+        status: 'error',
+      });
       return;
     }
     testProvider.mutate(
@@ -242,11 +256,17 @@ export default function ProvidersManagement() {
       },
       {
         onSuccess: () => {
-          showToast({ message: String(localize('com_ui_providers_test_complete')), status: 'success' });
+          showToast({
+            message: String(localize('com_ui_providers_test_complete')),
+            status: 'success',
+          });
         },
         onError: (error) => {
           showToast({
-            message: error instanceof Error ? error.message : String(localize('com_ui_providers_test_error')),
+            message:
+              error instanceof Error
+                ? error.message
+                : String(localize('com_ui_providers_test_error')),
             status: 'error',
           });
         },
@@ -284,24 +304,26 @@ export default function ProvidersManagement() {
                   + {localize('com_ui_providers_add')}
                 </Button>
               </div>
-              {isLoading ? (
+              {isLoading && (
                 <div className="flex grow items-center justify-center p-4">
                   <Spinner className="size-6" />
                 </div>
-              ) : configuredProviders.length === 0 && drafts.length === 0 ? (
-                <p className="text-sm text-text-secondary">
-                  {localize('com_ui_providers_empty')}
-                </p>
-              ) : (
+              )}
+              {!isLoading && configuredProviders.length === 0 && drafts.length === 0 && (
+                <p className="text-sm text-text-secondary">{localize('com_ui_providers_empty')}</p>
+              )}
+              {!isLoading && (configuredProviders.length > 0 || drafts.length > 0) && (
                 <ul className="flex flex-col gap-2">
                   {configuredProviders.map((provider) => (
                     <ProviderRow
                       key={`configured-${provider.name}`}
                       name={provider.name}
                       baseURL={provider.baseURL}
-                      badge={provider.apiKeyUserProvided
-                        ? localize('com_ui_providers_byo_key')
-                        : localize('com_ui_providers_deployed_key')}
+                      badge={
+                        provider.apiKeyUserProvided
+                          ? localize('com_ui_providers_byo_key')
+                          : localize('com_ui_providers_deployed_key')
+                      }
                       labels={{
                         test: localize('com_ui_providers_test'),
                       }}
@@ -392,11 +414,7 @@ export default function ProvidersManagement() {
           showCloseButton={true}
           className="w-11/12 max-w-lg"
           main={
-            <form
-              id="provider-draft-form"
-              onSubmit={saveDraft}
-              className="flex flex-col gap-4"
-            >
+            <form id="provider-draft-form" onSubmit={saveDraft} className="flex flex-col gap-4">
               <div className="space-y-2">
                 <Label htmlFor="provider-name">{localize('com_ui_providers_name')}</Label>
                 <Input
@@ -526,7 +544,6 @@ export default function ProvidersManagement() {
                   type="password"
                   value={testKey}
                   onChange={(event) => setTestKey(event.target.value)}
-                  autoFocus
                 />
               </div>
               <TestResult result={testProvider.data} />
@@ -538,7 +555,11 @@ export default function ProvidersManagement() {
               onClick={runTest}
               disabled={testProvider.isLoading || !testKey.trim()}
             >
-              {testProvider.isLoading ? <Spinner className="size-4" /> : localize('com_ui_providers_test')}
+              {testProvider.isLoading ? (
+                <Spinner className="size-4" />
+              ) : (
+                localize('com_ui_providers_test')
+              )}
             </Button>
           }
         />
@@ -546,7 +567,3 @@ export default function ProvidersManagement() {
     </>
   );
 }
-
-
-
-

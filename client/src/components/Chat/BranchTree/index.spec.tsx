@@ -1,14 +1,14 @@
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { Provider as JotaiProvider, getDefaultStore } from 'jotai';
 import { QueryKeys } from 'librechat-data-provider';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { render, screen, waitFor } from '@testing-library/react';
+import { Provider as JotaiProvider, getDefaultStore } from 'jotai';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { TMessage } from 'librechat-data-provider';
-import BranchTree from '~/components/Chat/BranchTree';
 import { siblingIdxFamily, siblingKey } from '~/components/Chat/Messages/Thread/state';
+import BranchTree from '~/components/Chat/BranchTree';
 
 jest.mock('~/hooks', () => ({
   useLocalize: () => (key: string) => key,
@@ -19,11 +19,41 @@ jest.mock('~/hooks', () => ({
  * level) and A1 has a second child R1b. Two branch points.
  */
 const MESSAGES: TMessage[] = [
-  { messageId: 'U1', parentMessageId: null, isCreatedByUser: true, text: 'hello', depth: 0 } as TMessage,
-  { messageId: 'R1', parentMessageId: 'U1', isCreatedByUser: false, text: 'answer one', depth: 1 } as TMessage,
-  { messageId: 'U2', parentMessageId: null, isCreatedByUser: true, text: 'regen hello', depth: 0 } as TMessage,
-  { messageId: 'R2', parentMessageId: 'U2', isCreatedByUser: false, text: 'answer two', depth: 1 } as TMessage,
-  { messageId: 'R1b', parentMessageId: 'U1', isCreatedByUser: false, text: 'answer one alt', depth: 1 } as TMessage,
+  {
+    messageId: 'U1',
+    parentMessageId: null,
+    isCreatedByUser: true,
+    text: 'hello',
+    depth: 0,
+  } as TMessage,
+  {
+    messageId: 'R1',
+    parentMessageId: 'U1',
+    isCreatedByUser: false,
+    text: 'answer one',
+    depth: 1,
+  } as TMessage,
+  {
+    messageId: 'U2',
+    parentMessageId: null,
+    isCreatedByUser: true,
+    text: 'regen hello',
+    depth: 0,
+  } as TMessage,
+  {
+    messageId: 'R2',
+    parentMessageId: 'U2',
+    isCreatedByUser: false,
+    text: 'answer two',
+    depth: 1,
+  } as TMessage,
+  {
+    messageId: 'R1b',
+    parentMessageId: 'U1',
+    isCreatedByUser: false,
+    text: 'answer one alt',
+    depth: 1,
+  } as TMessage,
 ];
 
 function renderTree() {
@@ -78,8 +108,14 @@ describe('BranchTree', () => {
     await user.click(screen.getByRole('button', { name: 'com_ui_branch_tree' }));
     // Default selections (both 0 = newest) walk U2 → R2, not U1 → R1.
     await waitFor(() => {
-      expect(screen.getByRole('treeitem', { name: 'com_ui_you regen hello' })).toHaveAttribute('aria-selected', 'true');
-      expect(screen.getByRole('treeitem', { name: 'com_ui_you hello' })).toHaveAttribute('aria-selected', 'false');
+      expect(screen.getByRole('treeitem', { name: 'com_ui_you regen hello' })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      expect(screen.getByRole('treeitem', { name: 'com_ui_you hello' })).toHaveAttribute(
+        'aria-selected',
+        'false',
+      );
     });
   });
 });

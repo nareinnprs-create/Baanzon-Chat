@@ -265,8 +265,9 @@ describe('skill tree handlers', () => {
   });
 
   it('reports 404 for content of an unknown node', async () => {
-    await request(app)
-      .get(`/skills/${skillId}/tree/${encodeURIComponent('missing.md')}/content`)
-      .expect(404);
+    const res = await request(app).get(
+      `/skills/${skillId}/tree/${encodeURIComponent('missing.md')}/content`,
+    );
+    expect(res.status).toBe(404);
   });
 });

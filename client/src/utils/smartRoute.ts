@@ -34,7 +34,9 @@ export function pickSmartModel(
   }
   const wantsDeep = text.length > 600 || DEEP_PATTERN.test(text);
   const tier = wantsDeep ? DEEP_MODEL_PATTERN : FAST_PATTERN;
-  const matches = usable.filter((spec) => tier.test(spec.name ?? '') || tier.test(spec.label ?? ''));
+  const matches = usable.filter(
+    (spec) => tier.test(spec.name ?? '') || tier.test(spec.label ?? ''),
+  );
   if (matches.length === 0) {
     return null;
   }

@@ -35,9 +35,7 @@ describe('pickSmartModel', () => {
   });
 
   it('returns null when the picked model equals the current one', () => {
-    expect(
-      pickSmartModel('summarize', [spec('gpt-5-mini')], 'openAI', 'gpt-5-mini'),
-    ).toBeNull();
+    expect(pickSmartModel('summarize', [spec('gpt-5-mini')], 'openAI', 'gpt-5-mini')).toBeNull();
   });
 
   it('ignores specs from other endpoints', () => {

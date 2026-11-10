@@ -81,7 +81,8 @@ export default function InConversationFind() {
     rangesRef.current = ranges;
     setScannedQuery(scanQuery);
     setMatchCount(ranges.length);
-    const nextActive = ranges.length === 0 ? 0 : clamp(activeIndexRef.current, 0, ranges.length - 1);
+    const nextActive =
+      ranges.length === 0 ? 0 : clamp(activeIndexRef.current, 0, ranges.length - 1);
     activeIndexRef.current = nextActive;
     setActiveIndex(nextActive);
     applyHighlights(ranges, nextActive);

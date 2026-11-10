@@ -26,16 +26,19 @@ function zeptoMailTransport(apiKey, fromAddress, fromName) {
           path: '/v1.1/email',
           method: 'POST',
           headers: {
-            'Authorization': `Zoho-enczapikey ${apiKey}`,
+            Authorization: `Zoho-enczapikey ${apiKey}`,
             'Content-Type': 'application/json',
             'Content-Length': Buffer.byteLength(body),
           },
         },
         (res) => {
           let data = '';
-          res.on('data', (c) => { data += c; });
+          res.on('data', (c) => {
+            data += c;
+          });
           res.on('end', () => {
-            if (res.statusCode >= 200 && res.statusCode < 300) callback(null, { messageId: Date.now().toString(), envelope: {} });
+            if (res.statusCode >= 200 && res.statusCode < 300)
+              callback(null, { messageId: Date.now().toString(), envelope: {} });
             else callback(new Error(`ZeptoMail ${res.statusCode}: ${data.slice(0, 200)}`));
           });
         },

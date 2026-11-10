@@ -65,5 +65,8 @@ export function applyCustomEndpointsLevers(config?: {
   config?: Pick<TCustomConfig, 'customEndpoints'> | null;
   endpoints?: { [EModelEndpoint.custom]?: unknown } | null;
 }): { endpoints: TEndpoint[]; levers: AppliedCustomEndpointsLevers } {
-  return filterCustomEndpoints(config?.endpoints?.[EModelEndpoint.custom], config?.config?.customEndpoints);
+  return filterCustomEndpoints(
+    config?.endpoints?.[EModelEndpoint.custom],
+    config?.config?.customEndpoints,
+  );
 }

@@ -1178,7 +1178,6 @@ describe('MCP UI refresh configuration', () => {
   });
 });
 
-
 describe('customEndpointsConfigSchema', () => {
   it('parses the admin levers, all optional', () => {
     const result = customEndpointsConfigSchema.safeParse({

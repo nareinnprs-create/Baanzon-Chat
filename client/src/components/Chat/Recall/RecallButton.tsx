@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import * as Ariakit from '@ariakit/react';
-import { useQueryClient } from '@tanstack/react-query';
-import { Constants } from 'librechat-data-provider';
 import { Globe, Loader } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { TooltipAnchor } from '@librechat/client';
-import { useLocalize } from '~/hooks';
+import { Constants } from 'librechat-data-provider';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRecallQuery } from '~/data-provider/recall';
+import { useLocalize } from '~/hooks';
 
 /**
  * X8 Cross-chat recall: ask across all your conversations. Lexical v1
@@ -85,14 +85,18 @@ export default function RecallButton() {
           />
         </form>
         {isFetching && (
-          <p role="status" aria-live="polite" className="mt-3 flex items-center gap-2 text-sm text-text-secondary">
+          <p
+            role="status"
+            aria-live="polite"
+            className="mt-3 flex items-center gap-2 text-sm text-text-secondary"
+          >
             <Loader className="size-3.5 animate-spin" aria-hidden="true" /> {submitted}
           </p>
         )}
         {!isFetching && submitted.length >= 2 && hits.length === 0 && (
           <p className="mt-3 text-sm text-text-secondary">{localize('com_ui_recall_no_results')}</p>
         )}
-        <ul role="list" className="mt-2 space-y-1">
+        <ul className="mt-2 space-y-1">
           {hits.map((hit) => (
             <li key={hit.conversationId}>
               <button
