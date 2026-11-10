@@ -63,10 +63,16 @@ function dropSchemaFields(
 }
 
 // Helper function to convert oneOf/anyOf to Zod unions
+/* The JSON-schema conversion output is intentionally loose: callers and specs
+ * reach into parsed values directly, and v4 ZodType defaults its output to
+ * unknown, which would force every call site through narrowing casts. */
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+type LooseZodSchema = z.ZodType<any>;
+
 function convertToZodUnion(
   schemas: Record<string, unknown>[],
   options: ConvertJsonSchemaToZodOptions,
-): z.ZodType<any> | undefined {
+): LooseZodSchema | undefined {
   if (!Array.isArray(schemas) || schemas.length === 0) {
     return undefined;
   }
@@ -830,7 +836,7 @@ export function sanitizeGeminiSchema<T extends Record<string, unknown>>(schema: 
 export function convertJsonSchemaToZod(
   schema: JsonSchemaType & Record<string, unknown>,
   options: ConvertJsonSchemaToZodOptions = {},
-): z.ZodType<any> | undefined {
+): LooseZodSchema | undefined {
   const { allowEmptyObject = true, dropFields, transformOneOfAnyOf = false } = options;
 
   // Handle oneOf/anyOf if transformOneOfAnyOf is enabled
@@ -919,7 +925,7 @@ export function convertJsonSchemaToZod(
     return undefined;
   }
 
-  let zodSchema: z.ZodType<any>;
+  let zodSchema: LooseZodSchema;
 
   // Handle primitive types
   if (schema.type === 'string') {
@@ -1083,7 +1089,7 @@ export function convertJsonSchemaToZod(
 export function convertWithResolvedRefs(
   schema: JsonSchemaType & Record<string, unknown>,
   options?: ConvertJsonSchemaToZodOptions,
-): z.ZodType<any> | undefined {
+): LooseZodSchema | undefined {
   const resolved = resolveJsonSchemaRefs(schema);
   return convertJsonSchemaToZod(resolved, options);
 }
