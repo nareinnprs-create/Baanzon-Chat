@@ -14,14 +14,11 @@ jest.mock('~/data-provider', () => {
   return { useBillingProducts: jest.fn(), useCreateCheckout: () => checkoutApi };
 });
 
-const {
-  useBillingProducts,
-  useCreateCheckout,
-} = require('~/data-provider') as {
+const { useBillingProducts, useCreateCheckout } = jest.requireMock('~/data-provider') as {
   useBillingProducts: jest.Mock;
   useCreateCheckout: () => { mutate: jest.Mock; isPending: boolean };
 };
-const checkoutApi = useCreateCheckout();
+let checkoutApi: { mutate: jest.Mock; isPending: boolean };
 
 const catalog: TBillingProductsResponse = {
   products: [
@@ -42,6 +39,7 @@ const renderView = () =>
 
 describe('PricingView', () => {
   beforeEach(() => {
+    checkoutApi = useCreateCheckout() as { mutate: jest.Mock; isPending: boolean };
     checkoutApi.mutate.mockReset();
     checkoutApi.mutate.mockImplementation(
       (_payload: unknown, options?: { onSuccess?: (d: unknown) => void }) => {

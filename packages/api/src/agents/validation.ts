@@ -10,12 +10,7 @@ import {
   MAX_SUBAGENT_GRAPH_NODES,
   MAX_GRAPH_SUBAGENT_MEMBERS,
 } from 'librechat-data-provider';
-import type {
-  Agent,
-  AgentGitIdentity,
-  TModelsConfig,
-  AgentSubagentsConfig,
-} from 'librechat-data-provider';
+import type { Agent, TModelsConfig } from 'librechat-data-provider';
 import type { Request, Response } from 'express';
 
 /**
@@ -84,6 +79,7 @@ export const agentSupportContactSchema: z.ZodOptional<
   .optional();
 
 /** Graph edge schema for agent handoffs */
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- the transform pipes in this shape are not expressible as an isolatedDeclarations annotation; parse contract: {from,to,description?,edgeType?,prompt?,excludeResults?,promptKey?} */
 export const graphEdgeSchema: z.ZodType<any> = z.object({
   from: z.union([z.string(), z.array(z.string())]),
   to: z.union([z.string(), z.array(z.string())]),
@@ -282,6 +278,7 @@ const graphSubagentSchema = z
     }
   });
 
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- superRefine-checked object type is not expressible as an isolatedDeclarations annotation */
 export const agentSubagentsSchema: z.ZodType<any> = z
   .object({
     enabled: z.boolean().optional(),

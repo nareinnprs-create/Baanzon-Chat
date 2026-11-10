@@ -71,7 +71,7 @@ function ProductCard({
     <Card className="flex-1 basis-64">
       <h3 className="text-base font-medium text-text-primary">{product.label}</h3>
       <p className="text-2xl text-text-primary">
-        ₹{new Intl.NumberFormat().format(price)}
+        {`₹${new Intl.NumberFormat().format(price)}`}
         <span className="text-sm text-text-secondary">
           {cycle === 'yearly' && yearly
             ? ` ${localize('com_ui_pricing_per_year')}`
@@ -80,8 +80,7 @@ function ProductCard({
       </p>
       {yearly && (
         <p className="text-xs text-text-secondary">
-          ₹{new Intl.NumberFormat().format(product.inrMonthly)}{' '}
-          {localize('com_ui_pricing_per_month')}
+          {`₹${new Intl.NumberFormat().format(product.inrMonthly)} ${localize('com_ui_pricing_per_month')}`}
         </p>
       )}
       <Button
@@ -112,13 +111,16 @@ function PackCard({
         <Sparkles className="icon-md" aria-hidden="true" />
         {pack.label}
       </h3>
-      <p className="text-2xl text-text-primary">
-        ₹{new Intl.NumberFormat().format(pack.inr)}
-      </p>
+      <p className="text-2xl text-text-primary">{`₹${new Intl.NumberFormat().format(pack.inr)}`}</p>
       <p className="text-sm text-text-secondary">
         {`${new Intl.NumberFormat().format(pack.credits)} ${localize('com_ui_pricing_credits')}`}
       </p>
-      <Button variant="outline" onClick={() => onBuy({ pack: pack.pack })} disabled={busy} className="mt-auto">
+      <Button
+        variant="outline"
+        onClick={() => onBuy({ pack: pack.pack })}
+        disabled={busy}
+        className="mt-auto"
+      >
         {busy ? localize('com_ui_pricing_redirecting') : localize('com_ui_pricing_topup')}
       </Button>
     </Card>
@@ -188,7 +190,13 @@ export function PricingView() {
           </div>
           <div className="mt-3 flex flex-wrap gap-4">
             {products.map((product) => (
-              <ProductCard key={product.tier} product={product} cycle={cycle} onBuy={buy} busy={busy} />
+              <ProductCard
+                key={product.tier}
+                product={product}
+                cycle={cycle}
+                onBuy={buy}
+                busy={busy}
+              />
             ))}
           </div>
 

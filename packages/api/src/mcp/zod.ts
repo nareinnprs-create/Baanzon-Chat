@@ -1009,7 +1009,19 @@ export function convertJsonSchemaToZod(
       shape[key] = fieldSchema;
     }
 
-    let objectSchema = z.object(shape);
+    /** v4: optional()/nullable() wrappers do not surface the registry description of
+ *  the wrapped schema, so the description is re-registered on the wrapper. */
+function describeWrapper<T extends z.ZodType>(
+  schema: T,
+  source: { description?: string | null },
+): T {
+  if (source.description != null && source.description !== '') {
+    return schema.describe(source.description) as T;
+  }
+  return schema;
+}
+
+let objectSchema = z.object(shape);
 
     if (Array.isArray(schema.required) && schema.required.length > 0) {
       const partial = Object.fromEntries(
@@ -1019,10 +1031,7 @@ export function convertJsonSchemaToZod(
            * description of the wrapped schema, so re-describe after wrapping. */
           schema.required?.includes(key) === true
             ? value
-            : value
-                .optional()
-                .nullable()
-                .describe(value.description ?? undefined),
+            : describeWrapper(value.optional().nullable(), value),
         ]),
       );
       objectSchema = z.object(partial);
@@ -1030,10 +1039,7 @@ export function convertJsonSchemaToZod(
       const partialNullable = Object.fromEntries(
         Object.entries(shape).map(([key, value]) => [
           key,
-          value
-            .optional()
-            .nullable()
-            .describe(value.description ?? undefined),
+          describeWrapper(value.optional().nullable(), value),
         ]),
       );
       objectSchema = z.object(partialNullable);
