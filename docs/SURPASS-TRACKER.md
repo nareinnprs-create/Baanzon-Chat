@@ -27,12 +27,12 @@ zero-downtime lane. Status: ⬜ pending · 🔄 in progress · ✅ done · ⛔ b
 | A1 reasoning visibility | ✅ "Thought for Ns" duration on reasoning panels (panel + streaming peek already built) |
 | V3 vision UX in chat | ✅ core: vision model in catalog + composer vision lane badge (hint chip = follow-up polish) |
 
-## Batch 4 — Intelligence surfaces (A3, A5)
+## Batch 4 — Intelligence surfaces (A3, A5) ✅
 
 | Item | Status |
 |---|---|
-| A3 Tasks surface (schedules UI) | ⬜ |
-| A5 Memory surface (user-facing viewer/editor) | ⬜ |
+| A3 Tasks surface (schedules UI) | ✅ verified: SidePanel Schedules dialog + specs green (98/98 across the batch) |
+| A5 Memory surface (user-facing viewer/editor) | ✅ verified: memory artifacts/call/info components green |
 
 ## Batch 5 — Routing + research (A6, B5, A7)
 
