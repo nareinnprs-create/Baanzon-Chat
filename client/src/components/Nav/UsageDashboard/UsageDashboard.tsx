@@ -10,6 +10,7 @@ import type { TranslationKeys } from '~/hooks';
 import { aggregateMessageLists } from './aggregate';
 import { usageScopeAtom } from './atoms';
 import { useGetStartupConfig, useGetUserBalance, useBillingSubscription } from '~/data-provider';
+import { useUsageSummaryQuery } from '~/data-provider/Usage/Usage';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
@@ -72,19 +73,30 @@ export default function UsageDashboard() {
   const balanceQuery = useGetUserBalance({
     enabled: startupConfig?.balance?.enabled === true,
   });
+  const summaryQuery = useUsageSummaryQuery();
 
   const aggregate: UsageAggregate | null = useMemo(() => {
-    const cached = queryClient.getQueriesData<TMessage[]>({ queryKey: [QueryKeys.messages] });
-    if (scope === 'current') {
-      const conversationId = currentConversationId(location.pathname);
-      if (conversationId == null) {
+    if (scope === 'all') {
+      const s = summaryQuery.data;
+      if (s == null) {
         return null;
       }
-      const messages = cached.find(([key]) => key[1] === conversationId)?.[1];
-      return messages != null && messages.length > 0 ? aggregateMessageLists([messages]) : null;
+      return {
+        conversations: 0,
+        messages: s.messages,
+        tokensIn: s.tokensIn,
+        tokensOut: s.tokensOut,
+        totalTokens: s.totalTokens,
+      };
     }
-    return aggregateMessageLists(cached.map(([, messages]) => messages ?? []));
-  }, [queryClient, location.pathname, scope]);
+    const cached = queryClient.getQueriesData<TMessage[]>({ queryKey: [QueryKeys.messages] });
+    const conversationId = currentConversationId(location.pathname);
+    if (conversationId == null) {
+      return null;
+    }
+    const messages = cached.find(([key]) => key[1] === conversationId)?.[1];
+    return messages != null && messages.length > 0 ? aggregateMessageLists([messages]) : null;
+  }, [queryClient, location.pathname, scope, summaryQuery.data]);
 
   const format = (n: number) => n.toLocaleString();
 

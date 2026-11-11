@@ -7,6 +7,7 @@ import type { AppConfig, IConversation, IMessage } from '~/types';
 import { createChatExpirationDate, createTempChatExpirationDate } from '~/utils/tempChatRetention';
 import { activeExpirationFilter, createFallbackRetentionDate } from '~/utils/retention';
 import { tenantSafeBulkWrite } from '~/utils/tenantBulkWrite';
+import { isValidObjectIdString } from '~/utils/objectId';
 import logger from '~/config/winston';
 
 /** Simple UUID v4 regex to replace zod validation */
@@ -572,6 +573,14 @@ export type ParentSubagentTaskRecord = {
   >;
 };
 
+/** All-time per-user usage totals aggregated over stored messages. */
+export interface MessageUsageSummary {
+  messages: number;
+  tokensIn: number;
+  tokensOut: number;
+  totalTokens: number;
+}
+
 export interface MessageMethods {
   saveMessage(
     ctx: {
@@ -725,6 +734,8 @@ export interface MessageMethods {
     limitPerThread: number;
   }): Promise<ParentSubagentTaskRecord[]>;
   getMessage(params: { user: string; messageId: string }): Promise<IMessage | null>;
+  /** All-time usage totals for a user, aggregated over stored messages. */
+  getMessageUsageSummary(userId: string): Promise<MessageUsageSummary>;
   getMessagesByCursor(
     filter: FilterQuery<IMessage>,
     options?: {
@@ -3322,6 +3333,57 @@ export function createMessageMethods(mongoose: typeof import('mongoose')): Messa
   }
 
   /**
+   * All-time usage totals for a user, aggregated in the database over stored
+   * messages: tokenCount is prompt-side on user messages and completion-side
+   * on assistant messages, mirroring the client-side dashboard aggregate.
+   */
+  async function getMessageUsageSummary(userId: string): Promise<MessageUsageSummary> {
+    const empty: MessageUsageSummary = { messages: 0, tokensIn: 0, tokensOut: 0, totalTokens: 0 };
+    if (!isValidObjectIdString(userId)) {
+      return empty;
+    }
+    try {
+      const Message = mongoose.models.Message as Model<IMessage>;
+      const [row] = await Message.aggregate([
+        { $match: { user: new mongoose.Types.ObjectId(userId) } },
+        {
+          $group: {
+            _id: null,
+            messages: { $sum: 1 },
+            tokensIn: {
+              $sum: {
+                $cond: [
+                  { $eq: ['$isCreatedByUser', true] },
+                  { $ifNull: ['$tokenCount', 0] },
+                  0,
+                ],
+              },
+            },
+            tokensOut: {
+              $sum: {
+                $cond: [
+                  { $ne: ['$isCreatedByUser', true] },
+                  { $ifNull: ['$tokenCount', 0] },
+                  0,
+                ],
+              },
+            },
+          },
+        },
+      ]);
+      const summary = {
+        messages: row?.messages ?? 0,
+        tokensIn: row?.tokensIn ?? 0,
+        tokensOut: row?.tokensOut ?? 0,
+      };
+      return { ...summary, totalTokens: summary.tokensIn + summary.tokensOut };
+    } catch (err) {
+      logger.error('Error getting usage summary:', err);
+      throw err;
+    }
+  }
+
+  /**
    * Deletes messages from the database.
    */
   async function deleteMessages(filter: FilterQuery<IMessage>) {
@@ -3409,6 +3471,7 @@ export function createMessageMethods(mongoose: typeof import('mongoose')): Messa
     getMessagesForSubagentThreadView,
     listSubagentTasksForThreads,
     getMessage,
+    getMessageUsageSummary,
     getMessagesByCursor,
     searchMessages,
     deleteMessages,

@@ -20,6 +20,7 @@ const memories = require('./memories');
 const knowledge = require('./knowledge');
 const notifications = require('./notifications');
 const usageRecords = require('./usage-records');
+const usage = require('./usage');
 const feedback = require('./feedback');
 const workflows = require('./workflows');
 const presets = require('./presets');
@@ -115,6 +116,7 @@ module.exports = {
   knowledge,
   notifications,
   usageRecords,
+  usage,
   feedback,
   workflows,
   endpoints,

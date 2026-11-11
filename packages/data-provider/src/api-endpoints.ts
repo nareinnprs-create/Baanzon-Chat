@@ -552,6 +552,9 @@ export const adminUsers = () => `${BASE_URL}/api/admin/users`;
 export const adminUsersSearch = (q: string, limit = 20) =>
   `${adminUsers()}/search?${new URLSearchParams({ q, limit: String(limit) }).toString()}`;
 
+/* Usage (self, all-time) */
+export const usageSummary = () => `${BASE_URL}/api/usage/summary`;
+
 /* Tool favorites (starred marketplace items) */
 export const toolFavorites = () => `${BASE_URL}/api/user/settings/favorites/tools`;
 export const toolFavorite = (itemType: string, itemId: string) =>

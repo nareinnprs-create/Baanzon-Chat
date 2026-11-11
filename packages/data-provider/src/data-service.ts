@@ -6,6 +6,7 @@ import type {
   TAdminUsersSearchParams,
   TAdminUsersSearchResponse,
 } from './types/admin-users';
+import type { TUsageSummary } from './types/usage-summary';
 import type { TFileConfig } from './file-config';
 import type * as t from './types';
 import * as permissions from './accessPermissions';
@@ -1089,6 +1090,11 @@ export function searchAdminUsers(
   params: TAdminUsersSearchParams,
 ): Promise<TAdminUsersSearchResponse> {
   return request.get(endpoints.adminUsersSearch(params.q, params.limit));
+}
+
+/** All-time usage totals for the signed-in user (`GET /api/usage/summary`). */
+export function getUsageSummary(): Promise<TUsageSummary> {
+  return request.get(endpoints.usageSummary());
 }
 
 /** Opens a Dodo hosted checkout for a plan subscription or a credit pack. */
