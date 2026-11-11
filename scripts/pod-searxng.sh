@@ -51,7 +51,7 @@ tar -xzf "$BASE/src.tar.gz" -C "$SRC" --strip-components=1 --exclude='utils/temp
 echo "[searxng] source extracted (templates excluded)"
 "$VENV/bin/pip" install -q -r "$SRC/requirements.txt" gunicorn \
   || { echo "[searxng] FAILED: requirements install"; exit 1; }
-( cd "$SRC" && "$VENV/bin/python" -c "import searx.webapp" ) 2>"$BASE/import-error.log" \
+( cd "$SRC" && SEARXNG_SETTINGS_PATH="$SETTINGS" "$VENV/bin/python" -c "import searx.webapp" ) 2>"$BASE/import-error.log" \
   || { echo "[searxng] FAILED: searx.webapp import:"; tail -8 "$BASE/import-error.log"; exit 1; }
 echo "[searxng] source ready"
 
