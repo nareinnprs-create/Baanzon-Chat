@@ -1,4 +1,10 @@
-const { createWorkflow, getWorkflowRun, listWorkflows } = require('~/models');
+const { createWorkflow, getWorkflowRun, listWorkflows, getWorkflow } = require('~/models');
+const logger = require('@librechat/data-schemas').logger;
+const {
+  startDetachedRun,
+  cancelDetachedRun,
+  newRunId,
+} = require('./engine');
 
 function resolveUserId(req) {
   const user = req.user;
@@ -42,4 +48,51 @@ async function getRun(req, res) {
   return res.status(200).json({ run });
 }
 
-module.exports = { handlers: { list, create, getRun } };
+/** Triggers a detached run of a persisted workflow; poll `GET /runs/:runId`. */
+async function startRun(req, res) {
+  const userId = resolveUserId(req);
+  if (!userId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  const workflowId = req.params.id;
+  const workflow = await getWorkflow(workflowId);
+  if (!workflow) {
+    return res.status(404).json({ error: 'Workflow not found' });
+  }
+  if (workflow.enabled === false) {
+    return res.status(409).json({ error: 'Workflow is disabled' });
+  }
+  const runId = newRunId(workflowId);
+  const variables =
+    req.body != null && typeof req.body.variables === 'object' && !Array.isArray(req.body.variables)
+      ? req.body.variables
+      : undefined;
+  try {
+    startDetachedRun({
+      runId,
+      workflowId,
+      userId,
+      variables,
+      metadata: { triggeredBy: 'manual' },
+    });
+  } catch (error) {
+    logger.error('[workflows] Failed to start run', error);
+    return res.status(500).json({ error: 'Failed to start workflow run' });
+  }
+  return res.status(202).json({ runId });
+}
+
+/** Cancels a detached run this user started; no-op for finished runs. */
+async function cancelRun(req, res) {
+  const userId = resolveUserId(req);
+  if (!userId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  const cancelled = cancelDetachedRun(userId, req.params.runId, req.body?.reason);
+  if (!cancelled) {
+    return res.status(404).json({ error: 'No active run to cancel' });
+  }
+  return res.status(200).json({ cancelled: true });
+}
+
+module.exports = { handlers: { list, create, getRun, startRun, cancelRun } };

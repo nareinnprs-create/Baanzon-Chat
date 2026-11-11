@@ -30,6 +30,8 @@ export interface CreateNotificationParams {
 export interface NotificationListOptions {
   unreadOnly?: boolean;
   limit?: number;
+  /** Rows to skip before the first returned row (offset paging). */
+  skip?: number;
 }
 
 /** The subset of `packages/data-schemas` notification methods the service depends on. */

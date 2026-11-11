@@ -25,6 +25,20 @@ const workflowRunSchema: Schema<IWorkflowRunDocument> = new Schema<IWorkflowRunD
       default: 'pending',
       required: true,
     },
+    /** Concluded step results keyed by step id (engine checkpoint). */
+    steps: {
+      type: Schema.Types.Mixed,
+      default: undefined,
+    },
+    /** Run variables carried between steps (engine checkpoint). */
+    variables: {
+      type: Schema.Types.Mixed,
+      default: undefined,
+    },
+    /** The step a resumed run should start at. */
+    nextStepId: {
+      type: String,
+    },
     error: {
       type: String,
     },

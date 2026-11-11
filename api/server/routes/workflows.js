@@ -11,5 +11,7 @@ router.use(configMiddleware);
 router.get('/', handlers.list);
 router.post('/', handlers.create);
 router.get('/runs/:id', handlers.getRun);
+router.post('/:id/runs', handlers.startRun);
+router.post('/runs/:runId/cancel', handlers.cancelRun);
 
 module.exports = router;

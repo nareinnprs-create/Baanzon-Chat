@@ -6,6 +6,7 @@ import type {
   StartWorkflowRunInput,
   CompleteWorkflowRunInput,
   ListWorkflowRunsOptions,
+  RecordWorkflowRunStepInput,
 } from '~/types/workflowRun';
 import { isValidObjectIdString } from '~/utils/objectId';
 
@@ -26,6 +27,8 @@ export interface WorkflowRunMethods {
   startWorkflowRun(input: StartWorkflowRunInput): Promise<IWorkflowRun>;
   getWorkflowRun(userId: string, runId: string): Promise<IWorkflowRun | null>;
   markWorkflowRunRunning(userId: string, runId: string): Promise<IWorkflowRun | null>;
+  /** Persists one concluded step result (engine checkpoint). */
+  recordWorkflowRunStep(input: RecordWorkflowRunStepInput): Promise<IWorkflowRun | null>;
   /** Settles a run into a terminal state. */
   completeWorkflowRun(
     userId: string,
@@ -99,6 +102,26 @@ export function createWorkflowRunMethods(mongoose: typeof import('mongoose')): W
       .lean<IWorkflowRun>();
   }
 
+  async function recordWorkflowRunStep(
+    input: RecordWorkflowRunStepInput,
+  ): Promise<IWorkflowRun | null> {
+    if (!isValidObjectIdString(input.user)) {
+      return null;
+    }
+    const set: Record<string, unknown> = {
+      [`steps.${input.result.stepId}`]: input.result,
+    };
+    if (input.nextStepId !== undefined) {
+      set.nextStepId = input.nextStepId;
+    }
+    if (input.variables !== undefined) {
+      set.variables = input.variables;
+    }
+    return await WorkflowRun()
+      .findOneAndUpdate({ runId: input.runId, user: input.user }, { $set: set }, { new: true })
+      .lean<IWorkflowRun>();
+  }
+
   async function completeWorkflowRun(
     userId: string,
     runId: string,
@@ -108,12 +131,21 @@ export function createWorkflowRunMethods(mongoose: typeof import('mongoose')): W
       return null;
     }
 
-    const update: Partial<Pick<IWorkflowRun, 'status' | 'error' | 'finishedAt'>> = {
+    const update: Partial<Pick<IWorkflowRun, 'status' | 'error' | 'finishedAt'>> & {
+      steps?: Record<string, unknown>;
+      nextStepId?: string;
+    } = {
       status: input.status,
       finishedAt: new Date(),
     };
     if (input.error !== undefined) {
       update.error = input.error;
+    }
+    if (input.steps !== undefined) {
+      update.steps = input.steps;
+    }
+    if (input.nextStepId !== undefined) {
+      update.nextStepId = input.nextStepId;
     }
 
     return await WorkflowRun()
@@ -165,6 +197,7 @@ export function createWorkflowRunMethods(mongoose: typeof import('mongoose')): W
     startWorkflowRun,
     getWorkflowRun,
     markWorkflowRunRunning,
+    recordWorkflowRunStep,
     completeWorkflowRun,
     listWorkflowRunsForUser,
     listWorkflowRunsForWorkflow,

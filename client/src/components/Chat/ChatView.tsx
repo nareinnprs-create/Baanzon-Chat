@@ -26,6 +26,7 @@ import Presentation from './Presentation';
 import ChatForm from './Input/ChatForm';
 import Landing from './Landing';
 import Header from './Header';
+import { useAuroraPulseHost } from '~/hooks/Chat/useAuroraPulseHost';
 import Footer from './Footer';
 import { cn } from '~/utils';
 import store from '~/store';
@@ -78,6 +79,7 @@ function ChatView({ index = 0, project }: { index?: number; project?: TChatProje
   }, [messages, fileMap]);
 
   const chatHelpers = useChatHelpers(index, conversationId);
+  useAuroraPulseHost(index);
   const addedChatHelpers = useAddedResponse();
 
   const activeConversation =

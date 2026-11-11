@@ -29,6 +29,7 @@ export { default as WorkflowView } from './WorkflowView';
 export { default as WorkflowEditor } from './WorkflowEditor';
 export { default as WorkflowRunPanel } from './WorkflowRunPanel';
 export { createInMemoryExecutor } from './api';
+export { createServerExecutor } from './serverExecutor';
 export { useWorkflowRun } from './run';
 export { WORKFLOW_LABELS, formatLabel } from './labels';
 export {

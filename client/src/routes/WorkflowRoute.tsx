@@ -1,13 +1,12 @@
-import { createInMemoryExecutor, WorkflowView } from '~/components/Workflow';
+import { createServerExecutor, WorkflowView } from '~/components/Workflow';
 
 /**
- * Route shell for the Workflow Builder. `createInMemoryExecutor` is the
- * feature's dependency-free reference executor, used as the placeholder until a
- * backend `WorkflowExecutor` is injected; it runs the editor's draft end to end
- * without a transport. `WorkflowView` wraps itself in a per-mount Jotai store,
- * so no extra provider is needed here.
+ * Route shell for the Workflow Builder. `createServerExecutor` persists the
+ * draft on the server (`POST /api/workflows`), triggers a detached run and
+ * polls the run record into the panel; `WorkflowView` wraps itself in a
+ * per-mount Jotai store, so no extra provider is needed here.
  */
-const executor = createInMemoryExecutor();
+const executor = createServerExecutor();
 
 export default function WorkflowRoute() {
   return <WorkflowView executor={executor} />;

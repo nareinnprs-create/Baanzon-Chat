@@ -20,6 +20,7 @@ import AddMultiConvo from './AddMultiConvo';
 import { useHasAccess } from '~/hooks';
 import BranchTree from './BranchTree';
 import ArenaButton from './Arena';
+import { AuroraPulse } from '~/components/Aurora';
 import { cn } from '~/utils';
 import store from '~/store';
 
@@ -89,6 +90,7 @@ function Header({
         {parentConversationId != null && (
           <SubagentThreadLink threadId={parentConversationId} labelClassName="hidden lg:inline" />
         )}
+        <AuroraPulse />
         <BranchTree readOnly={readOnly} />
         {!readOnly && <RecallButton />}
         {!readOnly && <RecapButton />}

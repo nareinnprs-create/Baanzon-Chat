@@ -18,6 +18,12 @@ export interface IWorkflowRun {
   /** The user who triggered the run. */
   user: Types.ObjectId;
   status: WorkflowRunStatus;
+  /** Concluded step results keyed by step id (engine checkpoint). */
+  steps?: Record<string, unknown>;
+  /** Run variables carried between steps (engine checkpoint). */
+  variables?: Record<string, unknown>;
+  /** The step a resumed run should start at. */
+  nextStepId?: string;
   error?: string;
   startedAt?: Date;
   finishedAt?: Date;
@@ -40,6 +46,22 @@ export interface StartWorkflowRunInput {
 export interface CompleteWorkflowRunInput {
   status: Extract<WorkflowRunStatus, 'succeeded' | 'failed' | 'cancelled'>;
   error?: string;
+  /** Final step results checkpoint. */
+  steps?: Record<string, unknown>;
+  /** The step a later resume should start at. */
+  nextStepId?: string;
+}
+
+/** Persists one concluded step result onto a running workflow run. */
+export interface RecordWorkflowRunStepInput {
+  user: string;
+  runId: string;
+  /** Concluded step result (engine StepResult shape). */
+  result: Record<string, unknown>;
+  /** The step the run should continue at after this step. */
+  nextStepId?: string;
+  /** Run variables checkpoint. */
+  variables?: Record<string, unknown>;
 }
 
 export interface ListWorkflowRunsOptions {
