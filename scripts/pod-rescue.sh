@@ -175,21 +175,55 @@ EOF
   echo "=== OPERATOR KEYS NEEDED: OPRAIZ_API_KEY, OPRAIZ_BASEURL, DODO_API_KEY, DODO_WEBHOOK_SECRET, SMTP/OpenID if used ==="
 fi
 
-echo "=== start ==="
+echo "=== db audit ==="
+if command -v mongosh >/dev/null 2>&1; then
+  CUR_DB=$(grep -oE "^MONGO_URI=mongodb://[^/]+/[^?[:space:]]+" "$APP_DIR/.env" 2>/dev/null | sed 's#.*/##')
+  echo "[rescue] .env points at db: ${CUR_DB:-none}"
+  DBS=$(mongosh --quiet --eval "JSON.stringify(db.adminCommand({listDatabases:1}).databases.map(function(d){return d.name}))" 2>/dev/null || true)
+  echo "[rescue] databases: $DBS"
+  BEST_DB=""; BEST_N=0
+  for db in $(echo "$DBS" | tr -d '[]",'); do
+    case "$db" in ""|admin|local|config) continue ;; esac
+    N=$(mongosh --quiet "$db" --eval "db.users.countDocuments({})" 2>/dev/null | tail -1)
+    case "$N" in ''|*[!0-9]*) N=0 ;; esac
+    echo "[rescue] db=$db users=$N"
+    if [ "$N" -gt "$BEST_N" ]; then BEST_N=$N; BEST_DB=$db; fi
+  done
+  if [ -n "$BEST_DB" ]; then
+    mongosh --quiet "$BEST_DB" --eval 'var u=db.users.findOne({email:"aravind18k@gmail.com"},{email:1}); print("[rescue] aravind-present:", !!u)' 2>/dev/null || true
+  fi
+  NEED_RESTART=no
+  if [ -n "$BEST_DB" ] && [ "$BEST_N" -gt 0 ] && [ "$BEST_DB" != "$CUR_DB" ]; then
+    echo "[rescue] MISMATCH: .env points at '$CUR_DB' but '$BEST_DB' holds $BEST_N users - fixing MONGO_URI"
+    grep -vE "^MONGO_URI=" "$APP_DIR/.env" > "$APP_DIR/.env.tmp"
+    printf 'MONGO_URI=mongodb://127.0.0.1:27017/%s\n' "$BEST_DB" >> "$APP_DIR/.env.tmp"
+    mv "$APP_DIR/.env.tmp" "$APP_DIR/.env"
+    chmod 600 "$APP_DIR/.env"
+    NEED_RESTART=yes
+  fi
+fi
+
+echo "=== restart-if-needed ==="
 [ -f "$APP_DIR/baanzon.yaml" ] || echo "[rescue] WARNING: baanzon.yaml missing - api boots on defaults until the next deploy carries it"
-supervisorctl reread >/dev/null 2>&1 || true
-supervisorctl update >/dev/null 2>&1 || true
-supervisorctl restart baanzon-api >/dev/null 2>&1 || supervisorctl start baanzon-api >/dev/null 2>&1 || true
-# restart can hit a transient spawn error on the network volume; keep trying
-for i in 1 2 3 4 5 6; do
-  if supervisorctl status baanzon-api 2>/dev/null | grep -q RUNNING; then break; fi
-  sleep 5
-  supervisorctl start baanzon-api 2>/dev/null || true
-done
-for i in $(seq 1 60); do
-  if curl -sf http://127.0.0.1:3080/readyz >/dev/null; then echo "[rescue] api ready after $((i*3))s"; break; fi
-  sleep 3
-done
+RUNNING=$(supervisorctl status baanzon-api 2>/dev/null | grep -c RUNNING || true)
+if [ "${NEED_RESTART:-no}" = "yes" ] || [ "${RUNNING:-0}" = "0" ]; then
+  supervisorctl reread >/dev/null 2>&1 || true
+  supervisorctl update >/dev/null 2>&1 || true
+  supervisorctl restart baanzon-api >/dev/null 2>&1 || supervisorctl start baanzon-api >/dev/null 2>&1 || true
+  # restart can hit a transient spawn error on the network volume; keep trying
+  for i in 1 2 3 4 5 6; do
+    if supervisorctl status baanzon-api 2>/dev/null | grep -q RUNNING; then break; fi
+    sleep 5
+    supervisorctl start baanzon-api 2>/dev/null || true
+  done
+  for i in $(seq 1 60); do
+    if curl -sf http://127.0.0.1:3080/readyz >/dev/null; then echo "[rescue] api ready after $((i*3))s"; break; fi
+    sleep 3
+  done
+else
+  echo "[rescue] api already RUNNING - not restarting (cold-start churn avoided)"
+  curl -s -o /dev/null -w "[rescue] local /readyz: %{http_code}\n" --max-time 10 http://127.0.0.1:3080/readyz || true
+fi
 supervisorctl status 2>&1 | head -8
 curl -s -o /dev/null -w "[rescue] local /health: %{http_code}\n" --max-time 10 http://127.0.0.1:3080/health || true
 echo "=== done ==="
