@@ -19,6 +19,13 @@ function normalizeLimit(limit: number | undefined): number {
   return Math.min(Math.floor(limit), NOTIFICATION_LIST_MAX_LIMIT);
 }
 
+function normalizeSkip(skip: number | undefined): number {
+  if (skip == null || !Number.isFinite(skip) || skip <= 0) {
+    return 0;
+  }
+  return Math.floor(skip);
+}
+
 export interface NotificationMethods {
   createNotification(input: CreateNotificationInput): Promise<INotification>;
   listNotifications(userId: string, options?: ListNotificationsOptions): Promise<INotification[]>;
@@ -62,6 +69,7 @@ export function createNotificationMethods(
     return await Notification()
       .find(filter)
       .sort({ createdAt: -1, _id: -1 })
+      .skip(normalizeSkip(options?.skip))
       .limit(normalizeLimit(options?.limit))
       .lean<INotification[]>();
   }

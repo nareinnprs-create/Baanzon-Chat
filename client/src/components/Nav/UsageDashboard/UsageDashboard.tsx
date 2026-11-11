@@ -9,6 +9,7 @@ import type { UsageAggregate } from './aggregate';
 import type { TranslationKeys } from '~/hooks';
 import { aggregateMessageLists } from './aggregate';
 import { usageScopeAtom } from './atoms';
+import { useGetStartupConfig, useGetUserBalance, useBillingSubscription } from '~/data-provider';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
@@ -66,6 +67,11 @@ export default function UsageDashboard() {
   const location = useLocation();
   const queryClient = useQueryClient();
   const [scope, setScope] = useAtom(usageScopeAtom);
+  const { data: startupConfig } = useGetStartupConfig();
+  const { data: subscription } = useBillingSubscription();
+  const balanceQuery = useGetUserBalance({
+    enabled: startupConfig?.balance?.enabled === true,
+  });
 
   const aggregate: UsageAggregate | null = useMemo(() => {
     const cached = queryClient.getQueriesData<TMessage[]>({ queryKey: [QueryKeys.messages] });
@@ -103,6 +109,17 @@ export default function UsageDashboard() {
           />
         </div>
       </div>
+      <dl className="flex flex-col gap-1.5 rounded-lg border border-border-light bg-surface-primary px-3 py-2">
+        {subscription?.tier != null && (
+          <StatRow label={localize('com_nav_plan')} value={String(subscription.tier)} />
+        )}
+        {startupConfig?.balance?.enabled === true && balanceQuery.data != null && (
+          <StatRow
+            label={localize('com_nav_balance')}
+            value={new Intl.NumberFormat().format(Math.round(balanceQuery.data.tokenCredits))}
+          />
+        )}
+      </dl>
       {aggregate == null || aggregate.messages === 0 ? (
         <p className="rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-text-secondary">
           {localize('com_ui_usage_no_data')}

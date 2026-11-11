@@ -17,6 +17,7 @@ import {
 } from '../SettingsTabs/Speech/STT';
 import DisplayUsernameMessages from '../SettingsTabs/Account/DisplayUsernameMessages';
 import BillingPaymentsManagement from '~/components/Admin/BillingPaymentsManagement';
+import UsersManagement from '~/components/Admin/UsersManagement';
 import ConversationModeSwitch from '../SettingsTabs/Speech/ConversationModeSwitch';
 import EnableTwoFactorItem from '../SettingsTabs/Account/TwoFactorAuthentication';
 import LangfuseConnection from '../SettingsTabs/Integrations/LangfuseConnection';
@@ -228,6 +229,15 @@ export const registry: SettingEntry[] = [
     labelKey: 'com_ui_billing_payments',
     keywords: ['billing', 'dodo', 'payments', 'webhook', 'subscription'],
     Component: BillingPaymentsManagement,
+    show: (ctx) => ctx.isAdmin === true,
+  },
+  {
+    id: 'usersManagement',
+    tab: GENERAL,
+    section: 'admin',
+    labelKey: 'com_ui_admin_users',
+    keywords: ['users', 'accounts', 'people', 'admin', 'roles'],
+    Component: UsersManagement,
     show: (ctx) => ctx.isAdmin === true,
   },
 

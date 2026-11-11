@@ -46,4 +46,6 @@ export interface CreateNotificationInput {
 export interface ListNotificationsOptions {
   unreadOnly?: boolean;
   limit?: number;
+  /** Rows to skip before the first returned row (offset paging). */
+  skip?: number;
 }

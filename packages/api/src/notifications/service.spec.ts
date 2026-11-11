@@ -79,6 +79,7 @@ describe('createNotificationsService', () => {
     expect(dataSource.listNotifications).toHaveBeenCalledWith('user-1', {
       unreadOnly: undefined,
       limit: 3,
+      skip: 0,
     });
     expect(page.notifications.map((n) => n.id)).toEqual(['n-0', 'n-1']);
     expect(page.unreadCount).toBe(7);
@@ -97,7 +98,20 @@ describe('createNotificationsService', () => {
     expect(page.hasMore).toBe(false);
     expect(dataSource.listNotifications).toHaveBeenCalledWith('user-1', {
       unreadOnly: undefined,
-      limit: 5,
+      limit: 3,
+      skip: 2,
+    });
+  });
+
+  it('pages past the old 200-row cap by passing skip through', async () => {
+    const dataSource = makeDataSource();
+    const service = createNotificationsService({ notifications: dataSource });
+
+    await service.list('user-1', { limit: 50, page: 5 });
+    expect(dataSource.listNotifications).toHaveBeenLastCalledWith('user-1', {
+      unreadOnly: undefined,
+      limit: 51,
+      skip: 200,
     });
   });
 
@@ -108,13 +122,15 @@ describe('createNotificationsService', () => {
     await service.list('user-1', { limit: 5000 });
     expect(dataSource.listNotifications).toHaveBeenLastCalledWith('user-1', {
       unreadOnly: undefined,
-      limit: NOTIFICATIONS_MAX_PAGE_SIZE,
+      limit: NOTIFICATIONS_MAX_PAGE_SIZE + 1,
+      skip: 0,
     });
 
     await service.list('user-1', { limit: -1, page: 0 });
     expect(dataSource.listNotifications).toHaveBeenLastCalledWith('user-1', {
       unreadOnly: undefined,
       limit: NOTIFICATIONS_DEFAULT_PAGE_SIZE + 1,
+      skip: 0,
     });
   });
 

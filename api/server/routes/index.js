@@ -19,8 +19,6 @@ const messages = require('./messages');
 const memories = require('./memories');
 const knowledge = require('./knowledge');
 const notifications = require('./notifications');
-const devices = require('./devices');
-const subscriptions = require('./subscriptions');
 const usageRecords = require('./usage-records');
 const feedback = require('./feedback');
 const workflows = require('./workflows');
@@ -116,8 +114,6 @@ module.exports = {
   memories,
   knowledge,
   notifications,
-  devices,
-  subscriptions,
   usageRecords,
   feedback,
   workflows,

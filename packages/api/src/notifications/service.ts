@@ -81,15 +81,14 @@ export function createNotificationsService(
     const pageSize = normalizePageSize(params?.limit);
     const offset = (page - 1) * pageSize;
     /**
-     * Over-fetch by one row to detect `hasMore`. The data-schemas list method
-     * has no offset/skip lever, so paging is bounded by its 200-row cap: pages
-     * past the cap under-report `hasMore`, which is the documented tradeoff.
+     * Over-fetch by one row to detect `hasMore`. The page size is capped but
+     * paging depth is not: offset/skip reaches any row in the feed.
      */
-    const fetchLimit = Math.min(offset + pageSize + 1, NOTIFICATIONS_MAX_PAGE_SIZE);
     const [rows, unreadCount] = await Promise.all([
       notifications.listNotifications(userId, {
         unreadOnly: params?.unreadOnly,
-        limit: fetchLimit,
+        limit: pageSize + 1,
+        skip: offset,
       }),
       notifications.countUnreadNotifications(userId),
     ]);

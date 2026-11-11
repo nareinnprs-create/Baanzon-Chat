@@ -256,10 +256,9 @@ interface:
   # Valid tool keys: artifacts, execute_code, web_search, file_search, skills.
   # Use 'mcp' (or a specific MCP server name) to pin the MCP servers dropdown.
   # When omitted, tools start unpinned and the MCP dropdown keeps its default (pinned).
-  # defaultPinnedTools:
-  #   - 'artifacts'
-  #   - 'execute_code'
-  #   - 'mcp'
+  # Web search is pinned so every user gets live-information answers by default.
+  defaultPinnedTools:
+    - 'web_search'
   # Remote Agents configuration
   # Controls user permissions for remote agents with external API support
   # remoteAgents:
@@ -976,13 +975,15 @@ endpoints:
 # # See the Custom Configuration Guide for more information on Assistants Config:
 # # https://www.librechat.ai/docs/configuration/librechat_yaml/object_structure/assistants_endpoint
 
-# Web Search Configuration — Baanzon: self-hosted SearXNG (search) + Keenable (scraper, keyless)
+# Web Search Configuration - Baanzon: Keenable (search + scraper, keyless).
+# Self-hosted SearXNG is the planned search upgrade (needs SEARXNG_INSTANCE_URL
+# + an instance on the pod; deep research also reads that env today).
 webSearch:
-  searchProvider: searxng
+  searchProvider: keenable
   scraperProvider: keenable
-  searxngInstanceUrl: '${SEARXNG_INSTANCE_URL}'
-  allowedAddresses:
-    - '127.0.0.1:8888'
+  # searxngInstanceUrl: '${SEARXNG_INSTANCE_URL}'
+  # allowedAddresses:
+  #   - '127.0.0.1:8888'
 
 # (reference examples below kept commented)
 # webSearch:

@@ -547,6 +547,11 @@ export const adminLangfuseSessionLink = (conversationId: string) =>
 export const adminProviders = () => `${BASE_URL}/api/admin/providers`;
 export const adminProvidersTest = () => `${adminProviders()}/test`;
 
+/* Users (admin) */
+export const adminUsers = () => `${BASE_URL}/api/admin/users`;
+export const adminUsersSearch = (q: string, limit = 20) =>
+  `${adminUsers()}/search?${new URLSearchParams({ q, limit: String(limit) }).toString()}`;
+
 /* Tool favorites (starred marketplace items) */
 export const toolFavorites = () => `${BASE_URL}/api/user/settings/favorites/tools`;
 export const toolFavorite = (itemType: string, itemId: string) =>

@@ -1,5 +1,11 @@
 import type { AxiosResponse } from 'axios';
 import type { TInsightsAccessResponse, TInsightsParams, TInsightsResponse } from './types/insights';
+import type {
+  TAdminUsersListParams,
+  TAdminUsersResponse,
+  TAdminUsersSearchParams,
+  TAdminUsersSearchResponse,
+} from './types/admin-users';
 import type { TFileConfig } from './file-config';
 import type * as t from './types';
 import * as permissions from './accessPermissions';
@@ -1061,6 +1067,28 @@ export function applyAdminDodoPayment(
   payload: bl.TAdminApplyPaymentRequest,
 ): Promise<bl.TAdminApplyPaymentResponse> {
   return request.post(endpoints.billingAdminApply(), payload);
+}
+
+/** Admin users list, offset-paged (`GET /api/admin/users`). */
+export function listAdminUsers(
+  params?: TAdminUsersListParams,
+): Promise<TAdminUsersResponse> {
+  const query = new URLSearchParams();
+  if (params?.limit != null) {
+    query.set('limit', String(params.limit));
+  }
+  if (params?.offset != null) {
+    query.set('offset', String(params.offset));
+  }
+  const qs = query.toString();
+  return request.get(qs ? `${endpoints.adminUsers()}?${qs}` : endpoints.adminUsers());
+}
+
+/** Admin users search (`GET /api/admin/users/search?q`). */
+export function searchAdminUsers(
+  params: TAdminUsersSearchParams,
+): Promise<TAdminUsersSearchResponse> {
+  return request.get(endpoints.adminUsersSearch(params.q, params.limit));
 }
 
 /** Opens a Dodo hosted checkout for a plan subscription or a credit pack. */
