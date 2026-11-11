@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Diagnose and restore on pod
-        if: ${{ inputs.stage == 'diagnose' }}
+        if: ${{ inputs.stage != 'env' }}
         env:
           SSH_KEY: ${{ secrets.POD_SSH_KEY }}
         run: |
@@ -76,7 +76,7 @@ jobs:
           SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30 -o ServerAliveCountMax=20 -o ConnectTimeout=30)
           ssh -i pod_key -p "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" \
             "root@${{ secrets.POD_SSH_HOST }}" \
-            "bash -s" < scripts/pod-grant.sh
+            "GRANT_USER_EMAIL='$GRANT_USER_EMAIL' GRANT_PLAN='$GRANT_PLAN' GRANT_DAYS='$GRANT_DAYS' bash -s" < scripts/pod-grant.sh
           rm -f pod_key
 
       - name: Apply operator keys to pod .env
