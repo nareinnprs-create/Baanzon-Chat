@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       stage:
-        description: 'diagnose (default) | env (merge RESCUE_* secrets into pod .env)'
+        description: 'diagnose (default) | env (merge RESCUE_* secrets into pod .env) | searxng (install self-hosted SearXNG on 8888)'
         default: 'diagnose'
 
 permissions:
@@ -39,6 +39,19 @@ jobs:
           ssh -i pod_key -p "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" \
             "root@${{ secrets.POD_SSH_HOST }}" \
             "bash -s" < scripts/pod-rescue.sh
+          rm -f pod_key
+
+      - name: Install SearXNG on pod
+        if: ${{ inputs.stage == 'searxng' }}
+        env:
+          SSH_KEY: ${{ secrets.POD_SSH_KEY }}
+        run: |
+          echo "$SSH_KEY" > pod_key
+          chmod 600 pod_key
+          SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30 -o ServerAliveCountMax=20 -o ConnectTimeout=30)
+          ssh -i pod_key -p "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" \
+            "root@${{ secrets.POD_SSH_HOST }}" \
+            "bash -s" < scripts/pod-searxng.sh
           rm -f pod_key
 
       - name: Apply operator keys to pod .env
