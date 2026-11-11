@@ -7,6 +7,15 @@
 # reach the CI log.
 set -u
 APP_DIR=/workspace/baanzon
+# follow the active slot installed by the blue-green apply (gate :3080 ->
+# baanzon-api :3090 / baanzon-api-next :3091); legacy pods have no gate and
+# the api still lives directly on :3080
+ACTIVE_PORT=$(cat /workspace/data/active-port 2>/dev/null | tr -dc 0-9)
+case "${ACTIVE_PORT:-}" in
+  3091) API_PROG=baanzon-api-next; APP_DIR=/workspace/baanzon-next ;;
+  3090) API_PROG=baanzon-api ;;
+  *)    API_PROG=baanzon-api; ACTIVE_PORT=3080 ;;
+esac
 
 echo "=== diagnose ==="
 ls -la /workspace 2>/dev/null | head -30 || echo "(no /workspace)"
@@ -141,7 +150,7 @@ if [ ! -f "$APP_DIR/.env" ]; then
   cat > "$APP_DIR/.env" <<EOF
 APP_TITLE=Baanzon Chat
 HOST=0.0.0.0
-PORT=3080
+PORT=$ACTIVE_PORT
 NODE_ENV=production
 DOMAIN_CLIENT=https://baanzonchat.opraiz.com
 DOMAIN_SERVER=https://baanzonchat.opraiz.com
@@ -181,7 +190,7 @@ NODE_BIN=$(command -v node || true)
   [ -x "$c" ] && NODE_BIN="$c" && break
 done
 AUDIT=$( [ -n "$NODE_BIN" ] && "$NODE_BIN" -e '
-const path = "/workspace/baanzon/node_modules/mongodb";
+const path = process.argv[1];
 let MongoClient;
 try { MongoClient = require(path).MongoClient || require(path).default.MongoClient; }
 catch (e) { console.log("[rescue] audit-skip: no mongodb driver (" + String(e).slice(0,80) + ")"); process.exit(0); }
@@ -204,7 +213,7 @@ catch (e) { console.log("[rescue] audit-skip: no mongodb driver (" + String(e).s
   console.log("[rescue] best-db=" + best.name + " users=" + best.n + " aravind-present=" + aravind);
   await c.close();
 })().catch(e => console.log("[rescue] audit-error: " + String(e).slice(0,200)));
-' 2>/dev/null || echo "[rescue] audit-error: node not available")
+' "$APP_DIR/node_modules/mongodb" 2>/dev/null || echo "[rescue] audit-error: node not available")
 echo "$AUDIT"
 CUR_DB=$(grep -oE "^MONGO_URI=mongodb://[^/]+/[^?[:space:]]+" "$APP_DIR/.env" 2>/dev/null | sed 's#.*/##')
 echo "[rescue] .env points at db: ${CUR_DB:-none}"
@@ -222,25 +231,25 @@ fi
 
 echo "=== restart-if-needed ==="
 [ -f "$APP_DIR/baanzon.yaml" ] || echo "[rescue] WARNING: baanzon.yaml missing - api boots on defaults until the next deploy carries it"
-RUNNING=$(supervisorctl status baanzon-api 2>/dev/null | grep -c RUNNING || true)
+RUNNING=$(supervisorctl status "$API_PROG" 2>/dev/null | grep -c RUNNING || true)
 if [ "${NEED_RESTART:-no}" = "yes" ] || [ "${RUNNING:-0}" = "0" ]; then
   supervisorctl reread >/dev/null 2>&1 || true
   supervisorctl update >/dev/null 2>&1 || true
-  supervisorctl restart baanzon-api >/dev/null 2>&1 || supervisorctl start baanzon-api >/dev/null 2>&1 || true
+  supervisorctl restart "$API_PROG" >/dev/null 2>&1 || supervisorctl start "$API_PROG" >/dev/null 2>&1 || true
   # restart can hit a transient spawn error on the network volume; keep trying
   for i in 1 2 3 4 5 6; do
-    if supervisorctl status baanzon-api 2>/dev/null | grep -q RUNNING; then break; fi
+    if supervisorctl status "$API_PROG" 2>/dev/null | grep -q RUNNING; then break; fi
     sleep 5
-    supervisorctl start baanzon-api 2>/dev/null || true
+    supervisorctl start "$API_PROG" 2>/dev/null || true
   done
   for i in $(seq 1 60); do
-    if curl -sf http://127.0.0.1:3080/readyz >/dev/null; then echo "[rescue] api ready after $((i*3))s"; break; fi
+    if curl -sf http://127.0.0.1:$PORT/readyz >/dev/null; then echo "[rescue] api ready after $((i*3))s"; break; fi
     sleep 3
   done
 else
   echo "[rescue] api already RUNNING - not restarting (cold-start churn avoided)"
-  curl -s -o /dev/null -w "[rescue] local /readyz: %{http_code}\n" --max-time 10 http://127.0.0.1:3080/readyz || true
+  curl -s -o /dev/null -w "[rescue] local /readyz: %{http_code}\n" --max-time 10 http://127.0.0.1:$PORT/readyz || true
 fi
 supervisorctl status 2>&1 | head -8
-curl -s -o /dev/null -w "[rescue] local /health: %{http_code}\n" --max-time 10 http://127.0.0.1:3080/health || true
+curl -s -o /dev/null -w "[rescue] local /health: %{http_code}\n" --max-time 10 http://127.0.0.1:$PORT/health || true
 echo "=== done ==="

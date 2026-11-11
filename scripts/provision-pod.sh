@@ -89,14 +89,34 @@ autorestart=true
 stdout_logfile=/workspace/baanzon/logs/searxng.log
 redirect_stderr=true
 
+[program:baanzon-gate]
+command=/bin/bash -lc 'exec node /workspace/gate/pod-gate.js'
+directory=/workspace
+autostart=true
+autorestart=true
+stopasgroup=true
+environment=ACTIVE_PORT_FILE="/workspace/data/active-port",GATE_PORT="3080",GATE_DEFAULT_PORT="3090"
+stdout_logfile=/workspace/baanzon/logs/supervisor-gate.log
+redirect_stderr=true
+
 [program:baanzon-api]
 command=/bin/bash -lc 'exec node api/server/index.js'
 directory=/workspace/baanzon
 autostart=true
 autorestart=true
 stopasgroup=true
-environment=NODE_ENV="production"
+environment=NODE_ENV="production",PORT="3090"
 stdout_logfile=/workspace/baanzon/logs/supervisor-api.log
+redirect_stderr=true
+
+[program:baanzon-api-next]
+command=/bin/bash -lc 'exec node api/server/index.js'
+directory=/workspace/baanzon-next
+autostart=true
+autorestart=true
+stopasgroup=true
+environment=NODE_ENV="production",PORT="3091"
+stdout_logfile=/workspace/baanzon-next/logs/supervisor-api.log
 redirect_stderr=true
 
 [program:cloudflared]
@@ -109,7 +129,9 @@ stdout_logfile=/workspace/baanzon/logs/supervisor-tunnel.log
 redirect_stderr=true
 EOF
 
-mkdir -p /workspace/data/mongodb /workspace/data/meili_data /workspace/baanzon/logs /workspace/baanzon/images /workspace/baanzon/uploads
+mkdir -p /workspace/data/mongodb /workspace/data/meili_data /workspace/baanzon/logs /workspace/baanzon/images /workspace/baanzon/uploads /workspace/baanzon-next/logs /workspace/gate
+printf '3090' > /workspace/data/active-port
+if [ -f "$(dirname "$0")/pod-gate.js" ]; then cp "$(dirname "$0")/pod-gate.js" /workspace/gate/pod-gate.js; fi
 supervisorctl reread && supervisorctl update || true
 echo "PROVISION COMPLETE"
 supervisorctl status || true

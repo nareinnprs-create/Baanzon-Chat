@@ -8,6 +8,14 @@
 # owns unpacking, npm ci and the release swap - finds a usable .env.
 set -u
 APP_DIR=/workspace/baanzon
+# follow the active slot installed by the blue-green apply; legacy pods have
+# no gate and the api still lives directly on :3080 as baanzon-api
+ACTIVE_PORT=$(cat /workspace/data/active-port 2>/dev/null | tr -dc 0-9)
+case "${ACTIVE_PORT:-}" in
+  3091) API_PROG=baanzon-api-next; APP_DIR=/workspace/baanzon-next ;;
+  3090) API_PROG=baanzon-api ;;
+  *)    API_PROG=baanzon-api; ACTIVE_PORT=3080 ;;
+esac
 ENV_FILE="$APP_DIR/.env"
 CREATED=no
 
@@ -110,19 +118,19 @@ chmod 600 "$ENV_FILE"
 if [ -f "$APP_DIR/package.json" ] && [ -d "$APP_DIR/node_modules" ]; then
   supervisorctl reread >/dev/null 2>&1 || true
   supervisorctl update >/dev/null 2>&1 || true
-  supervisorctl restart baanzon-api >/dev/null 2>&1 || supervisorctl start baanzon-api >/dev/null 2>&1 || true
+  supervisorctl restart "$API_PROG" >/dev/null 2>&1 || supervisorctl start "$API_PROG" >/dev/null 2>&1 || true
   # restart can hit a transient spawn error on the network volume; keep trying
   for r in 1 2 3 4 5 6; do
-    if supervisorctl status baanzon-api 2>/dev/null | grep -q RUNNING; then break; fi
+    if supervisorctl status "$API_PROG" 2>/dev/null | grep -q RUNNING; then break; fi
     sleep 5
-    supervisorctl start baanzon-api 2>/dev/null || true
+    supervisorctl start "$API_PROG" 2>/dev/null || true
   done
   for i in $(seq 1 60); do
-    if curl -sf http://127.0.0.1:3080/readyz >/dev/null; then echo "[env-apply] api ready after $((i*3))s"; break; fi
+    if curl -sf "http://127.0.0.1:$ACTIVE_PORT/readyz" >/dev/null; then echo "[env-apply] api ready after $((i*3))s"; break; fi
     sleep 3
   done
-  supervisorctl status baanzon-api || true
-  curl -s -o /dev/null -w "[env-apply] local /health: %{http_code}\n" --max-time 10 http://127.0.0.1:3080/health || true
+  supervisorctl status "$API_PROG" || true
+  curl -s -o /dev/null -w "[env-apply] local /health: %{http_code}\n" --max-time 10 "http://127.0.0.1:$ACTIVE_PORT/health" || true
 else
   echo "[env-apply] app tree not runnable yet ($CREATED) - leaving the restart to the next deploy"
 fi

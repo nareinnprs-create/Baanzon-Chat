@@ -1,53 +1,116 @@
-#!/bin/bash
-# Apply a release tarball onto the pod. Invoked by the deploy workflow over SSH.
-set -euo pipefail
-RELEASE_SRC=/workspace/_release
-APP_DIR=/workspace/baanzon
-NEW_DIR=/workspace/baanzon-next
-OLD_DIR=/workspace/baanzon-old
+#!/usr/bin/env bash
+# Blue-green deploy apply for the pod. Runs on the pod over SSH from GH Actions.
+#
+# Steady state: the gate process owns 127.0.0.1:3080 (cloudflared's target) and
+# never restarts. Two api slots - blue (baanzon-api, /workspace/baanzon, :3090)
+# and green (baanzon-api-next, /workspace/baanzon-next, :3091) - alternate as
+# the active release via /workspace/data/active-port, which the gate re-reads
+# per request. Each release stages the INACTIVE slot, boots and health-gates it
+# there (the 5-8 minute cold start is invisible: the active release keeps
+# serving), then flips one file. The previous release stays on disk as instant
+# rollback (start its program + flip the file back).
+set -u
 
-echo "[apply] unpacking release"
-# No-op guard: identical payload already deployed (docs-only pushes etc.)
-NEW_SHA=$(sha256sum "$RELEASE_SRC/baanzon-app.tar.gz" | cut -d' ' -f1)
-if [ -f /workspace/.release-sha ] && [ "$(cat /workspace/.release-sha)" = "$NEW_SHA" ]; then
-  echo "[apply] payload unchanged (sha match) - nothing to do"
+RELEASE_SRC=/workspace/_release
+GATE_DIR=/workspace/gate
+NEW_SHA=$(sha256sum "$RELEASE_SRC/baanzon-app.tar.gz" 2>/dev/null | cut -d' ' -f1 || echo unknown)
+
+if [ ! -f "$RELEASE_SRC/baanzon-app.tar.gz" ]; then
+  echo "[apply] no release tarball at $RELEASE_SRC - nothing to do"
   exit 0
 fi
-# self-heal: a failed rollback can leave APP_DIR missing or .env-less while a
-# usable release survives in a candidate dir; restore before anything else.
-if [ ! -f "$APP_DIR/.env" ]; then
-  for c in "$APP_DIR-tmp" "$OLD_DIR"; do
-    if [ -f "$c/.env" ]; then
-      echo "[apply] self-heal: $APP_DIR unusable - restoring from $c"
-      [ -d "$APP_DIR" ] && rm -rf "$APP_DIR" 2>/dev/null || true
-      mv "$c" "$APP_DIR"
-      break
-    fi
-  done
+
+# already applied and serving: skip the redundant redeploy
+if [ -f /workspace/.release-sha ] && [ "$(cat /workspace/.release-sha)" = "$NEW_SHA" ]; then
+  if curl -sf http://127.0.0.1:3080/readyz >/dev/null; then
+    echo "[apply] release $NEW_SHA already applied and healthy - skipping"
+    exit 0
+  fi
 fi
-# never destroy the release backup while the live .env is unaccounted for
+
+BLUE_DIR=/workspace/baanzon        BLUE_PORT=3090  BLUE_PROG=baanzon-api
+GREEN_DIR=/workspace/baanzon-next  GREEN_PORT=3091 GREEN_PROG=baanzon-api-next
+ACTIVE_FILE=/workspace/data/active-port
+
+mkdir -p /workspace/data "$GATE_DIR" "$BLUE_DIR/logs" "$GREEN_DIR/logs"
+
+# ---- which slot is active? -------------------------------------------------
+if [ -f "$ACTIVE_FILE" ]; then
+  ACTIVE_PORT=$(cat "$ACTIVE_FILE" 2>/dev/null | tr -dc 0-9)
+fi
+case "${ACTIVE_PORT:-}" in
+  3091) ACTIVE_DIR=$GREEN_DIR; ACTIVE_PROG=$GREEN_PROG ;;
+  *)    ACTIVE_PORT=3090; ACTIVE_DIR=$BLUE_DIR; ACTIVE_PROG=$BLUE_PROG ;;
+esac
+if [ "$ACTIVE_PORT" = "$BLUE_PORT" ]; then
+  STAGE_DIR=$GREEN_DIR; STAGE_PORT=$GREEN_PORT; STAGE_PROG=$GREEN_PROG
+else
+  STAGE_DIR=$BLUE_DIR; STAGE_PORT=$BLUE_PORT; STAGE_PROG=$BLUE_PROG
+fi
+echo "[apply] active: $ACTIVE_PROG ($ACTIVE_DIR) :$ACTIVE_PORT - staging into $STAGE_PROG ($STAGE_DIR) :$STAGE_PORT"
+
+# ---- stop the stale staging release before overwriting its tree ------------
+if supervisorctl status "$STAGE_PROG" 2>/dev/null | grep -q RUNNING; then
+  echo "[apply] stopping stale $STAGE_PROG (not serving; active is $ACTIVE_PROG)"
+  supervisorctl stop "$STAGE_PROG" >/dev/null 2>&1 || true
+fi
+
+# ---- stage the new tree ----------------------------------------------------
 for i in 1 2 3 4; do
-  if [ -f "$APP_DIR/.env" ]; then rm -rf "$OLD_DIR" 2>/dev/null || true; fi
-  if rm -rf "$NEW_DIR" 2>/dev/null; then break; fi
+  if rm -rf "$STAGE_DIR" 2>/dev/null; then break; fi
   echo "[apply] rm retry $i (network-volume rm race)"; sleep 5
 done
-rm -rf "$NEW_DIR" 2>/dev/null || true
-if [ -f "$APP_DIR/.env" ]; then rm -rf "$OLD_DIR" 2>/dev/null || true; fi
+rm -rf "$STAGE_DIR" 2>/dev/null || true
+mkdir -p "$STAGE_DIR/logs"
+tar --no-same-owner --no-same-permissions -xzf "$RELEASE_SRC/baanzon-app.tar.gz" -C "$STAGE_DIR"
+
+# operator-managed files the tarball must not carry
+for f in .env baanzon.yaml; do
+  if [ -f "$ACTIVE_DIR/$f" ]; then cp "$ACTIVE_DIR/$f" "$STAGE_DIR/$f"; fi
+done
+for d in images uploads; do
+  mkdir -p "$STAGE_DIR/$d"
+  if [ -d "$ACTIVE_DIR/$d" ]; then cp -a "$ACTIVE_DIR/$d/." "$STAGE_DIR/$d/" 2>/dev/null || true; fi
+done
+
+if [ ! -f "$STAGE_DIR/.env" ]; then
+  echo "[apply] REQUIRED: no .env in $ACTIVE_DIR to carry forward - refusing to stage"
+  exit 1
+fi
+
 # single-replica pod: without this the schedules engine refuses to arm and
 # schedule writes 503 forever (matches the previous live deployment's setting)
-if ! grep -qE "^SCHEDULES_SINGLE_PROCESS=" "$APP_DIR/.env"; then
-  printf 'SCHEDULES_SINGLE_PROCESS=true\n' >> "$APP_DIR/.env"
+if ! grep -qE "^SCHEDULES_SINGLE_PROCESS=" "$STAGE_DIR/.env"; then
+  printf 'SCHEDULES_SINGLE_PROCESS=true\n' >> "$STAGE_DIR/.env"
 fi
-# the previous .env guessed the db name: a swap can ship a stale MONGO_URI
-# pointing at an empty db and break every login until the next rescue - audit
-# and repoint before the release copies .env forward (11:38-12:27 outage)
+
+env_value() {
+  awk -F= -v key="$1" '$1 == key { sub(/^[^=]*=/, ""); sub(/[[:space:]]*\r?$/, ""); print; exit }' "$STAGE_DIR/.env"
+}
+if [ -z "$(env_value OPRAIZ_API_KEY)" ] || [ -z "$(env_value OPRAIZ_BASEURL)" ]; then
+  echo "[apply] WARNING: OPRAIZ_API_KEY and/or OPRAIZ_BASEURL empty - Opraiz models will not resolve until the operator re-enters them"
+fi
+
+echo "[apply] validating Cloudflare provider routing"
+node "$STAGE_DIR/scripts/validate-provider-routing.js" "$STAGE_DIR/baanzon.yaml" --fix || true
+node "$STAGE_DIR/scripts/validate-provider-routing.js" "$STAGE_DIR/baanzon.yaml" || true
+
+echo "[apply] preparing prod deps (lockfile cache)"
+cd "$STAGE_DIR" || exit 1
+(NPM_CONFIG_CACHE=/workspace/.npm-cache npm ci --omit=dev --no-audit --no-fund) >/workspace/npminstall.log 2>&1 \
+  || { echo "[apply] npm ci FAILED"; tail -20 /workspace/npminstall.log; exit 1; }
+echo "[apply] deps ready: $(ls node_modules | wc -l) top-level packages"
+
+# ---- db audit: repoint MONGO_URI before the new slot boots ------------------
+# a stale pointer to an empty database breaks every login until the next
+# rescue - audit per local database and repoint when the live one is empty
 NODE_BIN=$(command -v node || true)
 [ -z "$NODE_BIN" ] && for c in /usr/local/bin/node /usr/bin/node $(ls -t /root/.nvm/versions/node/*/bin/node 2>/dev/null | head -1); do
   [ -x "$c" ] && NODE_BIN="$c" && break
 done
-if [ -n "$NODE_BIN" ] && [ -d "/workspace/baanzon/node_modules/mongodb" ]; then
+if [ -n "$NODE_BIN" ] && [ -d "$STAGE_DIR/node_modules/mongodb" ]; then
   AUDIT=$("$NODE_BIN" -e '
-const path = "/workspace/baanzon/node_modules/mongodb";
+const path = process.argv[1];
 let MongoClient;
 try { MongoClient = require(path).MongoClient || require(path).default.MongoClient; }
 catch (e) { console.log("audit-skip: no mongodb driver"); process.exit(0); }
@@ -65,102 +128,136 @@ catch (e) { console.log("audit-skip: no mongodb driver"); process.exit(0); }
   console.log("best-db=" + best.name + " users=" + best.n);
   await c.close();
 })().catch(e => console.log("audit-error: " + String(e).slice(0,120)));
-' 2>/dev/null || true)
+' "$STAGE_DIR/node_modules/mongodb" 2>/dev/null || true)
   echo "[apply] db audit: $AUDIT"
-  CUR_DB=$(grep -oE "^MONGO_URI=mongodb://[^/]+/[^?[:space:]]+" "$APP_DIR/.env" 2>/dev/null | sed 's#.*/##')
+  CUR_DB=$(grep -oE "^MONGO_URI=mongodb://[^/]+/[^?[:space:]]+" "$STAGE_DIR/.env" 2>/dev/null | sed 's#.*/##')
   BEST_DB=$(echo "$AUDIT" | grep -oE "best-db=[^ ]+" | cut -d= -f2)
   BEST_N=$(echo "$AUDIT" | grep -oE "users=[0-9]+" | tail -1 | cut -d= -f2)
   if [ -n "$BEST_DB" ] && [ -n "$BEST_N" ] && [ "$BEST_N" -gt 0 ] && [ "$BEST_DB" != "$CUR_DB" ]; then
     echo "[apply] repointing MONGO_URI from '$CUR_DB' to '$BEST_DB'"
-    grep -vE "^MONGO_URI=" "$APP_DIR/.env" > "$APP_DIR/.env.tmp"
-    printf 'MONGO_URI=mongodb://127.0.0.1:27017/%s\n' "$BEST_DB" >> "$APP_DIR/.env.tmp"
-    mv "$APP_DIR/.env.tmp" "$APP_DIR/.env"
-    chmod 600 "$APP_DIR/.env"
+    grep -vE "^MONGO_URI=" "$STAGE_DIR/.env" > "$STAGE_DIR/.env.tmp"
+    printf 'MONGO_URI=mongodb://127.0.0.1:27017/%s\n' "$BEST_DB" >> "$STAGE_DIR/.env.tmp"
+    mv "$STAGE_DIR/.env.tmp" "$STAGE_DIR/.env"
+    chmod 600 "$STAGE_DIR/.env"
   fi
 fi
-mkdir -p "$NEW_DIR"
-tar --no-same-owner --no-same-permissions -xzf "$RELEASE_SRC/baanzon-app.tar.gz" -C "$NEW_DIR"
 
-# preserve operator-managed files the tarball must not carry
-for f in .env baanzon.yaml; do
-  if [ -f "$APP_DIR/$f" ]; then cp "$APP_DIR/$f" "$NEW_DIR/$f"; fi
+# ---- one-time migration: install gate + move api off 3080 -------------------
+# The gate owns 3080 for the pod's lifetime; the api slots move to 3090/3091.
+# This is the ONLY deploy that interrupts (the api restarts onto 3090); every
+# later deploy flips the active-port file with zero downtime.
+SUPERVISOR_CONF=/etc/supervisor/conf.d/baanzon.conf
+if ! grep -q "baanzon-gate" "$SUPERVISOR_CONF" 2>/dev/null; then
+  echo "[apply] MIGRATION: installing blue-green gate"
+  cp "$STAGE_DIR/scripts/pod-gate.js" "$GATE_DIR/pod-gate.js" || exit 1
+  # surgically replace the api block and append gate + second slot
+  awk 'BEGIN{skip=0} /^\[program:(baanzon-api|baanzon-api-next|baanzon-gate)\]/{skip=1; next} skip && /^\[/{skip=0} !skip' \
+    "$SUPERVISOR_CONF" > "$SUPERVISOR_CONF.tmp" 2>/dev/null || cp "$SUPERVISOR_CONF" "$SUPERVISOR_CONF.tmp"
+  cat >> "$SUPERVISOR_CONF.tmp" <<'EOF'
+
+[program:baanzon-gate]
+command=/bin/bash -lc 'exec node /workspace/gate/pod-gate.js'
+directory=/workspace
+autostart=true
+autorestart=true
+stopasgroup=true
+environment=ACTIVE_PORT_FILE="/workspace/data/active-port",GATE_PORT="3080",GATE_DEFAULT_PORT="3090"
+stdout_logfile=/workspace/baanzon/logs/supervisor-gate.log
+redirect_stderr=true
+
+[program:baanzon-api]
+command=/bin/bash -lc 'exec node api/server/index.js'
+directory=/workspace/baanzon
+autostart=true
+autorestart=true
+stopasgroup=true
+environment=NODE_ENV="production",PORT="3090"
+stdout_logfile=/workspace/baanzon/logs/supervisor-api.log
+redirect_stderr=true
+
+[program:baanzon-api-next]
+command=/bin/bash -lc 'exec node api/server/index.js'
+directory=/workspace/baanzon-next
+autostart=true
+autorestart=true
+stopasgroup=true
+environment=NODE_ENV="production",PORT="3091"
+stdout_logfile=/workspace/baanzon-next/logs/supervisor-api.log
+redirect_stderr=true
+EOF
+  mv "$SUPERVISOR_CONF.tmp" "$SUPERVISOR_CONF"
+  printf '%s' "$BLUE_PORT" > "$ACTIVE_FILE"
+  supervisorctl reread >/dev/null 2>&1 || true
+  supervisorctl update >/dev/null 2>&1 || true
+  # the api restarts onto 3090 here - announced one-time cut
+  for i in 1 2 3 4 5 6; do
+    if supervisorctl status baanzon-gate 2>/dev/null | grep -q RUNNING; then break; fi
+    sleep 3; supervisorctl start baanzon-gate >/dev/null 2>&1 || true
+  done
+  echo "[apply] waiting for api on :$BLUE_PORT (migration cold start)"
+  for i in $(seq 1 150); do
+    if curl -sf "http://127.0.0.1:$BLUE_PORT/readyz" >/dev/null; then break; fi
+    sleep 3
+  done
+  if ! curl -sf "http://127.0.0.1:$BLUE_PORT/readyz" >/dev/null; then
+    echo "[apply] MIGRATION FAILED: api did not come up on :$BLUE_PORT"
+    supervisorctl status || true
+    exit 1
+  fi
+  if ! curl -sf "http://127.0.0.1:3080/readyz" >/dev/null; then
+    echo "[apply] WARNING: gate not answering on 3080 yet - checking again"
+    for i in 1 2 3 4 5; do
+      if curl -sf "http://127.0.0.1:3080/readyz" >/dev/null; then break; fi
+      sleep 3; supervisorctl start baanzon-gate >/dev/null 2>&1 || true
+    done
+    curl -sf "http://127.0.0.1:3080/readyz" >/dev/null || { echo "[apply] MIGRATION FAILED: gate not serving"; supervisorctl status baanzon-gate || true; exit 1; }
+  fi
+  echo "[apply] MIGRATION COMPLETE: gate serving :3080 -> api :$BLUE_PORT"
+fi
+
+# ---- boot the staging slot and health-gate it there ------------------------
+echo "[apply] starting $STAGE_PROG on :$STAGE_PORT"
+supervisorctl reread >/dev/null 2>&1 || true
+supervisorctl update >/dev/null 2>&1 || true
+supervisorctl start "$STAGE_PROG" >/dev/null 2>&1 || true
+for i in 1 2 3 4 5 6; do
+  if supervisorctl status "$STAGE_PROG" 2>/dev/null | grep -q RUNNING; then break; fi
+  sleep 5; supervisorctl start "$STAGE_PROG" >/dev/null 2>&1 || true
 done
-for d in images uploads logs; do
-  mkdir -p "$NEW_DIR/$d"
-  if [ -d "$APP_DIR/$d" ]; then cp -a "$APP_DIR/$d/." "$NEW_DIR/$d/" 2>/dev/null || true; fi
+
+echo "[apply] health-gate node http://127.0.0.1:$STAGE_PORT/readyz (active keeps serving meanwhile)"
+for i in $(seq 1 150); do
+  if curl -sf "http://127.0.0.1:$STAGE_PORT/readyz" >/dev/null; then
+    echo "[apply] staging slot healthy after ~$((i*3))s"
+    break
+  fi
+  sleep 3
 done
-
-# data dirs: live OUTSIDE the app dir at /workspace/data/{mongodb,meili_data}
-# (mongod/meili supervisor conf point there) so releases never touch them.
-
-if [ ! -f "$APP_DIR/.env" ]; then
-  echo "[apply] REQUIRED: $APP_DIR/.env is missing"
+if ! curl -sf "http://127.0.0.1:$STAGE_PORT/readyz" >/dev/null; then
+  echo "[apply] staging slot FAILED health gate - active release untouched, no flip"
+  supervisorctl stop "$STAGE_PROG" >/dev/null 2>&1 || true
+  supervisorctl status "$ACTIVE_PROG" || true
+  if [ -f "$STAGE_DIR/logs/supervisor-api.log" ]; then tail -40 "$STAGE_DIR/logs/supervisor-api.log" || true; fi
   exit 1
 fi
 
-# Read only the two provider keys; do not source the file because provider URLs
-# and secrets may contain shell metacharacters or unrelated dotenv lines.
-env_value() {
-  awk -F= -v key="$1" '$1 == key { sub(/^[^=]*=/, ""); sub(/[[:space:]]*\r?$/, ""); print; exit }' "$APP_DIR/.env"
-}
-# Recovery boot: warn rather than refuse - a missing provider key must not
-# keep a half-reconstructed .env from booting the site (models fall back to
-# the static list; the operator re-enters keys via the Pod rescue env stage).
-if [ -z "$(env_value OPRAIZ_API_KEY)" ] || [ -z "$(env_value OPRAIZ_BASEURL)" ]; then
-  echo "[apply] WARNING: OPRAIZ_API_KEY and/or OPRAIZ_BASEURL empty - Opraiz models will not resolve until the operator re-enters them"
-fi
-
-echo "[apply] validating Cloudflare provider routing"
-node "$NEW_DIR/scripts/validate-provider-routing.js" "$NEW_DIR/baanzon.yaml" --fix
-node "$NEW_DIR/scripts/validate-provider-routing.js" "$NEW_DIR/baanzon.yaml"
-
-echo "[apply] preparing prod deps (lockfile cache)"
-cd "$NEW_DIR"
-(NPM_CONFIG_CACHE=/workspace/.npm-cache npm ci --omit=dev --no-audit --no-fund) >/workspace/npminstall.log 2>&1 \
-  || { echo "[apply] npm ci FAILED"; tail -20 /workspace/npminstall.log; exit 1; }
-echo "[apply] deps ready: $(ls node_modules | wc -l) top-level packages"
-if [ -d "$APP_DIR" ]; then mv "$APP_DIR" "$OLD_DIR"; fi
-mv "$NEW_DIR" "$APP_DIR"
-
-echo "[apply] restarting api under supervisord"
-SUPERVISOR_CONF=/etc/supervisor/conf.d/baanzon.conf
-if [ -f "$SUPERVISOR_CONF" ]; then
-  sed -i "/\[program:baanzon-api\]/,/^\[/ s#^command=.*#command=/bin/bash -lc 'exec node api/server/index.js'#" "$SUPERVISOR_CONF"
-fi
-supervisorctl reread >/dev/null 2>&1 || true
-supervisorctl update >/dev/null 2>&1 || true
-if ! supervisorctl restart baanzon-api; then
-  echo "[apply] baanzon-api supervisor start failed"
-  supervisorctl status baanzon-api || true
-  if [ -f "$APP_DIR/logs/supervisor-api.log" ]; then
-    tail -80 "$APP_DIR/logs/supervisor-api.log" || true
-  fi
-fi
-
-echo "[apply] health-gate node http://127.0.0.1:3080/readyz"
-# 450s: a cold start on the network volume (fresh node_modules, first Mongo
-# connect) has taken well over 3 minutes under degraded I/O.
-for i in $(seq 1 150); do
-  if curl -sf http://127.0.0.1:3080/readyz >/dev/null; then echo "[apply] healthy"; printf '%s' "$NEW_SHA" > /workspace/.release-sha; rm -rf "$OLD_DIR" 2>/dev/null & exit 0; fi
+# ---- flip: one file write, gate routes new connections to the new slot -----
+printf '%s' "$STAGE_PORT" > "$ACTIVE_FILE"
+for i in 1 2 3 4 5 6 7 8 9 10; do
+  if curl -sf "http://127.0.0.1:3080/readyz" >/dev/null; then break; fi
   sleep 3
 done
-# rollback on failure
-if [ -d "$OLD_DIR" ]; then
-  echo "[apply] health gate FAILED - rolling back to previous release"
-  mv "$APP_DIR" "$APP_DIR-tmp" 2>/dev/null || true
-  mv "$OLD_DIR" "$APP_DIR" || { sleep 5; mv "$OLD_DIR" "$APP_DIR" || true; }
-  sleep 2
-  # restart can hit a transient spawn error on the network volume; keep
-  # trying so a failed rollback never leaves the pod with no api running.
-  supervisorctl restart baanzon-api || true
-  for i in 1 2 3 4 5 6; do
-    if supervisorctl status baanzon-api 2>/dev/null | grep -q RUNNING; then break; fi
-    sleep 5
-    supervisorctl start baanzon-api 2>/dev/null || true
-  done
-  supervisorctl status baanzon-api || true
-  # only clean up the staged tree when the live .env is accounted for;
-  # otherwise it may hold the only copy of .env for the next run's self-heal
-  if [ -f "$APP_DIR/.env" ]; then rm -rf "$APP_DIR-tmp" 2>/dev/null || true; fi
+if ! curl -sf "http://127.0.0.1:3080/readyz" >/dev/null; then
+  echo "[apply] flip verification FAILED - reverting gate to :$ACTIVE_PORT"
+  printf '%s' "$ACTIVE_PORT" > "$ACTIVE_FILE"
+  supervisorctl stop "$STAGE_PROG" >/dev/null 2>&1 || true
+  exit 1
 fi
-exit 1
+
+# ---- retire the previous release (kept on disk for instant rollback) -------
+supervisorctl stop "$ACTIVE_PROG" >/dev/null 2>&1 || true
+printf '%s' "$NEW_SHA" > /workspace/.release-sha
+echo "[apply] flipped: gate :3080 -> $STAGE_PROG :$STAGE_PORT (release $NEW_SHA)"
+echo "[apply] previous release kept in $ACTIVE_DIR - rollback: start $ACTIVE_PROG + echo $ACTIVE_PORT > $ACTIVE_FILE"
+supervisorctl status | grep baanzon || true
+exit 0
