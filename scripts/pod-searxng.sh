@@ -28,12 +28,21 @@ fi
 "$VENV/bin/pip" uninstall -y searXNG 2>/dev/null | tail -1 || true
 
 echo "=== searxng: source ==="
+python3 --version 2>&1 || echo "[searxng] WARNING: python3 missing"
 for i in 1 2 3; do
   if rm -rf "$SRC" 2>/dev/null; then break; fi
   sleep 5
 done
-git clone --depth 1 https://github.com/searxng/searxng "$SRC" \
-  || { echo "[searxng] FAILED: git clone"; exit 1; }
+if git clone --depth 1 https://github.com/searxng/searxng "$SRC" 2>"$BASE/clone-error.log"; then
+  echo "[searxng] cloned via git"
+else
+  echo "[searxng] git clone failed: $(tail -3 "$BASE/clone-error.log" 2>/dev/null) - falling back to tarball"
+  mkdir -p "$SRC"
+  curl -fsSL https://github.com/searxng/searxng/archive/refs/heads/master.tar.gz -o "$BASE/src.tar.gz" \
+    && tar -xzf "$BASE/src.tar.gz" -C "$SRC" --strip-components=1 \
+    || { echo "[searxng] FAILED: tarball download"; exit 1; }
+  echo "[searxng] downloaded via tarball"
+fi
 "$VENV/bin/pip" install -q -r "$SRC/requirements.txt" gunicorn \
   || { echo "[searxng] FAILED: requirements install"; exit 1; }
 "$VENV/bin/python" -c "import searx.webapp" 2>"$BASE/import-error.log" \
