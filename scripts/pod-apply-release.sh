@@ -38,6 +38,46 @@ if [ -f "$APP_DIR/.env" ]; then rm -rf "$OLD_DIR" 2>/dev/null || true; fi
 if ! grep -qE "^SCHEDULES_SINGLE_PROCESS=" "$APP_DIR/.env"; then
   printf 'SCHEDULES_SINGLE_PROCESS=true\n' >> "$APP_DIR/.env"
 fi
+# the previous .env guessed the db name: a swap can ship a stale MONGO_URI
+# pointing at an empty db and break every login until the next rescue - audit
+# and repoint before the release copies .env forward (11:38-12:27 outage)
+NODE_BIN=$(command -v node || true)
+[ -z "$NODE_BIN" ] && for c in /usr/local/bin/node /usr/bin/node $(ls -t /root/.nvm/versions/node/*/bin/node 2>/dev/null | head -1); do
+  [ -x "$c" ] && NODE_BIN="$c" && break
+done
+if [ -n "$NODE_BIN" ] && [ -d "/workspace/baanzon/node_modules/mongodb" ]; then
+  AUDIT=$("$NODE_BIN" -e '
+const path = "/workspace/baanzon/node_modules/mongodb";
+let MongoClient;
+try { MongoClient = require(path).MongoClient || require(path).default.MongoClient; }
+catch (e) { console.log("audit-skip: no mongodb driver"); process.exit(0); }
+(async () => {
+  const c = new MongoClient("mongodb://127.0.0.1:27017", { serverSelectionTimeoutMS: 5000 });
+  await c.connect();
+  const dbs = await c.db("admin").admin().listDatabases();
+  let best = { name: "", n: -1 };
+  for (const d of dbs.databases) {
+    if (["admin","local","config"].includes(d.name)) continue;
+    let n = 0;
+    try { n = await c.db(d.name).collection("users").countDocuments({}); } catch (e) {}
+    if (n > best.n) best = { name: d.name, n };
+  }
+  console.log("best-db=" + best.name + " users=" + best.n);
+  await c.close();
+})().catch(e => console.log("audit-error: " + String(e).slice(0,120)));
+' 2>/dev/null || true)
+  echo "[apply] db audit: $AUDIT"
+  CUR_DB=$(grep -oE "^MONGO_URI=mongodb://[^/]+/[^?[:space:]]+" "$APP_DIR/.env" 2>/dev/null | sed 's#.*/##')
+  BEST_DB=$(echo "$AUDIT" | grep -oE "best-db=[^ ]+" | cut -d= -f2)
+  BEST_N=$(echo "$AUDIT" | grep -oE "users=[0-9]+" | tail -1 | cut -d= -f2)
+  if [ -n "$BEST_DB" ] && [ -n "$BEST_N" ] && [ "$BEST_N" -gt 0 ] && [ "$BEST_DB" != "$CUR_DB" ]; then
+    echo "[apply] repointing MONGO_URI from '$CUR_DB' to '$BEST_DB'"
+    grep -vE "^MONGO_URI=" "$APP_DIR/.env" > "$APP_DIR/.env.tmp"
+    printf 'MONGO_URI=mongodb://127.0.0.1:27017/%s\n' "$BEST_DB" >> "$APP_DIR/.env.tmp"
+    mv "$APP_DIR/.env.tmp" "$APP_DIR/.env"
+    chmod 600 "$APP_DIR/.env"
+  fi
+fi
 mkdir -p "$NEW_DIR"
 tar --no-same-owner --no-same-permissions -xzf "$RELEASE_SRC/baanzon-app.tar.gz" -C "$NEW_DIR"
 
