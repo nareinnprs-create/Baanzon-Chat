@@ -64,10 +64,13 @@ rm -rf "$STAGE_DIR" 2>/dev/null || true
 mkdir -p "$STAGE_DIR/logs"
 tar --no-same-owner --no-same-permissions -xzf "$RELEASE_SRC/baanzon-app.tar.gz" -C "$STAGE_DIR"
 
-# operator-managed files the tarball must not carry
-for f in .env baanzon.yaml; do
-  if [ -f "$ACTIVE_DIR/$f" ]; then cp "$ACTIVE_DIR/$f" "$STAGE_DIR/$f"; fi
-done
+# operator-managed files: .env is operator-managed (tarball must not carry it);
+# baanzon.yaml is git-tracked, so the tarball's copy wins and the active slot's
+# copy is only a fallback for tarballs built before it was tracked
+if [ -f "$ACTIVE_DIR/.env" ]; then cp "$ACTIVE_DIR/.env" "$STAGE_DIR/.env"; fi
+if [ ! -f "$STAGE_DIR/baanzon.yaml" ] && [ -f "$ACTIVE_DIR/baanzon.yaml" ]; then
+  cp "$ACTIVE_DIR/baanzon.yaml" "$STAGE_DIR/baanzon.yaml"
+fi
 for d in images uploads; do
   mkdir -p "$STAGE_DIR/$d"
   if [ -d "$ACTIVE_DIR/$d" ]; then cp -a "$ACTIVE_DIR/$d/." "$STAGE_DIR/$d/" 2>/dev/null || true; fi

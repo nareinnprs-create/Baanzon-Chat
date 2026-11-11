@@ -476,8 +476,6 @@ const startServer = async () => {
   app.use('/api/memories', routes.memories);
   app.use('/api/knowledge', routes.knowledge);
   app.use('/api/notifications', routes.notifications);
-  app.use('/api/devices', routes.devices);
-  app.use('/api/subscriptions', routes.subscriptions);
   app.use('/api/usage-records', routes.usageRecords);
   app.use('/api/feedback', routes.feedback);
   app.use('/api/workflows', routes.workflows);
