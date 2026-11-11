@@ -229,6 +229,8 @@ if [ -n "$BEST_DB" ] && [ -n "$BEST_N" ] && [ "$BEST_N" -gt 0 ] && [ "$BEST_DB" 
   NEED_RESTART=yes
 fi
 
+PORT="$ACTIVE_PORT"
+
 echo "=== restart-if-needed ==="
 [ -f "$APP_DIR/baanzon.yaml" ] || echo "[rescue] WARNING: baanzon.yaml missing - api boots on defaults until the next deploy carries it"
 RUNNING=$(supervisorctl status "$API_PROG" 2>/dev/null | grep -c RUNNING || true)
