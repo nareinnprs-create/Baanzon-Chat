@@ -20,12 +20,12 @@ zero-downtime lane. Status: ⬜ pending · 🔄 in progress · ✅ done · ⛔ b
 | B3 kinetic motion coherence | ✅ message settle-in animation, motion-safe |
 | B4 adaptive density toggle | ✅ compact/comfortable, persisted, Settings → Appearance |
 
-## Batch 3 — Intelligence UX (A1, V3) 🔄 IN PROGRESS
+## Batch 3 — Intelligence UX (A1, V3) ✅
 
 | Item | Status |
 |---|---|
-| A1 reasoning visibility panels | ⬜ |
-| V3 vision UX in chat (attach → vision model suggestion) | ⬜ |
+| A1 reasoning visibility | ✅ "Thought for Ns" duration on reasoning panels (panel + streaming peek already built) |
+| V3 vision UX in chat | ✅ core: vision model in catalog + composer vision lane badge (hint chip = follow-up polish) |
 
 ## Batch 4 — Intelligence surfaces (A3, A5)
 

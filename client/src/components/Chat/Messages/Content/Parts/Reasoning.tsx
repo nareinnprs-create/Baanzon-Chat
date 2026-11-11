@@ -194,15 +194,33 @@ const Reasoning = memo((props: ReasoningProps) => {
 
   const effectiveIsSubmitting = isLatestMessage ? isSubmitting : false;
 
+  /** A1: measure the reasoning duration while this run streams, so the label
+   *  reads "Thought for Ns" after the run ends (ChatGPT/Claude pattern). */
+  const [thoughtSeconds, setThoughtSeconds] = useState<number | null>(null);
+  const thoughtStartedAtRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (effectiveIsSubmitting && reasoningText && thoughtStartedAtRef.current == null) {
+      thoughtStartedAtRef.current = Date.now();
+    }
+    if (!effectiveIsSubmitting && thoughtStartedAtRef.current != null) {
+      setThoughtSeconds(Math.max(1, Math.round((Date.now() - thoughtStartedAtRef.current) / 1000)));
+      thoughtStartedAtRef.current = null;
+    }
+  }, [effectiveIsSubmitting, reasoningText]);
+
   const label = useMemo(() => {
     const generated = reasoningLabel?.trim();
     if (generated) {
       return generated;
     }
-    return effectiveIsSubmitting && isLast
-      ? localize('com_ui_thinking')
-      : localize('com_ui_thoughts');
-  }, [effectiveIsSubmitting, isLast, localize, reasoningLabel]);
+    if (effectiveIsSubmitting && isLast) {
+      return localize('com_ui_thinking');
+    }
+    if (thoughtSeconds != null) {
+      return localize('com_ui_thought_for', { 0: thoughtSeconds });
+    }
+    return localize('com_ui_thoughts');
+  }, [effectiveIsSubmitting, isLast, localize, reasoningLabel, thoughtSeconds]);
 
   if (!reasoningText) {
     return null;
