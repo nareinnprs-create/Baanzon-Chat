@@ -40,17 +40,15 @@ if [ -d "$SRC" ]; then
   SRC="$BASE/searxng-src-$STAMP"
   echo "[searxng] cleanup failed - using fresh dir $SRC"
 fi
-if git clone --depth 1 https://github.com/searxng/searxng "$SRC" 2>"$BASE/clone-error.log"; then
-  echo "[searxng] cloned via git"
-else
-  echo "[searxng] git clone failed: $(tail -3 "$BASE/clone-error.log" 2>/dev/null) - falling back to tarball"
-  mkdir -p "$SRC"
-  curl -SsL https://github.com/searxng/searxng/archive/refs/heads/master.tar.gz -o "$BASE/src.tar.gz" 2>"$BASE/tarball-error.log" \
-    || { echo "[searxng] FAILED: tarball download: $(tail -2 "$BASE/tarball-error.log" 2>/dev/null)"; exit 1; }
-  tar -xzf "$BASE/src.tar.gz" -C "$SRC" --strip-components=1 \
-    || { echo "[searxng] FAILED: tarball extract"; exit 1; }
-  echo "[searxng] downloaded via tarball"
-fi
+# Tarball only (no git): the repo's utils/templates files contain colons in
+# their names and this pod's volume rejects them, so exclude that directory -
+# gunicorn only needs the searx package and requirements.txt.
+mkdir -p "$SRC"
+curl -SsL https://github.com/searxng/searxng/archive/refs/heads/master.tar.gz -o "$BASE/src.tar.gz" 2>"$BASE/tarball-error.log" \
+  || { echo "[searxng] FAILED: tarball download: $(tail -2 "$BASE/tarball-error.log" 2>/dev/null)"; exit 1; }
+tar -xzf "$BASE/src.tar.gz" -C "$SRC" --strip-components=1 --exclude='utils/templates' \
+  || { echo "[searxng] FAILED: tarball extract"; exit 1; }
+echo "[searxng] source extracted (templates excluded)"
 "$VENV/bin/pip" install -q -r "$SRC/requirements.txt" gunicorn \
   || { echo "[searxng] FAILED: requirements install"; exit 1; }
 ( cd "$SRC" && "$VENV/bin/python" -c "import searx.webapp" ) 2>"$BASE/import-error.log" \
