@@ -2857,3 +2857,22 @@ html[data-input-modality='keyboard']
     }
   }
 }
+
+/* B1 - Signature Aurora (blueprint 65): Deep Ocean > Teal > Aqua > Soft Orchid.
+   Reserved for AI activity, brand moments and completion states only. */
+:root {
+  --aurora-1: #061316;
+  --aurora-2: #13A6A0;
+  --aurora-3: #46E2D2;
+  --aurora-4: #A998FF;
+  --aurora-gradient: linear-gradient(90deg, var(--aurora-1) 0%, var(--aurora-2) 38%, var(--aurora-3) 68%, var(--aurora-4) 100%);
+}
+.aurora-bg {
+  background-image: var(--aurora-gradient);
+}
+.aurora-text {
+  background-image: var(--aurora-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

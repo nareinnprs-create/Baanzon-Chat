@@ -15,17 +15,18 @@ import { cn } from '~/utils';
  * still under `prefers-reduced-motion: reduce`.
  *
  * Motion is truthful (§63.9): `idle` and `completed` animate nothing because
- * nothing is running. The §65 Aurora gradient is deliberately absent — that
- * token set is ROADMAP milestone 2; until it lands the pulse marks state with
- * semantic roles rather than hard-coding gradient stops in a feature.
+ * nothing is running. Active states carry the Signature Aurora gradient
+ * (§65 — AI activity is a reserved Aurora surface, milestone 2 tokens now in
+ * style.css); completed keeps the semantic success color, and everything sits
+ * behind `motion-safe:` so the pulse falls still under reduced motion.
  */
 const PULSE_MARKS: Record<TAuroraPulseState, string> = {
   idle: 'border border-border-medium bg-surface-tertiary',
-  thinking: 'motion-safe:animate-pulse bg-status-info',
-  searching: 'motion-safe:animate-pulse bg-status-info',
-  reading: 'motion-safe:animate-pulse bg-status-info',
-  creating: 'motion-safe:animate-pulse bg-status-info',
-  voice: 'motion-safe:animate-pulse bg-status-info',
+  thinking: 'motion-safe:animate-pulse aurora-bg',
+  searching: 'motion-safe:animate-pulse aurora-bg',
+  reading: 'motion-safe:animate-pulse aurora-bg',
+  creating: 'motion-safe:animate-pulse aurora-bg',
+  voice: 'motion-safe:animate-pulse aurora-bg',
   completed: 'bg-status-success',
   attention: 'motion-safe:animate-pulse bg-status-warning',
 };

@@ -71,14 +71,14 @@ describe('AuroraPulse', () => {
     expect(dot.className).not.toMatch(/animate-/);
   });
 
-  it('marks working activity with the status-info role and idle with the neutral surface', () => {
+  it('marks working activity with the aurora gradient and idle with the neutral surface', () => {
     const { rerender } = render(<AuroraPulse state="idle" />);
     let dot = screen.getByTestId('aurora-pulse').firstElementChild as HTMLElement;
     expect(dot).toHaveClass('bg-surface-tertiary');
 
     rerender(<AuroraPulse state="thinking" />);
     dot = screen.getByTestId('aurora-pulse').firstElementChild as HTMLElement;
-    expect(dot).toHaveClass('bg-status-info');
+    expect(dot).toHaveClass('aurora-bg');
 
     rerender(<AuroraPulse state="completed" />);
     dot = screen.getByTestId('aurora-pulse').firstElementChild as HTMLElement;

@@ -34,14 +34,15 @@ zero-downtime lane. Status: ⬜ pending · 🔄 in progress · ✅ done · ⛔ b
 | A3 Tasks surface (schedules UI) | ✅ verified: SidePanel Schedules dialog + specs green (98/98 across the batch) |
 | A5 Memory surface (user-facing viewer/editor) | ✅ verified: memory artifacts/call/info components green |
 
-## Batch 5 — Routing + research (A6, B5, A7)
+## Batch 5 — Routing + research (A6, B5, A7) 🔄
 
 | Item | Status |
 |---|---|
 | A6 Auto smart-routing with visible reasons | ✅ core: toggle + fast/deep heuristic live (branded catalog names feed it); visible-reason label = follow-up |
 | B5 command-everything palette | ✅ core: CommandPalette mounted in Root; action-coverage expansion = follow-up |
-| SearXNG pod install (rescue lane) | 🔄 installed + supervised, JSON probe returned 000 — gunicorn startup debug needed |
-| A7 Deep Research mode go-live | ⬜ blocked on the SearXNG probe above |
+| SearXNG pod install (rescue lane) | ✅ JSON API verified 200 on 127.0.0.1:8888, supervised, env pointer set |
+| A7 Deep Research mode go-live | 🔄 deploying: yaml flipped to searxng + SEARXNG_INSTANCE_URL picked up on this boot |
+| V3 hint chip (vision switch suggestion) | ⬜ follow-up polish |
 
 ## Operator grants
 
