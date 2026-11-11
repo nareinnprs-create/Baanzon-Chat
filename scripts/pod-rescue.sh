@@ -22,6 +22,15 @@ for d in "$APP_DIR" "$APP_DIR/baanzon" "$APP_DIR-tmp" /workspace/baanzon-old /wo
 done
 echo "-- supervisor"
 supervisorctl status 2>&1 | head -8
+echo "-- api log tail (redacted)"
+if [ -f "$APP_DIR/logs/supervisor-api.log" ]; then
+  tail -n 80 "$APP_DIR/logs/supervisor-api.log" 2>/dev/null \
+    | sed -E 's#[a-z+]+://[^ @"]*@#REDACTED_URI@#g; s#(cfat_|dodo_live_|dodo_test_|rpa_|sk-)[A-Za-z0-9._-]+#\1REDACTED#g' \
+    | grep -aE "error|Error|ERROR|FATAL|Cannot|Cannot find|throw|EADDR|ECONN|MONGO|Mongo|EEXIST|missing|at " | head -40
+else
+  echo "(no log at $APP_DIR/logs/supervisor-api.log)"
+  ls "$APP_DIR/logs" 2>/dev/null | head -10
+fi
 
 echo "=== stray rescue (before anything destructive) ==="
 n=0
@@ -171,6 +180,12 @@ echo "=== start ==="
 supervisorctl reread >/dev/null 2>&1 || true
 supervisorctl update >/dev/null 2>&1 || true
 supervisorctl restart baanzon-api >/dev/null 2>&1 || supervisorctl start baanzon-api >/dev/null 2>&1 || true
+# restart can hit a transient spawn error on the network volume; keep trying
+for i in 1 2 3 4 5 6; do
+  if supervisorctl status baanzon-api 2>/dev/null | grep -q RUNNING; then break; fi
+  sleep 5
+  supervisorctl start baanzon-api 2>/dev/null || true
+done
 for i in $(seq 1 60); do
   if curl -sf http://127.0.0.1:3080/readyz >/dev/null; then echo "[rescue] api ready after $((i*3))s"; break; fi
   sleep 3

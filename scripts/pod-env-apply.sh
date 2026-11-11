@@ -111,6 +111,12 @@ if [ -f "$APP_DIR/package.json" ] && [ -d "$APP_DIR/node_modules" ]; then
   supervisorctl reread >/dev/null 2>&1 || true
   supervisorctl update >/dev/null 2>&1 || true
   supervisorctl restart baanzon-api >/dev/null 2>&1 || supervisorctl start baanzon-api >/dev/null 2>&1 || true
+  # restart can hit a transient spawn error on the network volume; keep trying
+  for r in 1 2 3 4 5 6; do
+    if supervisorctl status baanzon-api 2>/dev/null | grep -q RUNNING; then break; fi
+    sleep 5
+    supervisorctl start baanzon-api 2>/dev/null || true
+  done
   for i in $(seq 1 60); do
     if curl -sf http://127.0.0.1:3080/readyz >/dev/null; then echo "[env-apply] api ready after $((i*3))s"; break; fi
     sleep 3
