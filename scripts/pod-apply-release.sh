@@ -76,7 +76,9 @@ if ! supervisorctl restart baanzon-api; then
 fi
 
 echo "[apply] health-gate node http://127.0.0.1:3080/readyz"
-for i in $(seq 1 60); do
+# 450s: a cold start on the network volume (fresh node_modules, first Mongo
+# connect) has taken well over 3 minutes under degraded I/O.
+for i in $(seq 1 150); do
   if curl -sf http://127.0.0.1:3080/readyz >/dev/null; then echo "[apply] healthy"; printf '%s' "$NEW_SHA" > /workspace/.release-sha; rm -rf "$OLD_DIR" 2>/dev/null & exit 0; fi
   sleep 3
 done
@@ -85,7 +87,16 @@ if [ -d "$OLD_DIR" ]; then
   echo "[apply] health gate FAILED - rolling back to previous release"
   mv "$APP_DIR" "$APP_DIR-tmp" 2>/dev/null || true
   mv "$OLD_DIR" "$APP_DIR"
+  sleep 2
+  # restart can hit a transient spawn error on the network volume; keep
+  # trying so a failed rollback never leaves the pod with no api running.
   supervisorctl restart baanzon-api || true
+  for i in 1 2 3 4 5 6; do
+    if supervisorctl status baanzon-api 2>/dev/null | grep -q RUNNING; then break; fi
+    sleep 5
+    supervisorctl start baanzon-api 2>/dev/null || true
+  done
+  supervisorctl status baanzon-api || true
   rm -rf "$APP_DIR-tmp" 2>/dev/null || true
 fi
 exit 1
