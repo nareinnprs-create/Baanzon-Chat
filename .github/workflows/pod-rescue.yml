@@ -3,10 +3,17 @@
 # Uses the same SSH secrets as the deploy workflow; runs scripts/pod-rescue.sh
 # on the pod via stdin. The script prints only paths and counts, never file
 # contents, so secrets cannot leak into the CI log.
+#
+# stage=env merges RESCUE_* repository secrets into the pod's .env and
+# restarts the api (scripts/pod-env-apply.sh); a secret left empty is skipped.
 name: Pod rescue
 
 on:
   workflow_dispatch:
+    inputs:
+      stage:
+        description: 'diagnose (default) | env (merge RESCUE_* secrets into pod .env)'
+        default: 'diagnose'
 
 permissions:
   contents: read
@@ -22,6 +29,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Diagnose and restore on pod
+        if: ${{ inputs.stage != 'env' }}
         env:
           SSH_KEY: ${{ secrets.POD_SSH_KEY }}
         run: |
@@ -32,3 +40,45 @@ jobs:
             "root@${{ secrets.POD_SSH_HOST }}" \
             "bash -s" < scripts/pod-rescue.sh
           rm -f pod_key
+
+      - name: Apply operator keys to pod .env
+        if: ${{ inputs.stage == 'env' }}
+        env:
+          SSH_KEY: ${{ secrets.POD_SSH_KEY }}
+          RESCUE_OPRAIZ_API_KEY: ${{ secrets.RESCUE_OPRAIZ_API_KEY }}
+          RESCUE_OPRAIZ_BASEURL: ${{ secrets.RESCUE_OPRAIZ_BASEURL }}
+          RESCUE_DODO_API_KEY: ${{ secrets.RESCUE_DODO_API_KEY }}
+          RESCUE_DODO_WEBHOOK_SECRET: ${{ secrets.RESCUE_DODO_WEBHOOK_SECRET }}
+          RESCUE_MONGO_URI: ${{ secrets.RESCUE_MONGO_URI }}
+          RESCUE_MEILI_MASTER_KEY: ${{ secrets.RESCUE_MEILI_MASTER_KEY }}
+          RESCUE_JWT_SECRET: ${{ secrets.RESCUE_JWT_SECRET }}
+          RESCUE_JWT_REFRESH_SECRET: ${{ secrets.RESCUE_JWT_REFRESH_SECRET }}
+          RESCUE_CREDS_KEY: ${{ secrets.RESCUE_CREDS_KEY }}
+          RESCUE_CREDS_IV: ${{ secrets.RESCUE_CREDS_IV }}
+        run: |
+          echo "$SSH_KEY" > pod_key
+          chmod 600 pod_key
+          SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30 -o ServerAliveCountMax=20 -o ConnectTimeout=30)
+          # key=value lines are written to a temp file (no output, values masked
+          # in the log as repository secrets) and fed to the pod script on stdin
+          : > env_input
+          for pair in \
+            "OPRAIZ_API_KEY=$RESCUE_OPRAIZ_API_KEY" \
+            "OPRAIZ_BASEURL=$RESCUE_OPRAIZ_BASEURL" \
+            "DODO_API_KEY=$RESCUE_DODO_API_KEY" \
+            "DODO_WEBHOOK_SECRET=$RESCUE_DODO_WEBHOOK_SECRET" \
+            "MONGO_URI=$RESCUE_MONGO_URI" \
+            "MEILI_MASTER_KEY=$RESCUE_MEILI_MASTER_KEY" \
+            "JWT_SECRET=$RESCUE_JWT_SECRET" \
+            "JWT_REFRESH_SECRET=$RESCUE_JWT_REFRESH_SECRET" \
+            "CREDS_KEY=$RESCUE_CREDS_KEY" \
+            "CREDS_IV=$RESCUE_CREDS_IV"; do
+            if [ -n "${pair#*=}" ]; then printf '%s\n' "$pair" >> env_input; fi
+          done
+          scp -q -i pod_key -P "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" \
+            scripts/pod-env-apply.sh "root@${{ secrets.POD_SSH_HOST }}:/workspace/_release/pod-env-apply.sh"
+          ssh -i pod_key -p "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" \
+            "root@${{ secrets.POD_SSH_HOST }}" \
+            "chmod +x /workspace/_release/pod-env-apply.sh && /workspace/_release/pod-env-apply.sh" \
+            < env_input
+          rm -f pod_key env_input
