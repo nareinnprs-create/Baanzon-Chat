@@ -176,31 +176,48 @@ EOF
 fi
 
 echo "=== db audit ==="
-if command -v mongosh >/dev/null 2>&1; then
-  CUR_DB=$(grep -oE "^MONGO_URI=mongodb://[^/]+/[^?[:space:]]+" "$APP_DIR/.env" 2>/dev/null | sed 's#.*/##')
-  echo "[rescue] .env points at db: ${CUR_DB:-none}"
-  DBS=$(mongosh --quiet --eval "JSON.stringify(db.adminCommand({listDatabases:1}).databases.map(function(d){return d.name}))" 2>/dev/null || true)
-  echo "[rescue] databases: $DBS"
-  BEST_DB=""; BEST_N=0
-  for db in $(echo "$DBS" | tr -d '[]",'); do
-    case "$db" in ""|admin|local|config) continue ;; esac
-    N=$(mongosh --quiet "$db" --eval "db.users.countDocuments({})" 2>/dev/null | tail -1)
-    case "$N" in ''|*[!0-9]*) N=0 ;; esac
-    echo "[rescue] db=$db users=$N"
-    if [ "$N" -gt "$BEST_N" ]; then BEST_N=$N; BEST_DB=$db; fi
-  done
-  if [ -n "$BEST_DB" ]; then
-    mongosh --quiet "$BEST_DB" --eval 'var u=db.users.findOne({email:"aravind18k@gmail.com"},{email:1}); print("[rescue] aravind-present:", !!u)' 2>/dev/null || true
-  fi
-  NEED_RESTART=no
-  if [ -n "$BEST_DB" ] && [ "$BEST_N" -gt 0 ] && [ "$BEST_DB" != "$CUR_DB" ]; then
-    echo "[rescue] MISMATCH: .env points at '$CUR_DB' but '$BEST_DB' holds $BEST_N users - fixing MONGO_URI"
-    grep -vE "^MONGO_URI=" "$APP_DIR/.env" > "$APP_DIR/.env.tmp"
-    printf 'MONGO_URI=mongodb://127.0.0.1:27017/%s\n' "$BEST_DB" >> "$APP_DIR/.env.tmp"
-    mv "$APP_DIR/.env.tmp" "$APP_DIR/.env"
-    chmod 600 "$APP_DIR/.env"
-    NEED_RESTART=yes
-  fi
+NODE_BIN=$(command -v node || true)
+[ -z "$NODE_BIN" ] && for c in /usr/local/bin/node /usr/bin/node $(ls -t /root/.nvm/versions/node/*/bin/node 2>/dev/null | head -1); do
+  [ -x "$c" ] && NODE_BIN="$c" && break
+done
+AUDIT=$( [ -n "$NODE_BIN" ] && "$NODE_BIN" -e '
+const path = "/workspace/baanzon/node_modules/mongodb";
+let MongoClient;
+try { MongoClient = require(path).MongoClient || require(path).default.MongoClient; }
+catch (e) { console.log("[rescue] audit-skip: no mongodb driver (" + String(e).slice(0,80) + ")"); process.exit(0); }
+(async () => {
+  const c = new MongoClient("mongodb://127.0.0.1:27017", { serverSelectionTimeoutMS: 5000 });
+  await c.connect();
+  const dbs = await c.db("admin").admin().listDatabases();
+  let best = { name: "", n: -1 };
+  for (const d of dbs.databases) {
+    if (["admin","local","config"].includes(d.name)) continue;
+    let n = 0;
+    try { n = await c.db(d.name).collection("users").countDocuments({}); } catch (e) {}
+    console.log("[rescue] db=" + d.name + " users=" + n);
+    if (n > best.n) best = { name: d.name, n };
+  }
+  let aravind = false;
+  if (best.n > 0) {
+    try { aravind = !!(await c.db(best.name).collection("users").findOne({ email: "aravind18k@gmail.com" }, { email: 1 })); } catch (e) {}
+  }
+  console.log("[rescue] best-db=" + best.name + " users=" + best.n + " aravind-present=" + aravind);
+  await c.close();
+})().catch(e => console.log("[rescue] audit-error: " + String(e).slice(0,200)));
+' 2>/dev/null || echo "[rescue] audit-error: node not available")
+echo "$AUDIT"
+CUR_DB=$(grep -oE "^MONGO_URI=mongodb://[^/]+/[^?[:space:]]+" "$APP_DIR/.env" 2>/dev/null | sed 's#.*/##')
+echo "[rescue] .env points at db: ${CUR_DB:-none}"
+BEST_DB=$(echo "$AUDIT" | grep -oE "best-db=[^ ]+" | cut -d= -f2)
+BEST_N=$(echo "$AUDIT" | grep -oE "users=[0-9]+" | tail -1 | cut -d= -f2)
+NEED_RESTART=no
+if [ -n "$BEST_DB" ] && [ -n "$BEST_N" ] && [ "$BEST_N" -gt 0 ] && [ "$BEST_DB" != "$CUR_DB" ]; then
+  echo "[rescue] MISMATCH: .env points at '$CUR_DB' but '$BEST_DB' holds $BEST_N users - fixing MONGO_URI"
+  grep -vE "^MONGO_URI=" "$APP_DIR/.env" > "$APP_DIR/.env.tmp"
+  printf 'MONGO_URI=mongodb://127.0.0.1:27017/%s\n' "$BEST_DB" >> "$APP_DIR/.env.tmp"
+  mv "$APP_DIR/.env.tmp" "$APP_DIR/.env"
+  chmod 600 "$APP_DIR/.env"
+  NEED_RESTART=yes
 fi
 
 echo "=== restart-if-needed ==="
