@@ -1,37 +1,49 @@
 #!/usr/bin/env bash
-# SearXNG installer for the pod (rescue lane, stage=searxng). Installs into a
-# venv on the persistent volume, writes minimal JSON-capable settings, adds a
-# supervisor program on 127.0.0.1:8888, verifies the JSON search API and points
-# SEARXNG_INSTANCE_URL at it in the ACTIVE slot's .env (picked up on the next
-# boot - no restart here, so the live site never blinks).
+# SearXNG installer for the pod (rescue lane, stage=searxng). SearXNG is not on
+# PyPI (the `searxng` name there is an unrelated MCP server), so this installs
+# from source into a venv on the persistent volume, writes JSON-capable
+# settings, supervises gunicorn on 127.0.0.1:8888, verifies the JSON search API
+# and points SEARXNG_INSTANCE_URL at it in the ACTIVE slot's .env (picked up on
+# the next boot - no restart here, so the live site never blinks).
 set -u
 
 BASE=/workspace/searxng
+SRC=$BASE/searxng-src
 VENV=$BASE/venv
 SETTINGS=$BASE/settings.yml
-APP_DIR=${SEARXNG_APP_DIR:-/workspace/baanzon-next}
-# The ACTIVE slot's .env is the one users boot with; default to the blue slot
-# and prefer green when the pointer says so.
+APP_STR='searx.webapp:app'
 ACTIVE_FILE=/workspace/data/active-port
 ENV_DIR=/workspace/baanzon
 if [ -f "$ACTIVE_FILE" ] && [ "$(cat "$ACTIVE_FILE" 2>/dev/null | tr -dc 0-9)" = "3091" ]; then
   ENV_DIR=/workspace/baanzon-next
 fi
 
-echo "=== searxng: install ==="
+echo "=== searxng: venv ==="
 mkdir -p "$BASE" /workspace/data
 if [ ! -x "$VENV/bin/python" ]; then
   python3 -m venv "$VENV" || { echo "[searxng] FAILED: venv creation"; exit 1; }
   "$VENV/bin/pip" install --upgrade pip -q
 fi
-if [ ! -x "$VENV/bin/gunicorn" ]; then
-  "$VENV/bin/pip" install -q searxng gunicorn || { echo "[searxng] FAILED: pip install"; exit 1; }
-fi
-echo "[searxng] deps ready"
+# The PyPI `searxng` name is an unrelated MCP server - remove it if present.
+"$VENV/bin/pip" uninstall -y searXNG 2>/dev/null | tail -1 || true
+
+echo "=== searxng: source ==="
+for i in 1 2 3; do
+  if rm -rf "$SRC" 2>/dev/null; then break; fi
+  sleep 5
+done
+git clone --depth 1 https://github.com/searxng/searxng "$SRC" \
+  || { echo "[searxng] FAILED: git clone"; exit 1; }
+"$VENV/bin/pip" install -q -r "$SRC/requirements.txt" gunicorn \
+  || { echo "[searxng] FAILED: requirements install"; exit 1; }
+"$VENV/bin/python" -c "import searx.webapp" 2>"$BASE/import-error.log" \
+  || { echo "[searxng] FAILED: searx.webapp import:"; tail -8 "$BASE/import-error.log"; exit 1; }
+echo "[searxng] source ready"
 
 echo "=== searxng: settings ==="
 # Always regenerate: machine-owned file, and a deterministic single `search:`
-# block (an appended duplicate crashes SearXNG's YAML parse).
+# block (an appended duplicate crashes SearXNG's YAML parse). The JSON format
+# is required by the search API the app and Deep Research call.
 SECRET=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')
 cat > "$SETTINGS" <<EOF
 use_default_settings: true
@@ -47,35 +59,11 @@ EOF
 chmod 600 "$SETTINGS"
 echo "[searxng] settings written ($SETTINGS)"
 
-echo "=== searxng: import preflight ==="
-"$VENV/bin/python" -c "import importlib.util; mods = [m for m in ('searxng.webapp','searx.webapp') if importlib.util.find_spec(m)]; print('modules:', mods)" 2>&1 | tail -3
-if ! "$VENV/bin/python" -c "import searxng.webapp" 2>"$BASE/import-error.log"; then
-  echo "[searxng] note: 'searxng.webapp' import failed (legacy 'searx' module expected):"
-  tail -6 "$BASE/import-error.log" || true
-fi
-
-echo "=== searxng: webapp module discovery ==="
-APP_STR=""
-for cand in 'searxng.webapp:app' 'searx.webapp:app'; do
-  mod="${cand%%:*}"
-  if "$VENV/bin/python" -c "import importlib.util,sys; sys.exit(0 if importlib.util.find_spec('$mod') else 1)" 2>/dev/null; then
-    APP_STR="$cand"
-    break
-  fi
-done
-if [ -z "$APP_STR" ]; then
-  echo "[searxng] FAILED: no webapp module found (searxng.webapp / searx.webapp)"
-  "$VENV/bin/pip" show searxng 2>/dev/null | head -5
-  "$VENV/bin/python" -c "import searxng, searx" 2>&1 | tail -4
-  exit 1
-fi
-echo "[searxng] webapp module: $APP_STR"
-
 echo "=== searxng: supervisor ==="
 cat > /etc/supervisor/conf.d/searxng.conf <<EOF
 [program:searxng]
-command=$VENV/bin/gunicorn --workers 2 --bind 127.0.0.1:8888 --timeout 120 '$APP_STR'
-directory=$BASE
+command=$VENV/bin/gunicorn --workers 2 --bind 127.0.0.1:8888 --timeout 120 --chdir $SRC 'searx.webapp:app'
+directory=$SRC
 autostart=true
 autorestart=true
 stopasgroup=true
@@ -91,6 +79,7 @@ for i in 1 2 3 4 5; do
   supervisorctl start searxng >/dev/null 2>&1 || true
 done
 supervisorctl status searxng || true
+tail -6 /workspace/baanzon/logs/supervisor-searxng.log 2>/dev/null || true
 
 echo "=== searxng: verify JSON search API ==="
 sleep 3
@@ -98,8 +87,8 @@ CODE=$(curl -s -o /tmp/searxng-probe.json -w '%{http_code}' --max-time 20 'http:
 if [ "$CODE" = "200" ]; then
   echo "[searxng] JSON search API: 200 ($(wc -c < /tmp/searxng-probe.json) bytes)"
 else
-  echo "[searxng] WARNING: JSON probe returned $CODE - check $BASE/../baanzon/logs/supervisor-searxng.log"
-  tail -5 /workspace/baanzon/logs/supervisor-searxng.log 2>/dev/null || true
+  echo "[searxng] WARNING: JSON probe returned $CODE"
+  tail -15 /workspace/baanzon/logs/supervisor-searxng.log 2>/dev/null || true
 fi
 
 echo "=== searxng: point the active slot at the instance ==="
