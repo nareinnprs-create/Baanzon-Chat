@@ -50,13 +50,13 @@ zero-downtime lane. Status: ⬜ pending · 🔄 in progress · ✅ done · ⛔ b
 |---|---|
 | aravind k (aravind18k@gmail.com) → Pro + unlimited pool + 30 days | ✅ live 2026-11-12 (window ends 2026-12-11); `stage=grant` lane built for future comps |
 
-## Batch 6 — Agentic + generative + gradient (A2, A4, B1)
+## Batch 6 — Agentic + generative + gradient (A2, A4, B1) 🔄
 
 | Item | Status |
 |---|---|
-| A2 agentic transparency (tool timeline, subagent chips) | ⬜ |
-| A4 generative UI in-message | ⬜ |
-| B1 Aurora gradient milestone 2 | ⬜ |
+| B1 Aurora gradient milestone 2 | ✅ tokens + utilities in style.css; pulse active states carry the Signature Aurora |
+| A2 agentic transparency (tool timeline, subagent chips) | ⬜ in progress |
+| A4 generative UI in-message (chart/table contracts) | ⬜ in progress |
 
 ## Batch 7 — Optional (V4, i18n)
 
