@@ -1,18 +1,16 @@
 #!/bin/bash
-# Pod rescue: diagnose /workspace after a failed deploy rollback, restore the
-# app dir if any candidate tree survives, and if .env was lost assemble a
-# minimal replacement from pod-derivable values (mongod on localhost, meili
-# key from /proc, fresh JWT/CREDS) so the site can come back up before the
-# operator re-enters the secret keys. Runs ON the pod over SSH via the Pod
-# rescue workflow. Prints only paths, sizes and names - never file contents -
-# so no secrets reach the CI log.
+# Pod rescue: diagnose /workspace after a failed deploy rollback, rescue any
+# stray .env / baanzon.yaml copies BEFORE anything destructive, restore the
+# app dir, merge pod-derivable and provisioning-scan secrets into .env, and
+# start the api. Runs ON the pod over SSH via the Pod rescue workflow.
+# Prints only paths, sizes and names - never file contents - so no secrets
+# reach the CI log.
 set -u
 APP_DIR=/workspace/baanzon
-CANDIDATES="$APP_DIR-tmp /workspace/baanzon-old /workspace/baanzon-next"
 
 echo "=== diagnose ==="
 ls -la /workspace 2>/dev/null | head -30 || echo "(no /workspace)"
-for d in $CANDIDATES "$APP_DIR"; do
+for d in "$APP_DIR" "$APP_DIR/baanzon" "$APP_DIR-tmp" /workspace/baanzon-old /workspace/baanzon-next; do
   if [ -d "$d" ]; then
     env_s=missing; [ -f "$d/.env" ] && env_s="present($(stat -c%s "$d/.env")B)"
     yaml_s=missing; [ -f "$d/baanzon.yaml" ] && yaml_s=present
@@ -22,43 +20,39 @@ for d in $CANDIDATES "$APP_DIR"; do
     echo "-- $d : ABSENT"
   fi
 done
-echo "-- stray .env files (paths only)"
-find /workspace /root -maxdepth 4 -name ".env*" -not -path "*/node_modules/*" 2>/dev/null | head -20
-echo "-- release sha: $(cat /workspace/.release-sha 2>/dev/null || echo none)"
-echo "-- supervisor programs"
-grep -hE "^\[program:" /etc/supervisor/conf.d/*.conf 2>/dev/null || echo "(no conf)"
-supervisorctl status 2>&1 | head -10
-echo "-- processes"
-ps -eo args --no-headers 2>/dev/null | grep -E "node|mongod|meili|cloudflared" | grep -v grep | awk '{print $1}' | sort | uniq -c
-for pid in $(pgrep -x mongod 2>/dev/null); do
-  echo "-- mongod/$pid dbpath=$(tr '\0' '\n' < /proc/$pid/cmdline 2>/dev/null | grep -A1 dbpath | tail -1) port=$(tr '\0' '\n' < /proc/$pid/cmdline 2>/dev/null | grep -A1 port | tail -1)"
+echo "-- supervisor"
+supervisorctl status 2>&1 | head -8
+
+echo "=== stray rescue (before anything destructive) ==="
+n=0
+while IFS= read -r f; do
+  n=$((n+1))
+  cp "$f" "/workspace/.env-rescued-$n" && echo "[rescue] saved stray env: $f ($(stat -c%s "$f")B)"
+done < <(find /workspace -maxdepth 5 \( -name ".env" -o -name ".env.*" \) \
+  -not -path "*/node_modules/*" \
+  -not -path "${APP_DIR}/.env" \
+  -not -name ".env-recovered" -not -name ".env-rescued-*" 2>/dev/null)
+[ "$n" = "0" ] && echo "[rescue] no stray .env files found"
+for f in /workspace/baanzon/baanzon/baanzon.yaml /workspace/baanzon/baanzon.yaml; do
+  if [ -f "$f" ]; then cp "$f" /workspace/baanzon.yaml-rescued && echo "[rescue] saved stray yaml: $f"; break; fi
 done
-df -h /workspace 2>/dev/null | tail -1
 
 echo "=== restore ==="
 if [ ! -f "$APP_DIR/.env" ]; then
-  SRC=""
-  for c in $CANDIDATES; do
-    if [ -d "$c" ] && [ -f "$c/.env" ]; then SRC="$c"; break; fi
-  done
-  if [ -n "$SRC" ]; then
-    if [ -d "$APP_DIR" ]; then
-      cp "$SRC/.env" "$APP_DIR/.env" && echo "[rescue] .env copied from $SRC"
-      [ -f "$SRC/baanzon.yaml" ] && cp "$SRC/baanzon.yaml" "$APP_DIR/baanzon.yaml"
-    else
-      mv "$SRC" "$APP_DIR" && echo "[rescue] app dir restored from $SRC"
-    fi
+  SRCENV=$(ls -S /workspace/.env-rescued-* 2>/dev/null | head -1)
+  if [ -n "${SRCENV:-}" ]; then
+    mkdir -p "$APP_DIR"
+    cp "$SRCENV" "$APP_DIR/.env" && echo "[rescue] .env restored from $SRCENV ($(stat -c%s "$APP_DIR/.env")B)"
   else
-    echo "[rescue] no candidate tree holds .env"
+    echo "[rescue] no rescued .env available"
   fi
 fi
-if [ -f "$APP_DIR/.env" ] && [ ! -f "$APP_DIR/baanzon.yaml" ]; then
-  for c in $CANDIDATES; do
-    if [ -f "$c/baanzon.yaml" ]; then cp "$c/baanzon.yaml" "$APP_DIR/baanzon.yaml" && echo "[rescue] baanzon.yaml copied from $c"; break; fi
-  done
+if [ ! -f "$APP_DIR/baanzon.yaml" ]; then
+  [ -f /workspace/baanzon.yaml-rescued ] && cp /workspace/baanzon.yaml-rescued "$APP_DIR/baanzon.yaml" && echo "[rescue] baanzon.yaml restored from stray"
 fi
+# code tree: restore from the newest candidate when APP_DIR lacks package.json
 if [ ! -d "$APP_DIR" ] || [ ! -f "$APP_DIR/package.json" ]; then
-  for c in $CANDIDATES; do
+  for c in "$APP_DIR-tmp" /workspace/baanzon-old /workspace/baanzon-next; do
     if [ -d "$c" ] && [ -f "$c/package.json" ]; then
       [ -d "$APP_DIR" ] && rm -rf "$APP_DIR" 2>/dev/null || true
       mv "$c" "$APP_DIR" && echo "[rescue] code-only app dir restored from $c"
@@ -67,9 +61,35 @@ if [ ! -d "$APP_DIR" ] || [ ! -f "$APP_DIR/package.json" ]; then
   done
 fi
 
-if [ -f "$APP_DIR/.env" ]; then
-  echo "[rescue] .env present - skipping reconstruction"
-else
+# secret scan: provisioning artifacts and the staging file may hold the real
+# keys; merge any KEY=VALUE hits into .env without printing them
+echo "=== secret scan ==="
+SCAN_HITS=$(grep -hoE "(OPRAIZ_API_KEY|OPRAIZ_BASEURL|DODO_API_KEY|DODO_WEBHOOK_SECRET|JWT_SECRET|JWT_REFRESH_SECRET|CREDS_KEY|CREDS_IV|MEILI_MASTER_KEY|MONGO_URI)=[^\"' ]+" \
+  /workspace/opraiz-providers.sh /workspace/provision*.log /workspace/.env-recovered 2>/dev/null | sort -u)
+SCAN_COUNT=$(echo "$SCAN_HITS" | grep -c . 2>/dev/null || echo 0)
+echo "[rescue] scan hits: $SCAN_COUNT"
+if [ -f "$APP_DIR/.env" ] && [ -n "$SCAN_HITS" ]; then
+  chmod 600 "$APP_DIR/.env" 2>/dev/null || true
+  echo "$SCAN_HITS" | while IFS= read -r line; do
+    key="${line%%=*}"
+    val="${line#*=}"
+    [ -n "$key" ] || continue
+    [ -n "$val" ] || continue
+    if grep -qE "^${key}=" "$APP_DIR/.env"; then
+      grep -vE "^${key}=" "$APP_DIR/.env" > "$APP_DIR/.env.tmp"
+      printf '%s\n' "$line" >> "$APP_DIR/.env.tmp"
+      mv "$APP_DIR/.env.tmp" "$APP_DIR/.env"
+    else
+      printf '%s\n' "$line" >> "$APP_DIR/.env"
+    fi
+  done
+  echo "[rescue] merged scan hits into .env"
+elif [ ! -f "$APP_DIR/.env" ] && [ -n "$SCAN_HITS" ]; then
+  printf '%s\n' "$SCAN_HITS" > "$APP_DIR/.env"
+  echo "[rescue] seeded .env from scan hits"
+fi
+
+if [ ! -f "$APP_DIR/.env" ]; then
   if [ ! -d "$APP_DIR" ] || [ ! -f "$APP_DIR/package.json" ]; then
     echo "=== ENV_MISSING_NO_CODE ==="
     echo "[rescue] no .env and no code tree; nothing to start"
@@ -81,19 +101,16 @@ else
   for pid in $(pgrep -f meilisearch 2>/dev/null); do
     echo "# meilisearch/$pid" >> "$REC"
     tr '\0' '\n' < "/proc/$pid/environ" 2>/dev/null | grep -E "^(MEILI|MEILISEARCH)" >> "$REC" || true
-    tr '\0' '\n' < "/proc/$pid/cmdline" 2>/dev/null | grep -iE "master[-_ ]?key|--env" >> "$REC" || true
   done
   for pid in $(pgrep -f "api/server/index.js" 2>/dev/null); do
     echo "# node/$pid" >> "$REC"
     tr '\0' '\n' < "/proc/$pid/environ" 2>/dev/null | grep -vE "^(PATH|LS_COLORS|PWD|SHLVL|_=|HOME|LANG|HOSTNAME|TERM|OLDPWD|npm_)" >> "$REC" || true
   done
   grep -hE "^environment=" /etc/supervisor/conf.d/*.conf 2>/dev/null >> "$REC" || true
-  echo "[rescue] staged $(wc -l < "$REC") candidate lines (not printed)"
 
   MEILI_KEY=$(grep -oE "^(MEILI_MASTER_KEY|MEILI_KEY)=..*" "$REC" | head -1 | cut -d= -f2-)
-  [ -z "$MEILI_KEY" ] && MEILI_KEY=$(grep -oiE "master[-_ ]?key[= ][A-Za-z0-9]+" "$REC" | head -1 | sed 's/.*[= ]//')
 
-  APP_DB=""
+  APP_DB="baanzon"
   MONGO_AUTH=no
   if command -v mongosh >/dev/null 2>&1; then
     DBS=$(mongosh --quiet --eval "JSON.stringify(db.adminCommand({listDatabases:1}).databases.map(function(d){return d.name}))" 2>/dev/null || true)
@@ -104,14 +121,13 @@ else
       if [ "$HAS" = "true" ]; then APP_DB="$db"; break; fi
     done
   fi
-  [ -z "$APP_DB" ] && APP_DB="baanzon"
-  echo "[rescue] mongo auth=$MONGO_AUTH app db=$APP_DB (from: $( [ -n "$DBS" ] && echo probe || echo fallback ))"
+  echo "[rescue] mongo auth=$MONGO_AUTH app db=$APP_DB"
 
   JWT=$(openssl rand -hex 32)
   JWT_REFRESH=$(openssl rand -hex 32)
   CREDS=$(openssl rand -hex 16)
   CREDS_IV=$(openssl rand -hex 8)
-  if [ -z "$MEILI_KEY" ]; then MEILI_KEY=$(openssl rand -hex 24); fi
+  [ -z "$MEILI_KEY" ] && MEILI_KEY=$(openssl rand -hex 24)
 
   cat > "$APP_DIR/.env" <<EOF
 APP_TITLE=Baanzon Chat
@@ -137,29 +153,28 @@ ALLOW_UNVERIFIED_EMAIL_LOGIN=false
 ALLOW_SHARED_LINKS=false
 SEARCH=false
 LOG_TO_FILE=true
-# --- operator action: re-enter the lost production keys ---
-OPRAIZ_API_KEY=
-OPRAIZ_BASEURL=
-DODO_API_KEY=
-DODO_WEBHOOK_SECRET=
 EOF
+  # re-run the scan merge over the fresh file so provisioning keys win
+  if [ -n "$SCAN_HITS" ]; then
+    echo "$SCAN_HITS" | while IFS= read -r line; do
+      key="${line%%=*}"; val="${line#*=}"
+      [ -n "$key" ] && [ -n "$val" ] && printf '%s\n' "$line" >> "$APP_DIR/.env"
+    done
+  fi
   chmod 600 "$APP_DIR/.env"
   echo "[rescue] minimal .env written; keys: $(grep -oE '^[A-Z_0-9]+' "$APP_DIR/.env" | tr '\n' ' ')"
   echo "=== OPERATOR KEYS NEEDED: OPRAIZ_API_KEY, OPRAIZ_BASEURL, DODO_API_KEY, DODO_WEBHOOK_SECRET, SMTP/OpenID if used ==="
 fi
 
 echo "=== start ==="
-if [ ! -f "$APP_DIR/.env" ]; then
-  echo "[rescue] still no .env - leaving api stopped"
-  exit 0
-fi
+[ -f "$APP_DIR/baanzon.yaml" ] || echo "[rescue] WARNING: baanzon.yaml missing - api boots on defaults until the next deploy carries it"
 supervisorctl reread >/dev/null 2>&1 || true
 supervisorctl update >/dev/null 2>&1 || true
 supervisorctl restart baanzon-api >/dev/null 2>&1 || supervisorctl start baanzon-api >/dev/null 2>&1 || true
-for i in $(seq 1 40); do
+for i in $(seq 1 60); do
   if curl -sf http://127.0.0.1:3080/readyz >/dev/null; then echo "[rescue] api ready after $((i*3))s"; break; fi
   sleep 3
 done
-supervisorctl status 2>&1 | head -6
+supervisorctl status 2>&1 | head -8
 curl -s -o /dev/null -w "[rescue] local /health: %{http_code}\n" --max-time 10 http://127.0.0.1:3080/health || true
 echo "=== done ==="
