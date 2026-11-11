@@ -13,11 +13,26 @@ if [ -f /workspace/.release-sha ] && [ "$(cat /workspace/.release-sha)" = "$NEW_
   echo "[apply] payload unchanged (sha match) - nothing to do"
   exit 0
 fi
+# self-heal: a failed rollback can leave APP_DIR missing or .env-less while a
+# usable release survives in a candidate dir; restore before anything else.
+if [ ! -f "$APP_DIR/.env" ]; then
+  for c in "$APP_DIR-tmp" "$OLD_DIR"; do
+    if [ -f "$c/.env" ]; then
+      echo "[apply] self-heal: $APP_DIR unusable - restoring from $c"
+      [ -d "$APP_DIR" ] && rm -rf "$APP_DIR" 2>/dev/null || true
+      mv "$c" "$APP_DIR"
+      break
+    fi
+  done
+fi
+# never destroy the release backup while the live .env is unaccounted for
 for i in 1 2 3 4; do
-  if rm -rf "$NEW_DIR" "$OLD_DIR" 2>/dev/null; then break; fi
+  if [ -f "$APP_DIR/.env" ]; then rm -rf "$OLD_DIR" 2>/dev/null || true; fi
+  if rm -rf "$NEW_DIR" 2>/dev/null; then break; fi
   echo "[apply] rm retry $i (network-volume rm race)"; sleep 5
 done
-rm -rf "$NEW_DIR" "$OLD_DIR" 2>/dev/null || true
+rm -rf "$NEW_DIR" 2>/dev/null || true
+if [ -f "$APP_DIR/.env" ]; then rm -rf "$OLD_DIR" 2>/dev/null || true; fi
 mkdir -p "$NEW_DIR"
 tar --no-same-owner --no-same-permissions -xzf "$RELEASE_SRC/baanzon-app.tar.gz" -C "$NEW_DIR"
 
@@ -86,7 +101,7 @@ done
 if [ -d "$OLD_DIR" ]; then
   echo "[apply] health gate FAILED - rolling back to previous release"
   mv "$APP_DIR" "$APP_DIR-tmp" 2>/dev/null || true
-  mv "$OLD_DIR" "$APP_DIR"
+  mv "$OLD_DIR" "$APP_DIR" || { sleep 5; mv "$OLD_DIR" "$APP_DIR" || true; }
   sleep 2
   # restart can hit a transient spawn error on the network volume; keep
   # trying so a failed rollback never leaves the pod with no api running.
@@ -97,6 +112,8 @@ if [ -d "$OLD_DIR" ]; then
     supervisorctl start baanzon-api 2>/dev/null || true
   done
   supervisorctl status baanzon-api || true
-  rm -rf "$APP_DIR-tmp" 2>/dev/null || true
+  # only clean up the staged tree when the live .env is accounted for;
+  # otherwise it may hold the only copy of .env for the next run's self-heal
+  if [ -f "$APP_DIR/.env" ]; then rm -rf "$APP_DIR-tmp" 2>/dev/null || true; fi
 fi
 exit 1
