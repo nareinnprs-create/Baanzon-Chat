@@ -33,6 +33,11 @@ for i in 1 2 3 4; do
 done
 rm -rf "$NEW_DIR" 2>/dev/null || true
 if [ -f "$APP_DIR/.env" ]; then rm -rf "$OLD_DIR" 2>/dev/null || true; fi
+# single-replica pod: without this the schedules engine refuses to arm and
+# schedule writes 503 forever (matches the previous live deployment's setting)
+if ! grep -qE "^SCHEDULES_SINGLE_PROCESS=" "$APP_DIR/.env"; then
+  printf 'SCHEDULES_SINGLE_PROCESS=true\n' >> "$APP_DIR/.env"
+fi
 mkdir -p "$NEW_DIR"
 tar --no-same-owner --no-same-permissions -xzf "$RELEASE_SRC/baanzon-app.tar.gz" -C "$NEW_DIR"
 
