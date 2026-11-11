@@ -97,13 +97,17 @@ supervisorctl status searxng || true
 tail -60 /workspace/baanzon/logs/supervisor-searxng.log 2>/dev/null || true
 
 echo "=== searxng: verify JSON search API ==="
-sleep 3
-CODE=$(curl -s -o /tmp/searxng-probe.json -w '%{http_code}' --max-time 20 'http://127.0.0.1:8888/search?q=baanzon&format=json' || echo 000)
+CODE=000
+for i in $(seq 1 20); do
+  CODE=$(curl -s -o /tmp/searxng-probe.json -w '%{http_code}' --max-time 20 'http://127.0.0.1:8888/search?q=baanzon&format=json' 2>/dev/null || echo 000)
+  if [ "$CODE" = "200" ]; then break; fi
+  sleep 3
+done
 if [ "$CODE" = "200" ]; then
   echo "[searxng] JSON search API: 200 ($(wc -c < /tmp/searxng-probe.json) bytes)"
 else
   echo "[searxng] WARNING: JSON probe returned $CODE"
-  tail -15 /workspace/baanzon/logs/supervisor-searxng.log 2>/dev/null || true
+  tail -60 /workspace/baanzon/logs/supervisor-searxng.log 2>/dev/null || true
 fi
 
 echo "=== searxng: point the active slot at the instance ==="
