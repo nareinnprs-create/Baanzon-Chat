@@ -28,6 +28,7 @@ import ImportConversations from '../SettingsTabs/Data/ImportConversations';
 import WeekStartSelector from '../SettingsTabs/General/WeekStartSelector';
 import ProvidersManagement from '~/components/Admin/ProvidersManagement';
 import SmartRouteSwitch from '../SettingsTabs/General/SmartRouteSwitch';
+import DensitySwitch from '../SettingsTabs/General/DensitySwitch';
 import { ArchiveAllChats } from '../SettingsTabs/Data/ArchiveAllChats';
 import { toggleControl, ThemeSetting, LangSetting } from './controls';
 import BackupCodesItem from '../SettingsTabs/Account/BackupCodesItem';
@@ -104,6 +105,14 @@ export const registry: SettingEntry[] = [
     labelKey: 'com_nav_smart_route',
     keywords: ['smart', 'route', 'auto', 'model', 'fast', 'deep'],
     Component: SmartRouteSwitch,
+  },
+  {
+    id: 'density',
+    tab: GENERAL,
+    section: 'appearance',
+    labelKey: 'com_ui_density_compact',
+    keywords: ['density', 'compact', 'comfortable', 'spacing'],
+    Component: DensitySwitch,
   },
   {
     id: 'fontSize',

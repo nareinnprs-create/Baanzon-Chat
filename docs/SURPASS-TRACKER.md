@@ -12,15 +12,15 @@ zero-downtime lane. Status: ⬜ pending · 🔄 in progress · ✅ done · ⛔ b
 | C3 renamed model picker groups | ✅ | existing grouped picker renders the spec catalog |
 | C2 Settings → AI Providers user page | ✅ | all users; branding cards + connected badge + models |
 
-## Batch 2 — Premium feel (B2, B3, B4) 🔄 IN PROGRESS
+## Batch 2 — Premium feel (B2, B3, B4) ✅
 
 | Item | Status |
 |---|---|
-| B2 editorial message typography (§63.8) | ⬜ |
-| B3 kinetic motion coherence | ⬜ |
-| B4 adaptive density toggle | ⬜ |
+| B2 editorial message typography (§63.8) | ✅ assistant-only measure + leading + prose rhythm |
+| B3 kinetic motion coherence | ✅ message settle-in animation, motion-safe |
+| B4 adaptive density toggle | ✅ compact/comfortable, persisted, Settings → Appearance |
 
-## Batch 3 — Intelligence UX (A1, V3)
+## Batch 3 — Intelligence UX (A1, V3) 🔄 IN PROGRESS
 
 | Item | Status |
 |---|---|

@@ -178,6 +178,12 @@ export const atelierFocusMode = createStorageAtom<boolean>('atelierFocusMode', f
 export const smartRouteEnabled = createStorageAtom<boolean>('smartRouteEnabled', false);
 
 /**
+ * Blueprint §63.7: 'comfortable' (low density) is the default; 'compact'
+ * trades vertical air for more rows on screen.
+ */
+export const densityCompact = createStorageAtom<boolean>('densityCompact', false);
+
+/**
  * Resolved active interface mode: the persisted local override wins over the
  * server-configured default ('classic' when `startupConfig.interface.mode` is
  * absent). Consumer hook for the visual shell — the shell itself is NOT wired

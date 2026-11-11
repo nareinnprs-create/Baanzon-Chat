@@ -784,6 +784,8 @@
   "com_ai_providers_connected": "Connected",
   "com_ai_providers_disconnected": "Disconnected",
   "com_ai_providers_empty": "No AI providers are configured yet.",
+  "com_ui_density_compact": "Compact density",
+  "com_ui_density_compact_hint": "Show more rows by tightening message spacing",
   "com_ui_admin_users": "Users",
   "com_ui_admin_users_search": "Search users by name or email (min 2 characters)",
   "com_ui_admin_users_empty": "No users match.",

@@ -123,6 +123,14 @@ const DisplayMessage = ({ text, isCreatedByUser, message, showCursor }: TDisplay
             showCursorState && text.length > 0 && 'result-streaming',
             isCreatedByUser && !enableUserMsgMarkdown && 'whitespace-pre-wrap',
             'text-text-primary',
+            // B2 editorial responses (blueprint §63.8): assistant answers read
+            // like typeset content, not chat bubbles. User messages stay plain.
+            !isCreatedByUser &&
+              'max-w-[46rem] leading-[1.65] prose-p:my-3 prose-li:my-1 prose-headings:mt-5 prose-headings:mb-2 prose-blockquote:border-l-2 prose-blockquote:not-italic',
+            // B3 kinetic coherence: new messages settle in once (mount-only),
+            // within the blueprint motion budget, and stay still under
+            // prefers-reduced-motion.
+            'motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1 motion-safe:duration-300',
           )}
         >
           {content}
