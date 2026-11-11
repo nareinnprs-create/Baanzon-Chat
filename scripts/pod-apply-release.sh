@@ -53,14 +53,16 @@ if [ ! -f "$APP_DIR/.env" ]; then
   exit 1
 fi
 
-# Read only the two required keys; do not source the file because provider URLs
+# Read only the two provider keys; do not source the file because provider URLs
 # and secrets may contain shell metacharacters or unrelated dotenv lines.
 env_value() {
   awk -F= -v key="$1" '$1 == key { sub(/^[^=]*=/, ""); sub(/[[:space:]]*\r?$/, ""); print; exit }' "$APP_DIR/.env"
 }
+# Recovery boot: warn rather than refuse - a missing provider key must not
+# keep a half-reconstructed .env from booting the site (models fall back to
+# the static list; the operator re-enters keys via the Pod rescue env stage).
 if [ -z "$(env_value OPRAIZ_API_KEY)" ] || [ -z "$(env_value OPRAIZ_BASEURL)" ]; then
-  echo "[apply] REQUIRED: OPRAIZ_API_KEY and OPRAIZ_BASEURL must be configured"
-  exit 1
+  echo "[apply] WARNING: OPRAIZ_API_KEY and/or OPRAIZ_BASEURL empty - Opraiz models will not resolve until the operator re-enters them"
 fi
 
 echo "[apply] validating Cloudflare provider routing"
