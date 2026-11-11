@@ -18,6 +18,7 @@ import {
 import DisplayUsernameMessages from '../SettingsTabs/Account/DisplayUsernameMessages';
 import BillingPaymentsManagement from '~/components/Admin/BillingPaymentsManagement';
 import UsersManagement from '~/components/Admin/UsersManagement';
+import AIProvidersView from '~/components/AIProviders/AIProvidersView';
 import ConversationModeSwitch from '../SettingsTabs/Speech/ConversationModeSwitch';
 import EnableTwoFactorItem from '../SettingsTabs/Account/TwoFactorAuthentication';
 import LangfuseConnection from '../SettingsTabs/Integrations/LangfuseConnection';
@@ -212,6 +213,15 @@ export const registry: SettingEntry[] = [
     keywords: ['admin', 'panel', 'dashboard'],
     Component: AdminPanel,
     show: (ctx) => ctx.adminPanelURL !== '',
+  },
+  // General · Providers (user-facing, all users)
+  {
+    id: 'aiProviders',
+    tab: GENERAL,
+    section: 'providers',
+    labelKey: 'com_ai_providers_title',
+    keywords: ['providers', 'models', 'ai', 'connected', 'baanzon'],
+    Component: AIProvidersView,
   },
   {
     id: 'providersManagement',
