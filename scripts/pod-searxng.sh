@@ -29,23 +29,31 @@ fi
 
 echo "=== searxng: source ==="
 python3 --version 2>&1 || echo "[searxng] WARNING: python3 missing"
-for i in 1 2 3; do
-  if rm -rf "$SRC" 2>/dev/null; then break; fi
+STAMP=$(date +%s)
+for i in 1 2 3 4 5; do
+  rm -rf "$SRC" 2>/dev/null || true
+  if [ ! -d "$SRC" ]; then break; fi
+  echo "[searxng] rm retry $i (network-volume rm race)"
   sleep 5
 done
+if [ -d "$SRC" ]; then
+  SRC="$BASE/searxng-src-$STAMP"
+  echo "[searxng] cleanup failed - using fresh dir $SRC"
+fi
 if git clone --depth 1 https://github.com/searxng/searxng "$SRC" 2>"$BASE/clone-error.log"; then
   echo "[searxng] cloned via git"
 else
   echo "[searxng] git clone failed: $(tail -3 "$BASE/clone-error.log" 2>/dev/null) - falling back to tarball"
   mkdir -p "$SRC"
-  curl -fsSL https://github.com/searxng/searxng/archive/refs/heads/master.tar.gz -o "$BASE/src.tar.gz" \
-    && tar -xzf "$BASE/src.tar.gz" -C "$SRC" --strip-components=1 \
-    || { echo "[searxng] FAILED: tarball download"; exit 1; }
+  curl -SsL https://github.com/searxng/searxng/archive/refs/heads/master.tar.gz -o "$BASE/src.tar.gz" 2>"$BASE/tarball-error.log" \
+    || { echo "[searxng] FAILED: tarball download: $(tail -2 "$BASE/tarball-error.log" 2>/dev/null)"; exit 1; }
+  tar -xzf "$BASE/src.tar.gz" -C "$SRC" --strip-components=1 \
+    || { echo "[searxng] FAILED: tarball extract"; exit 1; }
   echo "[searxng] downloaded via tarball"
 fi
 "$VENV/bin/pip" install -q -r "$SRC/requirements.txt" gunicorn \
   || { echo "[searxng] FAILED: requirements install"; exit 1; }
-"$VENV/bin/python" -c "import searx.webapp" 2>"$BASE/import-error.log" \
+( cd "$SRC" && "$VENV/bin/python" -c "import searx.webapp" ) 2>"$BASE/import-error.log" \
   || { echo "[searxng] FAILED: searx.webapp import:"; tail -8 "$BASE/import-error.log"; exit 1; }
 echo "[searxng] source ready"
 
