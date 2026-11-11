@@ -48,20 +48,38 @@ chmod 600 "$SETTINGS"
 echo "[searxng] settings written ($SETTINGS)"
 
 echo "=== searxng: import preflight ==="
+"$VENV/bin/python" -c "import importlib.util; mods = [m for m in ('searxng.webapp','searx.webapp') if importlib.util.find_spec(m)]; print('modules:', mods)" 2>&1 | tail -3
 if ! "$VENV/bin/python" -c "import searxng.webapp" 2>"$BASE/import-error.log"; then
-  echo "[searxng] WARNING: searxng.webapp import failed:"
+  echo "[searxng] note: 'searxng.webapp' import failed (legacy 'searx' module expected):"
   tail -6 "$BASE/import-error.log" || true
 fi
+
+echo "=== searxng: webapp module discovery ==="
+APP_STR=""
+for cand in 'searxng.webapp:app' 'searx.webapp:app'; do
+  mod="${cand%%:*}"
+  if "$VENV/bin/python" -c "import importlib.util,sys; sys.exit(0 if importlib.util.find_spec('$mod') else 1)" 2>/dev/null; then
+    APP_STR="$cand"
+    break
+  fi
+done
+if [ -z "$APP_STR" ]; then
+  echo "[searxng] FAILED: no webapp module found (searxng.webapp / searx.webapp)"
+  "$VENV/bin/pip" show searxng 2>/dev/null | head -5
+  "$VENV/bin/python" -c "import searxng, searx" 2>&1 | tail -4
+  exit 1
+fi
+echo "[searxng] webapp module: $APP_STR"
 
 echo "=== searxng: supervisor ==="
 cat > /etc/supervisor/conf.d/searxng.conf <<EOF
 [program:searxng]
-command=$VENV/bin/gunicorn --workers 2 --bind 127.0.0.1:8888 --timeout 120 'searxng.webapp:app'
+command=$VENV/bin/gunicorn --workers 2 --bind 127.0.0.1:8888 --timeout 120 '$APP_STR'
 directory=$BASE
 autostart=true
 autorestart=true
 stopasgroup=true
-environment=SEARXNG_SETTINGS_PATH="$SETTINGS",PYTHONPATH="$VENV/lib/python3.11/site-packages"
+environment=SEARXNG_SETTINGS_PATH="$SETTINGS"
 stdout_logfile=/workspace/baanzon/logs/supervisor-searxng.log
 redirect_stderr=true
 EOF
