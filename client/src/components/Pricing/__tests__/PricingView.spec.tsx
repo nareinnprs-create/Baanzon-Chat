@@ -11,11 +11,18 @@ jest.mock('~/hooks', () => ({
 
 jest.mock('~/data-provider', () => {
   const checkoutApi = { mutate: jest.fn(), isPending: false };
-  return { useBillingProducts: jest.fn(), useCreateCheckout: () => checkoutApi };
+  return {
+    useBillingProducts: jest.fn(),
+    useBillingSubscription: jest.fn(),
+    useCreateCheckout: () => checkoutApi,
+  };
 });
 
-const { useBillingProducts, useCreateCheckout } = jest.requireMock('~/data-provider') as {
+const { useBillingProducts, useBillingSubscription, useCreateCheckout } = jest.requireMock(
+  '~/data-provider',
+) as {
   useBillingProducts: jest.Mock;
+  useBillingSubscription: jest.Mock;
   useCreateCheckout: () => { mutate: jest.Mock; isPending: boolean };
 };
 let checkoutApi: { mutate: jest.Mock; isPending: boolean };
@@ -47,6 +54,7 @@ describe('PricingView', () => {
       },
     );
     useBillingProducts.mockReturnValue({ data: catalog, isLoading: false });
+    useBillingSubscription.mockReturnValue({ data: undefined });
   });
 
   it('renders the catalog tiers and credit packs with their INR prices', () => {
@@ -58,6 +66,21 @@ describe('PricingView', () => {
     expect(screen.getAllByRole('button', { name: 'com_ui_pricing_subscribe' })).toHaveLength(2);
     expect(screen.getByRole('button', { name: 'com_ui_pricing_topup' })).toBeInTheDocument();
     expect(screen.getByText('200 com_ui_pricing_credits')).toBeInTheDocument();
+  });
+
+  it('marks the caller\u2019s current tier from the subscription summary', () => {
+    useBillingSubscription.mockReturnValue({ data: { tier: 'lite', status: 'active' } });
+    renderView();
+
+    const badges = screen.getAllByText('com_ui_pricing_current_plan');
+    expect(badges).toHaveLength(1);
+    expect(badges[0].closest('section')?.textContent).toContain('Lite');
+  });
+
+  it('shows no current-plan badge without a subscription summary', () => {
+    renderView();
+
+    expect(screen.queryByText('com_ui_pricing_current_plan')).not.toBeInTheDocument();
   });
 
   it('buys a pack through checkout with the pack payload', async () => {

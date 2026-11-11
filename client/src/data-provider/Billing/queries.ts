@@ -4,6 +4,7 @@ import { dataService, QueryKeys } from 'librechat-data-provider';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   TBillingProductsResponse,
+  TBillingSubscriptionResponse,
   TCheckoutRequest,
   TEntitlementPlan,
   TEntitlementResource,
@@ -64,6 +65,21 @@ export const useBillingProducts = (
     {
       // Prices move only with a deploy; refetching on focus is noise.
       staleTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      ...config,
+    },
+  );
+
+/** The caller's subscription tier and today's usage from `GET /api/billing/subscription`. */
+export const useBillingSubscription = (
+  config?: UseQueryOptions<TBillingSubscriptionResponse>,
+): ReturnType<typeof useQuery<TBillingSubscriptionResponse>> =>
+  useQuery<TBillingSubscriptionResponse>(
+    [QueryKeys.billingSubscription],
+    () => dataService.getBillingSubscription(),
+    {
+      // Tier changes only via checkout/webhook; a short staleness window is fine.
+      staleTime: 60 * 1000,
       refetchOnWindowFocus: false,
       ...config,
     },

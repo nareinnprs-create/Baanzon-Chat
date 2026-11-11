@@ -16,6 +16,7 @@ import {
   DecibelSelector,
 } from '../SettingsTabs/Speech/STT';
 import DisplayUsernameMessages from '../SettingsTabs/Account/DisplayUsernameMessages';
+import BillingPaymentsManagement from '~/components/Admin/BillingPaymentsManagement';
 import ConversationModeSwitch from '../SettingsTabs/Speech/ConversationModeSwitch';
 import EnableTwoFactorItem from '../SettingsTabs/Account/TwoFactorAuthentication';
 import LangfuseConnection from '../SettingsTabs/Integrations/LangfuseConnection';
@@ -218,6 +219,15 @@ export const registry: SettingEntry[] = [
     labelKey: 'com_ui_providers',
     keywords: ['providers', 'custom', 'endpoints', 'upstream'],
     Component: ProvidersManagement,
+    show: (ctx) => ctx.isAdmin === true,
+  },
+  {
+    id: 'billingPaymentsManagement',
+    tab: GENERAL,
+    section: 'admin',
+    labelKey: 'com_ui_billing_payments',
+    keywords: ['billing', 'dodo', 'payments', 'webhook', 'subscription'],
+    Component: BillingPaymentsManagement,
     show: (ctx) => ctx.isAdmin === true,
   },
 

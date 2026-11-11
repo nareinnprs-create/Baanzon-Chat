@@ -4,7 +4,7 @@ import { Button, Spinner } from '@librechat/client';
 import { AlertCircle, Sparkles } from 'lucide-react';
 import type { TCheckoutRequest, TPlanProduct, TPackProduct } from 'librechat-data-provider';
 import type { TranslationKeys } from '~/hooks';
-import { useBillingProducts, useCreateCheckout } from '~/data-provider';
+import { useBillingProducts, useBillingSubscription, useCreateCheckout } from '~/data-provider';
 import { useDocumentTitle, useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
@@ -57,11 +57,13 @@ function ProductCard({
   cycle,
   onBuy,
   busy,
+  current,
 }: {
   product: TPlanProduct;
   cycle: Cycle;
   onBuy: (payload: TCheckoutRequest) => void;
   busy: boolean;
+  current: boolean;
 }) {
   const localize = useLocalize();
   const yearlyPrice = product.inrYearly;
@@ -69,7 +71,14 @@ function ProductCard({
   const price = cycle === 'yearly' && yearly ? yearlyPrice : product.inrMonthly;
   return (
     <Card className="flex-1 basis-64">
-      <h3 className="text-base font-medium text-text-primary">{product.label}</h3>
+      <h3 className="flex items-center gap-2 text-base font-medium text-text-primary">
+        {product.label}
+        {current && (
+          <span className="rounded-md bg-surface-active-alt px-2 py-0.5 text-xs text-text-primary">
+            {localize('com_ui_pricing_current_plan')}
+          </span>
+        )}
+      </h3>
       <p className="text-2xl text-text-primary">
         {`₹${new Intl.NumberFormat().format(price)}`}
         <span className="text-sm text-text-secondary">
@@ -138,6 +147,7 @@ export function PricingView() {
   const [cycle, setCycle] = useState<Cycle>('monthly');
   const [error, setError] = useState('');
   const productsQuery = useBillingProducts();
+  const subscription = useBillingSubscription();
   const checkout = useCreateCheckout();
 
   const buy = (payload: TCheckoutRequest) => {
@@ -196,6 +206,7 @@ export function PricingView() {
                 cycle={cycle}
                 onBuy={buy}
                 busy={busy}
+                current={product.tier === subscription.data?.tier}
               />
             ))}
           </div>

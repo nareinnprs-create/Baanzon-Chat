@@ -189,6 +189,18 @@ export const billingEntitlements = () => billingEntitlementsRoot;
 
 const billingProductsRoot = `${BASE_URL}/api/billing/products`;
 
+const billingSubscriptionRoot = `${BASE_URL}/api/billing/subscription`;
+
+export const billingSubscription = () => billingSubscriptionRoot;
+
+const billingAdminDodoRoot = `${BASE_URL}/api/billing/admin/recent-dodo`;
+
+export const billingAdminDodo = () => billingAdminDodoRoot;
+
+const billingAdminApplyRoot = `${BASE_URL}/api/billing/admin/apply-payment`;
+
+export const billingAdminApply = () => billingAdminApplyRoot;
+
 export const billingProducts = () => billingProductsRoot;
 
 const billingCheckoutRoot = `${BASE_URL}/api/billing/checkout`;

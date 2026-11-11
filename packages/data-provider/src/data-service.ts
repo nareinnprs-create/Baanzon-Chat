@@ -1046,6 +1046,23 @@ export function getBillingProducts(): Promise<bl.TBillingProductsResponse> {
   return request.get(endpoints.billingProducts());
 }
 
+/** The caller's subscription tier and today's usage. */
+export function getBillingSubscription(): Promise<bl.TBillingSubscriptionResponse> {
+  return request.get(endpoints.billingSubscription());
+}
+
+/** Admin view of recent Dodo payments. */
+export function getAdminDodoPayments(): Promise<bl.TAdminDodoPaymentsResponse> {
+  return request.get(endpoints.billingAdminDodo());
+}
+
+/** Admin replay of a missed Dodo webhook delivery. */
+export function applyAdminDodoPayment(
+  payload: bl.TAdminApplyPaymentRequest,
+): Promise<bl.TAdminApplyPaymentResponse> {
+  return request.post(endpoints.billingAdminApply(), payload);
+}
+
 /** Opens a Dodo hosted checkout for a plan subscription or a credit pack. */
 export function createCheckoutSession(payload: bl.TCheckoutRequest): Promise<bl.TCheckoutResponse> {
   return request.post(endpoints.billingCheckout(), payload);

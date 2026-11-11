@@ -138,6 +138,47 @@ export type TBillingProductsResponse = {
   packs: TPackProduct[];
 };
 
+/** `GET /api/billing/subscription` response — the caller's tier, status and today's usage. */
+export type TBillingSubscriptionResponse = {
+  tier: string;
+  status: string;
+  packsRemaining: number;
+  dailyLimit: number;
+  usedToday: number;
+  remainingToday: number;
+};
+
+/** One recent Dodo payment from `GET /api/billing/admin/recent-dodo`. */
+export type TAdminDodoPayment = {
+  paymentId: string;
+  status: string;
+  amount: number;
+  currency: string;
+  email?: string;
+  createdAt: string;
+  metadata: Record<string, string>;
+};
+
+/** `GET /api/billing/admin/recent-dodo` response. */
+export type TAdminDodoPaymentsResponse = {
+  items: TAdminDodoPayment[];
+};
+
+/** `POST /api/billing/admin/apply-payment` body. */
+export type TAdminApplyPaymentRequest = {
+  paymentId: string;
+};
+
+/** `POST /api/billing/admin/apply-payment` response. */
+export type TAdminApplyPaymentResponse = {
+  applied: 'subscription' | 'pack';
+  tier?: string;
+  pack?: string;
+  credits?: number;
+  userId?: string;
+  message?: string;
+};
+
 /** `POST /api/billing/checkout` body — a plan tier + cycle, or a credit pack. */
 export type TCheckoutRequest = {
   tier?: string;

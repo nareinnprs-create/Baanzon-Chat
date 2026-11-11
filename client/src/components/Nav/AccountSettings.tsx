@@ -14,8 +14,8 @@ import {
   Scale,
   ShieldCheck,
 } from 'lucide-react';
+import { useGetStartupConfig, useGetUserBalance, useBillingSubscription } from '~/data-provider';
 import { ArchivedChatsModal } from '~/components/Nav/SettingsTabs/General/ArchivedChatsModal';
-import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { useLocalize } from '~/hooks';
 import Settings from './Settings';
@@ -99,6 +99,7 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
   const balanceQuery = useGetUserBalance({
     enabled: !!isAuthenticated && startupConfig?.balance?.enabled,
   });
+  const subscription = useBillingSubscription();
   const [showSettings, setShowSettings] = useState(false);
   const navigate = useNavigate();
   const setShowShortcutsDialog = useSetRecoilState(store.showShortcutsDialog);
@@ -144,6 +145,15 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
         <div className="text-token-text-secondary ml-3 mr-2 py-2 text-sm" role="note">
           {user?.email ?? localize('com_nav_user')}
         </div>
+        {subscription.data != null && (
+          <div
+            className="text-token-text-secondary ml-3 mr-2 text-sm capitalize"
+            role="note"
+            data-testid="nav-plan-tier"
+          >
+            {`${localize('com_nav_plan')}: ${subscription.data.tier}`}
+          </div>
+        )}
         <DropdownMenuSeparator />
         {startupConfig?.balance?.enabled === true && balanceQuery.data != null && (
           <>
