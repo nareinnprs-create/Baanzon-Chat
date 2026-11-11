@@ -1085,13 +1085,13 @@ modelSpecs:
         endpoint: 'Opraiz'
         model: '@cf/meta/llama-3.2-11b-vision-instruct'
 
-# Web Search Configuration - Baanzon: Keenable (search + scraper, keyless).
-# Self-hosted SearXNG is the planned search upgrade (needs SEARXNG_INSTANCE_URL
-# + an instance on the pod; deep research also reads that env today).
+# Web Search Configuration - Baanzon: self-hosted SearXNG (search) + Keenable
+# (scraper, keyless). The instance is supervised on 127.0.0.1:8888 (see
+# scripts/pod-searxng.sh); SEARXNG_INSTANCE_URL also powers Deep Research.
 webSearch:
-  searchProvider: keenable
+  searchProvider: searxng
   scraperProvider: keenable
-  # searxngInstanceUrl: '${SEARXNG_INSTANCE_URL}'
+  searxngInstanceUrl: '${SEARXNG_INSTANCE_URL}'
   # allowedAddresses:
   #   - '127.0.0.1:8888'
 
