@@ -77,7 +77,7 @@ echo "[searxng] settings written ($SETTINGS)"
 echo "=== searxng: supervisor ==="
 cat > /etc/supervisor/conf.d/searxng.conf <<EOF
 [program:searxng]
-command=$VENV/bin/gunicorn --workers 2 --bind 127.0.0.1:8888 --timeout 120 --chdir $SRC 'searx.webapp:app'
+command=$VENV/bin/gunicorn --preload --workers 2 --bind 127.0.0.1:8888 --timeout 120 --chdir $SRC 'searx.webapp:app'
 directory=$SRC
 autostart=true
 autorestart=true
@@ -94,7 +94,7 @@ for i in 1 2 3 4 5; do
   supervisorctl start searxng >/dev/null 2>&1 || true
 done
 supervisorctl status searxng || true
-tail -6 /workspace/baanzon/logs/supervisor-searxng.log 2>/dev/null || true
+tail -60 /workspace/baanzon/logs/supervisor-searxng.log 2>/dev/null || true
 
 echo "=== searxng: verify JSON search API ==="
 sleep 3
