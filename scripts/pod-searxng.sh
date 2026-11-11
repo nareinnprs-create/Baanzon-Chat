@@ -30,9 +30,10 @@ fi
 echo "[searxng] deps ready"
 
 echo "=== searxng: settings ==="
-if [ ! -f "$SETTINGS" ]; then
-  SECRET=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')
-  cat > "$SETTINGS" <<EOF
+# Always regenerate: machine-owned file, and a deterministic single `search:`
+# block (an appended duplicate crashes SearXNG's YAML parse).
+SECRET=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')
+cat > "$SETTINGS" <<EOF
 use_default_settings: true
 server:
   bind_address: 127.0.0.1
@@ -43,17 +44,13 @@ search:
     - html
     - json
 EOF
-  chmod 600 "$SETTINGS"
-  echo "[searxng] settings written ($SETTINGS)"
-else
-  # JSON format is required by the search API; make sure it is enabled.
-  grep -q "application/json" "$SETTINGS" || cat >> "$SETTINGS" <<'EOF'
-search:
-  formats:
-    - html
-    - json
-EOF
-  echo "[searxng] settings kept"
+chmod 600 "$SETTINGS"
+echo "[searxng] settings written ($SETTINGS)"
+
+echo "=== searxng: import preflight ==="
+if ! "$VENV/bin/python" -c "import searxng.webapp" 2>"$BASE/import-error.log"; then
+  echo "[searxng] WARNING: searxng.webapp import failed:"
+  tail -6 "$BASE/import-error.log" || true
 fi
 
 echo "=== searxng: supervisor ==="

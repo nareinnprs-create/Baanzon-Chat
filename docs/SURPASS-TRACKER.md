@@ -38,10 +38,16 @@ zero-downtime lane. Status: ⬜ pending · 🔄 in progress · ✅ done · ⛔ b
 
 | Item | Status |
 |---|---|
-| A6 Auto smart-routing with visible reasons | ⬜ |
-| B5 command-everything palette | ⬜ |
-| SearXNG pod install (rescue lane) | ⬜ |
-| A7 Deep Research mode go-live | ⬜ |
+| A6 Auto smart-routing with visible reasons | ✅ core: toggle + fast/deep heuristic live (branded catalog names feed it); visible-reason label = follow-up |
+| B5 command-everything palette | ✅ core: CommandPalette mounted in Root; action-coverage expansion = follow-up |
+| SearXNG pod install (rescue lane) | 🔄 installed + supervised, JSON probe returned 000 — gunicorn startup debug needed |
+| A7 Deep Research mode go-live | ⬜ blocked on the SearXNG probe above |
+
+## Operator grants
+
+| Grant | Status |
+|---|---|
+| aravind k (aravind18k@gmail.com) → Pro + unlimited pool + 30 days | ✅ live 2026-11-12 (window ends 2026-12-11); `stage=grant` lane built for future comps |
 
 ## Batch 6 — Agentic + generative + gradient (A2, A4, B1)
 
