@@ -19,7 +19,7 @@ import { useAgentsMapContext, useAssistantsMapContext, useLiveAnnouncer } from '
 import { useGetEndpointsQuery, useListAgentsQuery } from '~/data-provider';
 import { useModelSelectorChatContext } from './ModelSelectorChatContext';
 import useSelectMention from '~/hooks/Input/useSelectMention';
-import { filterItems } from './utils';
+import { filterItems, getBrandedEndpoints } from './utils';
 
 type ModelSelectorContextType = {
   // State
@@ -30,6 +30,7 @@ type ModelSelectorContextType = {
   // LibreChat
   modelSpecs: t.TModelSpec[];
   mappedEndpoints: Endpoint[];
+  brandedEndpoints: Endpoint[];
   agentsMap: t.TAgentsMap | undefined;
   assistantsMap: t.TAssistantsMap | undefined;
   endpointsConfig: t.TEndpointsConfig;
@@ -177,14 +178,21 @@ export function ModelSelectorProvider({ children, startupConfig }: ModelSelector
 
   const keyProps = useKeyDialog();
 
+  /** Endpoints branded by the spec catalog: their raw entry (with internal model
+   * ids like @cf/...) must never appear in the picker, in search or as a group. */
+  const brandedEndpoints = useMemo(
+    () => getBrandedEndpoints(modelSpecs, mappedEndpoints),
+    [modelSpecs, mappedEndpoints],
+  );
+
   /** Memoized search results */
   const searchResults = useMemo(() => {
     if (!searchValue) {
       return null;
     }
-    const allItems = [...modelSpecs, ...mappedEndpoints];
+    const allItems = [...modelSpecs, ...brandedEndpoints];
     return filterItems(allItems, searchValue, agentsMap, assistantsMap || {}, localize);
-  }, [searchValue, modelSpecs, mappedEndpoints, agentsMap, assistantsMap, localize]);
+  }, [searchValue, modelSpecs, brandedEndpoints, agentsMap, assistantsMap, localize]);
 
   const setDebouncedSearchValue = useMemo(
     () =>
@@ -274,6 +282,7 @@ export function ModelSelectorProvider({ children, startupConfig }: ModelSelector
       modelSpecs,
       assistantsMap,
       mappedEndpoints,
+      brandedEndpoints,
       endpointsConfig,
       handleSelectSpec,
       handleSelectModel,
@@ -293,6 +302,7 @@ export function ModelSelectorProvider({ children, startupConfig }: ModelSelector
       modelSpecs,
       assistantsMap,
       mappedEndpoints,
+      brandedEndpoints,
       endpointsConfig,
       handleSelectSpec,
       handleSelectModel,

@@ -1,6 +1,6 @@
 import type { useLocalize } from '~/hooks';
 import type { Endpoint } from '~/common';
-import { filterItems } from '../utils';
+import { filterItems, getBrandedEndpoints } from '../utils';
 
 const agentsEndpoint: Endpoint = {
   value: 'agents',
@@ -42,5 +42,24 @@ describe('model selector utilities', () => {
   it('does not match agents when there are no selectable agent options', () => {
     const results = filterItems([disabledAgentsEndpoint], 'my agents', undefined, undefined);
     expect(results).toEqual([]);
+  });
+
+  it('hides endpoints covered by the spec catalog from the picker', () => {
+    const opraiz: Endpoint = {
+      value: 'Opraiz',
+      label: 'Opraiz',
+      hasModels: true,
+      icon: null,
+      models: [{ name: '@cf/meta/llama-3.3-70b-instruct-fp8-fast', isGlobal: true }],
+    };
+    const agents: Endpoint = { ...agentsEndpoint };
+    const specs = [
+      { name: 'baanzon-intelligence', label: 'Baanzon Intelligence', preset: { endpoint: 'Opraiz', model: '@cf/meta/llama-3.3-70b-instruct-fp8-fast' } },
+    ] as never as Parameters<typeof getBrandedEndpoints>[0];
+
+    expect(getBrandedEndpoints(specs, [opraiz, agents])).toEqual([agents]);
+    // No specs -> nothing is hidden
+    expect(getBrandedEndpoints([], [opraiz, agents])).toEqual([opraiz, agents]);
+    expect(getBrandedEndpoints(undefined, [opraiz, agents])).toEqual([opraiz, agents]);
   });
 });

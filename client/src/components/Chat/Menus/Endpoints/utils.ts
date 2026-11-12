@@ -89,6 +89,25 @@ export function shouldRenderEndpointOption(endpoint: {
   return !isAgentsEndpoint(endpoint.value) || endpoint.hasModels === true;
 }
 
+/**
+ * Drops endpoints whose models are fully represented in the spec catalog, so the
+ * raw endpoint entry (with internal model ids like @cf/...) never reaches the UI.
+ */
+export function getBrandedEndpoints(
+  modelSpecs: TModelSpec[] | undefined,
+  mappedEndpoints: Endpoint[],
+): Endpoint[] {
+  const covered = new Set(
+    (modelSpecs ?? [])
+      .map((spec) => spec.preset?.endpoint)
+      .filter((value): value is string => typeof value === 'string'),
+  );
+  if (!covered.size) {
+    return mappedEndpoints;
+  }
+  return mappedEndpoints.filter((endpoint) => !covered.has(endpoint.value));
+}
+
 export function filterModels(
   endpoint: Endpoint,
   models: string[],

@@ -28,6 +28,7 @@ function ModelSelectorContent() {
     agentsMap,
     modelSpecs,
     mappedEndpoints,
+    brandedEndpoints,
     endpointsConfig,
     // State
     searchValue,
@@ -112,10 +113,11 @@ function ModelSelectorContent() {
               modelSpecs?.filter((spec) => !spec.group) || [],
               selectedValues.modelSpec || '',
             )}
-            {/* Render endpoints (will include grouped specs matching endpoint names) */}
-            {renderEndpoints(mappedEndpoints ?? [])}
+            {/* Render endpoints not branded by the spec catalog (branded ones keep
+                their raw internal model ids out of the UI entirely) */}
+            {renderEndpoints(brandedEndpoints ?? [])}
             {/* Render custom groups (specs with group field not matching any endpoint) */}
-            {renderCustomGroups(modelSpecs || [], mappedEndpoints ?? [])}
+            {renderCustomGroups(modelSpecs || [], brandedEndpoints ?? [])}
           </>
         )}
       </Menu>
