@@ -8,6 +8,13 @@ jest.mock('~/hooks', () => ({
   useLocalize: () => (key: string) => key,
 }));
 
+/** HeaderLabel resolves hover labels against the startup config, which this
+ *  suite renders without providers; an empty result leaves names untouched. */
+jest.mock('~/data-provider', () => ({
+  ...jest.requireActual('~/data-provider'),
+  useGetStartupConfig: () => ({ data: undefined }),
+}));
+
 jest.mock('~/Providers', () => ({
   useAgentsMapContext: () => undefined,
 }));

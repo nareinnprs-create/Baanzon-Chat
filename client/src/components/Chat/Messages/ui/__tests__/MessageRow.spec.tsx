@@ -8,6 +8,13 @@ jest.mock('../MessageTimestamp', () => ({
   ),
 }));
 
+/** HeaderLabel resolves hover labels against the startup config, which this
+ *  suite renders without providers; an empty result leaves names untouched. */
+jest.mock('~/data-provider', () => ({
+  ...jest.requireActual('~/data-provider'),
+  useGetStartupConfig: () => ({ data: undefined }),
+}));
+
 const MESSAGE_BODY = 'Message body';
 
 const renderRow = ({
