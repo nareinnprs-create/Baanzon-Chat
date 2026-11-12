@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import * as Ariakit from '@ariakit/react';
 import { TooltipAnchor, DropdownPopup, PinIcon, VectorIcon } from '@librechat/client';
-import { Brain, Globe, ScrollText, Settings, Settings2, TerminalSquareIcon } from 'lucide-react';
+import { Brain, Globe, ImagePlus, ScrollText, Settings, Settings2, TerminalSquareIcon } from 'lucide-react';
 import {
   AuthType,
   Permissions,
@@ -19,6 +19,7 @@ import {
 } from '~/hooks';
 import ArtifactsSubMenu from '~/components/Chat/Input/ArtifactsSubMenu';
 import MCPSubMenu from '~/components/Chat/Input/MCPSubMenu';
+import ImageGenDialog from '~/components/Chat/Input/ImageGen/ImageGenDialog';
 import { useGetStartupConfig } from '~/data-provider';
 import { useBadgeRowContext } from '~/Providers';
 import { cn } from '~/utils';
@@ -75,6 +76,7 @@ const ToolsDropdown = ({ disabled }: ToolsDropdownProps) => {
   const showMemory = canUseMemory && memoryEnabled && user?.personalization?.memories !== false;
 
   const [isPopoverActive, setIsPopoverActive] = useState(false);
+  const [isImageGenOpen, setIsImageGenOpen] = useState(false);
   const isDisabled = disabled ?? false;
   const {
     skills,
@@ -161,6 +163,19 @@ const ToolsDropdown = ({ disabled }: ToolsDropdownProps) => {
   const mcpPlaceholder = startupConfig?.interface?.mcpServers?.placeholder;
 
   const dropdownItems: MenuItemProps[] = [];
+
+  dropdownItems.push({
+    onClick: () => setIsImageGenOpen(true),
+    hideOnClick: true,
+    render: (props) => (
+      <div {...props} data-testid="tools-menu-image-gen">
+        <div className="flex items-center gap-2">
+          <ImagePlus className="icon-md" aria-hidden="true" />
+          <span>{localize('com_ui_image_gen')}</span>
+        </div>
+      </div>
+    ),
+  });
 
   if (fileSearchEnabled && canUseFileSearch) {
     dropdownItems.push({
@@ -399,20 +414,23 @@ const ToolsDropdown = ({ disabled }: ToolsDropdownProps) => {
   );
 
   return (
-    <DropdownPopup
-      itemClassName="flex w-full cursor-pointer rounded-lg items-center justify-between hover:bg-surface-hover gap-5"
-      menuId="tools-dropdown-menu"
-      isOpen={isPopoverActive}
-      setIsOpen={setIsPopoverActive}
-      modal={false}
-      portal={true}
-      portalElement={getMainLandmark}
-      preserveTabOrder={false}
-      unmountOnHide={true}
-      trigger={menuTrigger}
-      items={dropdownItems}
-      iconClassName="mr-0"
-    />
+    <>
+      <DropdownPopup
+        itemClassName="flex w-full cursor-pointer rounded-lg items-center justify-between hover:bg-surface-hover gap-5"
+        menuId="tools-dropdown-menu"
+        isOpen={isPopoverActive}
+        setIsOpen={setIsPopoverActive}
+        modal={false}
+        portal={true}
+        portalElement={getMainLandmark}
+        preserveTabOrder={false}
+        unmountOnHide={true}
+        trigger={menuTrigger}
+        items={dropdownItems}
+        iconClassName="mr-0"
+      />
+      <ImageGenDialog open={isImageGenOpen} onClose={() => setIsImageGenOpen(false)} />
+    </>
   );
 };
 
