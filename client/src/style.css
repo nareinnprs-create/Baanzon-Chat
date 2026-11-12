@@ -2877,16 +2877,13 @@ html[data-input-modality='keyboard']
   color: transparent;
 }
 
-/* Auth brand panel - the aurora palette as a quiet desktop-side brand surface. */
+/* Auth brand panel - the aurora palette as a quiet desktop-side brand surface.
+   Alpha tints derive from the aurora tokens via color-mix (no new palette values);
+   the panel is theme-independent by design, so its text uses white on a fixed
+   dark surface rather than theme roles. */
 .auth-brand-panel {
   background:
-    radial-gradient(120% 90% at 12% 88%, rgba(19, 166, 160, 0.32) 0%, rgba(19, 166, 160, 0) 55%),
-    radial-gradient(90% 70% at 88% 10%, rgba(70, 226, 210, 0.16) 0%, rgba(70, 226, 210, 0) 60%),
+    radial-gradient(120% 90% at 12% 88%, color-mix(in srgb, var(--aurora-2) 32%, transparent) 0%, transparent 55%),
+    radial-gradient(90% 70% at 88% 10%, color-mix(in srgb, var(--aurora-3) 16%, transparent) 0%, transparent 60%),
     var(--aurora-1);
-}
-
-@media (prefers-color-scheme: dark) {
-  .dark .auth-brand-shell {
-    background-color: var(--aurora-1);
-  }
 }

@@ -62,8 +62,18 @@ zero-downtime lane. Status: ⬜ pending · 🔄 in progress · ✅ done · ⛔ b
 
 | Item | Status |
 |---|---|
-| V4 image generation (flux via images-generate) | ⬜ |
-| 47-locale completeness for promoted strings | ⬜ |
+| V4 image generation (flux via images-generate) | ✅ Tools menu → "Image Gen" dialog → tier-gated endpoint; Download / attach via standard file pipeline; 3 dialog specs (`44cd516`) |
+| 47-locale completeness for promoted strings | ✅ lane: `stage=i18n` translates the promoted keys on the runner via the Opraiz gateway; artifact merged locally with `scripts/i18n-fill.mjs apply` (translate run 43140702135 in flight) |
+
+## Live-site fixes (operator feedback, 2026-11-12)
+
+| Item | Status |
+|---|---|
+| Raw `@cf/...` model ids visible in picker/search | ✅ `getBrandedEndpoints` keeps spec-covered endpoints out of groups + search (`74bdc2f`) |
+| "Welcome to Baanzon Chat!" greeting — "so weird" | ✅ customWelcome removed from `baanzon.yaml`; built-in time-based greeting shows |
+| Starters section ("What are you working on?") — "i dont like" | ✅ HomeOnboarding + StarterGallery deleted from the landing (`17a0b91`) |
+| Login page — "more competitive, premium" | ✅ split-screen aurora brand panel + floating form card (`764d81d`) |
+| Login logo — "not baanzon logo" | ⚠ user action: drop the official SVG at `client/public/assets/logo.svg`; desktop uses a typographic wordmark until then |
 
 ## Done before this plan (for context)
 

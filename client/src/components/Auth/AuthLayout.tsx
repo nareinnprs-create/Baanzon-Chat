@@ -100,7 +100,7 @@ function AuthLayout({
             <ThemeSelector />
           </div>
           <main className="flex w-full flex-grow items-center justify-center sm:max-w-md">
-            <div className="w-authPageWidth overflow-hidden px-1 py-2 sm:rounded-3xl sm:border sm:border-border-light sm:bg-surface-primary sm:px-10 sm:py-10 sm:shadow-[0_20px_60px_-24px_rgba(6,19,22,0.18)]">
+            <div className="w-authPageWidth overflow-hidden px-1 py-2 sm:rounded-3xl sm:border sm:border-border-light sm:bg-surface-primary sm:px-10 sm:py-10 sm:shadow-xl">
               {!hasStartupConfigError && !isFetching && header && (
                 <h1
                   className="mb-6 text-center text-3xl font-semibold tracking-tight text-text-primary"
