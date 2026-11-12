@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       stage:
-        description: 'diagnose (default) | env (merge RESCUE_* secrets into pod .env) | searxng (install self-hosted SearXNG on 8888) | grant (grant a user a plan tier for N days)'
+        description: 'diagnose (default) | env (merge RESCUE_* secrets into pod .env) | searxng (install self-hosted SearXNG on 8888) | grant (grant a user a plan tier for N days) | i18n (fill promoted locale keys via the model gateway)'
         default: 'diagnose'
       grantUser:
         description: 'grant stage: email of the user'
@@ -78,6 +78,24 @@ jobs:
             "root@${{ secrets.POD_SSH_HOST }}" \
             "GRANT_USER_EMAIL='$GRANT_USER_EMAIL' GRANT_PLAN='$GRANT_PLAN' GRANT_DAYS='$GRANT_DAYS' bash -s" < scripts/pod-grant.sh
           rm -f pod_key
+
+      - name: Fill promoted locale keys via gateway
+        if: ${{ inputs.stage == 'i18n' }}
+        env:
+          OPRAIZ_API_KEY: ${{ secrets.RESCUE_OPRAIZ_API_KEY }}
+          OPRAIZ_BASEURL: ${{ secrets.RESCUE_OPRAIZ_BASEURL }}
+        run: |
+          node scripts/i18n-fill.mjs translate \
+            --locales client/src/locales \
+            --keys scripts/i18n-promoted-keys.json \
+            --out i18n-fill.json
+      - name: Upload translation fill
+        if: ${{ inputs.stage == 'i18n' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: i18n-fill
+          path: i18n-fill.json
+          retention-days: 7
 
       - name: Apply operator keys to pod .env
         if: ${{ inputs.stage == 'env' }}
