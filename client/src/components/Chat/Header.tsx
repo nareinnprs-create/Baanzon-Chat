@@ -75,7 +75,7 @@ function Header({
   return (
     <div
       data-chat-header="true"
-      className="absolute top-0 z-10 flex h-[52px] w-full items-center gap-2 border-b border-border-light bg-surface-primary p-2 font-semibold text-text-primary"
+      className="absolute top-0 z-10 flex h-[52px] w-full items-center gap-2 border-b border-border-light bg-surface-primary/85 backdrop-blur-md p-2 font-semibold text-text-primary"
     >
       <div className="flex flex-shrink-0 items-center md:hidden">
         <OpenSidebar testId="header-open-sidebar-button" />

@@ -78,6 +78,7 @@ function AuthLayout({
             <h2 className="text-4xl font-semibold leading-[1.12] tracking-tight text-white xl:text-[2.6rem]">
               {localize('com_auth_brand_headline')}
             </h2>
+            <div className="auth-accent-bar mt-5" aria-hidden="true" />
             <p className="mt-4 text-base leading-7 text-white/70">
               {localize('com_auth_brand_subline')}
             </p>
@@ -105,7 +106,7 @@ function AuthLayout({
             <ThemeSelector />
           </div>
           <main className="flex w-full flex-grow items-center justify-center sm:max-w-md">
-            <div className="w-authPageWidth overflow-hidden px-1 py-2 sm:rounded-3xl sm:border sm:border-border-light sm:bg-surface-primary sm:px-10 sm:py-10 sm:shadow-xl">
+            <div className="auth-card-enter w-authPageWidth overflow-hidden px-1 py-2 sm:rounded-3xl sm:border sm:border-border-light sm:bg-surface-primary sm:px-10 sm:py-10 sm:shadow-[var(--shadow-card)]">
               {!hasStartupConfigError && !isFetching && header && (
                 <h1
                   className="mb-6 text-center text-3xl font-semibold tracking-tight text-text-primary"

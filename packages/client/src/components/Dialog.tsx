@@ -29,7 +29,7 @@ const DialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     className={cn(
-      'fixed inset-0 z-[999] bg-surface-overlay/65 transition-all duration-100 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:fade-in',
+      'fixed inset-0 z-[999] bg-surface-overlay/65 backdrop-blur-[2px] transition-all duration-100 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:fade-in',
       className ?? '',
     )}
     {...props}
@@ -62,9 +62,9 @@ const DialogContent: React.ForwardRefExoticComponent<
           className={cn(
             /** The dialog surface is otherwise borderless: in high contrast it sits
              *  on a canvas of its own colour, so it needs a drawn edge. */
-            'fixed z-[999] grid w-full gap-4 rounded-b-lg bg-surface-dialog pb-6 animate-in data-[state=open]:fade-in-90 data-[state=open]:slide-in-from-bottom-10 high-contrast:border high-contrast:border-solid high-contrast:border-border-medium sm:rounded-lg',
+            'fixed z-[999] grid w-full gap-4 rounded-b-lg bg-surface-dialog pb-6 shadow-[var(--shadow-dialog)] animate-in data-[state=open]:fade-in-90 data-[state=open]:slide-in-from-bottom-10 high-contrast:border high-contrast:border-solid high-contrast:border-border-medium high-contrast:shadow-none sm:rounded-2xl',
             isSmallScreen
-              ? 'fixed left-1/2 top-1/2 z-[999] m-auto grid w-11/12 -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-surface-dialog pb-6'
+              ? 'fixed left-1/2 top-1/2 z-[999] m-auto grid w-11/12 -translate-x-1/2 -translate-y-1/2 gap-4 rounded-2xl bg-surface-dialog pb-6'
               : '',
             disableScroll ? 'overflow-hidden' : '',
             className ?? '',

@@ -6,6 +6,27 @@
   scroll-margin-top: 4rem;
 }
 
+/* Batch C — message rows enter with a quiet rise (mount-only; memo keeps the
+   row mounted while streaming). */
+.message-enter {
+  animation: message-in 280ms var(--ease-standard) both;
+}
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .message-enter {
+    animation: none;
+  }
+}
+
 /* Custom Variables */
 :root {
   --white: 255 255 255;
@@ -100,6 +121,35 @@
   --avatar-falloff: 0.45;
   --avatar-ease-in: cubic-bezier(0.22, 1, 0.36, 1);
   --avatar-ease-out: cubic-bezier(0.34, 3.85, 0.64, 1);
+}
+
+/* UI-upgrade batch A — shared motion + elevation scale. Durations/easing feed
+   every new entrance/hover animation; one curve, two speeds. The elevation
+   tiers replace ad-hoc shadows: card = resting surfaces, popover = menus,
+   dialog = modals. Dark deepens the alpha only. */
+:root {
+  --dur-fast: 120ms;
+  --dur-med: 200ms;
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --shadow-card: 0 1px 2px rgb(16 18 22 / 0.04), 0 8px 24px rgb(16 18 22 / 0.06);
+  --shadow-popover: 0 2px 6px rgb(16 18 22 / 0.08), 0 12px 32px rgb(16 18 22 / 0.12);
+  --shadow-dialog: 0 4px 12px rgb(16 18 22 / 0.1), 0 24px 64px rgb(16 18 22 / 0.18);
+}
+.dark {
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.28), 0 8px 24px rgb(0 0 0 / 0.34);
+  --shadow-popover: 0 2px 6px rgb(0 0 0 / 0.34), 0 12px 32px rgb(0 0 0 / 0.46);
+  --shadow-dialog: 0 4px 12px rgb(0 0 0 / 0.4), 0 24px 64px rgb(0 0 0 / 0.55);
+}
+
+/* Brand-tinted selection + caret for the standard themes. Celadon at low alpha
+   keeps every ink AA-readable; `html.high-contrast ::selection` below keeps
+   its own 21:1 inversion and wins on specificity. */
+::selection {
+  background-color: rgb(var(--brand-celadon) / 0.4);
+}
+input:not([type='checkbox']):not([type='radio']),
+textarea {
+  caret-color: rgb(var(--ring-primary));
 }
 
 /* Streaming affordance (Batch D): a quiet 2px progress filament across the top
@@ -2530,9 +2580,7 @@ html[data-input-modality='keyboard']
   background-color: rgb(var(--surface-primary));
   padding: 0.5rem;
   color: rgb(var(--text-primary));
-  box-shadow:
-    0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  box-shadow: var(--shadow-popover);
   transform-origin: var(--popover-transform-origin, top);
   opacity: 0;
   transition-property: opacity, scale;
@@ -2902,4 +2950,58 @@ html[data-input-modality='keyboard']
     radial-gradient(120% 90% at 12% 88%, color-mix(in srgb, var(--aurora-2) 32%, transparent) 0%, transparent 55%),
     radial-gradient(90% 70% at 88% 10%, color-mix(in srgb, var(--aurora-3) 16%, transparent) 0%, transparent 60%),
     var(--aurora-1);
+}
+/* Batch B — slow aurora drift behind the brand panel (reduced-motion: static). */
+.auth-brand-panel::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(
+    45% 35% at 30% 30%,
+    color-mix(in srgb, var(--aurora-3) 14%, transparent) 0%,
+    transparent 70%
+  );
+  animation: auth-aurora-drift 22s var(--ease-standard) infinite alternate;
+  pointer-events: none;
+}
+@keyframes auth-aurora-drift {
+  from {
+    transform: translate3d(-4%, -3%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(5%, 4%, 0) scale(1.08);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-brand-panel::after {
+    animation: none;
+  }
+}
+
+/* Celadon accent line under the panel headline. */
+.auth-accent-bar {
+  width: 4.5rem;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--aurora-3), transparent);
+}
+
+/* Card entrance on the auth form column. */
+.auth-card-enter {
+  animation: auth-card-in 420ms var(--ease-standard) both;
+}
+@keyframes auth-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-card-enter {
+    animation: none;
+  }
 }
