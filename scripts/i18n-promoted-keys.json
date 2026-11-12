@@ -1,4 +1,12 @@
 [
+  "com_auth_brand_headline",
+  "com_auth_brand_point_1",
+  "com_auth_brand_point_2",
+  "com_auth_brand_point_3",
+  "com_auth_brand_subline",
+  "com_ui_image_gen_add",
+  "com_ui_image_gen_generate",
+  "com_ui_image_gen_prompt",
   "com_nav_pricing",
   "com_nav_plan",
   "com_ui_pricing_title",
