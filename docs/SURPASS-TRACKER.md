@@ -73,7 +73,7 @@ zero-downtime lane. Status: ⬜ pending · 🔄 in progress · ✅ done · ⛔ b
 | "Welcome to Baanzon Chat!" greeting — "so weird" | ✅ customWelcome removed from `baanzon.yaml`; built-in time-based greeting shows |
 | Starters section ("What are you working on?") — "i dont like" | ✅ HomeOnboarding + StarterGallery deleted from the landing (`17a0b91`) |
 | Login page — "more competitive, premium" | ✅ split-screen aurora brand panel + floating form card (`764d81d`) |
-| Login logo — "not baanzon logo" | ⚠ user action: drop the official SVG at `client/public/assets/logo.svg`; desktop uses a typographic wordmark until then |
+| Login logo — "not baanzon logo" | ✅ brand kit LOCKED: S3-A emblem + wordmark lockup, favicon + PNG sizes rebuilt (`9025cdf`); kit canonized in `brand/` (`brand/LOCKED-README.md`), `--bc-*` tokens in style.css |
 
 ## Done before this plan (for context)
 
