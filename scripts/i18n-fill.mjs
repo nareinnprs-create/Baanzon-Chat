@@ -21,6 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const MODEL = process.env.I18N_MODEL || '@cf/zai-org/glm-5.3';
+const FALLBACK_MODEL = process.env.I18N_FALLBACK_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 const GATEWAY = (process.env.OPRAIZ_BASEURL || '').replace(/\/+$/, '');
 const API_KEY = process.env.OPRAIZ_API_KEY || '';
 
@@ -60,7 +61,7 @@ function chunk(arr, size) {
   return out;
 }
 
-async function translateBatch(source, targetName, targetCode, pairs) {
+async function translateBatch(source, targetName, targetCode, pairs, model = MODEL) {
   const keyText = pairs.map((k) => k.key);
   const srcMap = Object.fromEntries(pairs.map((k) => [k.key, k.value]));
   const prompt = [
@@ -79,7 +80,7 @@ async function translateBatch(source, targetName, targetCode, pairs) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${API_KEY}` },
     body: JSON.stringify({
-      model: MODEL,
+      model,
       temperature: 0,
       messages: [
         { role: 'system', content: 'You are a precise localization engine. Reply with JSON only.' },
@@ -137,6 +138,29 @@ async function modeTranslate(args) {
         done = true;
       } catch (err) {
         console.log(`[i18n] ${dir}: attempt ${attempt} failed: ${String(err.message || err).slice(0, 160)}`);
+      }
+    }
+    if (!done) {
+      /** One last shot on the fallback model - persistent 408s on the primary
+       * (e.g. Tibetan on glm-5.3) usually clear on the smaller model. */
+      try {
+        const pieces = [];
+        for (const part of chunk(missing, 60)) {
+          pieces.push(
+            await translateBatch(
+              en,
+              LANG_NAMES[dir] || dir,
+              dir,
+              part.map((key) => ({ key, value: en[key] })),
+              FALLBACK_MODEL,
+            ),
+          );
+        }
+        result[dir] = Object.assign({}, ...pieces);
+        done = true;
+        console.log(`[i18n] ${dir}: filled on fallback model`);
+      } catch (err) {
+        console.log(`[i18n] ${dir}: fallback failed: ${String(err.message || err).slice(0, 160)}`);
       }
     }
     if (done) {
