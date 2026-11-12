@@ -36,3 +36,8 @@ type-based (Inter/Arial) until custom wordmark paths are commissioned.
 Any UI surface that shows the logo, wordmark or brand accent colors consumes
 these files/tokens. Do not introduce substitute marks, other greens, or
 re-colored logo variants. Changes to this folder require the operator.
+
+Public brand assets are served with `Cache-Control: max-age=31536000` — whenever
+an asset file changes, bump the `?v=N` query in `client/index.html` and
+`AuthLayout.tsx` (currently `?v=2`), or cached clients keep the old mark for a
+year.
