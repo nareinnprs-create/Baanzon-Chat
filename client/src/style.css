@@ -135,11 +135,6 @@
   --shadow-popover: 0 2px 6px rgb(16 18 22 / 0.08), 0 12px 32px rgb(16 18 22 / 0.12);
   --shadow-dialog: 0 4px 12px rgb(16 18 22 / 0.1), 0 24px 64px rgb(16 18 22 / 0.18);
 }
-.dark {
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.28), 0 8px 24px rgb(0 0 0 / 0.34);
-  --shadow-popover: 0 2px 6px rgb(0 0 0 / 0.34), 0 12px 32px rgb(0 0 0 / 0.46);
-  --shadow-dialog: 0 4px 12px rgb(0 0 0 / 0.4), 0 24px 64px rgb(0 0 0 / 0.55);
-}
 
 /* Brand-tinted selection + caret for the standard themes. Celadon at low alpha
    keeps every ink AA-readable; `html.high-contrast ::selection` below keeps
@@ -354,7 +349,7 @@ html {
   --syntax-title: 190 18 60; /* #BE123C Rose */
 
   /* Signature brand gradient — celadon into graphite. */
-  --brand-sig-gradient: linear-gradient(135deg, #B7D6C3, #303438);
+  --brand-sig-gradient: linear-gradient(135deg, #b7d6c3, #303438);
 
   --surface-inverted: var(--gray-800);
   --surface-inverted-hover: 91 75 212; /* #5B4BD4 */
@@ -385,6 +380,10 @@ html {
   --provider-foreground: #ffffff;
 }
 .dark {
+  /* Dark elevation (batch A): deepened-alpha variants of the :root shadows. */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.28), 0 8px 24px rgb(0 0 0 / 0.34);
+  --shadow-popover: 0 2px 6px rgb(0 0 0 / 0.34), 0 12px 32px rgb(0 0 0 / 0.46);
+  --shadow-dialog: 0 4px 12px rgb(0 0 0 / 0.4), 0 24px 64px rgb(0 0 0 / 0.55);
   --brand-purple: var(--brand-celadon);
   --presentation: var(--gray-850);
   --text-primary: 245 245 247; /* #F5F5F7 */
@@ -477,7 +476,7 @@ html {
   --syntax-title: 255 154 165; /* #FF9AA5 */
 
   /* Signature brand gradient — celadon into soft white. */
-  --brand-sig-gradient: linear-gradient(135deg, #B7D6C3, #F0F0E9);
+  --brand-sig-gradient: linear-gradient(135deg, #b7d6c3, #f0f0e9);
 
   --surface-inverted: 245 245 247;
   --surface-inverted-hover: 161 161 170; /* #A1A1AA */
@@ -507,8 +506,11 @@ html {
 }
 
 .brand-surface {
-  background:
-    linear-gradient(180deg, rgb(var(--brand-soft-white) / 0.72), rgb(var(--surface-primary)) 80%);
+  background: linear-gradient(
+    180deg,
+    rgb(var(--brand-soft-white) / 0.72),
+    rgb(var(--surface-primary)) 80%
+  );
 }
 
 .dark .auth-brand-shell {
@@ -518,8 +520,11 @@ html {
 }
 
 .dark .brand-surface {
-  background:
-    linear-gradient(180deg, rgb(var(--brand-graphite) / 0.48), rgb(var(--surface-primary)) 80%);
+  background: linear-gradient(
+    180deg,
+    rgb(var(--brand-graphite) / 0.48),
+    rgb(var(--surface-primary)) 80%
+  );
 }
 .gizmo {
   --text-primary: var(--gizmo-gray-950);
@@ -2917,9 +2922,9 @@ html[data-input-modality='keyboard']
    emblem). Do not rename or revalue; new brand surfaces consume these. */
 :root {
   --bc-graphite: #303438;
-  --bc-celadon: #B7D6C3;
-  --bc-soft-white: #F0F0E9;
-  --bc-steel: #70777B;
+  --bc-celadon: #b7d6c3;
+  --bc-soft-white: #f0f0e9;
+  --bc-steel: #70777b;
 }
 .text-brand-celadon {
   color: var(--bc-celadon);
@@ -2932,10 +2937,16 @@ html[data-input-modality='keyboard']
    Reserved for AI activity, brand moments and completion states only. */
 :root {
   --aurora-1: #061316;
-  --aurora-2: #13A6A0;
-  --aurora-3: #46E2D2;
-  --aurora-4: #A998FF;
-  --aurora-gradient: linear-gradient(90deg, var(--aurora-1) 0%, var(--aurora-2) 38%, var(--aurora-3) 68%, var(--aurora-4) 100%);
+  --aurora-2: #13a6a0;
+  --aurora-3: #46e2d2;
+  --aurora-4: #a998ff;
+  --aurora-gradient: linear-gradient(
+    90deg,
+    var(--aurora-1) 0%,
+    var(--aurora-2) 38%,
+    var(--aurora-3) 68%,
+    var(--aurora-4) 100%
+  );
 }
 .aurora-bg {
   background-image: var(--aurora-gradient);
@@ -2953,8 +2964,16 @@ html[data-input-modality='keyboard']
    dark surface rather than theme roles. */
 .auth-brand-panel {
   background:
-    radial-gradient(120% 90% at 12% 88%, color-mix(in srgb, var(--aurora-2) 32%, transparent) 0%, transparent 55%),
-    radial-gradient(90% 70% at 88% 10%, color-mix(in srgb, var(--aurora-3) 16%, transparent) 0%, transparent 60%),
+    radial-gradient(
+      120% 90% at 12% 88%,
+      color-mix(in srgb, var(--aurora-2) 32%, transparent) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      90% 70% at 88% 10%,
+      color-mix(in srgb, var(--aurora-3) 16%, transparent) 0%,
+      transparent 60%
+    ),
     var(--aurora-1);
 }
 /* Batch B — slow aurora drift behind the brand panel (reduced-motion: static). */

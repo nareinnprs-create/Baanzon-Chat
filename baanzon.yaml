@@ -816,7 +816,7 @@ endpoints:
           - '@cf/meta/llama-3.1-8b-instruct-fp8'
           # Vision: image parts via the OpenAI-compatible chat endpoint
           - '@cf/meta/llama-3.2-11b-vision-instruct'
-        fetch: false   # CF /ai/v1/models does not support GET — validate against the list above
+        fetch: false # CF /ai/v1/models does not support GET — validate against the list above
       titleConvo: true
       titleModel: '@cf/meta/llama-3.1-8b-instruct-fp8'
       dropParams: ['stop', 'user', 'frequency_penalty', 'presence_penalty']
@@ -990,101 +990,125 @@ modelSpecs:
       group: 'Baanzon Intelligence'
       groupIcon: 'Opraiz'
       default: true
+      webSearch: true
       preset:
         endpoint: 'Opraiz'
-        model: '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
+        model: '@cf/zai-org/glm-5.3'
+        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts.'
     - name: 'baanzon-flash'
       label: 'Baanzon Flash'
       description: 'Low-latency general model for quick exchanges'
       group: 'Baanzon Intelligence'
       groupIcon: 'Opraiz'
+      webSearch: true
       preset:
         endpoint: 'Opraiz'
         model: '@cf/zai-org/glm-5.3-flash'
+        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts.'
     - name: 'baanzon-qwen3'
       label: 'Baanzon Q3'
       description: 'Qwen3 30B - strong multilingual and agentic work'
       group: 'Baanzon Intelligence'
       groupIcon: 'Opraiz'
+      webSearch: true
       preset:
         endpoint: 'Opraiz'
         model: '@cf/qwen/qwen3-30b-a3b-fp8'
+        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts.'
     # --- Baanzon Deep Reasoning ---
     - name: 'baanzon-reasoning'
       label: 'Baanzon Deep Reasoning'
       description: 'Extended-thinking model for hard problems (shows its reasoning)'
       group: 'Baanzon Deep Reasoning'
       groupIcon: 'Opraiz'
+      webSearch: true
       preset:
         endpoint: 'Opraiz'
         model: '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b'
+        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts.'
     - name: 'baanzon-gpt-oss'
       label: 'Baanzon GPT-OSS 120B'
       description: 'Open-weight frontier model with reasoning traces'
       group: 'Baanzon Deep Reasoning'
       groupIcon: 'Opraiz'
+      webSearch: true
       preset:
         endpoint: 'Opraiz'
         model: '@cf/openai/gpt-oss-120b'
+        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts.'
     - name: 'baanzon-glm5'
       label: 'Baanzon GLM 5.3'
       description: 'GLM 5.3 - deliberate, high-quality long-form work'
       group: 'Baanzon Deep Reasoning'
       groupIcon: 'Opraiz'
+      webSearch: true
       preset:
         endpoint: 'Opraiz'
         model: '@cf/zai-org/glm-5.3'
+        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts.'
     # --- Baanzon Code ---
     - name: 'baanzon-code'
       label: 'Baanzon Code'
       description: 'Coding specialist for writing, reviewing and refactoring code'
       group: 'Baanzon Code'
       groupIcon: 'Opraiz'
+      webSearch: true
       preset:
         endpoint: 'Opraiz'
         model: '@cf/qwen/qwen2.5-coder-32b-instruct'
+        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts.'
     - name: 'baanzon-kimi-code'
       label: 'Baanzon Kimi Code'
       description: 'Kimi K2.7 tuned for repository-scale coding tasks'
       group: 'Baanzon Code'
       groupIcon: 'Opraiz'
+      webSearch: true
       preset:
         endpoint: 'Opraiz'
         model: '@cf/moonshotai/kimi-k2.7-code'
+        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts.'
     # --- Baanzon Turbo ---
     - name: 'baanzon-turbo'
       label: 'Baanzon Turbo'
       description: 'Fastest responses for simple questions'
       group: 'Baanzon Turbo'
       groupIcon: 'Opraiz'
+      webSearch: true
       preset:
         endpoint: 'Opraiz'
         model: '@cf/meta/llama-3.1-8b-instruct-fp8'
+        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts.'
     - name: 'baanzon-glm-flash'
       label: 'Baanzon GLM Flash'
       description: 'GLM 4.7 Flash - quick and capable'
       group: 'Baanzon Turbo'
       groupIcon: 'Opraiz'
+      webSearch: true
       preset:
         endpoint: 'Opraiz'
         model: '@cf/zai-org/glm-4.7-flash'
+        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts.'
     - name: 'baanzon-v4-flash'
       label: 'Baanzon V4 Flash'
       description: 'DeepSeek V4 Flash - fast with strong reasoning'
       group: 'Baanzon Turbo'
       groupIcon: 'Opraiz'
+      webSearch: true
       preset:
         endpoint: 'Opraiz'
         model: '@cf/deepseek-ai/deepseek-v4-flash-0731'
+        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts.'
     # --- Baanzon Vision ---
     - name: 'baanzon-vision'
       label: 'Baanzon Vision'
       description: 'Attach images and talk about them - Llama 3.2 Vision'
       group: 'Baanzon Vision'
       groupIcon: 'Opraiz'
+      webSearch: true
       preset:
         endpoint: 'Opraiz'
         model: '@cf/meta/llama-3.2-11b-vision-instruct'
+        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts.'
 
 # Web Search Configuration - Baanzon: self-hosted SearXNG (search) + Keenable
 # (scraper, keyless). The instance is supervised on 127.0.0.1:8888 (see
@@ -1093,9 +1117,9 @@ webSearch:
   searchProvider: searxng
   scraperProvider: keenable
   searxngInstanceUrl: '${SEARXNG_INSTANCE_URL}'
-  # allowedAddresses:
-  #   - '127.0.0.1:8888'
-
+  # Loopback pin: the SearXNG upstream is local-only on the pod (SSRF guard).
+  allowedAddresses:
+    - '127.0.0.1:8888'
 # (reference examples below kept commented)
 # webSearch:
 #   # Jina Reranking Configuration

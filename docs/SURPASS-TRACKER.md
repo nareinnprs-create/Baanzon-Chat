@@ -86,6 +86,15 @@ zero-downtime lane. Status: ⬜ pending · 🔄 in progress · ✅ done · ⛔ b
 | E Feedback — skeletons + toasts | ✅ toasts on popover tier + `rounded-lg`; skeletons already pervasive (Skeleton.tsx in use across sidebar/notifications/pickers) — skipped as done |
 | F Hygiene — a11y + verification | ✅ every new animation has a `prefers-reduced-motion` guard; tsc clean (packages/client + client); 30 auth/locale + 1174 message + 12 primitive tests green; live check after deploy |
 
+## Launch plan — feature + freshness + CI (operator-approved, 2026-11-12) 🔄
+
+| Item | Status |
+|---|---|
+| Part 4 — CI green (stale i18n keys + shadow block + subagent mock) | ✅ 9 unused keys deleted; dark shadows merged into the main `.dark` block (positional spec reads correct values again); `runEndByIndex` added to the ChatView subagent store mock; both suites green (54 + 2) |
+| Part 3 — Fresh web answers | ✅ SearXNG `allowedAddresses` pin uncommented (`127.0.0.1:8888`); all 12 modelSpecs: spec-level `webSearch: true` + `promptPrefix` carrying `{{current_datetime}}`; default spec `baanzon-intelligence` switched llama-3.3-70b → `@cf/zai-org/glm-5.3` |
+| Part 2 — Typed "generate an image…" actually generates | ✅ `isImageRequest` interception in `useSubmitMessage`: POST `/api/images/generate` → blob → File → `/files/images` upload → submit with `overrideFiles`; skips attachments/queued overrides; cap/burst failures toast the server message and fall back to the plain send; specs 14/14 new |
+| Part 1 — Live verification pass | ⬜ after this deploy: auth, chat per group, freshness probe, image dialog + typed request, vision attach, title gen, offline queue |
+
 ## Done before this plan (for context)
 
 - ✅ Zero-downtime blue-green deploys (gate + two slots, rollback = 1 command)

@@ -6,6 +6,9 @@ import { useAuthContext } from '~/hooks/AuthContext';
 import useSubmitMessage from '../useSubmitMessage';
 
 const mockSetActivePrompt = jest.fn();
+const mockShowToast = jest.fn();
+const mockGenerateImageFile = jest.fn();
+const mockUploadGeneratedImage = jest.fn();
 
 jest.mock('recoil', () => ({
   ...jest.requireActual('recoil'),
@@ -27,7 +30,17 @@ jest.mock('recoil', () => ({
  *  data-provider's `ProviderId` — mocked away in this suite. The offline queue
  *  only consumes the toast context, so a stub keeps the module graph loadable. */
 jest.mock('@librechat/client', () => ({
-  useToastContext: () => ({ showToast: jest.fn() }),
+  useToastContext: () => ({ showToast: mockShowToast }),
+}));
+
+jest.mock('~/hooks', () => ({
+  useLocalize: () => (key: string) => key,
+}));
+
+jest.mock('~/utils/imageIntent', () => ({
+  isImageRequest: jest.requireActual('~/utils/imageIntent').isImageRequest,
+  generateImageFile: (...args: unknown[]) => mockGenerateImageFile(...args),
+  uploadGeneratedImage: (...args: unknown[]) => mockUploadGeneratedImage(...args),
 }));
 
 jest.mock('librechat-data-provider', () => ({
@@ -239,5 +252,112 @@ describe('useSubmitMessage', () => {
         overrideRecoverySteerId: 'source-steer',
       }),
     );
+  });
+
+  describe('image intent interception', () => {
+    it('generates, uploads, and submits the message with the file attached', async () => {
+      ask.mockReturnValue(true);
+      mockGenerateImageFile.mockResolvedValue(new File(['x'], 'img.png', { type: 'image/png' }));
+      mockUploadGeneratedImage.mockResolvedValue({
+        file_id: 'file-1',
+        filepath: '/images/file-1.png',
+        filename: 'img.png',
+        type: 'image/png',
+        height: 512,
+        width: 512,
+      });
+      const { result } = renderHook(() => useSubmitMessage());
+
+      await act(async () => {
+        result.current.submitMessage({ text: 'generate an image of a cat' });
+      });
+
+      expect(mockGenerateImageFile).toHaveBeenCalledWith('generate an image of a cat');
+      expect(mockUploadGeneratedImage).toHaveBeenCalledWith({
+        file: expect.any(File),
+        conversation: undefined,
+        isTemporary: false,
+      });
+      expect(ask).toHaveBeenCalledWith(
+        { text: 'generate an image of a cat' },
+        expect.objectContaining({
+          overrideFiles: [
+            {
+              file_id: 'file-1',
+              filepath: '/images/file-1.png',
+              filename: 'img.png',
+              type: 'image/png',
+              height: 512,
+              width: 512,
+            },
+          ],
+        }),
+      );
+      expect(reset).toHaveBeenCalled();
+    });
+
+    it('falls back to a plain send and toasts the server message when generation fails', async () => {
+      ask.mockReturnValue(true);
+      mockGenerateImageFile.mockRejectedValue(
+        Object.assign(new Error('Too many images this minute'), {
+          serverMessage: 'Too many images this minute',
+        }),
+      );
+      const { result } = renderHook(() => useSubmitMessage());
+
+      await act(async () => {
+        result.current.submitMessage({ text: 'draw a picture of the moon' });
+      });
+
+      expect(mockShowToast).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'Too many images this minute', status: 'error' }),
+      );
+      expect(ask).toHaveBeenCalledWith(
+        { text: 'draw a picture of the moon' },
+        expect.objectContaining({ overrideFiles: undefined }),
+      );
+      expect(reset).toHaveBeenCalled();
+    });
+
+    it('does not intercept when the composer already carries attachments', () => {
+      ask.mockReturnValue(true);
+      mockUseChatContext.mockReturnValue({
+        ask,
+        index: 0,
+        getMessages,
+        setMessages,
+        files: new Map([['a', { file_id: 'a' }]]),
+      });
+      const { result } = renderHook(() => useSubmitMessage());
+
+      act(() => {
+        result.current.submitMessage({ text: 'generate an image of a cat' });
+      });
+
+      expect(mockGenerateImageFile).not.toHaveBeenCalled();
+      expect(ask).toHaveBeenCalledWith(
+        { text: 'generate an image of a cat' },
+        expect.objectContaining({ overrideFiles: undefined }),
+      );
+    });
+
+    it('does not intercept caller-supplied files (queued drains carry their own)', () => {
+      ask.mockReturnValue(true);
+      const queuedFile = { file_id: 'queued-1', filepath: '/images/queued-1.png' };
+      const { result } = renderHook(() => useSubmitMessage());
+
+      act(() => {
+        result.current.submitMessage({
+          text: 'generate an image of a cat',
+          overrideFiles: [queuedFile],
+        });
+      });
+
+      expect(mockGenerateImageFile).not.toHaveBeenCalled();
+      expect(ask).toHaveBeenCalledWith(
+        { text: 'generate an image of a cat' },
+        expect.objectContaining({ overrideFiles: [queuedFile] }),
+      );
+    });
   });
 });

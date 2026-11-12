@@ -1,8 +1,10 @@
 import { useCallback } from 'react';
 import { useAtomValue } from 'jotai';
+import { useToastContext } from '@librechat/client';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { replaceSpecialVars } from 'librechat-data-provider';
 import type { ModelLane, TMessage } from 'librechat-data-provider';
+import { generateImageFile, isImageRequest, uploadGeneratedImage } from '~/utils/imageIntent';
 import { useChatContext, useChatFormContext, useAddedChatContext } from '~/Providers';
 import { useGetLatestMessage } from '~/hooks/Messages/useLatestMessage';
 import { selectedModelLaneAtom } from '~/store/modelLane';
@@ -12,14 +14,30 @@ import { smartRouteEnabled } from '~/store/settings';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { pickSmartModel } from '~/utils/smartRoute';
 import { mainTextareaId } from '~/common';
+import { useLocalize } from '~/hooks';
 import store from '~/store';
+
+type Submission = {
+  text: string;
+  overrideFiles?: TMessage['files'];
+  overrideQuotes?: string[];
+  overrideManualSkills?: string[];
+  overrideClientRequestId?: string;
+  overrideRecoverySteerId?: string;
+  overrideExpectedPredecessorCreatedAt?: number;
+  overrideQueuedMessageOrigin?: unknown;
+  overrideLane?: ModelLane;
+};
 
 export default function useSubmitMessage() {
   const { user } = useAuthContext();
   const methods = useChatFormContext();
   const { conversation: addedConvo } = useAddedChatContext();
-  const { ask, index, getMessages, setMessages, conversation } = useChatContext();
+  const { ask, index, getMessages, setMessages, conversation, files } = useChatContext();
   const getLatestMessage = useGetLatestMessage(index);
+  const { showToast } = useToastContext();
+  const localize = useLocalize();
+  const isTemporary = useRecoilValue(store.isTemporary);
   const offline = useOfflineQueue({
     conversationId: conversation?.conversationId ?? null,
     send: async (item) => {
@@ -42,17 +60,7 @@ export default function useSubmitMessage() {
   const modelSpecsList = startupConfig?.modelSpecs?.list;
 
   const submitMessage = useCallback(
-    (data?: {
-      text: string;
-      overrideFiles?: TMessage['files'];
-      overrideQuotes?: string[];
-      overrideManualSkills?: string[];
-      overrideClientRequestId?: string;
-      overrideRecoverySteerId?: string;
-      overrideExpectedPredecessorCreatedAt?: number;
-      overrideQueuedMessageOrigin?: unknown;
-      overrideLane?: ModelLane;
-    }) => {
+    (data?: Submission) => {
       if (!data) {
         return console.warn('No data provided to submitMessage');
       }
@@ -66,49 +74,95 @@ export default function useSubmitMessage() {
         });
         return false;
       }
-      const latestMessage = getLatestMessage();
-      const rootMessages = getMessages();
-      const isLatestInRootMessages = rootMessages?.some(
-        (message) => message.messageId === latestMessage?.messageId,
-      );
-      if (!isLatestInRootMessages && latestMessage) {
-        setMessages([...(rootMessages || []), latestMessage]);
-      }
 
-      const submitted = ask(
-        {
-          text: data.text,
-          ...(data.overrideRecoverySteerId != null && {
-            overrideUserMessageId: data.overrideRecoverySteerId,
-          }),
-        },
-        {
-          addedConvo: addedConvo ?? undefined,
-          overrideModel:
-            smartRouteOn && modelSpecsList
-              ? (pickSmartModel(
-                  data.text,
-                  modelSpecsList,
-                  conversation?.endpoint,
-                  conversation?.model,
-                ) ?? undefined)
-              : undefined,
-          overrideLane: data.overrideLane ?? selectedModelLane ?? undefined,
-          // Queued during-run messages carry their own consumed attachments,
-          // quote chips, and manual skill picks (undefined = drain composer).
-          overrideFiles: data.overrideFiles,
-          overrideQuotes: data.overrideQuotes,
-          overrideManualSkills: data.overrideManualSkills,
-          overrideClientRequestId: data.overrideClientRequestId,
-          overrideRecoverySteerId: data.overrideRecoverySteerId,
-          overrideExpectedPredecessorCreatedAt: data.overrideExpectedPredecessorCreatedAt,
-          overrideQueuedMessageOrigin: data.overrideQueuedMessageOrigin,
-        },
-      );
-      if (submitted === false) {
+      /** Sync tail shared by the direct send and the image-intent flow: the
+       *  reconciliation, ask, and composer reset all read state at call time. */
+      const performSend = (submission: Submission) => {
+        const latestMessage = getLatestMessage();
+        const rootMessages = getMessages();
+        const isLatestInRootMessages = rootMessages?.some(
+          (message) => message.messageId === latestMessage?.messageId,
+        );
+        if (!isLatestInRootMessages && latestMessage) {
+          setMessages([...(rootMessages || []), latestMessage]);
+        }
+
+        const submitted = ask(
+          {
+            text: submission.text,
+            ...(submission.overrideRecoverySteerId != null && {
+              overrideUserMessageId: submission.overrideRecoverySteerId,
+            }),
+          },
+          {
+            addedConvo: addedConvo ?? undefined,
+            overrideModel:
+              smartRouteOn && modelSpecsList
+                ? (pickSmartModel(
+                    submission.text,
+                    modelSpecsList,
+                    conversation?.endpoint,
+                    conversation?.model,
+                  ) ?? undefined)
+                : undefined,
+            overrideLane: submission.overrideLane ?? selectedModelLane ?? undefined,
+            // Queued during-run messages carry their own consumed attachments,
+            // quote chips, and manual skill picks (undefined = drain composer).
+            overrideFiles: submission.overrideFiles,
+            overrideQuotes: submission.overrideQuotes,
+            overrideManualSkills: submission.overrideManualSkills,
+            overrideClientRequestId: submission.overrideClientRequestId,
+            overrideRecoverySteerId: submission.overrideRecoverySteerId,
+            overrideExpectedPredecessorCreatedAt: submission.overrideExpectedPredecessorCreatedAt,
+            overrideQueuedMessageOrigin: submission.overrideQueuedMessageOrigin,
+          },
+        );
+        if (submitted === false) {
+          return false;
+        }
+        methods.reset();
+      };
+
+      /** Typed "generate an image…" with nothing attached: generate server-side,
+       *  upload through the file pipeline, and submit with the result attached.
+       *  Any failure toasts (server cap/burst message when present) and falls
+       *  back to the plain chat send, so the request is never lost. */
+      if (
+        data.overrideFiles == null &&
+        (files == null || files.size === 0) &&
+        isImageRequest(data.text)
+      ) {
+        void (async () => {
+          try {
+            const file = await generateImageFile(data.text);
+            const uploaded = await uploadGeneratedImage({ file, conversation, isTemporary });
+            performSend({
+              text: data.text,
+              overrideFiles: [
+                {
+                  file_id: uploaded.file_id,
+                  filepath: uploaded.filepath,
+                  filename: uploaded.filename,
+                  type: uploaded.type ?? '',
+                  height: uploaded.height,
+                  width: uploaded.width,
+                },
+              ],
+            });
+          } catch (err) {
+            const serverMessage = (err as { serverMessage?: string }).serverMessage;
+            showToast({
+              message: serverMessage || localize('com_ui_image_gen_failed'),
+              status: 'error',
+              duration: 5000,
+            });
+            performSend(data);
+          }
+        })();
         return false;
       }
-      methods.reset();
+
+      return performSend(data);
     },
     [
       ask,
@@ -118,10 +172,14 @@ export default function useSubmitMessage() {
       getMessages,
       getLatestMessage,
       conversation,
+      files,
       offline,
       selectedModelLane,
       smartRouteOn,
       modelSpecsList,
+      showToast,
+      localize,
+      isTemporary,
     ],
   );
 
