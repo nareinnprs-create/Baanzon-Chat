@@ -31,6 +31,7 @@ const {
   getToolInputValidationDetails,
 } = require('@librechat/api');
 const { processFileCitations } = require('~/server/services/Files/Citations');
+const { toPublicModelId } = require('~/server/services/billing/modelRouter');
 const { processCodeOutput, runPreviewFinalize } = require('~/server/services/Files/Code/process');
 const { preflightCodeOutputBatch } = require('~/server/services/Files/Code/preflight');
 const { saveBase64Image } = require('~/server/services/Files/process');
@@ -503,6 +504,11 @@ function getDefaultHandlers({
       } catch (err) {
         logger.warn('[getDefaultHandlers] Failed to compute usage cost', err);
       }
+    }
+    // Usage events stream to the client and persist on the response: name only
+    // the public key. Priced BEFORE this line — multipliers key on the concrete id.
+    if (typeof payload.model === 'string' && payload.model) {
+      payload.model = toPublicModelId(payload.model) ?? payload.model;
     }
     /** Collect the same payload the client folds so the response's usage rollup
      *  persisted on `metadata.usage` reproduces the live branch/total + cost. */

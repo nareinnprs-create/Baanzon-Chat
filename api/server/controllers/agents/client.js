@@ -205,6 +205,7 @@ const { encodeAndFormat } = require('~/server/services/Files/images/encode');
 const { createContextHandlers } = require('~/app/clients/prompts');
 const { resolveConfigServers, getAccessibleMcpServerNames } = require('~/server/services/MCP');
 const { getMCPServerTools } = require('~/server/services/Config');
+const { toPublicModelId } = require('~/server/services/billing/modelRouter');
 const { getAccessibleMCPServers } = require('~/server/services/MCP');
 const BaseClient = require('~/app/clients/BaseClient');
 const { getMCPManager } = require('~/config');
@@ -1251,6 +1252,8 @@ class AgentClient extends BaseClient {
             )
           : undefined,
       };
+      // Client-facing: name only the public key (cost above already priced on the raw id).
+      data.model = toPublicModelId(data.model) ?? data.model;
       /** Fold into the response rollup synchronously, then stream it like
        *  primary/subagent usage so the live session gauge stays honest.
        *  Retained and flushed with the subagent emits so job cleanup cannot
@@ -3808,6 +3811,8 @@ class AgentClient extends BaseClient {
          * child message after the emitter has attached authoritative cost. */
         usage.cost = data.cost;
       }
+      // Client-facing: name only the public key (cost above already priced on the raw id).
+      data.model = toPublicModelId(data.model) ?? data.model;
       /** Fold into the response's usage rollup (synchronously, regardless of
        *  emit success) so the persisted total matches the live session, which
        *  also folds subagent usage into its cost/totals. */

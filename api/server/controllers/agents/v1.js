@@ -79,6 +79,7 @@ const {
   userCanUseMCPServers,
 } = require('~/server/services/MCP');
 const { attachOwnerContacts } = require('~/server/services/Agents/ownerContact');
+const { toPublicModelId } = require('~/server/services/billing/modelRouter');
 const { getMCPServersRegistry } = require('~/config');
 const { getLogStores } = require('~/cache');
 const db = require('~/models');
@@ -95,6 +96,21 @@ const escapeRegex = (str = '') => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const getSafeModelParameters = (modelParameters) => {
   const { useResponsesApi } = modelParameters ?? {};
   return typeof useResponsesApi === 'boolean' ? { useResponsesApi } : {};
+};
+/**
+ * Agents keep their concrete model server-side (generation needs it); API
+ * responses only ever name the public baanzon-* key it serves. Unmapped ids
+ * (internal aliases like opraiz-small) pass through.
+ */
+const scrubAgentModel = (agent) => {
+  if (typeof agent?.model === 'string' && agent.model) {
+    agent.model = toPublicModelId(agent.model) ?? agent.model;
+  }
+  const paramsModel = agent?.model_parameters?.model;
+  if (typeof paramsModel === 'string' && paramsModel) {
+    agent.model_parameters.model = toPublicModelId(paramsModel) ?? paramsModel;
+  }
+  return agent;
 };
 const hasEditBit = (permission) => (permission & PermissionBits.EDIT) === PermissionBits.EDIT;
 
@@ -911,6 +927,8 @@ const createAgentHandler = async (req, res) => {
       );
     }
 
+    scrubAgentModel(agent);
+
     res.status(201).json(agent);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -949,6 +967,8 @@ const getAgentHandler = async (req, res, expandProperties = false) => {
     if (!agent) {
       return res.status(404).json({ error: 'Agent not found' });
     }
+
+    scrubAgentModel(agent);
 
     if (agent.avatar && agent.avatar?.source === FileSources.s3) {
       try {
@@ -1033,6 +1053,8 @@ const getAgentVersionsHandler = async (req, res) => {
     if (versions == null) {
       return res.status(404).json({ error: 'Agent not found' });
     }
+
+    versions.forEach(scrubAgentModel);
 
     return res.status(200).json(versions);
   } catch (error) {
@@ -1329,6 +1351,8 @@ const updateAgentHandler = async (req, res) => {
     // Add version count to the response
     updatedAgent.version = updatedAgent.versions ? updatedAgent.versions.length : 0;
 
+    scrubAgentModel(updatedAgent);
+
     if (updatedAgent.author) {
       updatedAgent.author = updatedAgent.author.toString();
     }
@@ -1621,6 +1645,8 @@ const duplicateAgentHandler = async (req, res) => {
       );
     }
 
+    scrubAgentModel(newAgent);
+
     return res.status(201).json({
       agent: newAgent,
       actions: newActionsList,
@@ -1852,6 +1878,7 @@ const getListAgentsHandler = async (req, res) => {
         if (agent?._id && publicSet.has(agent._id.toString())) {
           agent.isPublic = true;
         }
+        scrubAgentModel(agent);
         agent.isEditable = editableSet == null || editableSet.has(agent?._id?.toString());
         if (
           urlCache &&
@@ -1971,6 +1998,8 @@ const uploadAgentAvatarHandler = async (req, res) => {
     } catch (cacheErr) {
       logger.error('[/:agent_id/avatar] Error invalidating avatar refresh cache', cacheErr);
     }
+
+    scrubAgentModel(updatedAgent);
 
     res.status(201).json(updatedAgent);
   } catch (error) {
@@ -2150,6 +2179,8 @@ const revertAgentVersionHandler = async (req, res) => {
     }
 
     await attachOwnerContacts([updatedAgent]);
+
+    scrubAgentModel(updatedAgent);
 
     if (updatedAgent.author !== req.user.id) {
       delete updatedAgent.author;

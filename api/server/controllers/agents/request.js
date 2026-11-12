@@ -49,6 +49,7 @@ const {
 } = require('~/server/services/MCPRequestContext');
 const { logViolation } = require('~/cache');
 const { recordScheduleOutcome, isScheduleLive } = require('~/server/services/Schedules');
+const { toPublicModelId } = require('~/server/services/billing/modelRouter');
 const {
   saveMessage,
   saveConvo,
@@ -325,7 +326,9 @@ function getAgentResponseModel(req, endpointOption) {
     return agentId;
   }
 
-  return getEndpointResponseModel(endpointOption);
+  // Stored rows and job metadata are user-facing: name only the public key.
+  const model = getEndpointResponseModel(endpointOption);
+  return toPublicModelId(model) ?? model;
 }
 
 async function finishResumableRequest(req, userId) {

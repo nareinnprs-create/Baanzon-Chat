@@ -18,6 +18,7 @@ const { logger, getTenantId, SystemCapabilities } = require('@librechat/data-sch
 const { hasCapability, hasConfigCapability } = require('~/server/middleware/roles/capabilities');
 const { getLdapConfig } = require('~/server/services/Config/ldap');
 const { getRumConfig } = require('~/server/services/Config/rum');
+const { toPublicModelId } = require('~/server/services/billing/modelRouter');
 const { getAppConfig } = require('~/server/services/Config/app');
 
 const router = express.Router();
@@ -299,7 +300,17 @@ router.get('/', async function (req, res) {
       }),
       turnstile: appConfig?.turnstileConfig,
       modelSpecs: sanitizeModelSpecs(excludeHiddenModelSpecs(appConfig?.modelSpecs)),
-      modelLanes: appConfig?.modelLanes,
+      // Public identity only: lane config may list concrete vision model ids.
+      ...(appConfig?.modelLanes && {
+        modelLanes: {
+          ...appConfig.modelLanes,
+          ...(appConfig.modelLanes.visionModels && {
+            visionModels: appConfig.modelLanes.visionModels.map(
+              (model) => toPublicModelId(model) ?? model,
+            ),
+          }),
+        },
+      }),
       balance: balanceConfig,
       bundlerURL: process.env.SANDPACK_BUNDLER_URL,
       staticBundlerURL: process.env.SANDPACK_STATIC_BUNDLER_URL,

@@ -116,6 +116,16 @@ function mergeModelSpecPreset(
   return { parsedBody: merged, appliedPrivateFields };
 }
 
+/** Spec slugs renamed for launch; old clients (localStorage/presets) keep resolving. */
+const LEGACY_MODEL_SPEC_NAMES: Record<string, string> = {
+  'baanzon-qwen3': 'baanzon-polyglot',
+  'baanzon-gpt-oss': 'baanzon-reasoner',
+  'baanzon-glm5': 'baanzon-scribe',
+  'baanzon-kimi-code': 'baanzon-code-xl',
+  'baanzon-glm-flash': 'baanzon-swift',
+  'baanzon-v4-flash': 'baanzon-rapid',
+};
+
 export function findModelSpecByName(
   modelSpecs: Pick<TSpecsConfig, 'list'> | undefined,
   spec: string | null | undefined,
@@ -124,7 +134,8 @@ export function findModelSpecByName(
     return undefined;
   }
 
-  return modelSpecs?.list?.find((modelSpec) => modelSpec.name === spec);
+  const name = LEGACY_MODEL_SPEC_NAMES[spec] ?? spec;
+  return modelSpecs?.list?.find((modelSpec) => modelSpec.name === name);
 }
 
 export function isModelSpecEndpointMatch(

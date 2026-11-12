@@ -184,6 +184,18 @@ describe('modelSpecs helpers', () => {
     expect(isModelSpecEndpointMatch(modelSpec, EModelEndpoint.google)).toBe(false);
   });
 
+  it('resolves renamed spec slugs from their legacy names', () => {
+    const modelSpec: TModelSpec = {
+      name: 'baanzon-polyglot',
+      label: 'Baanzon Polyglot',
+      preset: { endpoint: EModelEndpoint.custom, model: 'baanzon-polyglot' },
+    } as TModelSpec;
+
+    expect(findModelSpecByName({ list: [modelSpec] }, 'baanzon-qwen3')).toBe(modelSpec);
+    expect(findModelSpecByName({ list: [modelSpec] }, 'baanzon-polyglot')).toBe(modelSpec);
+    expect(findModelSpecByName({ list: [modelSpec] }, 'baanzon-unknown')).toBeUndefined();
+  });
+
   it('should resolve a model spec only for its selected endpoint', () => {
     const modelSpec: TModelSpec = {
       name: 'restricted-agent',
