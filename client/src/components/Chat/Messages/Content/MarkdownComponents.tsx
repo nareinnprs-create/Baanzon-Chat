@@ -13,6 +13,7 @@ import { useCodeBlockContext, useMediaContext } from '~/Providers';
 import CodeBlock from '~/components/Messages/Content/CodeBlock';
 import useHasAccess from '~/hooks/Roles/useHasAccess';
 import { useFileDownload } from '~/data-provider';
+import DataLabFence from './Parts/DataLabFence';
 import { useLocalize } from '~/hooks';
 import store from '~/store';
 
@@ -44,10 +45,13 @@ export const code: React.ElementType = memo(function MarkdownCode({
   const lang = match && match[1];
   const isMath = lang === 'math';
   const isMermaid = lang === 'mermaid';
+  const isDataLabFence = lang === 'chart' || lang === 'table';
   const isSingleLine = isSingleLineCode(children);
 
   const { getNextIndex, getNextMermaidIndex, resetCounter } = useCodeBlockContext();
-  const blockIndex = useRef(getNextIndex(isMath || isMermaid || isSingleLine)).current;
+  const blockIndex = useRef(
+    getNextIndex(isMath || isMermaid || isSingleLine || isDataLabFence),
+  ).current;
   /* Mermaid fences do not consume a code-block index, so every one of them in a
    * message would otherwise share `blockIndex` and collapse onto a single
    * artifact id. They carry their own sequence instead. */
@@ -65,6 +69,17 @@ export const code: React.ElementType = memo(function MarkdownCode({
       <MermaidErrorBoundary code={content}>
         <Mermaid id={`mermaid-${mermaidIndex}`}>{content}</Mermaid>
       </MermaidErrorBoundary>
+    );
+  } else if (isDataLabFence) {
+    const content = typeof children === 'string' ? children : String(children);
+    return (
+      <DataLabFence
+        lang={lang}
+        content={content}
+        codeChildren={children}
+        allowExecution={canRunCode}
+        blockIndex={blockIndex}
+      />
     );
   } else if (isSingleLine) {
     return (
@@ -97,6 +112,16 @@ export const codeNoExecution: React.ElementType = memo(function MarkdownCodeNoEx
   } else if (lang === 'mermaid') {
     const content = typeof children === 'string' ? children : String(children);
     return <Mermaid>{content}</Mermaid>;
+  } else if (lang === 'chart' || lang === 'table') {
+    const content = typeof children === 'string' ? children : String(children);
+    return (
+      <DataLabFence
+        lang={lang}
+        content={content}
+        codeChildren={children}
+        allowExecution={false}
+      />
+    );
   } else if (isSingleLineCode(children)) {
     return (
       <code onDoubleClick={handleDoubleClick} className={className}>

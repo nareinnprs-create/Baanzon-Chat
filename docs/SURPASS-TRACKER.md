@@ -55,8 +55,8 @@ zero-downtime lane. Status: ⬜ pending · 🔄 in progress · ✅ done · ⛔ b
 | Item | Status |
 |---|---|
 | B1 Aurora gradient milestone 2 | ✅ tokens + utilities in style.css; pulse active states carry the Signature Aurora |
-| A2 agentic transparency (tool timeline, subagent chips) | ⬜ in progress |
-| A4 generative UI in-message (chart/table contracts) | ⬜ in progress |
+| A2 agentic transparency (tool timeline, subagent chips) | ✅ verified: ToolCallGroup + ActivityPhaseGroup timeline, SubagentCall chips, AgentUpdate, AgentHandoff — all wired in ContentParts/Part (67 test files) |
+| A4 generative UI in-message (chart/table contracts) | 🔄 `chart`/`table` code fences render DataLab primitives inline (DataLabFence); tests 6/6, full suite + tsc verifying |
 
 ## Batch 7 — Optional (V4, i18n)
 
