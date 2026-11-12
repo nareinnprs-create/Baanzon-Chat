@@ -59,23 +59,35 @@ describe('Error — typed provider errors', () => {
     expect(screen.getByText(catalog[key])).toBeInTheDocument();
   });
 
-  it('keeps the provider message for a LangChain code without localized copy, minus the URL', () => {
+  it('renders generic copy for a LangChain code without localized copy', () => {
     const raw =
       'An error occurred while processing the request: could not parse output\n\nTroubleshooting URL: https://docs.langchain.com/oss/javascript/langchain/errors/OUTPUT_PARSING_FAILURE/\n';
     render(<Error text={raw} />);
 
-    expect(screen.getByText(/could not parse output/)).toBeInTheDocument();
+    expect(screen.getByText(catalog.com_error_generic)).toBeInTheDocument();
+    expect(screen.queryByText(/could not parse output/)).not.toBeInTheDocument();
     expect(screen.queryByText(/langchain\.com/i)).not.toBeInTheDocument();
   });
 
-  it('falls back to the raw provider text for an unmapped error', () => {
+  it('renders generic copy and hides provider internals for an unmapped error', () => {
     const raw =
       '[GoogleGenerativeAI Error]: [400 Bad Request] Request contains an invalid argument';
     render(<Error text={raw} />);
 
-    expect(
-      screen.getByText(new RegExp(raw.slice(0, 30).replace(/[[\]]/g, '\\$&'))),
-    ).toBeInTheDocument();
+    expect(screen.getByText(catalog.com_error_generic)).toBeInTheDocument();
+    expect(screen.queryByText(/GoogleGenerativeAI/)).not.toBeInTheDocument();
+  });
+
+  it('renders generic copy for an unknown JSON error body without relaying internals', () => {
+    const payload = JSON.stringify({
+      type: 'upstream_failure',
+      info: 'gateway https://gw.example.com/v1 rejected @cf/zai-org/glm-5.3 with status 500',
+    });
+    render(<Error text={payload} />);
+
+    expect(screen.getByText(catalog.com_error_generic)).toBeInTheDocument();
+    expect(screen.queryByText(/gw\.example\.com/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/@cf\//)).not.toBeInTheDocument();
   });
 });
 

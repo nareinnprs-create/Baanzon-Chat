@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+import { useGetStartupConfig } from '~/data-provider';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
@@ -44,8 +46,24 @@ const labelSlot =
  *  reasons they matter to the timestamp and the footer actions. */
 export default function HeaderLabel({ label, hoverLabel }: HeaderLabelProps) {
   const localize = useLocalize();
+  const { data: startupConfig } = useGetStartupConfig();
 
-  if (!hoverLabel || hoverLabel === label) {
+  /** Raw gateway ids (`@cf/...`) must never render. A spec match swaps in the
+   *  branded label; an unmatched id is dropped, falling back to the label above. */
+  const resolvedHoverLabel = useMemo(() => {
+    if (!hoverLabel) {
+      return hoverLabel;
+    }
+    const spec = startupConfig?.modelSpecs?.list?.find(
+      (modelSpec) => modelSpec.preset?.model === hoverLabel,
+    );
+    if (spec?.label) {
+      return spec.label;
+    }
+    return hoverLabel.includes('@') ? undefined : hoverLabel;
+  }, [hoverLabel, startupConfig]);
+
+  if (!resolvedHoverLabel || resolvedHoverLabel === label) {
     return <span className="min-w-0 truncate">{label}</span>;
   }
 
@@ -73,9 +91,9 @@ export default function HeaderLabel({ label, hoverLabel }: HeaderLabelProps) {
           'group-focus-visible:blur-0 group-has-[:focus-visible:not(:is(input,textarea,[contenteditable]))]:blur-0',
         )}
       >
-        {hoverLabel}
+        {resolvedHoverLabel}
       </span>
-      <span className="sr-only">{localize('com_ui_message_model', { 0: hoverLabel })}</span>
+      <span className="sr-only">{localize('com_ui_message_model', { 0: resolvedHoverLabel })}</span>
     </span>
   );
 }

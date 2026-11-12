@@ -1,6 +1,37 @@
 import { render, screen } from '@testing-library/react';
 import HeaderLabel, { getHeaderModelName } from '../HeaderLabel';
 
+const startupConfig = {
+  modelSpecs: {
+    list: [
+      {
+        name: 'baanzon-intelligence',
+        label: 'Baanzon Intelligence',
+        preset: { endpoint: 'Opraiz', model: '@cf/zai-org/glm-5.3' },
+      },
+    ],
+  },
+};
+
+jest.mock('~/data-provider', () => ({
+  useGetStartupConfig: () => ({ data: startupConfig }),
+}));
+
+jest.mock('~/hooks', () => ({
+  useLocalize:
+    () =>
+    (key: string, values?: Record<string, unknown>): string => {
+      const template =
+        (jest.requireActual('~/locales/en/translation.json') as Record<string, string>)[key] ?? key;
+      if (!values) {
+        return template;
+      }
+      return template.replace(/\{\{(\w+)\}\}/g, (match, name) =>
+        values[name] != null ? String(values[name]) : match,
+      );
+    },
+}));
+
 describe('getHeaderModelName', () => {
   it('prefers a real model over an agent document id', () => {
     expect(getHeaderModelName('agent_abc', 'gemma4:12b-it-qat')).toBe('gemma4:12b-it-qat');
@@ -71,5 +102,29 @@ describe('HeaderLabel', () => {
 
     expect(announced).toHaveClass('sr-only');
     expect(announced).not.toHaveAttribute('aria-hidden');
+  });
+
+  /* Raw gateway ids (`@cf/...`) must never render. A spec match swaps in the
+     branded label; an unmatched id is dropped so the provider label stays. */
+  it('swaps a raw gateway id for the branded spec label', () => {
+    render(<HeaderLabel label="Baanzon" hoverLabel="@cf/zai-org/glm-5.3" />);
+
+    expect(screen.getByText('Baanzon Intelligence')).toBeVisible();
+    expect(screen.getByText('Model: Baanzon Intelligence')).toHaveClass('sr-only');
+    expect(screen.queryByText('@cf/zai-org/glm-5.3')).not.toBeInTheDocument();
+  });
+
+  it('drops an unmatched gateway id instead of revealing it', () => {
+    render(<HeaderLabel label="Baanzon" hoverLabel="@cf/unlisted/model-xyz" />);
+
+    expect(screen.getByText('Baanzon')).toBeVisible();
+    expect(screen.queryByText('@cf/unlisted/model-xyz')).not.toBeInTheDocument();
+    expect(screen.queryByText(/@cf\//)).not.toBeInTheDocument();
+  });
+
+  it('keeps a plain catalog model name untouched by the spec resolution', () => {
+    render(<HeaderLabel label="Ollama" hoverLabel="gemma4:12b-it-qat" />);
+
+    expect(screen.getByText('gemma4:12b-it-qat')).toHaveAttribute('aria-hidden', 'true');
   });
 });

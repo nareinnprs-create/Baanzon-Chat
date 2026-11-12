@@ -4,7 +4,6 @@ import {
   alternateName,
   ViolationTypes,
   parseLangChainErrorCode,
-  stripLangChainTroubleshootingUrl,
 } from 'librechat-data-provider';
 import type { LocalizeFunction } from '~/common';
 import type { TranslationKeys } from '~/hooks';
@@ -17,7 +16,7 @@ const localizedErrorPrefix = 'com_error';
 /**
  * The server converts classified LangChain failures into typed payloads, but messages persisted
  * before it did still carry the docs URL, so the code is read back out of the text to localize
- * those the same way. Codes without copy fall through to the provider text, stripped of the URL.
+ * those the same way.
  */
 const langChainErrorKeys: Record<string, TranslationKeys> = {
   MODEL_NOT_FOUND: 'com_error_model_not_found',
@@ -221,10 +220,6 @@ const errorMessages = {
 const Error = ({ text }: { text: string }) => {
   const localize = useLocalize();
   const jsonString = extractJson(text);
-  const providerText = stripLangChainTroubleshootingUrl(text);
-  const errorMessage =
-    providerText.length > 512 && !jsonString ? providerText.slice(0, 512) + '...' : providerText;
-  const defaultResponse = `Something went wrong. Here's the specific error message we encountered: ${errorMessage}`;
 
   const langChainErrorKey = getLangChainErrorKey(text);
   if (langChainErrorKey != null) {
@@ -232,7 +227,7 @@ const Error = ({ text }: { text: string }) => {
   }
 
   if (!isJson(jsonString)) {
-    return defaultResponse;
+    return localize('com_error_generic');
   }
 
   const json = JSON.parse(jsonString);
@@ -246,7 +241,9 @@ const Error = ({ text }: { text: string }) => {
   } else if (keyExists) {
     return errorMessages[errorKey];
   } else {
-    return defaultResponse;
+    /** Unknown error bodies may carry upstream internals (gateway urls, model ids),
+     *  so only known/localized keys are relayed; anything else stays generic. */
+    return localize('com_error_generic');
   }
 };
 
