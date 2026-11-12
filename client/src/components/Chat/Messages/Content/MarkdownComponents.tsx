@@ -115,12 +115,7 @@ export const codeNoExecution: React.ElementType = memo(function MarkdownCodeNoEx
   } else if (lang === 'chart' || lang === 'table') {
     const content = typeof children === 'string' ? children : String(children);
     return (
-      <DataLabFence
-        lang={lang}
-        content={content}
-        codeChildren={children}
-        allowExecution={false}
-      />
+      <DataLabFence lang={lang} content={content} codeChildren={children} allowExecution={false} />
     );
   } else if (isSingleLineCode(children)) {
     return (

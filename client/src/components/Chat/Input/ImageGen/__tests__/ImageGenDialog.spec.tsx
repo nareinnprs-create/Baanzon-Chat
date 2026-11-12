@@ -26,20 +26,13 @@ describe('ImageGenDialog', () => {
   });
 
   /** jsdom has no fetch/Response globals; the dialog calls ok/json()/blob(). */
-  const response = ({
-    ok,
-    json,
-    blob,
-  }: {
-    ok: boolean;
-    json?: unknown;
-    blob?: Blob;
-  }) => ({
-    ok,
-    status: ok ? 200 : 402,
-    json: async () => json ?? {},
-    blob: async () => blob ?? new Blob(),
-  }) as unknown as Response;
+  const response = ({ ok, json, blob }: { ok: boolean; json?: unknown; blob?: Blob }) =>
+    ({
+      ok,
+      status: ok ? 200 : 402,
+      json: async () => json ?? {},
+      blob: async () => blob ?? new Blob(),
+    }) as unknown as Response;
 
   it('generates an image and previews it', async () => {
     const post = jest.mocked(global.fetch);
@@ -96,7 +89,9 @@ describe('ImageGenDialog', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'com_ui_image_gen_add' }));
     await waitFor(() => {
-      expect(mockAttachFiles).toHaveBeenCalledWith([expect.objectContaining({ type: 'image/jpeg' })]);
+      expect(mockAttachFiles).toHaveBeenCalledWith([
+        expect.objectContaining({ type: 'image/jpeg' }),
+      ]);
     });
     expect(mockAttachFiles.mock.calls[0][0][0]).toBeInstanceOf(File);
     post.mockRestore();

@@ -50,7 +50,7 @@ function buildEngine() {
         };
       },
       async getRun(userId, runId) {
-        const doc = await getRunRecord(userId, runId);
+        const doc = await getWorkflowRun(userId, runId);
         if (!doc) {
           return null;
         }

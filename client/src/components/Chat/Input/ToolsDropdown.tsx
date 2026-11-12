@@ -1,7 +1,15 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import * as Ariakit from '@ariakit/react';
 import { TooltipAnchor, DropdownPopup, PinIcon, VectorIcon } from '@librechat/client';
-import { Brain, Globe, ImagePlus, ScrollText, Settings, Settings2, TerminalSquareIcon } from 'lucide-react';
+import {
+  Brain,
+  Globe,
+  ImagePlus,
+  ScrollText,
+  Settings,
+  Settings2,
+  TerminalSquareIcon,
+} from 'lucide-react';
 import {
   AuthType,
   Permissions,
@@ -17,9 +25,9 @@ import {
   useHasMemoryAccess,
   useAgentCapabilities,
 } from '~/hooks';
+import ImageGenDialog from '~/components/Chat/Input/ImageGen/ImageGenDialog';
 import ArtifactsSubMenu from '~/components/Chat/Input/ArtifactsSubMenu';
 import MCPSubMenu from '~/components/Chat/Input/MCPSubMenu';
-import ImageGenDialog from '~/components/Chat/Input/ImageGen/ImageGenDialog';
 import { useGetStartupConfig } from '~/data-provider';
 import { useBadgeRowContext } from '~/Providers';
 import { cn } from '~/utils';

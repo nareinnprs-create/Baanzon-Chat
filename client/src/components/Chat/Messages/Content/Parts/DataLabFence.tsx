@@ -1,13 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { ChartKind, DataRow, SortState } from '~/components/DataLab';
-import {
-  BarChart,
-  DataLabTable,
-  LineChart,
-  PieChart,
-  parseTable,
-} from '~/components/DataLab';
+import { BarChart, DataLabTable, LineChart, PieChart, parseTable } from '~/components/DataLab';
 import CodeBlock from '~/components/Messages/Content/CodeBlock';
 import MarkdownErrorBoundary from '../MarkdownErrorBoundary';
 
@@ -64,7 +58,13 @@ function buildChart(spec: ChartSpec): ReactNode {
   const rows: DataRow[] = spec.data.map((entry) => {
     const row: DataRow = {};
     for (const [key, value] of Object.entries(entry)) {
-      row[key] = typeof value === 'number' ? value : value == null ? '' : String(value);
+      if (typeof value === 'number') {
+        row[key] = value;
+      } else if (value == null) {
+        row[key] = '';
+      } else {
+        row[key] = String(value);
+      }
     }
     return row;
   });
@@ -74,8 +74,7 @@ function buildChart(spec: ChartSpec): ReactNode {
   if (valueKeys.length === 0) {
     return null;
   }
-  const kind: ChartKind =
-    spec.kind === 'line' || spec.kind === 'pie' ? spec.kind : 'bar';
+  const kind: ChartKind = spec.kind === 'line' || spec.kind === 'pie' ? spec.kind : 'bar';
   const title = typeof spec.title === 'string' ? spec.title : undefined;
   const ariaLabel = title ?? ARIA_LABEL_FALLBACK;
   const labelAccessor = (row: DataRow) => String(row.label ?? '');
@@ -100,23 +99,11 @@ function buildChart(spec: ChartSpec): ReactNode {
   }));
   const Chart = kind === 'line' ? LineChart : BarChart;
   return (
-    <Chart
-      data={rows}
-      x={labelAccessor}
-      series={series}
-      ariaLabel={ariaLabel}
-      title={title}
-    />
+    <Chart data={rows} x={labelAccessor} series={series} ariaLabel={ariaLabel} title={title} />
   );
 }
 
-function ChartFence({
-  content,
-  fallback,
-}: {
-  content: string;
-  fallback: ReactNode;
-}) {
+function ChartFence({ content, fallback }: { content: string; fallback: ReactNode }) {
   const parsed = useMemo(() => parseChartSpec(content), [content]);
   const node = useMemo(() => (parsed ? buildChart(parsed) : null), [parsed]);
   if (node === null) {
@@ -129,13 +116,7 @@ function ChartFence({
   );
 }
 
-function TableFence({
-  content,
-  fallback,
-}: {
-  content: string;
-  fallback: ReactNode;
-}) {
+function TableFence({ content, fallback }: { content: string; fallback: ReactNode }) {
   const [sort, setSort] = useState<SortState | null>(null);
   const table = useMemo(() => {
     try {
@@ -170,15 +151,14 @@ export default function DataLabFence({
   blockIndex?: number;
   fallback?: ReactNode;
 }) {
-  const codeFallback =
-    fallback ?? (
-      <CodeBlock
-        lang={lang ?? 'text'}
-        codeChildren={codeChildren}
-        blockIndex={blockIndex}
-        allowExecution={allowExecution}
-      />
-    );
+  const codeFallback = fallback ?? (
+    <CodeBlock
+      lang={lang ?? 'text'}
+      codeChildren={codeChildren}
+      blockIndex={blockIndex}
+      allowExecution={allowExecution}
+    />
+  );
   if (lang === 'chart') {
     return <ChartFence content={content} fallback={codeFallback} />;
   }

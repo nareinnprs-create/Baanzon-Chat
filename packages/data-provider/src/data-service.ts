@@ -1,11 +1,11 @@
 import type { AxiosResponse } from 'axios';
-import type { TInsightsAccessResponse, TInsightsParams, TInsightsResponse } from './types/insights';
 import type {
   TAdminUsersListParams,
   TAdminUsersResponse,
   TAdminUsersSearchParams,
   TAdminUsersSearchResponse,
 } from './types/admin-users';
+import type { TInsightsAccessResponse, TInsightsParams, TInsightsResponse } from './types/insights';
 import type { TUsageSummary } from './types/usage-summary';
 import type { TFileConfig } from './file-config';
 import type * as t from './types';
@@ -1071,9 +1071,7 @@ export function applyAdminDodoPayment(
 }
 
 /** Admin users list, offset-paged (`GET /api/admin/users`). */
-export function listAdminUsers(
-  params?: TAdminUsersListParams,
-): Promise<TAdminUsersResponse> {
+export function listAdminUsers(params?: TAdminUsersListParams): Promise<TAdminUsersResponse> {
   const query = new URLSearchParams();
   if (params?.limit != null) {
     query.set('limit', String(params.limit));

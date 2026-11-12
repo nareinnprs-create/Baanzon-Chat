@@ -54,7 +54,11 @@ describe('model selector utilities', () => {
     };
     const agents: Endpoint = { ...agentsEndpoint };
     const specs = [
-      { name: 'baanzon-intelligence', label: 'Baanzon Intelligence', preset: { endpoint: 'Opraiz', model: '@cf/meta/llama-3.3-70b-instruct-fp8-fast' } },
+      {
+        name: 'baanzon-intelligence',
+        label: 'Baanzon Intelligence',
+        preset: { endpoint: 'Opraiz', model: '@cf/meta/llama-3.3-70b-instruct-fp8-fast' },
+      },
     ] as never as Parameters<typeof getBrandedEndpoints>[0];
 
     expect(getBrandedEndpoints(specs, [opraiz, agents])).toEqual([agents]);

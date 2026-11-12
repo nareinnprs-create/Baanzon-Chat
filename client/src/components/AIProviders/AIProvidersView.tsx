@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 import { Label } from '@librechat/client';
 import type { TModelSpec } from 'librechat-data-provider';
-import store from '~/store';
 import { useGetStartupConfig } from '~/data-provider';
 import { useLocalize } from '~/hooks';
+import store from '~/store';
 
 interface ProviderGroup {
   group: string;
@@ -30,7 +30,11 @@ export default function AIProvidersView() {
       if (spec.showInMenu === false || spec.group == null || spec.group === '') {
         continue;
       }
-      const entry = map.get(spec.group) ?? { group: spec.group, groupIcon: spec.groupIcon, models: [] };
+      const entry = map.get(spec.group) ?? {
+        group: spec.group,
+        groupIcon: spec.groupIcon,
+        models: [],
+      };
       entry.models.push({ label: spec.label, description: spec.description });
       map.set(spec.group, entry);
     }
@@ -46,9 +50,7 @@ export default function AIProvidersView() {
   };
 
   if (groups.length === 0) {
-    return (
-      <p className="text-sm text-text-secondary">{localize('com_ai_providers_empty')}</p>
-    );
+    return <p className="text-sm text-text-secondary">{localize('com_ai_providers_empty')}</p>;
   }
 
   return (
@@ -62,7 +64,9 @@ export default function AIProvidersView() {
           <div className="flex items-center justify-between gap-3">
             <span className="text-sm font-medium text-text-primary">{group.group}</span>
             <span className="rounded-md border border-border-light px-1.5 py-0.5 text-xs text-text-secondary">
-              {connected(group) ? localize('com_ai_providers_connected') : localize('com_ai_providers_disconnected')}
+              {connected(group)
+                ? localize('com_ai_providers_connected')
+                : localize('com_ai_providers_disconnected')}
             </span>
           </div>
           <ul className="flex flex-col gap-1">

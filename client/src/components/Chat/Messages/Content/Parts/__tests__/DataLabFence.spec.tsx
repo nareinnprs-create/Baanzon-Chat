@@ -9,7 +9,8 @@ jest.mock('echarts/core', () => ({
     dispose: jest.fn(),
   })),
   use: jest.fn(),
-}));jest.mock('echarts/charts', () => ({
+}));
+jest.mock('echarts/charts', () => ({
   BarChart: {},
   LineChart: {},
   PieChart: {},
@@ -48,7 +49,13 @@ beforeAll(() => {
 const fallback = <div data-testid="dlf-fallback" />;
 
 function baseProps(lang: string, content: string) {
-  return { lang, content, codeChildren: content, allowExecution: false, fallbackOverride: undefined };
+  return {
+    lang,
+    content,
+    codeChildren: content,
+    allowExecution: false,
+    fallbackOverride: undefined,
+  };
 }
 
 describe('DataLabFence', () => {
@@ -71,7 +78,9 @@ describe('DataLabFence', () => {
     const content = JSON.stringify({
       data: [{ label: 'Mon', value: 3, forecast: 5 }],
     });
-    const { container } = render(<DataLabFence {...baseProps('chart', content)} fallback={fallback} />);
+    const { container } = render(
+      <DataLabFence {...baseProps('chart', content)} fallback={fallback} />,
+    );
     const initMock = jest.mocked(echartsCore.init);
     const chart = initMock.mock.results.at(-1)?.value;
     if (!chart) {

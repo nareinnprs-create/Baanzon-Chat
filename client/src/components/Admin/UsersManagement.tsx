@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Button, Input, Label, Spinner } from '@librechat/client';
 import type { TAdminUser } from 'librechat-data-provider';
 import { useAdminUsersQuery, useAdminUsersSearchQuery } from '~/data-provider/Admin/Users';
@@ -12,7 +12,6 @@ function formatDate(iso: string): string {
 }
 
 function UserRow({ user }: { user: TAdminUser }) {
-  const localize = useLocalize();
   return (
     <li className="flex items-center justify-between gap-3 rounded-lg border border-border-light bg-surface-secondary px-3 py-2">
       <div className="min-w-0">
@@ -43,10 +42,12 @@ export default function UsersManagement() {
   const [offset, setOffset] = useState(0);
 
   const trimmed = search.trim();
-  const listQuery = useAdminUsersQuery(trimmed.length >= 2 ? undefined : { limit: PAGE_SIZE, offset });
+  const listQuery = useAdminUsersQuery(
+    trimmed.length >= 2 ? undefined : { limit: PAGE_SIZE, offset },
+  );
   const searchQuery = useAdminUsersSearchQuery(trimmed);
 
-  const { users, total, offset: currentOffset } = useMemo(() => {
+  const { users, total } = useMemo(() => {
     if (trimmed.length >= 2) {
       const data = searchQuery.data;
       return { users: data?.users ?? [], total: data?.total ?? 0, offset: 0 };
@@ -55,9 +56,58 @@ export default function UsersManagement() {
     return { users: data?.users ?? [], total: data?.total ?? 0, offset: data?.offset ?? 0 };
   }, [trimmed, searchQuery.data, listQuery.data]);
 
-  const isLoading =
-    trimmed.length >= 2 ? searchQuery.isLoading : listQuery.isLoading;
+  const isLoading = trimmed.length >= 2 ? searchQuery.isLoading : listQuery.isLoading;
   const error = trimmed.length >= 2 ? searchQuery.error : listQuery.error;
+
+  let body: ReactNode;
+  if (isLoading) {
+    body = (
+      <div className="flex justify-center py-4" role="status">
+        <Spinner aria-label={localize('com_ui_admin_users')} />
+      </div>
+    );
+  } else if (users.length === 0) {
+    body = (
+      <p className="rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-text-secondary">
+        {localize('com_ui_admin_users_empty')}
+      </p>
+    );
+  } else {
+    body = (
+      <>
+        <ul className="flex flex-col gap-2">
+          {users.map((user) => (
+            <UserRow key={user.id} user={user} />
+          ))}
+        </ul>
+        {trimmed.length < 2 && total > PAGE_SIZE && (
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs text-text-secondary">
+              {`${offset + 1}–${Math.min(offset + users.length, total)} / ${total}`}
+            </span>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={offset === 0}
+                onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
+              >
+                {localize('com_ui_prev')}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={offset + PAGE_SIZE >= total}
+                onClick={() => setOffset(offset + PAGE_SIZE)}
+              >
+                {localize('com_ui_next')}
+              </Button>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-3">
@@ -77,48 +127,7 @@ export default function UsersManagement() {
           {localize('com_ui_admin_users_error')}
         </p>
       )}
-      {isLoading ? (
-        <div className="flex justify-center py-4" role="status">
-          <Spinner aria-label={localize('com_ui_admin_users')} />
-        </div>
-      ) : users.length === 0 ? (
-        <p className="rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-text-secondary">
-          {localize('com_ui_admin_users_empty')}
-        </p>
-      ) : (
-        <>
-          <ul className="flex flex-col gap-2">
-            {users.map((user) => (
-              <UserRow key={user.id} user={user} />
-            ))}
-          </ul>
-          {trimmed.length < 2 && total > PAGE_SIZE && (
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-xs text-text-secondary">
-                {`${offset + 1}–${Math.min(offset + users.length, total)} / ${total}`}
-              </span>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={offset === 0}
-                  onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
-                >
-                  {localize('com_ui_prev')}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={offset + PAGE_SIZE >= total}
-                  onClick={() => setOffset(offset + PAGE_SIZE)}
-                >
-                  {localize('com_ui_next')}
-                </Button>
-              </div>
-            </div>
-          )}
-        </>
-      )}
+      {body}
     </div>
   );
 }

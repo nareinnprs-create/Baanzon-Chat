@@ -21,20 +21,58 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const MODEL = process.env.I18N_MODEL || '@cf/zai-org/glm-5.3';
-const FALLBACK_MODEL = process.env.I18N_FALLBACK_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
+const FALLBACK_MODEL =
+  process.env.I18N_FALLBACK_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 const GATEWAY = (process.env.OPRAIZ_BASEURL || '').replace(/\/+$/, '');
 const API_KEY = process.env.OPRAIZ_API_KEY || '';
 
 const LANG_NAMES = {
-  ar: 'Arabic', bo: 'Tibetan', bs: 'Bosnian', ca: 'Catalan', cs: 'Czech', da: 'Danish',
-  de: 'German', es: 'Spanish', et: 'Estonian', fa: 'Persian', fi: 'Finnish', fr: 'French',
-  gu: 'Gujarati', he: 'Hebrew', hu: 'Hungarian', hy: 'Armenian', id: 'Indonesian',
-  is: 'Icelandic', it: 'Italian', ja: 'Japanese', ka: 'Georgian', kn: 'Kannada',
-  ko: 'Korean', lt: 'Lithuanian', lv: 'Latvian', ml: 'Malayalam', nb: 'Norwegian Bokmål',
-  ne: 'Nepali', nl: 'Dutch', nn: 'Norwegian Nynorsk', pl: 'Polish', 'pt-BR': 'Brazilian Portuguese',
-  'pt-PT': 'European Portuguese', ru: 'Russian', si: 'Sinhala', sk: 'Slovak', sl: 'Slovenian',
-  sv: 'Swedish', ta: 'Tamil', th: 'Thai', tr: 'Turkish', ug: 'Uyghur', uk: 'Ukrainian',
-  vi: 'Vietnamese', 'zh-Hans': 'Simplified Chinese', 'zh-Hant': 'Traditional Chinese',
+  ar: 'Arabic',
+  bo: 'Tibetan',
+  bs: 'Bosnian',
+  ca: 'Catalan',
+  cs: 'Czech',
+  da: 'Danish',
+  de: 'German',
+  es: 'Spanish',
+  et: 'Estonian',
+  fa: 'Persian',
+  fi: 'Finnish',
+  fr: 'French',
+  gu: 'Gujarati',
+  he: 'Hebrew',
+  hu: 'Hungarian',
+  hy: 'Armenian',
+  id: 'Indonesian',
+  is: 'Icelandic',
+  it: 'Italian',
+  ja: 'Japanese',
+  ka: 'Georgian',
+  kn: 'Kannada',
+  ko: 'Korean',
+  lt: 'Lithuanian',
+  lv: 'Latvian',
+  ml: 'Malayalam',
+  nb: 'Norwegian Bokmål',
+  ne: 'Nepali',
+  nl: 'Dutch',
+  nn: 'Norwegian Nynorsk',
+  pl: 'Polish',
+  'pt-BR': 'Brazilian Portuguese',
+  'pt-PT': 'European Portuguese',
+  ru: 'Russian',
+  si: 'Sinhala',
+  sk: 'Slovak',
+  sl: 'Slovenian',
+  sv: 'Swedish',
+  ta: 'Tamil',
+  th: 'Thai',
+  tr: 'Turkish',
+  ug: 'Uyghur',
+  uk: 'Ukrainian',
+  vi: 'Vietnamese',
+  'zh-Hans': 'Simplified Chinese',
+  'zh-Hant': 'Traditional Chinese',
 };
 
 function parseArgs(argv) {
@@ -131,13 +169,20 @@ async function modeTranslate(args) {
         const pieces = [];
         for (const part of chunk(missing, 60)) {
           pieces.push(
-            await translateBatch(en, LANG_NAMES[dir] || dir, dir, part.map((key) => ({ key, value: en[key] }))),
+            await translateBatch(
+              en,
+              LANG_NAMES[dir] || dir,
+              dir,
+              part.map((key) => ({ key, value: en[key] })),
+            ),
           );
         }
         result[dir] = Object.assign({}, ...pieces);
         done = true;
       } catch (err) {
-        console.log(`[i18n] ${dir}: attempt ${attempt} failed: ${String(err.message || err).slice(0, 160)}`);
+        console.log(
+          `[i18n] ${dir}: attempt ${attempt} failed: ${String(err.message || err).slice(0, 160)}`,
+        );
       }
     }
     if (!done) {
@@ -171,7 +216,9 @@ async function modeTranslate(args) {
     }
   }
   fs.writeFileSync(args.out, JSON.stringify(result));
-  console.log(`[i18n] done: locales=${okLocales} failed=${failLocales} keys=${pairs.length} -> ${args.out}`);
+  console.log(
+    `[i18n] done: locales=${okLocales} failed=${failLocales} keys=${pairs.length} -> ${args.out}`,
+  );
 }
 
 function modeApply(args) {

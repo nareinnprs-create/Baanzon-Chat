@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from 'react';
+import { Download } from 'lucide-react';
 import {
   Button,
   OGDialog,
@@ -8,9 +9,8 @@ import {
   OGDialogTitle,
   Textarea,
 } from '@librechat/client';
-import { Download } from 'lucide-react';
-import { useLocalize } from '~/hooks';
 import useFileUploadRouter from '~/hooks/Files/useFileUploadRouter';
+import { useLocalize } from '~/hooks';
 
 /**
  * V4 image generation entry: prompts for a description, calls the tier-gated
@@ -20,13 +20,7 @@ import useFileUploadRouter from '~/hooks/Files/useFileUploadRouter';
  * the dialog. "Add to message" hands the blob to the standard file pipeline,
  * so it uploads and attaches like any picked image.
  */
-export default function ImageGenDialog({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export default function ImageGenDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const localize = useLocalize();
   const attachFiles = useFileUploadRouter();
   const fieldId = useId();
@@ -85,7 +79,12 @@ export default function ImageGenDialog({
     if (!result) {
       return;
     }
-    const extension = result.mime.includes('jpeg') ? 'jpg' : result.mime.includes('png') ? 'png' : 'img';
+    let extension = 'img';
+    if (result.mime.includes('jpeg')) {
+      extension = 'jpg';
+    } else if (result.mime.includes('png')) {
+      extension = 'png';
+    }
     const file = new File([result.blob], `baanzon-image-${Date.now()}.${extension}`, {
       type: result.mime,
     });
@@ -145,12 +144,10 @@ export default function ImageGenDialog({
           <OGDialogClose asChild>
             <Button variant="outline">{localize('com_ui_cancel')}</Button>
           </OGDialogClose>
-          <Button
-            variant="default"
-            disabled={running || prompt.trim() === ''}
-            onClick={generate}
-          >
-            {running ? localize('com_ui_image_gen_generate') + '…' : localize('com_ui_image_gen_generate')}
+          <Button variant="default" disabled={running || prompt.trim() === ''} onClick={generate}>
+            {running
+              ? localize('com_ui_image_gen_generate') + '…'
+              : localize('com_ui_image_gen_generate')}
           </Button>
         </div>
       </OGDialogContent>

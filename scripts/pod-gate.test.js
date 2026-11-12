@@ -22,7 +22,9 @@ function upstream(port, tag) {
     res.end(tag);
   });
   server.on('upgrade', (req, socket, head) => {
-    socket.write('HTTP/1.1 101 Switching Protocols\r\nupgrade: websocket\r\nconnection: Upgrade\r\n\r\n');
+    socket.write(
+      'HTTP/1.1 101 Switching Protocols\r\nupgrade: websocket\r\nconnection: Upgrade\r\n\r\n',
+    );
     if (head && head.length) socket.write(head);
     socket.on('data', (d) => socket.write(Buffer.from(d))); // echo frames
     socket.on('error', () => {});
@@ -38,7 +40,9 @@ function get(port, urlPath) {
       r.on('end', () => resolve({ status: r.statusCode, body }));
     });
     req.on('error', reject);
-    req.setTimeout(5000, () => { req.destroy(new Error('timeout')); });
+    req.setTimeout(5000, () => {
+      req.destroy(new Error('timeout'));
+    });
   });
 }
 
@@ -47,7 +51,7 @@ function wsEcho(port) {
     const key = Buffer.from('0123456789abcdef').toString('base64');
     const socket = net.connect(port, '127.0.0.1', () => {
       socket.write(
-        `GET /socket.io/?EIO=4 HTTP/1.1\r\nhost: 127.0.0.1\r\nupgrade: websocket\r\nconnection: Upgrade\r\nsec-websocket-key: ${key}\r\nsec-websocket-version: 13\r\n\r\n`
+        `GET /socket.io/?EIO=4 HTTP/1.1\r\nhost: 127.0.0.1\r\nupgrade: websocket\r\nconnection: Upgrade\r\nsec-websocket-key: ${key}\r\nsec-websocket-version: 13\r\n\r\n`,
       );
     });
     let buf = Buffer.alloc(0);
@@ -79,17 +83,29 @@ function wsEcho(port) {
       }
     });
     socket.on('error', reject);
-    socket.setTimeout(5000, () => { socket.destroy(); reject(new Error('ws timeout')); });
+    socket.setTimeout(5000, () => {
+      socket.destroy();
+      reject(new Error('ws timeout'));
+    });
   });
 }
 
 (async () => {
   await upstream(A, 'A');
   await upstream(B, 'B');
-  const gateProc = require('child_process').spawn(process.execPath, [path.join(__dirname, 'pod-gate.js')], {
-    env: { ...process.env, ACTIVE_PORT_FILE: ACTIVE, GATE_PORT: String(GATE), GATE_DEFAULT_PORT: String(A) },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+  const gateProc = require('child_process').spawn(
+    process.execPath,
+    [path.join(__dirname, 'pod-gate.js')],
+    {
+      env: {
+        ...process.env,
+        ACTIVE_PORT_FILE: ACTIVE,
+        GATE_PORT: String(GATE),
+        GATE_DEFAULT_PORT: String(A),
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    },
+  );
   gateProc.stderr.on('data', (d) => process.stderr.write(d));
   await new Promise((r) => setTimeout(r, 500));
 

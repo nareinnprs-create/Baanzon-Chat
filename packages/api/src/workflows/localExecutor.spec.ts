@@ -1,7 +1,6 @@
+import { describe, expect, it } from '@jest/globals';
 import type { WorkflowExecutionContext, WorkflowStep } from './types';
 import { createLocalWorkflowExecutor } from './localExecutor';
-import type { LocalWorkflowExecutorOptions } from './localExecutor';
-import { describe, expect, it } from '@jest/globals';
 
 function makeContext(
   step: Pick<WorkflowStep, 'id' | 'type' | 'input'>,
@@ -19,15 +18,16 @@ function makeContext(
   };
 }
 
-const okFetch = (body: unknown, status = 200, contentType = 'application/json') =>
-  (async () =>
+const okFetch =
+  (body: unknown, status = 200, contentType = 'application/json') =>
+  async () =>
     ({
       ok: status >= 200 && status < 300,
       status,
       statusText: 'X',
       headers: { get: (k: string) => (k.toLowerCase() === 'content-type' ? contentType : null) },
       text: async () => (typeof body === 'string' ? body : JSON.stringify(body)),
-    }) as unknown as Response);
+    }) as unknown as Response;
 
 describe('createLocalWorkflowExecutor', () => {
   it('runs http steps and parses JSON responses', async () => {
@@ -80,11 +80,17 @@ describe('createLocalWorkflowExecutor', () => {
   it('branches then/else by comparing a variable', async () => {
     const executor = createLocalWorkflowExecutor();
     const then = await executor.execute(
-      makeContext({ id: 'b', type: 'branch', input: { variable: 'flag', equals: true } }, { flag: true }),
+      makeContext(
+        { id: 'b', type: 'branch', input: { variable: 'flag', equals: true } },
+        { flag: true },
+      ),
     );
     expect(then.branch).toBe('then');
     const els = await executor.execute(
-      makeContext({ id: 'b', type: 'branch', input: { variable: 'flag', equals: true } }, { flag: false }),
+      makeContext(
+        { id: 'b', type: 'branch', input: { variable: 'flag', equals: true } },
+        { flag: false },
+      ),
     );
     expect(els.branch).toBe('else');
   });

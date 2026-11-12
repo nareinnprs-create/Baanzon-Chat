@@ -16,6 +16,7 @@ import {
   useLocalize,
 } from '~/hooks';
 import { ChatContext, AddedChatContext, ChatFormProvider, useFileMapContext } from '~/Providers';
+import { useAuroraPulseHost } from '~/hooks/Chat/useAuroraPulseHost';
 import ApprovalProvider from './Messages/Content/ApprovalContext';
 import ConversationStarters from './Input/ConversationStarters';
 import { pendingApprovalActionFamily } from './approval/state';
@@ -26,7 +27,6 @@ import Presentation from './Presentation';
 import ChatForm from './Input/ChatForm';
 import Landing from './Landing';
 import Header from './Header';
-import { useAuroraPulseHost } from '~/hooks/Chat/useAuroraPulseHost';
 import Footer from './Footer';
 import { cn } from '~/utils';
 import store from '~/store';

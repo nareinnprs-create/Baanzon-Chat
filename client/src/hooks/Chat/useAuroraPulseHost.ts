@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useRecoilValue } from 'recoil';
-import store from '~/store';
 import { useSetAuroraPulse } from '~/components/Aurora/atoms';
+import store from '~/store';
 
 /**
  * Maps the chat generation lifecycle onto the Baanzon Intelligence Pulse

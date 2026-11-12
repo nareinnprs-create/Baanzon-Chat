@@ -70,7 +70,7 @@ function AuthLayout({
         <aside className="auth-brand-panel relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-between lg:p-14">
           <div className="text-lg font-semibold tracking-tight text-white">
             <span>BAANZON</span>
-            <span className="ml-3 text-sm font-medium tracking-[0.35em] text-brand-celadon">
+            <span className="text-brand-celadon ml-3 text-sm font-medium tracking-[0.35em]">
               CHAT
             </span>
           </div>

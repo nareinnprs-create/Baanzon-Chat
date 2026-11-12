@@ -1,13 +1,5 @@
-import type {
-  WorkflowExecutor,
-  WorkflowRunCallbacks,
-  WorkflowRunHandle,
-} from './api';
-import type {
-  StepResult,
-  WorkflowStartInput,
-  WorkflowStepResultStatus,
-} from './types';
+import type { StepResult, WorkflowStartInput, WorkflowStepResultStatus } from './types';
+import type { WorkflowExecutor, WorkflowRunCallbacks, WorkflowRunHandle } from './api';
 
 /**
  * Server-backed executor: persists the workflow (`POST /api/workflows`),
@@ -76,10 +68,7 @@ export function createServerExecutor(pollIntervalMs = 1000): WorkflowExecutor {
       let serverRunId = '';
       const seen = new Set<string>();
 
-      const emit = (
-        stepId: string,
-        raw: NonNullable<RunRecord['run']['steps']>[string],
-      ): void => {
+      const emit = (stepId: string, raw: NonNullable<RunRecord['run']['steps']>[string]): void => {
         if (seen.has(stepId)) {
           return;
         }
@@ -122,11 +111,11 @@ export function createServerExecutor(pollIntervalMs = 1000): WorkflowExecutor {
             });
             workflowId = created.workflow?._id ?? created.workflow?.id;
           } catch {
-            const list = await jfetch<{ workflows: Array<{ _id?: string; id?: string; slug?: string }> }>(
-              `${base()}`,
-              { signal: controller.signal },
-            );
-            workflowId = list.workflows?.find((w) => w.slug === workflow.id)?._id ?? list.workflows?.[0]?._id;
+            const list = await jfetch<{
+              workflows: Array<{ _id?: string; id?: string; slug?: string }>;
+            }>(`${base()}`, { signal: controller.signal });
+            workflowId =
+              list.workflows?.find((w) => w.slug === workflow.id)?._id ?? list.workflows?.[0]?._id;
           }
           if (workflowId == null) {
             throw new Error('Could not resolve the workflow id on the server');
@@ -177,10 +166,10 @@ export function createServerExecutor(pollIntervalMs = 1000): WorkflowExecutor {
         cancel(reason?: string): void {
           controller.abort();
           if (serverRunId !== '') {
-            void jfetch(
-              `${base()}/runs/${encodeURIComponent(serverRunId)}/cancel`,
-              { method: 'POST', body: JSON.stringify({ reason: reason ?? 'Cancelled by user' }) },
-            ).catch(() => undefined);
+            void jfetch(`${base()}/runs/${encodeURIComponent(serverRunId)}/cancel`, {
+              method: 'POST',
+              body: JSON.stringify({ reason: reason ?? 'Cancelled by user' }),
+            }).catch(() => undefined);
           }
         },
       };

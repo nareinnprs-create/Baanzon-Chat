@@ -1,8 +1,4 @@
-import type {
-  StepResult,
-  WorkflowExecutionContext,
-  WorkflowExecutor,
-} from './types';
+import type { StepResult, WorkflowExecutionContext, WorkflowExecutor } from './types';
 
 /**
  * Local step executor: runs every effect this deployment can honor natively —
@@ -64,12 +60,14 @@ async function executeHttp(
   }
   const method = typeof input.method === 'string' ? input.method.toUpperCase() : 'GET';
   const useJson = input.json === true;
-  const body =
-    input.body === undefined
-      ? undefined
-      : useJson || (input.body != null && typeof input.body === 'object')
-        ? JSON.stringify(input.body)
-        : String(input.body);
+  let body: string | undefined;
+  if (input.body !== undefined) {
+    if (useJson || (input.body != null && typeof input.body === 'object')) {
+      body = JSON.stringify(input.body);
+    } else {
+      body = String(input.body);
+    }
+  }
 
   let response: Response;
   try {
@@ -120,8 +118,7 @@ function executeTransform(ctx: WorkflowExecutionContext): StepResult {
   if (input.set != null && typeof input.set === 'object') {
     Object.assign(ctx.variables, input.set);
   }
-  const output =
-    input.result !== undefined ? input.result : { ...ctx.variables };
+  const output = input.result !== undefined ? input.result : { ...ctx.variables };
   return { ...baseResult(ctx), output };
 }
 

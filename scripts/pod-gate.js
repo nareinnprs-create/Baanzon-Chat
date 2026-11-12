@@ -28,11 +28,18 @@ function active() {
 
 const server = http.createServer((req, res) => {
   const upstream = http.request(
-    { host: '127.0.0.1', port: active(), path: req.url, method: req.method, headers: req.headers, agent },
+    {
+      host: '127.0.0.1',
+      port: active(),
+      path: req.url,
+      method: req.method,
+      headers: req.headers,
+      agent,
+    },
     (r) => {
       res.writeHead(r.statusCode, r.headers);
       r.pipe(res, { end: true });
-    }
+    },
   );
   upstream.on('error', () => {
     if (!res.headersSent) {
@@ -48,7 +55,14 @@ const server = http.createServer((req, res) => {
 
 // socket.io websocket upgrades: raw socket passthrough after 101
 server.on('upgrade', (req, client, head) => {
-  const upstream = http.request({ host: '127.0.0.1', port: active(), path: req.url, method: req.method, headers: req.headers, agent });
+  const upstream = http.request({
+    host: '127.0.0.1',
+    port: active(),
+    path: req.url,
+    method: req.method,
+    headers: req.headers,
+    agent,
+  });
   upstream.on('upgrade', (r, up, uhead) => {
     const lines = [`HTTP/${r.httpVersion} ${r.statusCode} ${r.statusMessage}`];
     for (const [k, v] of Object.entries(r.headers)) lines.push(`${k}: ${v}`);
@@ -56,7 +70,10 @@ server.on('upgrade', (req, client, head) => {
     if (uhead && uhead.length) client.write(uhead);
     up.pipe(client);
     client.pipe(up);
-    const die = () => { up.destroy(); client.destroy(); };
+    const die = () => {
+      up.destroy();
+      client.destroy();
+    };
     up.on('error', die);
     client.on('error', die);
     client.on('close', () => up.destroy());
@@ -81,5 +98,7 @@ server.on('clientError', (err, socket) => {
 });
 
 server.listen(LISTEN, '127.0.0.1', () => {
-  console.log(`[gate] listening 127.0.0.1:${LISTEN} -> port from ${ACTIVE} (default ${DEFAULT_PORT})`);
+  console.log(
+    `[gate] listening 127.0.0.1:${LISTEN} -> port from ${ACTIVE} (default ${DEFAULT_PORT})`,
+  );
 });

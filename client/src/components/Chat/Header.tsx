@@ -13,6 +13,7 @@ import ModelSelector from './Menus/Endpoints/ModelSelector';
 import { useGetStartupConfig } from '~/data-provider';
 import ExportAndShareMenu from './ExportAndShareMenu';
 import SubagentThreadLink from './SubagentThreadLink';
+import { AuroraPulse } from '~/components/Aurora';
 import RecallButton from './Recall/RecallButton';
 import BookmarkMenu from './Menus/BookmarkMenu';
 import RecapButton from './Recap/RecapButton';
@@ -20,7 +21,6 @@ import AddMultiConvo from './AddMultiConvo';
 import { useHasAccess } from '~/hooks';
 import BranchTree from './BranchTree';
 import ArenaButton from './Arena';
-import { AuroraPulse } from '~/components/Aurora';
 import { cn } from '~/utils';
 import store from '~/store';
 
@@ -75,7 +75,7 @@ function Header({
   return (
     <div
       data-chat-header="true"
-      className="absolute top-0 z-10 flex h-[52px] w-full items-center gap-2 border-b border-border-light bg-surface-primary/85 backdrop-blur-md p-2 font-semibold text-text-primary"
+      className="absolute top-0 z-10 flex h-[52px] w-full items-center gap-2 border-b border-border-light bg-surface-primary/85 p-2 font-semibold text-text-primary backdrop-blur-md"
     >
       <div className="flex flex-shrink-0 items-center md:hidden">
         <OpenSidebar testId="header-open-sidebar-button" />

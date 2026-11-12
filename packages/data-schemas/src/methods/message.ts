@@ -3352,20 +3352,12 @@ export function createMessageMethods(mongoose: typeof import('mongoose')): Messa
             messages: { $sum: 1 },
             tokensIn: {
               $sum: {
-                $cond: [
-                  { $eq: ['$isCreatedByUser', true] },
-                  { $ifNull: ['$tokenCount', 0] },
-                  0,
-                ],
+                $cond: [{ $eq: ['$isCreatedByUser', true] }, { $ifNull: ['$tokenCount', 0] }, 0],
               },
             },
             tokensOut: {
               $sum: {
-                $cond: [
-                  { $ne: ['$isCreatedByUser', true] },
-                  { $ifNull: ['$tokenCount', 0] },
-                  0,
-                ],
+                $cond: [{ $ne: ['$isCreatedByUser', true] }, { $ifNull: ['$tokenCount', 0] }, 0],
               },
             },
           },
