@@ -40,8 +40,8 @@ zero-downtime lane. Status: ⬜ pending · 🔄 in progress · ✅ done · ⛔ b
 |---|---|
 | A6 Auto smart-routing with visible reasons | ✅ core: toggle + fast/deep heuristic live (branded catalog names feed it); visible-reason label = follow-up |
 | B5 command-everything palette | ✅ core: CommandPalette mounted in Root; action-coverage expansion = follow-up |
-| SearXNG pod install (rescue lane) | ✅ JSON API verified 200 on 127.0.0.1:8888, supervised, env pointer set |
-| A7 Deep Research mode go-live | 🔄 deploying: yaml flipped to searxng + SEARXNG_INSTANCE_URL picked up on this boot |
+| SearXNG pod install (rescue lane) | ✅ live: JSON API returns results (36-37/search); fixed gunicorn --preload (kills SearXNG's async engine loop thread at fork → every engine "timeout") + `outgoing.request_timeout: 10.0` in settings.yml; mirrored in scripts/pod-searxng.sh |
+| A7 Deep Research mode go-live | ✅ live: pod E2E verified plan→run (SSE: search → 8 sources → synthesis with citations); LLM via Opraiz gateway; duckduckgo engine CAPTCHAs from datacenter IP are the only engine loss |
 | V3 hint chip (vision switch suggestion) | ⬜ follow-up polish |
 
 ## Operator grants

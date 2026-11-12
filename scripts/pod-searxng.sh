@@ -58,7 +58,10 @@ echo "[searxng] source ready"
 echo "=== searxng: settings ==="
 # Always regenerate: machine-owned file, and a deterministic single `search:`
 # block (an appended duplicate crashes SearXNG's YAML parse). The JSON format
-# is required by the search API the app and Deep Research call.
+# is required by the search API the app and Deep Research call. Engine requests
+# ride on curl_cffi, which is slow-to-erratic on this pod (0.5-7s), so the
+# per-engine `outgoing.request_timeout` (default 3.0) is raised to 10s —
+# `search.request_timeout` is a different, useless knob for this.
 SECRET=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')
 cat > "$SETTINGS" <<EOF
 use_default_settings: true
@@ -70,6 +73,8 @@ search:
   formats:
     - html
     - json
+outgoing:
+  request_timeout: 10.0
 EOF
 chmod 600 "$SETTINGS"
 echo "[searxng] settings written ($SETTINGS)"
@@ -77,7 +82,10 @@ echo "[searxng] settings written ($SETTINGS)"
 echo "=== searxng: supervisor ==="
 cat > /etc/supervisor/conf.d/searxng.conf <<EOF
 [program:searxng]
-command=$VENV/bin/gunicorn --preload --workers 2 --bind 127.0.0.1:8888 --timeout 120 --chdir $SRC 'searx.webapp:app'
+# No --preload: SearXNG's client.py starts its asyncio loop in a daemon thread
+# at import; with preload the master imports the app and the fork kills that
+# thread, so every engine request in the workers hangs until timeout.
+command=$VENV/bin/gunicorn --workers 2 --bind 127.0.0.1:8888 --timeout 120 --chdir $SRC 'searx.webapp:app'
 directory=$SRC
 autostart=true
 autorestart=true
