@@ -15,7 +15,6 @@ import {
 import { useChatContext, useAgentsMapContext, useAssistantsMapContext } from '~/Providers';
 import { useGetEndpointsQuery, useGetStartupConfig } from '~/data-provider';
 import { useLocalize, useAuthContext, useGreeting } from '~/hooks';
-import HomeOnboarding from '~/components/Chat/Home/HomeOnboarding';
 import AgentContact from '~/components/Agents/AgentContact';
 import ConvoIcon from '~/components/Endpoints/ConvoIcon';
 import temporaryStore from '~/store/temporary';
@@ -243,7 +242,6 @@ export default function Landing({
             className="animate-fadeIn mt-2 max-w-md justify-center text-center text-sm"
           />
         )}
-        {showOnboarding && !isTemporary && <HomeOnboarding />}
       </div>
     </div>
   );

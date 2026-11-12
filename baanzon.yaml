@@ -147,7 +147,8 @@ cache: true
 
 # Custom interface configuration
 interface:
-  customWelcome: 'Welcome to Baanzon Chat! Enjoy your experience.'
+  # No customWelcome: the built-in time-based greeting ("What are we working on?")
+  # is the landing headline.
   # Enable/disable file search as a chatarea selection (default: true)
   # Note: This setting does not disable the Agents File Search Capability.
   # To disable the Agents Capability, see the Agents Endpoint configuration instead.
