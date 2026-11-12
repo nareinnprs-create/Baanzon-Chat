@@ -2276,5 +2276,13 @@
   "com_ui_pricing_redirecting": "מבצע הפניה…",
   "com_ui_pricing_loading": "טוען מחירים",
   "com_ui_pricing_mock_note": "מצב תשלום מדומה — לא נגבה תשלום אמיתי.",
-  "com_ui_checkout_error": "לא ניתן להתחיל את תהליך התשלום. נסה שוב."
+  "com_ui_checkout_error": "לא ניתן להתחיל את תהליך התשלום. נסה שוב.",
+  "com_auth_brand_headline": "כל מודל שחשוב, בשיחה אחת.",
+  "com_auth_brand_point_1": "מודלים חלוציים של מותגים מובילים בכל תוכנית",
+  "com_auth_brand_point_2": "יצירת תמונות וחיפוש באינטרנט מובנים",
+  "com_auth_brand_point_3": "העבודה שלך לעולם לא משמשת לאימון",
+  "com_auth_brand_subline": "מודלים חלוציים לצ'אט, קוד, מחקר וראייה — חשבון אחד, מקום אחד.",
+  "com_ui_image_gen_add": "הוסף להודעה",
+  "com_ui_image_gen_generate": "צור",
+  "com_ui_image_gen_prompt": "תאר את התמונה שברצונך ליצור"
 }

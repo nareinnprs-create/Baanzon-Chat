@@ -2294,5 +2294,13 @@
   "com_ui_pricing_redirecting": "Pāradresē…",
   "com_ui_pricing_loading": "Ielādē cenas",
   "com_ui_pricing_mock_note": "Simulēts norēķinu režīms — reāls maksājums netiek veikts.",
-  "com_ui_checkout_error": "Neizdevās sākt norēķinus. Mēģiniet vēlreiz."
+  "com_ui_checkout_error": "Neizdevās sākt norēķinus. Mēģiniet vēlreiz.",
+  "com_auth_brand_headline": "Katrs svarīgais modelis vienā sarunā.",
+  "com_auth_brand_point_1": "Zināmu zīmolu vadošie modeļi katrā plānā",
+  "com_auth_brand_point_2": "Iebūvēta attēlu ģenerēšana un tīmekļa meklēšana",
+  "com_auth_brand_point_3": "Jūsu darbs nekad netiek izmantots apmācībai",
+  "com_auth_brand_subline": "Vadošie čata, koda, pētījumu un redzes modeļi — viens konts, viena vieta.",
+  "com_ui_image_gen_add": "Pievienot ziņojumam",
+  "com_ui_image_gen_generate": "Ģenerēt",
+  "com_ui_image_gen_prompt": "Aprakstiet ģenerējamo attēlu"
 }

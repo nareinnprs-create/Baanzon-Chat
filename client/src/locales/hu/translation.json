@@ -971,5 +971,13 @@
   "com_ui_pricing_redirecting": "Átirányítás…",
   "com_ui_pricing_loading": "Árak betöltése",
   "com_ui_pricing_mock_note": "Szimulált fizetési mód — nem történik valódi fizetés.",
-  "com_ui_checkout_error": "A fizetés nem indítható el. Próbálja újra."
+  "com_ui_checkout_error": "A fizetés nem indítható el. Próbálja újra.",
+  "com_auth_brand_headline": "Minden modell, ami számít, egyetlen beszélgetésben.",
+  "com_auth_brand_point_1": "Ismert márkájú élvonalbeli modellek minden csomagban",
+  "com_auth_brand_point_2": "Beépített képgenerálás és webes keresés",
+  "com_auth_brand_point_3": "A munkája sosem kerül felhasználásra tanításhoz",
+  "com_auth_brand_subline": "Élvonalbeli chat-, kód-, kutatási és vizuális modellek – egy fiók, egy hely.",
+  "com_ui_image_gen_add": "Hozzáadás az üzenethez",
+  "com_ui_image_gen_generate": "Generálás",
+  "com_ui_image_gen_prompt": "Írja le a generálandó képet"
 }

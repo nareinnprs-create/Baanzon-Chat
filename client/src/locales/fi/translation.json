@@ -773,5 +773,13 @@
   "com_ui_pricing_redirecting": "Ohjataan uudelleen…",
   "com_ui_pricing_loading": "Ladataan hinnoittelua",
   "com_ui_pricing_mock_note": "Kassan testitila — oikeaa maksua ei veloiteta.",
-  "com_ui_checkout_error": "Kassaa ei voitu käynnistää. Yritä uudelleen."
+  "com_ui_checkout_error": "Kassaa ei voitu käynnistää. Yritä uudelleen.",
+  "com_auth_brand_headline": "Kaikki tärkeät mallit yhdessä keskustelussa.",
+  "com_auth_brand_point_1": "Tunnettujen merkkien huippumallit kaikissa tilauksissa",
+  "com_auth_brand_point_2": "Sisäänrakennettu kuvien luonti ja verkkohaku",
+  "com_auth_brand_point_3": "Työtäsi ei koskaan käytetä koulutukseen",
+  "com_auth_brand_subline": "Huippuluokan chat-, koodi-, tutkimus- ja visiomallit — yksi tili, yksi paikka.",
+  "com_ui_image_gen_add": "Lisää viestiin",
+  "com_ui_image_gen_generate": "Luo",
+  "com_ui_image_gen_prompt": "Kuvaile luotava kuva"
 }

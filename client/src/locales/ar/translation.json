@@ -903,5 +903,13 @@
   "com_ui_pricing_redirecting": "جارٍ إعادة التوجيه…",
   "com_ui_pricing_loading": "جارٍ تحميل الأسعار",
   "com_ui_pricing_mock_note": "وضع الدفع التجريبي (Mock) — لا يتم تنفيذ أي دفعة فعلية.",
-  "com_ui_checkout_error": "تعذّر بدء عملية الدفع. حاول مرة أخرى."
+  "com_ui_checkout_error": "تعذّر بدء عملية الدفع. حاول مرة أخرى.",
+  "com_auth_brand_headline": "كل النماذج المهمة، في محادثة واحدة.",
+  "com_auth_brand_point_1": "نماذج متقدمة رسمية في كل خطة",
+  "com_auth_brand_point_2": "توليد الصور والبحث في الويب مدمجان",
+  "com_auth_brand_point_3": "لا يُستخدم عملك أبدًا في التدريب",
+  "com_auth_brand_subline": "نماذج متقدمة للمحادثة والبرمجة والبحث والرؤية — حساب واحد، ومكان واحد.",
+  "com_ui_image_gen_add": "إضافة إلى الرسالة",
+  "com_ui_image_gen_generate": "توليد",
+  "com_ui_image_gen_prompt": "صف الصورة المراد توليدها"
 }

@@ -2448,5 +2448,13 @@
   "com_ui_pricing_redirecting": "Weiterleitung…",
   "com_ui_pricing_loading": "Preise werden geladen",
   "com_ui_pricing_mock_note": "Test-Checkout-Modus – es wird keine echte Zahlung ausgeführt.",
-  "com_ui_checkout_error": "Checkout konnte nicht gestartet werden. Bitte erneut versuchen."
+  "com_ui_checkout_error": "Checkout konnte nicht gestartet werden. Bitte erneut versuchen.",
+  "com_auth_brand_headline": "Jedes Modell, das zählt, in einem Gespräch.",
+  "com_auth_brand_point_1": "Frontier-Modelle bekannter Marken in jedem Tarif",
+  "com_auth_brand_point_2": "Integrierte Bildgenerierung und Websuche",
+  "com_auth_brand_point_3": "Deine Arbeit wird niemals zum Training verwendet",
+  "com_auth_brand_subline": "Frontier-Modelle für Chat, Code, Recherche und Vision – ein Konto, ein Ort.",
+  "com_ui_image_gen_add": "Zur Nachricht hinzufügen",
+  "com_ui_image_gen_generate": "Generieren",
+  "com_ui_image_gen_prompt": "Beschreibe das zu generierende Bild"
 }

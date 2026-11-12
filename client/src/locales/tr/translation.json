@@ -2095,5 +2095,13 @@
   "com_ui_pricing_redirecting": "Yönlendiriliyor…",
   "com_ui_pricing_loading": "Fiyatlandırma yükleniyor",
   "com_ui_pricing_mock_note": "Deneme ödeme modu — gerçek ödeme alınmaz.",
-  "com_ui_checkout_error": "Ödeme işlemi başlatılamadı. Tekrar deneyin."
+  "com_ui_checkout_error": "Ödeme işlemi başlatılamadı. Tekrar deneyin.",
+  "com_auth_brand_headline": "Önemli her model, tek bir sohbette.",
+  "com_auth_brand_point_1": "Her planda markalı son teknoloji modeller",
+  "com_auth_brand_point_2": "Yerleşik görsel oluşturma ve web araması",
+  "com_auth_brand_point_3": "Çalışmalarınız asla eğitim için kullanılmaz",
+  "com_auth_brand_subline": "Son teknoloji sohbet, kod, araştırma ve görüntü modelleri — tek hesap, tek yer.",
+  "com_ui_image_gen_add": "Mesaja ekle",
+  "com_ui_image_gen_generate": "Oluştur",
+  "com_ui_image_gen_prompt": "Oluşturulacak görseli açıklayın"
 }

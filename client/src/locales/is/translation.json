@@ -2284,5 +2284,13 @@
   "com_ui_pricing_redirecting": "Endurbeini…",
   "com_ui_pricing_loading": "Hleð verðskrá",
   "com_ui_pricing_mock_note": "Sýndarhamur við greiðsluferli — engin raungreiðsla fer fram.",
-  "com_ui_checkout_error": "Ekki tókst að hefja greiðsluferlið. Reyndu aftur."
+  "com_ui_checkout_error": "Ekki tókst að hefja greiðsluferlið. Reyndu aftur.",
+  "com_auth_brand_headline": "Öll líkön sem skipta máli, í einu samtali.",
+  "com_auth_brand_point_1": "Framúrskarandi líkön frá þekktum vörumerkjum á öllum áskriftum",
+  "com_auth_brand_point_2": "Innbyggð myndagerð og veffleit",
+  "com_auth_brand_point_3": "Vinna þín er aldrei notuð til þjálfunar",
+  "com_auth_brand_subline": "Framúrskarandi líkön fyrir spjall, kóðun, rannsóknir og sjón — einn aðgangur, einn staður.",
+  "com_ui_image_gen_add": "Bæta við skilaboð",
+  "com_ui_image_gen_generate": "Búa til",
+  "com_ui_image_gen_prompt": "Lýstu myndinni sem á að búa til"
 }

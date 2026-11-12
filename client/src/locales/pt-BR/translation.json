@@ -2304,5 +2304,13 @@
   "com_ui_pricing_redirecting": "Redirecionando…",
   "com_ui_pricing_loading": "Carregando preços",
   "com_ui_pricing_mock_note": "Modo de checkout simulado — nenhum pagamento real é efetuado.",
-  "com_ui_checkout_error": "Não foi possível iniciar o checkout. Tente novamente."
+  "com_ui_checkout_error": "Não foi possível iniciar o checkout. Tente novamente.",
+  "com_auth_brand_headline": "Todos os modelos que importam, em uma só conversa.",
+  "com_auth_brand_point_1": "Modelos de ponta das marcas oficiais em todos os planos",
+  "com_auth_brand_point_2": "Geração de imagens e busca na web integradas",
+  "com_auth_brand_point_3": "Seu trabalho nunca é usado para treinamento",
+  "com_auth_brand_subline": "Modelos de ponta de chat, código, pesquisa e visão — uma conta, um só lugar.",
+  "com_ui_image_gen_add": "Adicionar à mensagem",
+  "com_ui_image_gen_generate": "Gerar",
+  "com_ui_image_gen_prompt": "Descreva a imagem a ser gerada"
 }

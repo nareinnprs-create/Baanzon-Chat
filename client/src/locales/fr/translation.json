@@ -1700,5 +1700,13 @@
   "com_ui_pricing_redirecting": "Redirection…",
   "com_ui_pricing_loading": "Chargement des tarifs",
   "com_ui_pricing_mock_note": "Mode de paiement simulé — aucun paiement réel n'est effectué.",
-  "com_ui_checkout_error": "Impossible de démarrer le paiement. Réessayez."
+  "com_ui_checkout_error": "Impossible de démarrer le paiement. Réessayez.",
+  "com_auth_brand_headline": "Tous les modèles qui comptent, dans une seule conversation.",
+  "com_auth_brand_point_1": "Des modèles de pointe de grandes marques sur toutes les formules",
+  "com_auth_brand_point_2": "Génération d'images et recherche web intégrées",
+  "com_auth_brand_point_3": "Votre travail n'est jamais utilisé pour l'entraînement",
+  "com_auth_brand_subline": "Des modèles de pointe pour le chat, le code, la recherche et la vision — un seul compte, un seul endroit.",
+  "com_ui_image_gen_add": "Ajouter au message",
+  "com_ui_image_gen_generate": "Générer",
+  "com_ui_image_gen_prompt": "Décrivez l'image à générer"
 }

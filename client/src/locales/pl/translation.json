@@ -2282,5 +2282,13 @@
   "com_ui_pricing_redirecting": "Przekierowywanie…",
   "com_ui_pricing_loading": "Ładowanie cennika",
   "com_ui_pricing_mock_note": "Tryb testowego checkoutu — żadna rzeczywista płatność nie zostanie pobrana.",
-  "com_ui_checkout_error": "Nie udało się rozpocząć checkoutu. Spróbuj ponownie."
+  "com_ui_checkout_error": "Nie udało się rozpocząć checkoutu. Spróbuj ponownie.",
+  "com_auth_brand_headline": "Każdy model, który się liczy, w jednej rozmowie.",
+  "com_auth_brand_point_1": "Najnowocześniejsze modele od znanych marek w każdym planie",
+  "com_auth_brand_point_2": "Wbudowane generowanie obrazów i wyszukiwanie w internecie",
+  "com_auth_brand_point_3": "Twoja praca nigdy nie jest wykorzystywana do treningu",
+  "com_auth_brand_subline": "Najnowocześniejsze modele do czatu, kodu, badań i analizy obrazu — jedno konto, jedno miejsce.",
+  "com_ui_image_gen_add": "Dodaj do wiadomości",
+  "com_ui_image_gen_generate": "Generuj",
+  "com_ui_image_gen_prompt": "Opisz obraz do wygenerowania"
 }

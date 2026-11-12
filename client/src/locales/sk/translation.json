@@ -208,5 +208,13 @@
   "com_ui_pricing_redirecting": "Presmerováva sa…",
   "com_ui_pricing_loading": "Načítavajú sa ceny",
   "com_ui_pricing_mock_note": "Testovací režim pokladne — neprevedie sa žiadna skutočná platba.",
-  "com_ui_checkout_error": "Platobný proces sa nepodarilo spustiť. Skúste to znova."
+  "com_ui_checkout_error": "Platobný proces sa nepodarilo spustiť. Skúste to znova.",
+  "com_auth_brand_headline": "Každý model, na ktorom záleží, v jednej konverzácii.",
+  "com_auth_brand_point_1": "Špičkové modely od známych značiek v každom pláne",
+  "com_auth_brand_point_2": "Vstavané generovanie obrázkov a vyhľadávanie na webe",
+  "com_auth_brand_point_3": "Vaša práca sa nikdy nepoužíva na trénovanie",
+  "com_auth_brand_subline": "Špičkové modely pre chat, kódovanie, výskum a videnie — jeden účet, jedno miesto.",
+  "com_ui_image_gen_add": "Pridať do správy",
+  "com_ui_image_gen_generate": "Generovať",
+  "com_ui_image_gen_prompt": "Popíšte obrázok, ktorý chcete vygenerovať"
 }

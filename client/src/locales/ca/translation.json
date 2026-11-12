@@ -1964,5 +1964,13 @@
   "com_ui_pricing_redirecting": "S'està redirigint…",
   "com_ui_pricing_loading": "S'estan carregant els preus",
   "com_ui_pricing_mock_note": "Mode de pagament simulat — no es fa cap pagament real.",
-  "com_ui_checkout_error": "No s'ha pogut iniciar el pagament. Torna-ho a provar."
+  "com_ui_checkout_error": "No s'ha pogut iniciar el pagament. Torna-ho a provar.",
+  "com_auth_brand_headline": "Tots els models que importen, en una sola conversa.",
+  "com_auth_brand_point_1": "Models d'avantguarda de marques reconegudes en tots els plans",
+  "com_auth_brand_point_2": "Generació d'imatges i cerca web integrades",
+  "com_auth_brand_point_3": "El teu treball mai no s'utilitza per a l'entrenament",
+  "com_auth_brand_subline": "Models d'avantguarda de xat, codi, recerca i visió — un compte, un sol lloc.",
+  "com_ui_image_gen_add": "Afegeix al missatge",
+  "com_ui_image_gen_generate": "Genera",
+  "com_ui_image_gen_prompt": "Descriu la imatge que vols generar"
 }

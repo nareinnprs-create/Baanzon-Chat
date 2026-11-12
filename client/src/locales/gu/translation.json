@@ -3239,5 +3239,13 @@
   "com_ui_pricing_redirecting": "રીડાયરેક્ટ થઈ રહ્યું છે…",
   "com_ui_pricing_loading": "કિંમતો લોડ થઈ રહી છે",
   "com_ui_pricing_mock_note": "મોક ચેકઆઉટ મોડ — કોઈ વાસ્તવિક ચુકવણી લેવાતી નથી.",
-  "com_ui_checkout_error": "ચેકઆઉટ શરૂ કરી શકાયું નથી. ફરી પ્રયાસ કરો."
+  "com_ui_checkout_error": "ચેકઆઉટ શરૂ કરી શકાયું નથી. ફરી પ્રયાસ કરો.",
+  "com_auth_brand_headline": "દરેક મહત્વપૂર્ણ મોડેલ, એક જ વાતચીતમાં.",
+  "com_auth_brand_point_1": "દરેક પ્લાનમાં બ્રાન્ડેડ ફ્રન્ટિયર મોડેલ્સ",
+  "com_auth_brand_point_2": "બિલ્ટ-ઇન ઇમેજ જનરેશન અને વેબ સર્ચ",
+  "com_auth_brand_point_3": "તમારા કાર્યનો ઉપયોગ ક્યારેય ટ્રેનિંગ માટે થતો નથી",
+  "com_auth_brand_subline": "ફ્રન્ટિયર ચેટ, કોડ, રિસર્ચ અને વિઝન મોડેલ્સ — એક એકાઉન્ટ, એક જગ્યા.",
+  "com_ui_image_gen_add": "સંદેશમાં ઉમેરો",
+  "com_ui_image_gen_generate": "જનરેટ કરો",
+  "com_ui_image_gen_prompt": "જનરેટ કરવા માટે ઇમેજનું વર્ણન કરો"
 }

@@ -1423,5 +1423,13 @@
   "com_ui_pricing_redirecting": "Redirigiendo…",
   "com_ui_pricing_loading": "Cargando precios",
   "com_ui_pricing_mock_note": "Modo de pago simulado — no se realiza ningún pago real.",
-  "com_ui_checkout_error": "No se pudo iniciar el pago. Inténtalo de nuevo."
+  "com_ui_checkout_error": "No se pudo iniciar el pago. Inténtalo de nuevo.",
+  "com_auth_brand_headline": "Todos los modelos que importan, en una sola conversación.",
+  "com_auth_brand_point_1": "Modelos de vanguardia de marcas reconocidas en todos los planes",
+  "com_auth_brand_point_2": "Generación de imágenes y búsqueda web integradas",
+  "com_auth_brand_point_3": "Tu trabajo nunca se usa para entrenamiento",
+  "com_auth_brand_subline": "Modelos de vanguardia de chat, código, investigación y visión — una cuenta, un solo lugar.",
+  "com_ui_image_gen_add": "Añadir al mensaje",
+  "com_ui_image_gen_generate": "Generar",
+  "com_ui_image_gen_prompt": "Describe la imagen que quieres generar"
 }

@@ -879,5 +879,13 @@
   "com_ui_pricing_redirecting": "Přesměrovávání…",
   "com_ui_pricing_loading": "Načítání cen",
   "com_ui_pricing_mock_note": "Testovací režim pokladny — neprovádí se žádná skutečná platba.",
-  "com_ui_checkout_error": "Platbu nebylo možné zahájit. Zkuste to znovu."
+  "com_ui_checkout_error": "Platbu nebylo možné zahájit. Zkuste to znovu.",
+  "com_auth_brand_headline": "Všechny důležité modely v jedné konverzaci.",
+  "com_auth_brand_point_1": "Špičkové modely známých značek v každém tarifu",
+  "com_auth_brand_point_2": "Vestavěné generování obrázků a vyhledávání na webu",
+  "com_auth_brand_point_3": "Vaše práce se nikdy nepoužívá k trénování",
+  "com_auth_brand_subline": "Špičkové modely pro chat, kódování, výzkum a vidění — jeden účet, jedno místo.",
+  "com_ui_image_gen_add": "Přidat ke zprávě",
+  "com_ui_image_gen_generate": "Generovat",
+  "com_ui_image_gen_prompt": "Popište obrázek, který chcete vygenerovat"
 }

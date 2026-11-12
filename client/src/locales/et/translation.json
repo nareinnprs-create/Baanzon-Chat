@@ -1084,5 +1084,13 @@
   "com_ui_pricing_redirecting": "Suunan ümber…",
   "com_ui_pricing_loading": "Hindade laadimine",
   "com_ui_pricing_mock_note": "Maksmise jäljendusrežiim — tegelikku makset ei võeta.",
-  "com_ui_checkout_error": "Maksmist ei õnnestunud alustada. Proovi uuesti."
+  "com_ui_checkout_error": "Maksmist ei õnnestunud alustada. Proovi uuesti.",
+  "com_auth_brand_headline": "Kõik olulised mudelid ühes vestluses.",
+  "com_auth_brand_point_1": "Tuntud brändide tipptasemel mudelid igas paketis",
+  "com_auth_brand_point_2": "Sisseehitatud pildigeneratsioon ja veebiotsing",
+  "com_auth_brand_point_3": "Sinu tööd ei kasutata kunagi treenimiseks",
+  "com_auth_brand_subline": "Tipptasemel vestlus-, koodi-, uurimis- ja visioonimudelid — üks konto, üks koht.",
+  "com_ui_image_gen_add": "Lisa sõnumile",
+  "com_ui_image_gen_generate": "Genereeri",
+  "com_ui_image_gen_prompt": "Kirjelda loodavat pilti"
 }

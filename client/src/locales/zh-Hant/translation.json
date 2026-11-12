@@ -2264,5 +2264,13 @@
   "com_ui_pricing_redirecting": "正在重新導向…",
   "com_ui_pricing_loading": "正在載入價格",
   "com_ui_pricing_mock_note": "模擬結帳模式 — 不會進行實際付款。",
-  "com_ui_checkout_error": "無法啟動結帳，請再試一次。"
+  "com_ui_checkout_error": "無法啟動結帳，請再試一次。",
+  "com_auth_brand_headline": "所有重要模型，盡在一場對話中。",
+  "com_auth_brand_point_1": "每個方案皆提供品牌前沿模型",
+  "com_auth_brand_point_2": "內建圖像生成與網頁搜尋",
+  "com_auth_brand_point_3": "您的內容絕不會用於訓練",
+  "com_auth_brand_subline": "前沿對話、程式碼、研究與視覺模型——一個帳戶，一站搞定。",
+  "com_ui_image_gen_add": "新增至訊息",
+  "com_ui_image_gen_generate": "生成",
+  "com_ui_image_gen_prompt": "描述要生成的圖像"
 }

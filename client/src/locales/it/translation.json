@@ -2453,5 +2453,13 @@
   "com_ui_pricing_redirecting": "Reindirizzamento…",
   "com_ui_pricing_loading": "Caricamento prezzi",
   "com_ui_pricing_mock_note": "Modalità checkout simulata — non viene effettuato alcun pagamento reale.",
-  "com_ui_checkout_error": "Impossibile avviare il checkout. Riprova."
+  "com_ui_checkout_error": "Impossibile avviare il checkout. Riprova.",
+  "com_auth_brand_headline": "Tutti i modelli che contano, in un'unica conversazione.",
+  "com_auth_brand_point_1": "Modelli frontier ufficiali su ogni piano",
+  "com_auth_brand_point_2": "Generazione di immagini e ricerca web integrate",
+  "com_auth_brand_point_3": "Il tuo lavoro non viene mai usato per l'addestramento",
+  "com_auth_brand_subline": "Modelli frontier per chat, codice, ricerca e vision — un solo account, un unico posto.",
+  "com_ui_image_gen_add": "Aggiungi al messaggio",
+  "com_ui_image_gen_generate": "Genera",
+  "com_ui_image_gen_prompt": "Descrivi l'immagine da generare"
 }

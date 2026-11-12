@@ -605,5 +605,13 @@
   "com_ui_pricing_redirecting": "Đang chuyển hướng…",
   "com_ui_pricing_loading": "Đang tải bảng giá",
   "com_ui_pricing_mock_note": "Chế độ thanh toán giả lập — không có khoản thanh toán thực nào được thực hiện.",
-  "com_ui_checkout_error": "Không thể bắt đầu thanh toán. Vui lòng thử lại."
+  "com_ui_checkout_error": "Không thể bắt đầu thanh toán. Vui lòng thử lại.",
+  "com_auth_brand_headline": "Mọi mô hình quan trọng nhất, trong một cuộc trò chuyện.",
+  "com_auth_brand_point_1": "Mô hình hàng đầu chính hãng trên mọi gói",
+  "com_auth_brand_point_2": "Tích hợp sẵn tạo ảnh và tìm kiếm web",
+  "com_auth_brand_point_3": "Tác phẩm của bạn không bao giờ được dùng để huấn luyện",
+  "com_auth_brand_subline": "Mô hình chat, code, nghiên cứu và thị giác hàng đầu — một tài khoản, một nơi.",
+  "com_ui_image_gen_add": "Thêm vào tin nhắn",
+  "com_ui_image_gen_generate": "Tạo ảnh",
+  "com_ui_image_gen_prompt": "Mô tả hình ảnh bạn muốn tạo"
 }

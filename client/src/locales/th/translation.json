@@ -1018,5 +1018,13 @@
   "com_ui_pricing_redirecting": "กำลังนำไปยังหน้าใหม่…",
   "com_ui_pricing_loading": "กำลังโหลดข้อมูลราคา",
   "com_ui_pricing_mock_note": "โหมดชำระเงินจำลอง — จะไม่มีการเรียกเก็บเงินจริง",
-  "com_ui_checkout_error": "ไม่สามารถเริ่มการชำระเงินได้ โปรดลองอีกครั้ง"
+  "com_ui_checkout_error": "ไม่สามารถเริ่มการชำระเงินได้ โปรดลองอีกครั้ง",
+  "com_auth_brand_headline": "ทุกโมเดลที่สำคัญ ในบทสนทนาเดียว",
+  "com_auth_brand_point_1": "โมเดลแบรนด์ดังระดับแนวหน้าในทุกแพ็กเกจ",
+  "com_auth_brand_point_2": "สร้างภาพและค้นหาบนเว็บในตัว",
+  "com_auth_brand_point_3": "งานของคุณจะไม่ถูกนำไปใช้เทรนโมเดล",
+  "com_auth_brand_subline": "โมเดลแนวหน้าด้านแชท โค้ด วิจัย และวิชัน — บัญชีเดียว ที่เดียว",
+  "com_ui_image_gen_add": "เพิ่มในข้อความ",
+  "com_ui_image_gen_generate": "สร้างภาพ",
+  "com_ui_image_gen_prompt": "อธิบายภาพที่ต้องการสร้าง"
 }

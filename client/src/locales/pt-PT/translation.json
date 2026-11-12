@@ -2010,5 +2010,13 @@
   "com_ui_pricing_redirecting": "A redirecionar…",
   "com_ui_pricing_loading": "A carregar preços",
   "com_ui_pricing_mock_note": "Modo de checkout simulado — não é efetuado nenhum pagamento real.",
-  "com_ui_checkout_error": "Não foi possível iniciar o checkout. Tente novamente."
+  "com_ui_checkout_error": "Não foi possível iniciar o checkout. Tente novamente.",
+  "com_auth_brand_headline": "Todos os modelos que importam, numa só conversa.",
+  "com_auth_brand_point_1": "Modelos de ponta das principais marcas em todos os planos",
+  "com_auth_brand_point_2": "Geração de imagens e pesquisa na web integradas",
+  "com_auth_brand_point_3": "O seu trabalho nunca é utilizado para treino",
+  "com_auth_brand_subline": "Modelos de ponta de conversa, código, pesquisa e visão — uma conta, um só lugar.",
+  "com_ui_image_gen_add": "Adicionar à mensagem",
+  "com_ui_image_gen_generate": "Gerar",
+  "com_ui_image_gen_prompt": "Descreva a imagem a gerar"
 }

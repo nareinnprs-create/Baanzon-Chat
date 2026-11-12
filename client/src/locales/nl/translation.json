@@ -1335,5 +1335,13 @@
   "com_ui_pricing_redirecting": "Je wordt doorgestuurd…",
   "com_ui_pricing_loading": "Prijzen laden",
   "com_ui_pricing_mock_note": "Mock-afrekenmodus — er wordt geen echte betaling uitgevoerd.",
-  "com_ui_checkout_error": "Afrekenen kon niet worden gestart. Probeer het opnieuw."
+  "com_ui_checkout_error": "Afrekenen kon niet worden gestart. Probeer het opnieuw.",
+  "com_auth_brand_headline": "Elk model dat ertoe doet, in één gesprek.",
+  "com_auth_brand_point_1": "Frontier-modellen van bekende merken bij elk abonnement",
+  "com_auth_brand_point_2": "Ingebouwde beeldgeneratie en webzoekfunctie",
+  "com_auth_brand_point_3": "Je werk wordt nooit gebruikt voor training",
+  "com_auth_brand_subline": "Frontier-modellen voor chat, code, onderzoek en visie — één account, één plek.",
+  "com_ui_image_gen_add": "Toevoegen aan bericht",
+  "com_ui_image_gen_generate": "Genereren",
+  "com_ui_image_gen_prompt": "Beschrijf de afbeelding die je wilt genereren"
 }

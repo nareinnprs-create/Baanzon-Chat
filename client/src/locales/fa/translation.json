@@ -1646,5 +1646,13 @@
   "com_ui_pricing_redirecting": "در حال انتقال…",
   "com_ui_pricing_loading": "در حال بارگذاری قیمت‌ها",
   "com_ui_pricing_mock_note": "حالت پرداخت آزمایشی — پرداخت واقعی انجام نمی‌شود.",
-  "com_ui_checkout_error": "پرداخت آغاز نشد. دوباره تلاش کنید."
+  "com_ui_checkout_error": "پرداخت آغاز نشد. دوباره تلاش کنید.",
+  "com_auth_brand_headline": "همه مدل‌های مهم، در یک گفتگو.",
+  "com_auth_brand_point_1": "مدل‌های پیشرو از برندهای معتبر در همه طرح‌ها",
+  "com_auth_brand_point_2": "تولید تصویر و جستجوی وب یکپارچه",
+  "com_auth_brand_point_3": "کارهای شما هرگز برای آموزش استفاده نمی‌شوند",
+  "com_auth_brand_subline": "مدل‌های پیشروی گفتگو، کدنویسی، پژوهش و بینایی — یک حساب، یک‌جا.",
+  "com_ui_image_gen_add": "افزودن به پیام",
+  "com_ui_image_gen_generate": "تولید",
+  "com_ui_image_gen_prompt": "توضیح دهید چه تصویری تولید شود"
 }

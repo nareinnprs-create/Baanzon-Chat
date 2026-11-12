@@ -2099,5 +2099,13 @@
   "com_ui_pricing_redirecting": "Nukreipiama…",
   "com_ui_pricing_loading": "Kraunamos kainos",
   "com_ui_pricing_mock_note": "Bandomasis atsiskaitymo režimas — tikras mokėjimas neimamas.",
-  "com_ui_checkout_error": "Nepavyko pradėti atsiskaitymo. Bandykite dar kartą."
+  "com_ui_checkout_error": "Nepavyko pradėti atsiskaitymo. Bandykite dar kartą.",
+  "com_auth_brand_headline": "Kiekvienas svarbus modelis — viename pokalbyje.",
+  "com_auth_brand_point_1": "Pažangiausi žinomų prekės ženklų modeliai visuose planuose",
+  "com_auth_brand_point_2": "Integruotas vaizdų generavimas ir paieška internete",
+  "com_auth_brand_point_3": "Jūsų darbas niekada nenaudojamas mokymui",
+  "com_auth_brand_subline": "Pažangiausi pokalbių, kodo, tyrimų ir regos modeliai — viena paskyra, viena vieta.",
+  "com_ui_image_gen_add": "Pridėti prie pranešimo",
+  "com_ui_image_gen_generate": "Generuoti",
+  "com_ui_image_gen_prompt": "Aprašykite vaizdą, kurį norite sugeneruoti"
 }

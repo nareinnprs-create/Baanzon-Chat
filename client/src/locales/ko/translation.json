@@ -1514,5 +1514,13 @@
   "com_ui_pricing_redirecting": "리디렉션 중…",
   "com_ui_pricing_loading": "가격 정보 불러오는 중",
   "com_ui_pricing_mock_note": "모의 결제 모드 — 실제 결제가 이루어지지 않습니다.",
-  "com_ui_checkout_error": "결제를 시작할 수 없습니다. 다시 시도해 주세요."
+  "com_ui_checkout_error": "결제를 시작할 수 없습니다. 다시 시도해 주세요.",
+  "com_auth_brand_headline": "중요한 모든 모델을 하나의 대화에서.",
+  "com_auth_brand_point_1": "모든 플랜에서 브랜드 프론티어 모델 이용 가능",
+  "com_auth_brand_point_2": "이미지 생성 및 웹 검색 기본 내장",
+  "com_auth_brand_point_3": "작업 내용은 학습에 사용되지 않습니다",
+  "com_auth_brand_subline": "프론티어 채팅, 코드, 리서치, 비전 모델 — 계정 하나로, 한 곳에서.",
+  "com_ui_image_gen_add": "메시지에 추가",
+  "com_ui_image_gen_generate": "생성",
+  "com_ui_image_gen_prompt": "생성할 이미지를 설명하세요"
 }

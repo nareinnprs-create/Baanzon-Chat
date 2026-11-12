@@ -1062,5 +1062,13 @@
   "com_ui_pricing_redirecting": "Omdirigerer…",
   "com_ui_pricing_loading": "Indlæser priser",
   "com_ui_pricing_mock_note": "Mock-betalingstilstand — der trækkes ingen rigtig betaling.",
-  "com_ui_checkout_error": "Checkout kunne ikke startes. Prøv igen."
+  "com_ui_checkout_error": "Checkout kunne ikke startes. Prøv igen.",
+  "com_auth_brand_headline": "Alle modeller, der betyder noget, i én samtale.",
+  "com_auth_brand_point_1": "Frontier-modeller fra kendte mærker på alle abonnementer",
+  "com_auth_brand_point_2": "Indbygget billedgenerering og websøgning",
+  "com_auth_brand_point_3": "Dit arbejde bruges aldrig til træning",
+  "com_auth_brand_subline": "Frontier-modeller til chat, kode, research og vision — én konto, ét sted.",
+  "com_ui_image_gen_add": "Føj til besked",
+  "com_ui_image_gen_generate": "Generér",
+  "com_ui_image_gen_prompt": "Beskriv billedet, der skal genereres"
 }

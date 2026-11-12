@@ -241,5 +241,13 @@
   "com_ui_pricing_redirecting": "Preusmerjanje…",
   "com_ui_pricing_loading": "Nalaganje cenika",
   "com_ui_pricing_mock_note": "Preizkusni način blagajne — dejansko plačilo se ne izvede.",
-  "com_ui_checkout_error": "Blagajne ni bilo mogoče zagnati. Poskusite znova."
+  "com_ui_checkout_error": "Blagajne ni bilo mogoče zagnati. Poskusite znova.",
+  "com_auth_brand_headline": "Vsi pomembni modeli v enem pogovoru.",
+  "com_auth_brand_point_1": "Vrhunski modeli znanih znamk v vsakem paketu",
+  "com_auth_brand_point_2": "Vgrajeno ustvarjanje slik in iskanje po spletu",
+  "com_auth_brand_point_3": "Vaše delo se nikoli ne uporablja za usposabljanje",
+  "com_auth_brand_subline": "Vrhunski modeli za klepet, kodo, raziskave in vid — en račun, eno mesto.",
+  "com_ui_image_gen_add": "Dodaj v sporočilo",
+  "com_ui_image_gen_generate": "Ustvari",
+  "com_ui_image_gen_prompt": "Opišite sliko, ki jo želite ustvariti"
 }

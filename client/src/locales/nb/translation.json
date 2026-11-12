@@ -1528,5 +1528,13 @@
   "com_ui_pricing_redirecting": "Omdirigerer…",
   "com_ui_pricing_loading": "Laster inn priser",
   "com_ui_pricing_mock_note": "Mock-utsjekkmodus – ingen ekte betaling blir gjennomført.",
-  "com_ui_checkout_error": "Utsjekken kunne ikke startes. Prøv igjen."
+  "com_ui_checkout_error": "Utsjekken kunne ikke startes. Prøv igjen.",
+  "com_auth_brand_headline": "Alle modeller som betyr noe, i én samtale.",
+  "com_auth_brand_point_1": "Frontier-modeller fra kjente merker i alle abonnementer",
+  "com_auth_brand_point_2": "Innebygd bildegenerering og nettsøk",
+  "com_auth_brand_point_3": "Arbeidet ditt brukes aldri til trening",
+  "com_auth_brand_subline": "Frontier-modeller for chat, kode, research og visjon – én konto, ett sted.",
+  "com_ui_image_gen_add": "Legg til i melding",
+  "com_ui_image_gen_generate": "Generer",
+  "com_ui_image_gen_prompt": "Beskriv bildet som skal genereres"
 }

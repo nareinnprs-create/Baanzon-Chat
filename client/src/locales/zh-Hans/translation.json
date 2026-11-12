@@ -1654,5 +1654,13 @@
   "com_ui_pricing_redirecting": "正在跳转…",
   "com_ui_pricing_loading": "正在加载价格信息",
   "com_ui_pricing_mock_note": "模拟结账模式——不会产生真实扣款。",
-  "com_ui_checkout_error": "无法启动结账，请重试。"
+  "com_ui_checkout_error": "无法启动结账，请重试。",
+  "com_auth_brand_headline": "所有重要模型，尽在一个对话中。",
+  "com_auth_brand_point_1": "所有套餐均提供知名前沿模型",
+  "com_auth_brand_point_2": "内置图像生成与网络搜索",
+  "com_auth_brand_point_3": "您的内容绝不会用于训练",
+  "com_auth_brand_subline": "前沿对话、代码、研究与视觉模型——一个账号，尽在一处。",
+  "com_ui_image_gen_add": "添加到消息",
+  "com_ui_image_gen_generate": "生成",
+  "com_ui_image_gen_prompt": "描述要生成的图像"
 }

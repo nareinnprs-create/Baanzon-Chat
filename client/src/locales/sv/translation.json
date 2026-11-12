@@ -1102,5 +1102,13 @@
   "com_ui_pricing_redirecting": "Omdirigerar…",
   "com_ui_pricing_loading": "Laddar priser",
   "com_ui_pricing_mock_note": "Simulerat kassaläge – ingen verklig betalning genomförs.",
-  "com_ui_checkout_error": "Kassan kunde inte startas. Försök igen."
+  "com_ui_checkout_error": "Kassan kunde inte startas. Försök igen.",
+  "com_auth_brand_headline": "Alla modeller som spelar roll, i en enda konversation.",
+  "com_auth_brand_point_1": "Frontiermodeller från kända varumärken i alla abonnemang",
+  "com_auth_brand_point_2": "Inbyggd bildgenerering och webbsökning",
+  "com_auth_brand_point_3": "Ditt arbete används aldrig för träning",
+  "com_auth_brand_subline": "Frontiermodeller för chatt, kod, forskning och vision — ett konto, en plats.",
+  "com_ui_image_gen_add": "Lägg till i meddelandet",
+  "com_ui_image_gen_generate": "Generera",
+  "com_ui_image_gen_prompt": "Beskriv bilden du vill generera"
 }

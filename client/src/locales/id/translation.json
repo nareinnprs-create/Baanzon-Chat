@@ -478,5 +478,13 @@
   "com_ui_pricing_redirecting": "Mengalihkan…",
   "com_ui_pricing_loading": "Memuat harga",
   "com_ui_pricing_mock_note": "Mode checkout simulasi — tidak ada pembayaran nyata yang diproses.",
-  "com_ui_checkout_error": "Checkout tidak dapat dimulai. Coba lagi."
+  "com_ui_checkout_error": "Checkout tidak dapat dimulai. Coba lagi.",
+  "com_auth_brand_headline": "Setiap model yang penting, dalam satu percakapan.",
+  "com_auth_brand_point_1": "Model frontier bermerek di semua paket",
+  "com_auth_brand_point_2": "Pembuatan gambar dan pencarian web bawaan",
+  "com_auth_brand_point_3": "Karya Anda tidak pernah digunakan untuk pelatihan",
+  "com_auth_brand_subline": "Model frontier untuk chat, kode, riset, dan visi — satu akun, satu tempat.",
+  "com_ui_image_gen_add": "Tambahkan ke pesan",
+  "com_ui_image_gen_generate": "Hasilkan",
+  "com_ui_image_gen_prompt": "Deskripsikan gambar yang ingin dibuat"
 }

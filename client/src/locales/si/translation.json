@@ -3239,5 +3239,13 @@
   "com_ui_pricing_redirecting": "නැවත යොමු වෙමින්…",
   "com_ui_pricing_loading": "මිල ගණන් පූරණය වෙමින්",
   "com_ui_pricing_mock_note": "අනුකාරක චෙක්අවුට් ප්‍රකාරය — සත්‍ය ගෙවීමක් නොගැනේ.",
-  "com_ui_checkout_error": "චෙක්අවුට් ආරම්භ කළ නොහැකි විය. නැවත උත්සාහ කරන්න."
+  "com_ui_checkout_error": "චෙක්අවුට් ආරම්භ කළ නොහැකි විය. නැවත උත්සාහ කරන්න.",
+  "com_auth_brand_headline": "වැදගත් සෑම මොඩල් එකක්ම, එකම සංවාදයක.",
+  "com_auth_brand_point_1": "සෑම සැලැස්මකම ප්‍රමුඛ නාමික මොඩල්",
+  "com_auth_brand_point_2": "ඇතුළත් රූප ජනනය සහ වෙබ් සෙවුම",
+  "com_auth_brand_point_3": "ඔබගේ කාර්යය කිසිදා පුහුණු කිරීමට යොදවන්නේ නැත",
+  "com_auth_brand_subline": "ප්‍රමුඛ චැට්, කේත, පර්යේෂණ සහ දෘශ්‍ය මොඩල් — එක් ගිණුමක්, එක් ස්ථානයක්.",
+  "com_ui_image_gen_add": "පණිවිඩයට එක් කරන්න",
+  "com_ui_image_gen_generate": "ජනනය කරන්න",
+  "com_ui_image_gen_prompt": "ජනනය කිරීමට අවශ්‍ය රූපය විස්තර කරන්න"
 }

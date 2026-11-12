@@ -3239,5 +3239,13 @@
   "com_ui_pricing_redirecting": "रिडाइरेक्ट हुँदै…",
   "com_ui_pricing_loading": "मूल्य जानकारी लोड हुँदै",
   "com_ui_pricing_mock_note": "Mock checkout मोड — कुनै वास्तविक भुक्तानी लिइँदैन।",
-  "com_ui_checkout_error": "Checkout सुरु गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"
+  "com_ui_checkout_error": "Checkout सुरु गर्न सकिएन। फेरि प्रयास गर्नुहोस्।",
+  "com_auth_brand_headline": "हरेक महत्त्वपूर्ण मोडेल, एउटै कुराकानीमा।",
+  "com_auth_brand_point_1": "हरेक योजनामा ब्रान्डेड फ्रन्टियर मोडेलहरू",
+  "com_auth_brand_point_2": "इन्बिल्ट तस्बिर जनरेसन र वेब खोज",
+  "com_auth_brand_point_3": "तपाईंको काम कहिल्यै पनि ट्रेनिङका लागि प्रयोग गरिँदैन",
+  "com_auth_brand_subline": "फ्रन्टियर च्याट, कोड, रिसर्च र भिजन मोडेलहरू — एउटा खाता, एउटै ठाउँ।",
+  "com_ui_image_gen_add": "सन्देशमा थप्नुहोस्",
+  "com_ui_image_gen_generate": "जनरेट गर्नुहोस्",
+  "com_ui_image_gen_prompt": "जनरेट गर्नुपर्ने तस्बिरको वर्णन गर्नुहोस्"
 }

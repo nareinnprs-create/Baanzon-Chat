@@ -2316,5 +2316,13 @@
   "com_ui_pricing_redirecting": "リダイレクト中…",
   "com_ui_pricing_loading": "料金を読み込み中",
   "com_ui_pricing_mock_note": "モック決済モード — 実際の支払いは発生しません。",
-  "com_ui_checkout_error": "チェックアウトを開始できませんでした。もう一度お試しください。"
+  "com_ui_checkout_error": "チェックアウトを開始できませんでした。もう一度お試しください。",
+  "com_auth_brand_headline": "重要なすべてのモデルを、ひとつの会話で。",
+  "com_auth_brand_point_1": "すべてのプランで主要ブランドの最先端モデル",
+  "com_auth_brand_point_2": "画像生成とウェブ検索を内蔵",
+  "com_auth_brand_point_3": "あなたの作業はトレーニングに使用されません",
+  "com_auth_brand_subline": "チャット、コード、リサーチ、ビジョンの最先端モデル — ひとつのアカウント、ひとつの場所で。",
+  "com_ui_image_gen_add": "メッセージに追加",
+  "com_ui_image_gen_generate": "生成",
+  "com_ui_image_gen_prompt": "生成する画像の説明を入力"
 }

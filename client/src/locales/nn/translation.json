@@ -1738,5 +1738,13 @@
   "com_ui_pricing_redirecting": "Sender vidare…",
   "com_ui_pricing_loading": "Lastar inn prisar",
   "com_ui_pricing_mock_note": "Mock-kassemodus — ingen ekte betaling vert gjennomført.",
-  "com_ui_checkout_error": "Klarte ikkje å starte kassen. Prøv igjen."
+  "com_ui_checkout_error": "Klarte ikkje å starte kassen. Prøv igjen.",
+  "com_auth_brand_headline": "Alle modellar som betyr noko, i ei samtale.",
+  "com_auth_brand_point_1": "Frontmodellar frå kjende merke i alle abonnement",
+  "com_auth_brand_point_2": "Innebygd biletegenerering og nettsøk",
+  "com_auth_brand_point_3": "Arbeidet ditt vert aldri brukt til trening",
+  "com_auth_brand_subline": "Frontmodellar for chat, kode, forsking og visjon — ein konto, ein stad.",
+  "com_ui_image_gen_add": "Legg til i meldinga",
+  "com_ui_image_gen_generate": "Generer",
+  "com_ui_image_gen_prompt": "Skildra biletet du vil generera"
 }
