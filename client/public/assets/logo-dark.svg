@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="320" viewBox="0 0 680 320">
+  <title>Baanzon Chat</title>
+  <g transform="translate(40,0)">
+
+  <path d="M130 105 L190 105 Q208 105 218 122 L250 174 Q260 192 250 208 L218 260 Q208 277 190 277 L130 277 Q112 277 102 260 L70 208 Q60 192 70 174 L102 122 Q112 105 130 105 Z" fill="#303438"/>
+  <path d="M140 137 L179 137 Q189 137 195 147 L217 181 Q223 192 217 202 L195 235 Q189 245 179 245 L140 245 Q130 245 124 235 L103 202 Q97 192 103 181 L124 147 Q130 137 140 137 Z" fill="#B7D6C3"/>
+  <rect x="133" y="136" width="52" height="110" rx="18" fill="#F0F0E9"/>
+
+  </g>
+  <text x="330" y="172" font-family="Inter, Arial, sans-serif" font-size="56" font-weight="700" letter-spacing="2" fill="#F0F0E9">BAANZON</text>
+  <text x="334" y="222" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="600" letter-spacing="14" fill="#B7D6C3">CHAT</text>
+</svg>

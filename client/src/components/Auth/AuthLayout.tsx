@@ -68,7 +68,12 @@ function AuthLayout({
         {/* Brand panel - desktop only. Typographic wordmark until the official
             logo asset replaces client/public/assets/logo.svg. */}
         <aside className="auth-brand-panel relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-between lg:p-14">
-          <div className="text-lg font-semibold tracking-tight text-white">{appTitle}</div>
+          <div className="text-lg font-semibold tracking-tight text-white">
+            <span>BAANZON</span>
+            <span className="ml-3 text-sm font-medium tracking-[0.35em] text-brand-celadon">
+              CHAT
+            </span>
+          </div>
           <div className="max-w-md">
             <h2 className="text-4xl font-semibold leading-[1.12] tracking-tight text-white xl:text-[2.6rem]">
               {localize('com_auth_brand_headline')}

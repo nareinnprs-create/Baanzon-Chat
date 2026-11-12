@@ -1,0 +1,34 @@
+BAANZON CHAT — Validation and Clearance Checklist
+Status: Not completed; use as a working checklist.
+
+LOGO / DESIGN
+[ ] Choose between S3-A and S3-B after refinement
+[ ] Rebuild selected emblem as clean production vector geometry
+[ ] Create custom wordmark paths and optical spacing
+[ ] Prepare horizontal, stacked, emblem-only and wordmark-only lockups
+[ ] Test at 16, 24, 32, 48, 64, 128 px
+[ ] Test solid black, solid white and grayscale
+[ ] Test light, dark and transparent backgrounds
+[ ] Test print, embroidery/engraving if needed, and device masks
+
+ACCESSIBILITY / PRODUCT
+[ ] Validate contrast for all UI text and controls
+[ ] Verify light and dark themes
+[ ] Check reduced-motion behaviour
+[ ] Check icon legibility and accessible labels
+
+TRADEMARK / LEGAL
+[ ] Search BAANZON word mark
+[ ] Search BAANZON CHAT word mark
+[ ] Conduct emblem similarity searches
+[ ] Review relevant goods/services classes
+[ ] Review Malaysia, India, US and EU databases
+[ ] Review domain names and social handles
+[ ] Obtain legal review before commercial reliance
+
+PRODUCTION
+[ ] Confirm typeface licensing
+[ ] Export final SVG, PDF, PNG and icon sizes
+[ ] Document clear space and minimum sizes
+[ ] Approve brand guidelines and templates
+[ ] Record final approval/version

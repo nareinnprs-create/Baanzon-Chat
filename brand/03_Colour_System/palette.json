@@ -1,0 +1,26 @@
+{
+  "brand": "BAANZON CHAT",
+  "status": "Working palette; verify accessibility before production",
+  "colors": [
+    {
+      "name": "Graphite",
+      "hex": "#303438",
+      "role": "Primary brand anchor"
+    },
+    {
+      "name": "Celadon",
+      "hex": "#B7D6C3",
+      "role": "Signature accent"
+    },
+    {
+      "name": "Soft White",
+      "hex": "#F0F0E9",
+      "role": "Light surfaces"
+    },
+    {
+      "name": "Steel",
+      "hex": "#70777B",
+      "role": "Secondary neutral"
+    }
+  ]
+}

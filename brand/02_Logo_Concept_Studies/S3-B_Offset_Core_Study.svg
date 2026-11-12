@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="360" viewBox="0 0 600 360">
+<title>BAANZON CHAT S3-B Offset Core — concept study, not final artwork</title>
+<rect width="600" height="360" fill="#F0F0E9"/>
+<text x="28" y="42" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#303438">S3-B / OFFSET CORE</text>
+<text x="28" y="66" font-family="Arial,sans-serif" font-size="12" fill="#70777B">Exploratory geometry only — not approved logo artwork</text>
+<path d="M130 105 L190 105 Q208 105 218 122 L250 174 Q260 192 250 208 L218 260 Q208 277 190 277 L130 277 Q112 277 102 260 L70 208 Q60 192 70 174 L102 122 Q112 105 130 105 Z" fill="#303438"/>
+<path d="M144 127 L180 127 Q191 127 197 139 L219 177 Q226 189 218 202 L196 237 Q190 248 178 248 L143 248 Q131 248 125 236 L107 204 Q100 192 108 179 L126 141 Q132 127 144 127 Z" fill="#B7D6C3"/>
+<path d="M160 147 L184 147 L198 169 L182 190 L201 190 L171 226 L176 200 L154 200 L169 179 Z" fill="#303438"/>
+<text x="300" y="174" font-family="Arial,sans-serif" font-size="34" font-weight="700" letter-spacing="1" fill="#303438">BAANZON</text>
+<text x="302" y="207" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing="7" fill="#70777B">CHAT</text>
+<line x1="28" y1="310" x2="572" y2="310" stroke="#C8CDCA"/>
+<text x="28" y="335" font-family="Arial,sans-serif" font-size="11" fill="#70777B">Shape and wordmark are placeholders for geometry exploration; refine before use.</text>
+</svg>
