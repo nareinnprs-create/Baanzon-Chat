@@ -85,6 +85,10 @@ jobs:
           OPRAIZ_API_KEY: ${{ secrets.RESCUE_OPRAIZ_API_KEY }}
           OPRAIZ_BASEURL: ${{ secrets.RESCUE_OPRAIZ_BASEURL }}
         run: |
+          # The promoted keys and their English strings were added on the b1
+          # deploy lane; overlay them so translation reads the current source.
+          git fetch origin b1 --quiet
+          git checkout origin/b1 -- client/src/locales scripts/i18n-promoted-keys.json
           node scripts/i18n-fill.mjs translate \
             --locales client/src/locales \
             --keys scripts/i18n-promoted-keys.json \
