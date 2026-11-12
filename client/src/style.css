@@ -147,6 +147,12 @@
 ::selection {
   background-color: rgb(var(--brand-celadon) / 0.4);
 }
+/* Dark ink on the celadon tint in dark mode: the inherited near-white would sit
+   under ~4:1 on the lightened selection band, so invert like high-contrast does. */
+.dark ::selection {
+  background-color: rgb(var(--brand-celadon) / 0.9);
+  color: rgb(var(--gray-900));
+}
 input:not([type='checkbox']):not([type='radio']),
 textarea {
   caret-color: rgb(var(--ring-primary));
