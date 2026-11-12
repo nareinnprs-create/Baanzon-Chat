@@ -75,6 +75,17 @@ zero-downtime lane. Status: ⬜ pending · 🔄 in progress · ✅ done · ⛔ b
 | Login page — "more competitive, premium" | ✅ split-screen aurora brand panel + floating form card (`764d81d`) |
 | Login logo — "not baanzon logo" | ✅ brand kit LOCKED: S3-A emblem + wordmark lockup, favicon + PNG sizes rebuilt (`9025cdf`); kit canonized in `brand/` (`brand/LOCKED-README.md`), `--bc-*` tokens in style.css |
 
+## UI upgrade 2026 (operator-approved A–F, enhance-only: no structure/theme/brand change)
+
+| Group | Status |
+|---|---|
+| A Foundation — motion tokens + elevation scale + selection/caret | ✅ `--dur-fast/med`, `--ease-standard`, `--shadow-card/popover/dialog` (+ dark) in style.css; popover, both dialog primitives and auth card on tier tokens; dialogs 2xl radius + overlay blur; brand-tinted `::selection` + caret (`a00f445`) |
+| B Login page — card entrance, aurora drift, control polish | ✅ `.auth-card-enter` rise-in, aurora drift behind brand panel (reduced-motion static), celadon accent bar, input focus glow, submit/social hover-lift, animated alerts (`a00f445`) |
+| C Chat workspace — header blur + message entrance | ✅ header `bg-surface-primary/85 backdrop-blur-md`; `.message-enter` rise on row mount (`a00f445`). Composer focus halo + sidebar active accent bars already existed — skipped as done |
+| D Overlays — dialog/menu motion + depth | ✅ covered by A (tier shadows, 2xl radius, blur, radix data-state animations already present) |
+| E Feedback — skeletons + toasts | ✅ toasts on popover tier + `rounded-lg`; skeletons already pervasive (Skeleton.tsx in use across sidebar/notifications/pickers) — skipped as done |
+| F Hygiene — a11y + verification | ✅ every new animation has a `prefers-reduced-motion` guard; tsc clean (packages/client + client); 30 auth/locale + 1174 message + 12 primitive tests green; live check after deploy |
+
 ## Done before this plan (for context)
 
 - ✅ Zero-downtime blue-green deploys (gate + two slots, rollback = 1 command)
