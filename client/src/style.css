@@ -2876,3 +2876,17 @@ html[data-input-modality='keyboard']
   background-clip: text;
   color: transparent;
 }
+
+/* Auth brand panel - the aurora palette as a quiet desktop-side brand surface. */
+.auth-brand-panel {
+  background:
+    radial-gradient(120% 90% at 12% 88%, rgba(19, 166, 160, 0.32) 0%, rgba(19, 166, 160, 0) 55%),
+    radial-gradient(90% 70% at 88% 10%, rgba(70, 226, 210, 0.16) 0%, rgba(70, 226, 210, 0) 60%),
+    var(--aurora-1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .dark .auth-brand-shell {
+    background-color: var(--aurora-1);
+  }
+}

@@ -1,4 +1,9 @@
 {
+  "com_auth_brand_headline": "Every model that matters, in one conversation.",
+  "com_auth_brand_point_1": "Branded frontier models on every plan",
+  "com_auth_brand_point_2": "Built-in image generation and web search",
+  "com_auth_brand_point_3": "Your work is never used for training",
+  "com_auth_brand_subline": "Frontier chat, code, research and vision models — one account, one place.",
   "com_ui_image_gen_add": "Add to message",
   "com_ui_image_gen_generate": "Generate",
   "com_ui_image_gen_prompt": "Describe the image to generate",

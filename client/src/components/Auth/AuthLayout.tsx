@@ -59,41 +59,68 @@ function AuthLayout({
     return null;
   };
 
+  const appTitle = startupConfig?.appTitle ?? 'Baanzon Chat';
+
   return (
     <div className="auth-brand-shell relative flex min-h-screen flex-col bg-surface-primary">
       <Banner />
-      <BlinkAnimation active={isFetching}>
-        <div className="auth-brand-logo mt-8 h-14 w-full bg-cover px-6">
-          <img
-            src="assets/logo.svg"
-            className="h-full w-full object-contain"
-            alt={localize('com_ui_logo', { 0: startupConfig?.appTitle ?? 'Baanzon Chat' })}
-          />
-        </div>
-      </BlinkAnimation>
-      <DisplayError />
-      <div className="absolute bottom-0 left-0 md:m-4">
-        <ThemeSelector />
-      </div>
+      <div className="flex flex-1 lg:grid lg:grid-cols-[1.05fr_1fr]">
+        {/* Brand panel - desktop only. Typographic wordmark until the official
+            logo asset replaces client/public/assets/logo.svg. */}
+        <aside className="auth-brand-panel relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-between lg:p-14">
+          <div className="text-lg font-semibold tracking-tight text-white">{appTitle}</div>
+          <div className="max-w-md">
+            <h2 className="text-4xl font-semibold leading-[1.12] tracking-tight text-white xl:text-[2.6rem]">
+              {localize('com_auth_brand_headline')}
+            </h2>
+            <p className="mt-4 text-base leading-7 text-white/70">
+              {localize('com_auth_brand_subline')}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 text-sm text-white/55">
+            <span>{localize('com_auth_brand_point_1')}</span>
+            <span>{localize('com_auth_brand_point_2')}</span>
+            <span>{localize('com_auth_brand_point_3')}</span>
+          </div>
+        </aside>
 
-      <main className="flex flex-grow items-center justify-center px-4 py-10">
-        <div className="w-authPageWidth overflow-hidden rounded-2xl border border-border-light bg-surface-primary px-6 py-7 shadow-lg sm:max-w-md">
-          {!hasStartupConfigError && !isFetching && header && (
-            <h1
-              className="mb-4 text-center text-3xl font-semibold text-text-primary"
-              style={{ userSelect: 'none' }}
-            >
-              {header}
-            </h1>
-          )}
-          {children}
-          {!pathname.includes('2fa') &&
-            (pathname.includes('login') || pathname.includes('register')) && (
-              <SocialLoginRender startupConfig={startupConfig} />
-            )}
+        {/* Form column */}
+        <div className="relative flex flex-col items-center justify-center px-4 py-10">
+          <BlinkAnimation active={isFetching}>
+            <div className="mb-8 flex h-10 items-center justify-center lg:hidden">
+              <img
+                src="assets/logo.svg"
+                className="h-full w-auto object-contain"
+                alt={localize('com_ui_logo', { 0: appTitle })}
+              />
+            </div>
+          </BlinkAnimation>
+          <DisplayError />
+          <div className="absolute bottom-0 left-0 md:m-4">
+            <ThemeSelector />
+          </div>
+          <main className="flex w-full flex-grow items-center justify-center sm:max-w-md">
+            <div className="w-authPageWidth overflow-hidden px-1 py-2 sm:rounded-3xl sm:border sm:border-border-light sm:bg-surface-primary sm:px-10 sm:py-10 sm:shadow-[0_20px_60px_-24px_rgba(6,19,22,0.18)]">
+              {!hasStartupConfigError && !isFetching && header && (
+                <h1
+                  className="mb-6 text-center text-3xl font-semibold tracking-tight text-text-primary"
+                  style={{ userSelect: 'none' }}
+                >
+                  {header}
+                </h1>
+              )}
+              {children}
+              {!pathname.includes('2fa') &&
+                (pathname.includes('login') || pathname.includes('register')) && (
+                  <SocialLoginRender startupConfig={startupConfig} />
+                )}
+            </div>
+          </main>
+          <div className="w-full">
+            <Footer startupConfig={startupConfig} />
+          </div>
         </div>
-      </main>
-      <Footer startupConfig={startupConfig} />
+      </div>
     </div>
   );
 }
