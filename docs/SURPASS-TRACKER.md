@@ -63,7 +63,7 @@ zero-downtime lane. Status: ⬜ pending · 🔄 in progress · ✅ done · ⛔ b
 | Item | Status |
 |---|---|
 | V4 image generation (flux via images-generate) | ✅ Tools menu → "Image Gen" dialog → tier-gated endpoint; Download / attach via standard file pipeline; 3 dialog specs (`44cd516`) |
-| 47-locale completeness for promoted strings | ✅ lane: `stage=i18n` translates the promoted keys on the runner via the Opraiz gateway; artifact merged locally with `scripts/i18n-fill.mjs apply` (translate run 43140702135 in flight) |
+| 47-locale completeness for promoted strings | ✅ 46/47 locales carry all 153 promoted keys; Tibetan (`bo`) shows the en fallback for the 8 brand/image-gen strings — glm-5.3 gateway-408s on Tibetan and llama-3.3 returns empty (fill script has a fallback-model retry; `bo` alone fails both). Deliberate: clean English beats bad Tibetan in brand copy |
 
 ## Live-site fixes (operator feedback, 2026-11-12)
 
