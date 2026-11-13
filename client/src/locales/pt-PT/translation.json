@@ -1602,6 +1602,12 @@
   "com_ui_settings_section_langfuse": "Langfuse",
   "com_ui_settings_section_layout": "Disposição",
   "com_ui_settings_section_memory": "Memória",
+  "com_ui_settings_section_notifications": "Notificações",
+  "com_ui_push_notifications": "Notificações push",
+  "com_ui_push_notifications_description": "Receba uma notificação no navegador quando a atividade em segundo plano terminar, mesmo com este separador fechado.",
+  "com_ui_push_enabled": "Notificações push ativadas",
+  "com_ui_push_disabled": "Notificações push desativadas",
+  "com_ui_push_permission_denied": "As notificações do navegador estão bloqueadas para este site",
   "com_ui_settings_section_messages": "Mensagens",
   "com_ui_settings_section_profile": "Perfil",
   "com_ui_settings_section_prompts": "Prompts",
@@ -2018,5 +2024,7 @@
   "com_auth_brand_subline": "Modelos de ponta de conversa, código, pesquisa e visão — uma conta, um só lugar.",
   "com_ui_image_gen_add": "Adicionar à mensagem",
   "com_ui_image_gen_generate": "Gerar",
-  "com_ui_image_gen_prompt": "Descreva a imagem a gerar"
+  "com_ui_image_gen_prompt": "Descreva a imagem a gerar",
+  "com_ui_usage_today": "Limite de hoje",
+  "com_ui_usage_remaining": "restante hoje"
 }

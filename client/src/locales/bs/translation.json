@@ -216,5 +216,13 @@
   "com_auth_brand_subline": "Vrhunski modeli za chat, kodiranje, istraživanje i vid — jedan račun, jedno mjesto.",
   "com_ui_image_gen_add": "Dodaj u poruku",
   "com_ui_image_gen_generate": "Generiši",
-  "com_ui_image_gen_prompt": "Opišite sliku koju želite generisati"
+  "com_ui_image_gen_prompt": "Opišite sliku koju želite generisati",
+  "com_ui_settings_section_notifications": "Obavještenja",
+  "com_ui_push_notifications": "Push obavještenja",
+  "com_ui_push_notifications_description": "Primajte obavještenje u pregledniku kada pozadinska aktivnost završi, čak i kada je ova kartica zatvorena.",
+  "com_ui_push_enabled": "Push obavještenja su omogućena",
+  "com_ui_push_disabled": "Push obavještenja su isključena",
+  "com_ui_push_permission_denied": "Obavještenja preglednika su blokirana za ovu web lokaciju",
+  "com_ui_usage_today": "Današnji limit",
+  "com_ui_usage_remaining": "preostalo danas"
 }

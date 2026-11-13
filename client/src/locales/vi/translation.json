@@ -613,5 +613,13 @@
   "com_auth_brand_subline": "Mô hình chat, code, nghiên cứu và thị giác hàng đầu — một tài khoản, một nơi.",
   "com_ui_image_gen_add": "Thêm vào tin nhắn",
   "com_ui_image_gen_generate": "Tạo ảnh",
-  "com_ui_image_gen_prompt": "Mô tả hình ảnh bạn muốn tạo"
+  "com_ui_image_gen_prompt": "Mô tả hình ảnh bạn muốn tạo",
+  "com_ui_settings_section_notifications": "Thông báo",
+  "com_ui_push_notifications": "Thông báo đẩy",
+  "com_ui_push_notifications_description": "Nhận thông báo trên trình duyệt khi tác vụ nền hoàn tất, ngay cả khi tab này đã đóng.",
+  "com_ui_push_enabled": "Đã bật thông báo đẩy",
+  "com_ui_push_disabled": "Đã tắt thông báo đẩy",
+  "com_ui_push_permission_denied": "Thông báo trình duyệt bị chặn đối với trang web này",
+  "com_ui_usage_today": "Hạn mức hôm nay",
+  "com_ui_usage_remaining": "còn lại hôm nay"
 }

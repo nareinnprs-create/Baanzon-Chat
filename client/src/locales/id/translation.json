@@ -486,5 +486,13 @@
   "com_auth_brand_subline": "Model frontier untuk chat, kode, riset, dan visi — satu akun, satu tempat.",
   "com_ui_image_gen_add": "Tambahkan ke pesan",
   "com_ui_image_gen_generate": "Hasilkan",
-  "com_ui_image_gen_prompt": "Deskripsikan gambar yang ingin dibuat"
+  "com_ui_image_gen_prompt": "Deskripsikan gambar yang ingin dibuat",
+  "com_ui_settings_section_notifications": "Notifikasi",
+  "com_ui_push_notifications": "Notifikasi push",
+  "com_ui_push_notifications_description": "Dapatkan notifikasi browser saat aktivitas latar belakang selesai, bahkan saat tab ini ditutup.",
+  "com_ui_push_enabled": "Notifikasi push diaktifkan",
+  "com_ui_push_disabled": "Notifikasi push dinonaktifkan",
+  "com_ui_push_permission_denied": "Notifikasi browser diblokir untuk situs ini",
+  "com_ui_usage_today": "Kuota hari ini",
+  "com_ui_usage_remaining": "tersisa hari ini"
 }

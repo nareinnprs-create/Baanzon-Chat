@@ -1110,5 +1110,13 @@
   "com_auth_brand_subline": "Frontiermodeller för chatt, kod, forskning och vision — ett konto, en plats.",
   "com_ui_image_gen_add": "Lägg till i meddelandet",
   "com_ui_image_gen_generate": "Generera",
-  "com_ui_image_gen_prompt": "Beskriv bilden du vill generera"
+  "com_ui_image_gen_prompt": "Beskriv bilden du vill generera",
+  "com_ui_settings_section_notifications": "Notiser",
+  "com_ui_push_notifications": "Push-notiser",
+  "com_ui_push_notifications_description": "Få en webbläsaravisering när bakgrundsaktivitet avslutas, även när den här fliken är stängd.",
+  "com_ui_push_enabled": "Push-notiser aktiverade",
+  "com_ui_push_disabled": "Push-notiser inaktiverade",
+  "com_ui_push_permission_denied": "Webbläsaraviseringar är blockerade för den här webbplatsen",
+  "com_ui_usage_today": "Dagens gräns",
+  "com_ui_usage_remaining": "kvar idag"
 }

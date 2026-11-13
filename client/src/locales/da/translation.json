@@ -1070,5 +1070,13 @@
   "com_auth_brand_subline": "Frontier-modeller til chat, kode, research og vision — én konto, ét sted.",
   "com_ui_image_gen_add": "Føj til besked",
   "com_ui_image_gen_generate": "Generér",
-  "com_ui_image_gen_prompt": "Beskriv billedet, der skal genereres"
+  "com_ui_image_gen_prompt": "Beskriv billedet, der skal genereres",
+  "com_ui_settings_section_notifications": "Notifikationer",
+  "com_ui_push_notifications": "Push-notifikationer",
+  "com_ui_push_notifications_description": "Få en browsernotifikation, når baggrundsaktivitet afsluttes, også når fanen er lukket.",
+  "com_ui_push_enabled": "Push-notifikationer aktiveret",
+  "com_ui_push_disabled": "Push-notifikationer slået fra",
+  "com_ui_push_permission_denied": "Browsernotifikationer er blokeret for dette websted",
+  "com_ui_usage_today": "Dagens grænse",
+  "com_ui_usage_remaining": "tilbage i dag"
 }

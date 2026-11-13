@@ -1662,5 +1662,13 @@
   "com_auth_brand_subline": "前沿对话、代码、研究与视觉模型——一个账号，尽在一处。",
   "com_ui_image_gen_add": "添加到消息",
   "com_ui_image_gen_generate": "生成",
-  "com_ui_image_gen_prompt": "描述要生成的图像"
+  "com_ui_image_gen_prompt": "描述要生成的图像",
+  "com_ui_settings_section_notifications": "通知",
+  "com_ui_push_notifications": "推送通知",
+  "com_ui_push_notifications_description": "当后台任务完成时接收浏览器通知，即使此标签页已关闭。",
+  "com_ui_push_enabled": "已启用推送通知",
+  "com_ui_push_disabled": "已停用推送通知",
+  "com_ui_push_permission_denied": "此网站的浏览器通知已被屏蔽",
+  "com_ui_usage_today": "今日额度",
+  "com_ui_usage_remaining": "今日剩余"
 }

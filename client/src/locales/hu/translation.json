@@ -979,5 +979,13 @@
   "com_auth_brand_subline": "Élvonalbeli chat-, kód-, kutatási és vizuális modellek – egy fiók, egy hely.",
   "com_ui_image_gen_add": "Hozzáadás az üzenethez",
   "com_ui_image_gen_generate": "Generálás",
-  "com_ui_image_gen_prompt": "Írja le a generálandó képet"
+  "com_ui_image_gen_prompt": "Írja le a generálandó képet",
+  "com_ui_settings_section_notifications": "Értesítések",
+  "com_ui_push_notifications": "Push értesítések",
+  "com_ui_push_notifications_description": "Kapjon böngészőértesítést, amikor a háttérfeladat befejeződik, akkor is, ha ez a lap be van zárva.",
+  "com_ui_push_enabled": "Push értesítések bekapcsolva",
+  "com_ui_push_disabled": "Push értesítések kikapcsolva",
+  "com_ui_push_permission_denied": "A böngészőértesítések le vannak tiltva ezen a webhelyen",
+  "com_ui_usage_today": "Mai keret",
+  "com_ui_usage_remaining": "ma fennmaradó"
 }

@@ -2475,6 +2475,12 @@
   "com_ui_settings_section_langfuse": "Langfuse",
   "com_ui_settings_section_layout": "Layout",
   "com_ui_settings_section_memory": "Memory",
+  "com_ui_settings_section_notifications": "அறிவிப்புகள்",
+  "com_ui_push_notifications": "புஷ் அறிவிப்புகள்",
+  "com_ui_push_notifications_description": "பின்புலச் செயல்பாடு முடிந்ததும் உலாவி அறிவிப்பைப் பெறுங்கள், இந்தத் தத்தல் மூடப்பட்டிருந்தாலும் சரி.",
+  "com_ui_push_enabled": "புஷ் அறிவிப்புகள் இயக்கப்பட்டன",
+  "com_ui_push_disabled": "புஷ் அறிவிப்புகள் முடக்கப்பட்டன",
+  "com_ui_push_permission_denied": "இந்தத் தளத்திற்கு உலாவி அறிவிப்புகள் தடுக்கப்பட்டுள்ளன",
   "com_ui_settings_section_code_execution": "Code execution",
   "com_ui_settings_section_messages": "Messages",
   "com_ui_settings_section_profile": "Profile",
@@ -3247,5 +3253,7 @@
   "com_auth_brand_subline": "முன்னணி அரட்டை, குறியீடு, ஆய்வு மற்றும் பார்வை மாதிரிகள் — ஒரே கணக்கு, ஒரே இடம்.",
   "com_ui_image_gen_add": "செய்தியில் சேர்க்க",
   "com_ui_image_gen_generate": "உருவாக்கு",
-  "com_ui_image_gen_prompt": "உருவாக்க வேண்டிய படத்தை விவரிக்கவும்"
+  "com_ui_image_gen_prompt": "உருவாக்க வேண்டிய படத்தை விவரிக்கவும்",
+  "com_ui_usage_today": "இன்றைய வரம்பு",
+  "com_ui_usage_remaining": "இன்று மீதமுள்ளது"
 }

@@ -781,5 +781,13 @@
   "com_auth_brand_subline": "Huippuluokan chat-, koodi-, tutkimus- ja visiomallit — yksi tili, yksi paikka.",
   "com_ui_image_gen_add": "Lisää viestiin",
   "com_ui_image_gen_generate": "Luo",
-  "com_ui_image_gen_prompt": "Kuvaile luotava kuva"
+  "com_ui_image_gen_prompt": "Kuvaile luotava kuva",
+  "com_ui_settings_section_notifications": "Ilmoitukset",
+  "com_ui_push_notifications": "Push-ilmoitukset",
+  "com_ui_push_notifications_description": "Vastaanota selaimen ilmoitus, kun taustatehtävä valmistuu, myös kun tämä välilehti on suljettu.",
+  "com_ui_push_enabled": "Push-ilmoitukset käytössä",
+  "com_ui_push_disabled": "Push-ilmoitukset poissa käytöstä",
+  "com_ui_push_permission_denied": "Selaimen ilmoitukset on estetty tällä sivustolla",
+  "com_ui_usage_today": "Päivän kiintiö",
+  "com_ui_usage_remaining": "jäljellä tänään"
 }

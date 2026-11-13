@@ -1,5 +1,5 @@
-import { createPushDispatcher } from './index';
 import type { PushSubscriptionLean } from '@librechat/data-schemas';
+import { createPushDispatcher } from './index';
 
 function makeSub(endpoint: string): PushSubscriptionLean {
   return {

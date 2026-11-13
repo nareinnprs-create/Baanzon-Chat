@@ -1788,6 +1788,12 @@
   "com_ui_settings_section_data": "Twoje dane",
   "com_ui_settings_section_layout": "Układ",
   "com_ui_settings_section_memory": "Pamięć",
+  "com_ui_settings_section_notifications": "Powiadomienia",
+  "com_ui_push_notifications": "Powiadomienia push",
+  "com_ui_push_notifications_description": "Otrzymuj powiadomienie w przeglądarce po zakończeniu działania w tle, nawet gdy ta karta jest zamknięta.",
+  "com_ui_push_enabled": "Powiadomienia push włączone",
+  "com_ui_push_disabled": "Powiadomienia push wyłączone",
+  "com_ui_push_permission_denied": "Powiadomienia przeglądarki są zablokowane dla tej witryny",
   "com_ui_settings_section_messages": "Wiadomości",
   "com_ui_settings_section_profile": "Profil",
   "com_ui_settings_section_prompts": "Podpowiedzi",
@@ -2290,5 +2296,7 @@
   "com_auth_brand_subline": "Najnowocześniejsze modele do czatu, kodu, badań i analizy obrazu — jedno konto, jedno miejsce.",
   "com_ui_image_gen_add": "Dodaj do wiadomości",
   "com_ui_image_gen_generate": "Generuj",
-  "com_ui_image_gen_prompt": "Opisz obraz do wygenerowania"
+  "com_ui_image_gen_prompt": "Opisz obraz do wygenerowania",
+  "com_ui_usage_today": "Dzienny limit",
+  "com_ui_usage_remaining": "pozostało dziś"
 }

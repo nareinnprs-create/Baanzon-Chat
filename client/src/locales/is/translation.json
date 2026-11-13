@@ -1790,6 +1790,12 @@
   "com_ui_settings_section_data": "Gögnin þín",
   "com_ui_settings_section_layout": "Uppsetning",
   "com_ui_settings_section_memory": "Minningar",
+  "com_ui_settings_section_notifications": "Tilkynningar",
+  "com_ui_push_notifications": "Push-tilkynningar",
+  "com_ui_push_notifications_description": "Fáðu tilkynningu í vafranum þegar bakgrunnsstarf klárast, jafnvel þótt þessi flipi sé lokaður.",
+  "com_ui_push_enabled": "Push-tilkynningar kveikt",
+  "com_ui_push_disabled": "Push-tilkynningar slökkt",
+  "com_ui_push_permission_denied": "Vafratilkynningar eru læstar fyrir þetta vefsvæði",
   "com_ui_settings_section_messages": "Skilaboð",
   "com_ui_settings_section_profile": "Prófíll",
   "com_ui_settings_section_prompts": "Fyrirmæli",
@@ -2292,5 +2298,7 @@
   "com_auth_brand_subline": "Framúrskarandi líkön fyrir spjall, kóðun, rannsóknir og sjón — einn aðgangur, einn staður.",
   "com_ui_image_gen_add": "Bæta við skilaboð",
   "com_ui_image_gen_generate": "Búa til",
-  "com_ui_image_gen_prompt": "Lýstu myndinni sem á að búa til"
+  "com_ui_image_gen_prompt": "Lýstu myndinni sem á að búa til",
+  "com_ui_usage_today": "Dagskvóti",
+  "com_ui_usage_remaining": "eftir í dag"
 }

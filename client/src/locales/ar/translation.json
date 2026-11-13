@@ -911,5 +911,13 @@
   "com_auth_brand_subline": "نماذج متقدمة للمحادثة والبرمجة والبحث والرؤية — حساب واحد، ومكان واحد.",
   "com_ui_image_gen_add": "إضافة إلى الرسالة",
   "com_ui_image_gen_generate": "توليد",
-  "com_ui_image_gen_prompt": "صف الصورة المراد توليدها"
+  "com_ui_image_gen_prompt": "صف الصورة المراد توليدها",
+  "com_ui_settings_section_notifications": "الإشعارات",
+  "com_ui_push_notifications": "الإشعارات الفورية",
+  "com_ui_push_notifications_description": "احصل على إشعار في المتصفح عند انتهاء النشاط في الخلفية، حتى عند إغلاق هذه الصفحة.",
+  "com_ui_push_enabled": "تم تمكين الإشعارات الفورية",
+  "com_ui_push_disabled": "تم إيقاف الإشعارات الفورية",
+  "com_ui_push_permission_denied": "إشعارات المتصفح محجوبة لهذا الموقع",
+  "com_ui_usage_today": "حصة اليوم",
+  "com_ui_usage_remaining": "متبقٍ اليوم"
 }

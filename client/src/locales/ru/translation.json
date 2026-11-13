@@ -1518,5 +1518,13 @@
   "com_auth_brand_subline": "Передовые модели для чата, кода, исследований и зрения — один аккаунт, одно место.",
   "com_ui_image_gen_add": "Добавить к сообщению",
   "com_ui_image_gen_generate": "Сгенерировать",
-  "com_ui_image_gen_prompt": "Опишите изображение для генерации"
+  "com_ui_image_gen_prompt": "Опишите изображение для генерации",
+  "com_ui_settings_section_notifications": "Уведомления",
+  "com_ui_push_notifications": "Push-уведомления",
+  "com_ui_push_notifications_description": "Получайте уведомление в браузере, когда фоновая задача завершится, даже если эта вкладка закрыта.",
+  "com_ui_push_enabled": "Push-уведомления включены",
+  "com_ui_push_disabled": "Push-уведомления отключены",
+  "com_ui_push_permission_denied": "Уведомления браузера заблокированы для этого сайта",
+  "com_ui_usage_today": "Дневной лимит",
+  "com_ui_usage_remaining": "осталось сегодня"
 }

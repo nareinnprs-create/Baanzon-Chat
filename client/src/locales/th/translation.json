@@ -1026,5 +1026,13 @@
   "com_auth_brand_subline": "โมเดลแนวหน้าด้านแชท โค้ด วิจัย และวิชัน — บัญชีเดียว ที่เดียว",
   "com_ui_image_gen_add": "เพิ่มในข้อความ",
   "com_ui_image_gen_generate": "สร้างภาพ",
-  "com_ui_image_gen_prompt": "อธิบายภาพที่ต้องการสร้าง"
+  "com_ui_image_gen_prompt": "อธิบายภาพที่ต้องการสร้าง",
+  "com_ui_settings_section_notifications": "การแจ้งเตือน",
+  "com_ui_push_notifications": "การแจ้งเตือนแบบพุช",
+  "com_ui_push_notifications_description": "รับการแจ้งเตือนในเบราว์เซอร์เมื่องานเบื้องหลังเสร็จสิ้น แม้ปิดแท็บนี้ไปแล้วก็ตาม",
+  "com_ui_push_enabled": "เปิดใช้การแจ้งเตือนแบบพุชแล้ว",
+  "com_ui_push_disabled": "ปิดการแจ้งเตือนแบบพุชแล้ว",
+  "com_ui_push_permission_denied": "การแจ้งเตือนในเบราว์เซอร์ถูกบล็อกสำหรับเว็บไซต์นี้",
+  "com_ui_usage_today": "โควตาวันนี้",
+  "com_ui_usage_remaining": "เหลือวันนี้"
 }

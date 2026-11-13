@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { logger } from '@librechat/data-schemas';
-import type { Response } from 'express';
 import type { PushSubscriptionLean } from '@librechat/data-schemas';
+import type { Response } from 'express';
 import type { ServerRequest } from '~/types/http';
 
 /** The storage-shaped subscription a push service accepts (endpoint + client keys). */
@@ -128,9 +128,7 @@ export function createPushHandlers(deps: PushHandlersDeps): PushHandlers {
 
   async function getPushConfig(req: ServerRequest, res: Response): Promise<Response> {
     const enabled =
-      resolveUserId(req) != null &&
-      configured &&
-      req.config?.config?.webPush?.enabled === true;
+      resolveUserId(req) != null && configured && req.config?.config?.webPush?.enabled === true;
     if (!enabled) {
       return res.status(200).json({ enabled: false });
     }

@@ -887,5 +887,13 @@
   "com_auth_brand_subline": "Špičkové modely pro chat, kódování, výzkum a vidění — jeden účet, jedno místo.",
   "com_ui_image_gen_add": "Přidat ke zprávě",
   "com_ui_image_gen_generate": "Generovat",
-  "com_ui_image_gen_prompt": "Popište obrázek, který chcete vygenerovat"
+  "com_ui_image_gen_prompt": "Popište obrázek, který chcete vygenerovat",
+  "com_ui_settings_section_notifications": "Oznámení",
+  "com_ui_push_notifications": "Push oznámení",
+  "com_ui_push_notifications_description": "Zobrazit oznámení v prohlížeči po dokončení aktivity na pozadí, i když je tato karta zavřená.",
+  "com_ui_push_enabled": "Push oznámení povolena",
+  "com_ui_push_disabled": "Push oznámení vypnuta",
+  "com_ui_push_permission_denied": "Oznámení prohlížeče jsou pro tento web blokována",
+  "com_ui_usage_today": "Dnešní limit",
+  "com_ui_usage_remaining": "zbývá dnes"
 }

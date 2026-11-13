@@ -2475,6 +2475,12 @@
   "com_ui_settings_section_langfuse": "Langfuse",
   "com_ui_settings_section_layout": "Layout",
   "com_ui_settings_section_memory": "Memory",
+  "com_ui_settings_section_notifications": "දැනුම්දීම්",
+  "com_ui_push_notifications": "පුෂ් දැනුම්දීම්",
+  "com_ui_push_notifications_description": "පසුබිම් ක්‍රියාකාරකම අවසන් වූ විට බ්‍රව්සර් දැනුම්දීමක් ලබාගන්න, මෙම ටැබය වසා ඇති වුවද.",
+  "com_ui_push_enabled": "පුෂ් දැනුම්දීම් සබල කරන ලදී",
+  "com_ui_push_disabled": "පුෂ් දැනුම්දීම් අබල කරන ලදී",
+  "com_ui_push_permission_denied": "මෙම අඩවිය සඳහා බ්‍රව්සර් දැනුම්දීම් අවහිර කර ඇත",
   "com_ui_settings_section_code_execution": "Code execution",
   "com_ui_settings_section_messages": "Messages",
   "com_ui_settings_section_profile": "Profile",
@@ -3247,5 +3253,7 @@
   "com_auth_brand_subline": "ප්‍රමුඛ චැට්, කේත, පර්යේෂණ සහ දෘශ්‍ය මොඩල් — එක් ගිණුමක්, එක් ස්ථානයක්.",
   "com_ui_image_gen_add": "පණිවිඩයට එක් කරන්න",
   "com_ui_image_gen_generate": "ජනනය කරන්න",
-  "com_ui_image_gen_prompt": "ජනනය කිරීමට අවශ්‍ය රූපය විස්තර කරන්න"
+  "com_ui_image_gen_prompt": "ජනනය කිරීමට අවශ්‍ය රූපය විස්තර කරන්න",
+  "com_ui_usage_today": "අද සීමාව",
+  "com_ui_usage_remaining": "අද ඉතිරිව ඇත"
 }

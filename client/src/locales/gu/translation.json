@@ -2475,6 +2475,12 @@
   "com_ui_settings_section_langfuse": "Langfuse",
   "com_ui_settings_section_layout": "Layout",
   "com_ui_settings_section_memory": "Memory",
+  "com_ui_settings_section_notifications": "સૂચનાઓ",
+  "com_ui_push_notifications": "પુશ સૂચનાઓ",
+  "com_ui_push_notifications_description": "બેકગ્રાઉન્ડ પ્રવૃત્તિ પૂરી થાય ત્યારે બ્રાઉઝર સૂચના મેળવો, આ ટૅબ બંધ હોય ત્યારે પણ.",
+  "com_ui_push_enabled": "પુશ સૂચનાઓ સક્ષમ કરી",
+  "com_ui_push_disabled": "પુશ સૂચનાઓ બંધ કરી",
+  "com_ui_push_permission_denied": "આ સાઇટ માટે બ્રાઉઝર સૂચનાઓ અવરોધિત છે",
   "com_ui_settings_section_code_execution": "Code execution",
   "com_ui_settings_section_messages": "Messages",
   "com_ui_settings_section_profile": "Profile",
@@ -3247,5 +3253,7 @@
   "com_auth_brand_subline": "ફ્રન્ટિયર ચેટ, કોડ, રિસર્ચ અને વિઝન મોડેલ્સ — એક એકાઉન્ટ, એક જગ્યા.",
   "com_ui_image_gen_add": "સંદેશમાં ઉમેરો",
   "com_ui_image_gen_generate": "જનરેટ કરો",
-  "com_ui_image_gen_prompt": "જનરેટ કરવા માટે ઇમેજનું વર્ણન કરો"
+  "com_ui_image_gen_prompt": "જનરેટ કરવા માટે ઇમેજનું વર્ણન કરો",
+  "com_ui_usage_today": "આજની મર્યાદા",
+  "com_ui_usage_remaining": "આજે બાકી"
 }

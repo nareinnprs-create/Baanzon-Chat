@@ -1092,5 +1092,13 @@
   "com_auth_brand_subline": "Tipptasemel vestlus-, koodi-, uurimis- ja visioonimudelid — üks konto, üks koht.",
   "com_ui_image_gen_add": "Lisa sõnumile",
   "com_ui_image_gen_generate": "Genereeri",
-  "com_ui_image_gen_prompt": "Kirjelda loodavat pilti"
+  "com_ui_image_gen_prompt": "Kirjelda loodavat pilti",
+  "com_ui_settings_section_notifications": "Teavitused",
+  "com_ui_push_notifications": "Push-teavitused",
+  "com_ui_push_notifications_description": "Saad brauseri teavituse, kui taustategevus lõpeb, isegi kui see vaheleht on suletud.",
+  "com_ui_push_enabled": "Push-teavitused lubatud",
+  "com_ui_push_disabled": "Push-teavitused keelatud",
+  "com_ui_push_permission_denied": "Brauseri teavitused on selle saidi jaoks blokeeritud",
+  "com_ui_usage_today": "Tänane limiit",
+  "com_ui_usage_remaining": "täna jäänud"
 }

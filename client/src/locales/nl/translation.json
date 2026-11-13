@@ -1343,5 +1343,13 @@
   "com_auth_brand_subline": "Frontier-modellen voor chat, code, onderzoek en visie — één account, één plek.",
   "com_ui_image_gen_add": "Toevoegen aan bericht",
   "com_ui_image_gen_generate": "Genereren",
-  "com_ui_image_gen_prompt": "Beschrijf de afbeelding die je wilt genereren"
+  "com_ui_image_gen_prompt": "Beschrijf de afbeelding die je wilt genereren",
+  "com_ui_settings_section_notifications": "Meldingen",
+  "com_ui_push_notifications": "Pushmeldingen",
+  "com_ui_push_notifications_description": "Ontvang een browsermelding wanneer achtergrondactiviteit klaar is, ook als dit tabblad gesloten is.",
+  "com_ui_push_enabled": "Pushmeldingen ingeschakeld",
+  "com_ui_push_disabled": "Pushmeldingen uitgeschakeld",
+  "com_ui_push_permission_denied": "Browsermeldingen zijn geblokkeerd voor deze site",
+  "com_ui_usage_today": "Limiet van vandaag",
+  "com_ui_usage_remaining": "vandaag over"
 }

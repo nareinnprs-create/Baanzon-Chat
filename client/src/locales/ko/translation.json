@@ -1522,5 +1522,13 @@
   "com_auth_brand_subline": "프론티어 채팅, 코드, 리서치, 비전 모델 — 계정 하나로, 한 곳에서.",
   "com_ui_image_gen_add": "메시지에 추가",
   "com_ui_image_gen_generate": "생성",
-  "com_ui_image_gen_prompt": "생성할 이미지를 설명하세요"
+  "com_ui_image_gen_prompt": "생성할 이미지를 설명하세요",
+  "com_ui_settings_section_notifications": "알림",
+  "com_ui_push_notifications": "푸시 알림",
+  "com_ui_push_notifications_description": "백그라운드 작업이 완료되면 이 탭이 닫혀 있어도 브라우저 알림을 받습니다.",
+  "com_ui_push_enabled": "푸시 알림이 사용 설정되었습니다",
+  "com_ui_push_disabled": "푸시 알림이 사용 해제되었습니다",
+  "com_ui_push_permission_denied": "이 사이트에 대한 브라우저 알림이 차단되어 있습니다",
+  "com_ui_usage_today": "오늘 한도",
+  "com_ui_usage_remaining": "오늘 남음"
 }

@@ -12,7 +12,10 @@ const {
   markAllNotificationsRead,
   deleteNotification,
 } = require('~/models');
-const { dispatcher: pushDispatcher, configured: pushConfigured } = require('~/server/services/Push/handlers');
+const {
+  dispatcher: pushDispatcher,
+  configured: pushConfigured,
+} = require('~/server/services/Push/handlers');
 
 /**
  * The hub is process-scoped: every request shares the one fan-out registry so a

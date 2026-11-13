@@ -1431,5 +1431,13 @@
   "com_auth_brand_subline": "Modelos de vanguardia de chat, código, investigación y visión — una cuenta, un solo lugar.",
   "com_ui_image_gen_add": "Añadir al mensaje",
   "com_ui_image_gen_generate": "Generar",
-  "com_ui_image_gen_prompt": "Describe la imagen que quieres generar"
+  "com_ui_image_gen_prompt": "Describe la imagen que quieres generar",
+  "com_ui_settings_section_notifications": "Notificaciones",
+  "com_ui_push_notifications": "Notificaciones push",
+  "com_ui_push_notifications_description": "Recibe una notificación en el navegador cuando termine la actividad en segundo plano, incluso con esta pestaña cerrada.",
+  "com_ui_push_enabled": "Notificaciones push activadas",
+  "com_ui_push_disabled": "Notificaciones push desactivadas",
+  "com_ui_push_permission_denied": "Las notificaciones del navegador están bloqueadas para este sitio",
+  "com_ui_usage_today": "Límite de hoy",
+  "com_ui_usage_remaining": "restante hoy"
 }

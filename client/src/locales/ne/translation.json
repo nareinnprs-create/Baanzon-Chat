@@ -2475,6 +2475,12 @@
   "com_ui_settings_section_langfuse": "Langfuse",
   "com_ui_settings_section_layout": "Layout",
   "com_ui_settings_section_memory": "Memory",
+  "com_ui_settings_section_notifications": "सूचनाहरू",
+  "com_ui_push_notifications": "पुश सूचनाहरू",
+  "com_ui_push_notifications_description": "पृष्ठभूमि कार्य सम्पन्न हुँदा ब्राउजर सूचना प्राप्त गर्नुहोस्, यो ट्याब बन्द भए पनि।",
+  "com_ui_push_enabled": "पुश सूचनाहरू सक्षम गरियो",
+  "com_ui_push_disabled": "पुश सूचनाहरू असक्षम गरियो",
+  "com_ui_push_permission_denied": "यस साइटका लागि ब्राउजर सूचनाहरू अवरुद्ध छन्",
   "com_ui_settings_section_code_execution": "Code execution",
   "com_ui_settings_section_messages": "Messages",
   "com_ui_settings_section_profile": "Profile",
@@ -3247,5 +3253,7 @@
   "com_auth_brand_subline": "फ्रन्टियर च्याट, कोड, रिसर्च र भिजन मोडेलहरू — एउटा खाता, एउटै ठाउँ।",
   "com_ui_image_gen_add": "सन्देशमा थप्नुहोस्",
   "com_ui_image_gen_generate": "जनरेट गर्नुहोस्",
-  "com_ui_image_gen_prompt": "जनरेट गर्नुपर्ने तस्बिरको वर्णन गर्नुहोस्"
+  "com_ui_image_gen_prompt": "जनरेट गर्नुपर्ने तस्बिरको वर्णन गर्नुहोस्",
+  "com_ui_usage_today": "आजको सीमा",
+  "com_ui_usage_remaining": "आज बाँकी"
 }

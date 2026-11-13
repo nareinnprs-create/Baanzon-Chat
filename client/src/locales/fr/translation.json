@@ -1708,5 +1708,13 @@
   "com_auth_brand_subline": "Des modèles de pointe pour le chat, le code, la recherche et la vision — un seul compte, un seul endroit.",
   "com_ui_image_gen_add": "Ajouter au message",
   "com_ui_image_gen_generate": "Générer",
-  "com_ui_image_gen_prompt": "Décrivez l'image à générer"
+  "com_ui_image_gen_prompt": "Décrivez l'image à générer",
+  "com_ui_settings_section_notifications": "Notifications",
+  "com_ui_push_notifications": "Notifications push",
+  "com_ui_push_notifications_description": "Recevez une notification dans le navigateur lorsqu'une activité en arrière-plan se termine, même si cet onglet est fermé.",
+  "com_ui_push_enabled": "Notifications push activées",
+  "com_ui_push_disabled": "Notifications push désactivées",
+  "com_ui_push_permission_denied": "Les notifications du navigateur sont bloquées pour ce site",
+  "com_ui_usage_today": "Quota du jour",
+  "com_ui_usage_remaining": "restant aujourd'hui"
 }

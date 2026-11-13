@@ -1388,5 +1388,13 @@
   "com_auth_brand_subline": "Передові моделі для чату, коду, досліджень та зору — один акаунт, одне місце.",
   "com_ui_image_gen_add": "Додати до повідомлення",
   "com_ui_image_gen_generate": "Згенерувати",
-  "com_ui_image_gen_prompt": "Опишіть зображення, яке потрібно згенерувати"
+  "com_ui_image_gen_prompt": "Опишіть зображення, яке потрібно згенерувати",
+  "com_ui_settings_section_notifications": "Сповіщення",
+  "com_ui_push_notifications": "Push-сповіщення",
+  "com_ui_push_notifications_description": "Отримуйте сповіщення в браузері, коли фонова задача завершиться, навіть якщо ця вкладка закрита.",
+  "com_ui_push_enabled": "Push-сповіщення увімкнено",
+  "com_ui_push_disabled": "Push-сповіщення вимкнено",
+  "com_ui_push_permission_denied": "Сповіщення браузера заблоковано для цього сайту",
+  "com_ui_usage_today": "Денний ліміт",
+  "com_ui_usage_remaining": "залишилось сьогодні"
 }

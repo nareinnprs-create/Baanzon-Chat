@@ -1746,5 +1746,13 @@
   "com_auth_brand_subline": "Frontmodellar for chat, kode, forsking og visjon — ein konto, ein stad.",
   "com_ui_image_gen_add": "Legg til i meldinga",
   "com_ui_image_gen_generate": "Generer",
-  "com_ui_image_gen_prompt": "Skildra biletet du vil generera"
+  "com_ui_image_gen_prompt": "Skildra biletet du vil generera",
+  "com_ui_settings_section_notifications": "Varsel",
+  "com_ui_push_notifications": "Push-varsel",
+  "com_ui_push_notifications_description": "Få eit varsel i nettlesaren når bakgrunnsaktivitet er ferdig, sjølv om denne fana er lukka.",
+  "com_ui_push_enabled": "Push-varsel aktivert",
+  "com_ui_push_disabled": "Push-varsel deaktivert",
+  "com_ui_push_permission_denied": "Nettlesarvarsel er blokkert for dette nettstaden",
+  "com_ui_usage_today": "Dagens grense",
+  "com_ui_usage_remaining": "gjenstår i dag"
 }

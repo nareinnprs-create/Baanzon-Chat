@@ -249,5 +249,13 @@
   "com_auth_brand_subline": "Vrhunski modeli za klepet, kodo, raziskave in vid — en račun, eno mesto.",
   "com_ui_image_gen_add": "Dodaj v sporočilo",
   "com_ui_image_gen_generate": "Ustvari",
-  "com_ui_image_gen_prompt": "Opišite sliko, ki jo želite ustvariti"
+  "com_ui_image_gen_prompt": "Opišite sliko, ki jo želite ustvariti",
+  "com_ui_settings_section_notifications": "Obvestila",
+  "com_ui_push_notifications": "Push obvestila",
+  "com_ui_push_notifications_description": "Prejmite obvestilo v brskalniku, ko se dejavnost v ozadju konča, tudi če je ta zavihek zaprt.",
+  "com_ui_push_enabled": "Push obvestila omogočena",
+  "com_ui_push_disabled": "Push obvestila onemogočena",
+  "com_ui_push_permission_denied": "Obvestila brskalnika so za to spletno mesto blokirana",
+  "com_ui_usage_today": "Dnevna omejitev",
+  "com_ui_usage_remaining": "še danes"
 }

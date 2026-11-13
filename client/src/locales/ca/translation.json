@@ -1972,5 +1972,13 @@
   "com_auth_brand_subline": "Models d'avantguarda de xat, codi, recerca i visió — un compte, un sol lloc.",
   "com_ui_image_gen_add": "Afegeix al missatge",
   "com_ui_image_gen_generate": "Genera",
-  "com_ui_image_gen_prompt": "Descriu la imatge que vols generar"
+  "com_ui_image_gen_prompt": "Descriu la imatge que vols generar",
+  "com_ui_settings_section_notifications": "Notificacions",
+  "com_ui_push_notifications": "Notificacions push",
+  "com_ui_push_notifications_description": "Rebeu una notificació del navegador quan acabi l'activitat en segon pla, fins i tot amb aquesta pestanya tancada.",
+  "com_ui_push_enabled": "Notificacions push activades",
+  "com_ui_push_disabled": "Notificacions push desactivades",
+  "com_ui_push_permission_denied": "Les notificacions del navegador estan bloquejades per a aquest lloc",
+  "com_ui_usage_today": "Quota d'avui",
+  "com_ui_usage_remaining": "resta avui"
 }

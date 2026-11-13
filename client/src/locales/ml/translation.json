@@ -2475,6 +2475,12 @@
   "com_ui_settings_section_langfuse": "Langfuse",
   "com_ui_settings_section_layout": "Layout",
   "com_ui_settings_section_memory": "Memory",
+  "com_ui_settings_section_notifications": "അറിയിപ്പുകൾ",
+  "com_ui_push_notifications": "പുഷ് അറിയിപ്പുകൾ",
+  "com_ui_push_notifications_description": "പശ്ചാത്തല പ്രവർത്തനം പൂർത്തിയാകുമ്പോൾ ബ്രൗസർ അറിയിപ്പ് സ്വീകരിക്കുക, ഈ ടാബ് അടച്ചിട്ടുണ്ടെങ്കിലും.",
+  "com_ui_push_enabled": "പുഷ് അറിയിപ്പുകൾ പ്രാപ്തമാക്കി",
+  "com_ui_push_disabled": "പുഷ് അറിയിപ്പുകൾ പ്രവർത്തനരഹിതമാക്കി",
+  "com_ui_push_permission_denied": "ഈ സൈറ്റിനായി ബ്രൗസർ അറിയിപ്പുകൾ തടഞ്ഞിരിക്കുന്നു",
   "com_ui_settings_section_code_execution": "Code execution",
   "com_ui_settings_section_messages": "Messages",
   "com_ui_settings_section_profile": "Profile",
@@ -3247,5 +3253,7 @@
   "com_auth_brand_subline": "ഫ്രോണ്ടിയർ ചാറ്റ്, കോഡ്, റിസർച്ച്, വിഷൻ മോഡലുകൾ — ഒരു അക്കൗണ്ട്, ഒരിടത്ത്.",
   "com_ui_image_gen_add": "സന്ദേശത്തിലേക്ക് ചേർക്കുക",
   "com_ui_image_gen_generate": "സൃഷ്ടിക്കുക",
-  "com_ui_image_gen_prompt": "സൃഷ്ടിക്കേണ്ട ചിത്രം വിവരിക്കുക"
+  "com_ui_image_gen_prompt": "സൃഷ്ടിക്കേണ്ട ചിത്രം വിവരിക്കുക",
+  "com_ui_usage_today": "ഇന്നത്തെ പരിധി",
+  "com_ui_usage_remaining": "ഇന്ന് ശേഷിക്കുന്നു"
 }

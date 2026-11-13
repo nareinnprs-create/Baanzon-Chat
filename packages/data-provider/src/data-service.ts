@@ -1064,9 +1064,7 @@ export function getPushConfig(): Promise<bl.TPushConfigResponse> {
 }
 
 /** Registers (or refreshes) this browser's push subscription. */
-export function subscribePush(
-  payload: bl.TPushSubscribeRequest,
-): Promise<{ subscribed: boolean }> {
+export function subscribePush(payload: bl.TPushSubscribeRequest): Promise<{ subscribed: boolean }> {
   return request.post(endpoints.pushSubscribe(), payload);
 }
 

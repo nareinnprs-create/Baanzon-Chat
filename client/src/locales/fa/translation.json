@@ -1654,5 +1654,13 @@
   "com_auth_brand_subline": "مدل‌های پیشروی گفتگو، کدنویسی، پژوهش و بینایی — یک حساب، یک‌جا.",
   "com_ui_image_gen_add": "افزودن به پیام",
   "com_ui_image_gen_generate": "تولید",
-  "com_ui_image_gen_prompt": "توضیح دهید چه تصویری تولید شود"
+  "com_ui_image_gen_prompt": "توضیح دهید چه تصویری تولید شود",
+  "com_ui_settings_section_notifications": "اعلان‌ها",
+  "com_ui_push_notifications": "اعلان‌های فوری",
+  "com_ui_push_notifications_description": "وقتی فعالیت پس‌زمینه تمام شود، اعلانی در مرورگر دریافت کنید، حتی اگر این برگه بسته باشد.",
+  "com_ui_push_enabled": "اعلان‌های فوری فعال شد",
+  "com_ui_push_disabled": "اعلان‌های فوری خاموش شد",
+  "com_ui_push_permission_denied": "اعلان‌های مرورگر برای این وب‌سایت مسدود شده‌اند",
+  "com_ui_usage_today": "سهمیه امروز",
+  "com_ui_usage_remaining": "باقی‌مانده امروز"
 }

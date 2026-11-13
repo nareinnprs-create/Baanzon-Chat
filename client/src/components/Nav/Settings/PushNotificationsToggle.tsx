@@ -34,7 +34,9 @@ export default function PushNotificationsToggle() {
     } catch (err) {
       const denied = err instanceof Error && err.message === 'Notification permission denied';
       showToast({
-        message: localize(denied ? 'com_ui_push_permission_denied' : 'com_ui_error_updating_preferences'),
+        message: localize(
+          denied ? 'com_ui_push_permission_denied' : 'com_ui_error_updating_preferences',
+        ),
         status: 'error',
       });
     } finally {

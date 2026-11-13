@@ -216,5 +216,13 @@
   "com_auth_brand_subline": "Špičkové modely pre chat, kódovanie, výskum a videnie — jeden účet, jedno miesto.",
   "com_ui_image_gen_add": "Pridať do správy",
   "com_ui_image_gen_generate": "Generovať",
-  "com_ui_image_gen_prompt": "Popíšte obrázok, ktorý chcete vygenerovať"
+  "com_ui_image_gen_prompt": "Popíšte obrázok, ktorý chcete vygenerovať",
+  "com_ui_settings_section_notifications": "Oznámenia",
+  "com_ui_push_notifications": "Push oznámenia",
+  "com_ui_push_notifications_description": "Zobrazte oznámenie v prehliadači po dokončení aktivity na pozadí, aj keď je táto karta zatvorená.",
+  "com_ui_push_enabled": "Push oznámenia povolené",
+  "com_ui_push_disabled": "Push oznámenia zakázané",
+  "com_ui_push_permission_denied": "Oznámenia prehliadača sú pre túto stránku zablokované",
+  "com_ui_usage_today": "Dnešný limit",
+  "com_ui_usage_remaining": "zostáva dnes"
 }

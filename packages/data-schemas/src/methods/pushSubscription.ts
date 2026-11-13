@@ -43,9 +43,7 @@ export function createPushSubscriptionMethods(
     if (!isValidObjectIdString(userId)) {
       return [];
     }
-    return await PushSubscription()
-      .find({ userId })
-      .lean<PushSubscriptionLean[]>();
+    return await PushSubscription().find({ userId }).lean<PushSubscriptionLean[]>();
   }
 
   async function deletePushSubscription(userId: string, endpoint: string): Promise<boolean> {

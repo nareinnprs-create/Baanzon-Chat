@@ -274,5 +274,13 @@
   "com_auth_brand_subline": "წამყვანი ჩატის, კოდის, კვლევისა და ხედვის მოდელები — ერთი ანგარიში, ერთი ადგილი.",
   "com_ui_image_gen_add": "შეტყობინებაში დამატება",
   "com_ui_image_gen_generate": "გენერირება",
-  "com_ui_image_gen_prompt": "აღწერეთ დასაგენერირებელი სურათი"
+  "com_ui_image_gen_prompt": "აღწერეთ დასაგენერირებელი სურათი",
+  "com_ui_settings_section_notifications": "შეტყობინებები",
+  "com_ui_push_notifications": "Push შეტყობინებები",
+  "com_ui_push_notifications_description": "მიიღეთ ბრაუზერის შეტყობინება, როდესაც ფონური ამოცანა დასრულდება, თუნდაც ამ ჩანართი დახურულია.",
+  "com_ui_push_enabled": "Push შეტყობინებები ჩართულია",
+  "com_ui_push_disabled": "Push შეტყობინებები გამორთულია",
+  "com_ui_push_permission_denied": "ბრაუზერის შეტყობინებები დაბლოკილია ამ საიტისთვის",
+  "com_ui_usage_today": "დღევანდელი ლიმიტი",
+  "com_ui_usage_remaining": "დღეს დარჩენილია"
 }
