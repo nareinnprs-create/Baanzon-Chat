@@ -95,7 +95,8 @@ if [ -z "$(env_value OPRAIZ_API_KEY)" ] || [ -z "$(env_value OPRAIZ_BASEURL)" ];
 fi
 
 echo "[apply] validating served model catalog (yaml parse + public-key contract)"
-if ! node "$STAGE_DIR/scripts/validate-provider-routing.js" "$STAGE_DIR/baanzon.yaml"; then
+# validator runs before npm ci; resolve js-yaml/librechat-data-provider from the live slot
+if ! NODE_PATH="$ACTIVE_DIR/node_modules" node "$STAGE_DIR/scripts/validate-provider-routing.js" "$STAGE_DIR/baanzon.yaml"; then
   echo "[apply] baanzon.yaml validation FAILED - active release untouched, no flip"
   exit 1
 fi
