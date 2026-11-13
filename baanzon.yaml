@@ -346,6 +346,21 @@ registration:
 # Note: If balance.enabled is true, transactions will always be enabled
 # regardless of this setting to ensure balance tracking works correctly
 
+# User memory (approved rollout): persistent per-user memories with automatic
+# extraction by an ephemeral agent. The model key is a public spec key;
+# modelRouter resolves it at generation like any Opraiz request.
+memory:
+  agent:
+    enabled: true
+    provider: 'Opraiz'
+    model: 'baanzon-flash'
+    instructions: >-
+      You maintain the user's persistent memory. From the conversation, extract
+      durable facts, preferences, and working context about the user worth
+      remembering across sessions, and update the memory set accordingly.
+      Keep entries short, factual, and in the user's language. Never store
+      credentials, payment details, or anything the user asks you to forget.
+
 # Speech (STT/TTS) outbound requests to operator-provided target URLs are SSRF-guarded
 # at connect time: private, loopback, link-local, and cloud-metadata targets are blocked
 # by default. To point STT/TTS at a private or self-hosted service (LocalAI, a self-hosted
@@ -789,6 +804,16 @@ endpoints:
   #     #   claude-sonnet-4: true  # Will use the default deploymentName
   #     #   claude-3.5-haiku:
   #     #     deploymentName: claude-3-5-haiku@20241022  # Override for this model
+
+  agents:
+    # Approved rollout: HITL tool approvals. dontAsk mode pauses only explicitly
+    # listed tools (today: MCP tool calls); built-in sandboxed tools run free.
+    toolApproval:
+      enabled: true
+      mode: dontAsk
+      ask:
+        - 'mcp:*:*'
+      reason: 'Review {tool} before it runs.'
 
   custom:
     # Opraiz gateway - the ONLY provider exposed to users. CF Workers AI via
