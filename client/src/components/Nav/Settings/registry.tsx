@@ -40,6 +40,7 @@ import DeleteAccount from '../SettingsTabs/Account/DeleteAccount';
 import StatefulWorkspaceDefault from './StatefulWorkspaceDefault';
 import UsersManagement from '~/components/Admin/UsersManagement';
 import { ForkSettings } from '../SettingsTabs/Chat/ForkSettings';
+import PushNotificationsToggle from './PushNotificationsToggle';
 import ChatDirection from '../SettingsTabs/Chat/ChatDirection';
 import { DeleteCache } from '../SettingsTabs/Data/DeleteCache';
 import { ManageFiles } from '../SettingsTabs/Data/ManageFiles';
@@ -212,6 +213,15 @@ export const registry: SettingEntry[] = [
       localizationKey: 'com_nav_keep_screen_awake',
       switchId: 'keepScreenAwake',
     }),
+  },
+  // General · Notifications
+  {
+    id: 'pushNotifications',
+    tab: GENERAL,
+    section: 'notifications',
+    labelKey: 'com_ui_push_notifications',
+    keywords: ['push', 'notifications', 'browser', 'web push'],
+    Component: PushNotificationsToggle,
   },
   // General · Admin
   {

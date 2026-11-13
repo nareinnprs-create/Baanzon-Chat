@@ -1058,6 +1058,23 @@ export function getBillingSubscription(): Promise<bl.TBillingSubscriptionRespons
   return request.get(endpoints.billingSubscription());
 }
 
+/** Web Push availability and the VAPID public key. */
+export function getPushConfig(): Promise<bl.TPushConfigResponse> {
+  return request.get(endpoints.pushConfig());
+}
+
+/** Registers (or refreshes) this browser's push subscription. */
+export function subscribePush(
+  payload: bl.TPushSubscribeRequest,
+): Promise<{ subscribed: boolean }> {
+  return request.post(endpoints.pushSubscribe(), payload);
+}
+
+/** Removes this browser's push subscription row. */
+export function unsubscribePush(payload: { endpoint: string }): Promise<{ deleted: boolean }> {
+  return request.post(endpoints.pushUnsubscribe(), payload);
+}
+
 /** Admin view of recent Dodo payments. */
 export function getAdminDodoPayments(): Promise<bl.TAdminDodoPaymentsResponse> {
   return request.get(endpoints.billingAdminDodo());

@@ -18,6 +18,7 @@ export enum QueryKeys {
   balance = 'balance',
   billingProducts = 'billingProducts',
   billingSubscription = 'billingSubscription',
+  pushConfig = 'pushConfig',
   adminDodoPayments = 'adminDodoPayments',
   adminUsers = 'adminUsers',
   usageSummary = 'usageSummary',

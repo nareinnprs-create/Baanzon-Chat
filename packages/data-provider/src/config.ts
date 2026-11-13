@@ -2191,6 +2191,8 @@ export type TStartupConfig = {
     scraperProvider?: ScraperProviders;
     rerankerType?: RerankerTypes;
   };
+  /** Web Push availability; the VAPID key is fetched from `/api/push` when true. */
+  webPush?: TWebPushConfig;
   cloudFront?: {
     cookieRefresh?: {
       endpoint: string;
@@ -2427,6 +2429,13 @@ export const balanceSchema = z.object({
   refillIntervalUnit: z.enum(REFILL_INTERVAL_UNITS).optional().default('days'),
   refillAmount: z.number().optional().default(10000),
 });
+
+/** Web Push notifications: one toggle; VAPID keys stay in the server `.env`. */
+export const webPushSchema = z.object({
+  enabled: z.boolean().optional().default(false),
+});
+
+export type TWebPushConfig = z.infer<typeof webPushSchema>;
 
 export const transactionsSchema = z.object({
   enabled: z.boolean().optional().default(true),
@@ -2826,6 +2835,7 @@ export const configSchema = z.object({
   crossEntitySearch: crossEntitySearchConfigSchema.optional(),
   ocr: ocrSchema.optional(),
   webSearch: webSearchSchema.optional(),
+  webPush: webPushSchema.optional(),
   langfuse: langfuseConfigSchema.optional(),
   memory: memorySchema.optional(),
   rag: ragSchema.optional(),

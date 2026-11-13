@@ -73,6 +73,8 @@ export * from './workflowRun';
 export * from './device';
 /* Subscriptions (§45) */
 export * from './subscription';
+/* Web Push subscriptions */
+export * from './pushSubscription';
 /* Usage Records (§45) */
 export * from './usageRecord';
 /* Feedback (§45) */

@@ -1,4 +1,5 @@
 import type { TNotification, TNotificationCreateRequest } from 'librechat-data-provider';
+import { logger } from '@librechat/data-schemas';
 import type { NotificationDataSource, NotificationRecord } from './types';
 
 /** Default page size when the caller does not ask for one. */
@@ -29,6 +30,12 @@ export interface NotificationsService {
 
 export interface CreateNotificationsServiceDeps {
   notifications: NotificationDataSource;
+  /**
+   * Optional fan-out hook fired once per created notification (the single seam
+   * shared by the REST handler and background producers). The hook owns its
+   * errors: `create` never awaits or surfaces a rejection from it.
+   */
+  onCreated?: (userId: string, notification: TNotification) => void;
 }
 
 function toIsoString(value: Date | string | null | undefined): string | null {
@@ -108,7 +115,15 @@ export function createNotificationsService(
       link: input.link,
       data: input.data,
     });
-    return serializeNotification(created);
+    const serialized = serializeNotification(created);
+    if (deps.onCreated) {
+      try {
+        deps.onCreated(userId, serialized);
+      } catch (err) {
+        logger.error('[notifications] onCreated hook error:', err);
+      }
+    }
+    return serialized;
   }
 
   async function markRead(userId: string, id: string): Promise<TNotification | null> {

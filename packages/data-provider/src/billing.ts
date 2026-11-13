@@ -148,6 +148,22 @@ export type TBillingSubscriptionResponse = {
   remainingToday: number;
 };
 
+/** `GET /api/push` response — VAPID public key when the feature is available. */
+export type TPushConfigResponse = {
+  enabled: boolean;
+  publicKey?: string;
+};
+
+/** `POST /api/push/subscribe` payload — a browser PushSubscription JSON. */
+export type TPushSubscribeRequest = {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+  userAgent?: string;
+};
+
 /** One recent Dodo payment from `GET /api/billing/admin/recent-dodo`. */
 export type TAdminDodoPayment = {
   paymentId: string;

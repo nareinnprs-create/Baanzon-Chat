@@ -166,4 +166,29 @@ describe('createNotificationsService', () => {
     expect(await service.remove('user-1', 'n-1')).toBe(true);
     expect(await service.unreadCount('user-1')).toBe(9);
   });
+
+  it('fires the onCreated seam per creation and survives a rejecting hook', async () => {
+    const created = record({ _id: 'new', title: 'Created' });
+    const dataSource = makeDataSource({
+      createNotification: jest.fn().mockResolvedValue(created),
+    });
+    const onCreated = jest.fn();
+    const service = createNotificationsService({ notifications: dataSource, onCreated });
+
+    const notification = await service.create('user-1', { type: 'agent_run', title: 'Created' });
+
+    expect(onCreated).toHaveBeenCalledWith('user-1', notification);
+
+    const rejecting = createNotificationsService({
+      notifications: makeDataSource({
+        createNotification: jest.fn().mockResolvedValue(created),
+      }),
+      onCreated: () => {
+        throw new Error('hook exploded');
+      },
+    });
+    await expect(
+      rejecting.create('user-1', { type: 'agent_run', title: 'Created' }),
+    ).resolves.toMatchObject({ id: 'new' });
+  });
 });

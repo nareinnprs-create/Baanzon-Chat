@@ -15,6 +15,8 @@ import { createRoleMethods, RoleConflictError } from './role';
 import { createKeyMethods, type KeyMethods } from './key';
 /* Memories */
 import { createMemoryMethods, type MemoryMethods } from './memory';
+/* Web Push subscriptions */
+import { createPushSubscriptionMethods, type PushSubscriptionMethods } from './pushSubscription';
 /* Tool Favorites */
 import {
   createToolFavoriteMethods,
@@ -343,6 +345,7 @@ export type AllMethods = UserMethods &
   WorkflowRunMethods &
   DeviceMethods &
   SubscriptionMethods &
+  PushSubscriptionMethods &
   UsageRecordMethods &
   FlagOverrideMethods &
   PlanEntitlementMethods &
@@ -589,6 +592,7 @@ export function createMethods(
     ...createWorkflowRunMethods(mongoose),
     ...createDeviceMethods(mongoose),
     ...createSubscriptionMethods(mongoose),
+    ...createPushSubscriptionMethods(mongoose),
     ...createUsageRecordMethods(mongoose),
     ...createFlagOverrideMethods(mongoose),
     ...createPlanEntitlementMethods(mongoose),
@@ -663,6 +667,7 @@ export type {
   MessagePartMethods,
   AgentRunMethods,
   NotificationMethods,
+  PushSubscriptionMethods,
   ToolMethods,
   ToolVersionMethods,
   ToolPermissionMethods,

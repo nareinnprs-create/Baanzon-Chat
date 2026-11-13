@@ -336,6 +336,11 @@ router.get('/', async function (req, res) {
       payload.webSearch = webSearch;
     }
 
+    // Public visibility flag only; the VAPID key itself is served by /api/push.
+    if (appConfig?.config?.webPush?.enabled === true) {
+      payload.webPush = { enabled: true };
+    }
+
     const buildInfo = buildBuildInfoPayload(appConfig?.interfaceConfig);
     if (buildInfo) {
       payload.buildInfo = buildInfo;

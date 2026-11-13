@@ -9,6 +9,8 @@ import type {
   TEntitlementPlan,
   TEntitlementResource,
   TGetEntitlementsResponse,
+  TPushConfigResponse,
+  TPushSubscribeRequest,
   TSetEntitlementRequest,
 } from 'librechat-data-provider';
 import type { UseMutationResult, UseQueryOptions } from '@tanstack/react-query';
@@ -92,3 +94,31 @@ export const useCreateCheckout = (): UseMutationResult<
   TCheckoutRequest,
   unknown
 > => useMutation((payload) => dataService.createCheckoutSession(payload));
+
+/** Web Push availability and VAPID public key from `GET /api/push`. */
+export const useGetPushConfig = (
+  config?: UseQueryOptions<TPushConfigResponse>,
+): ReturnType<typeof useQuery<TPushConfigResponse>> =>
+  useQuery<TPushConfigResponse>([QueryKeys.pushConfig], () => dataService.getPushConfig(), {
+    // The key changes only with a deploy; browsers re-subscribe on key rotation errors.
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: false,
+    ...config,
+  });
+
+/** Registers (or refreshes) this browser's push subscription on the server. */
+export const useSubscribePush = (): UseMutationResult<
+  { subscribed: boolean },
+  unknown,
+  TPushSubscribeRequest,
+  unknown
+> => useMutation((payload) => dataService.subscribePush(payload));
+
+/** Removes this browser's push subscription row from the server. */
+export const useUnsubscribePush = (): UseMutationResult<
+  { deleted: boolean },
+  unknown,
+  { endpoint: string },
+  unknown
+> => useMutation((payload) => dataService.unsubscribePush(payload));

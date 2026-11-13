@@ -248,7 +248,7 @@ interface:
     groups: true
     roles: true
   marketplace:
-    use: false
+    use: true
   fileCitations: true
   # Show the thumbs up/thumbs down feedback buttons on responses (default: true)
   feedback: true
@@ -360,6 +360,12 @@ memory:
       remembering across sessions, and update the memory set accordingly.
       Keep entries short, factual, and in the user's language. Never store
       credentials, payment details, or anything the user asks you to forget.
+
+# Web Push notifications. The VAPID signing keys live only in the pod `.env`
+# (VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / VAPID_SUBJECT); this flag controls
+# client visibility and the subscribe routes.
+webPush:
+  enabled: true
 
 # Speech (STT/TTS) outbound requests to operator-provided target URLs are SSRF-guarded
 # at connect time: private, loopback, link-local, and cloud-metadata targets are blocked

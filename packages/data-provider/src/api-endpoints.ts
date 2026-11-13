@@ -207,6 +207,14 @@ const billingCheckoutRoot = `${BASE_URL}/api/billing/checkout`;
 
 export const billingCheckout = () => billingCheckoutRoot;
 
+const pushRoot = `${BASE_URL}/api/push`;
+
+export const pushConfig = () => pushRoot;
+
+export const pushSubscribe = () => `${pushRoot}/subscribe`;
+
+export const pushUnsubscribe = () => `${pushRoot}/unsubscribe`;
+
 const evalRunsRoot = `${BASE_URL}/api/evals/runs`;
 
 export const evalRuns = () => evalRunsRoot;

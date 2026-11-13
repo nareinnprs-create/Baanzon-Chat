@@ -131,6 +131,13 @@ export default function UsageDashboard() {
             value={new Intl.NumberFormat().format(Math.round(balanceQuery.data.tokenCredits))}
           />
         )}
+        {subscription?.dailyLimit != null && (
+          <StatRow
+            label={localize('com_ui_usage_today')}
+            value={`${format(subscription.usedToday)} / ${format(subscription.dailyLimit)}`}
+            hint={`${format(subscription.remainingToday)} ${localize('com_ui_usage_remaining')}`}
+          />
+        )}
       </dl>
       {aggregate == null || aggregate.messages === 0 ? (
         <p className="rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-text-secondary">

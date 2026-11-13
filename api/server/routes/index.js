@@ -19,6 +19,7 @@ const messages = require('./messages');
 const memories = require('./memories');
 const knowledge = require('./knowledge');
 const notifications = require('./notifications');
+const push = require('./push');
 const usageRecords = require('./usage-records');
 const usage = require('./usage');
 const feedback = require('./feedback');
@@ -115,6 +116,7 @@ module.exports = {
   memories,
   knowledge,
   notifications,
+  push,
   usageRecords,
   usage,
   feedback,

@@ -18,6 +18,7 @@ export type SectionId =
   | 'appearance'
   | 'layout'
   | 'accessibility'
+  | 'notifications'
   | 'providers'
   | 'admin'
   | 'sending'
@@ -103,6 +104,7 @@ export const TABS: TabMeta[] = [
       { id: 'appearance', labelKey: 'com_ui_settings_section_appearance' },
       { id: 'layout', labelKey: 'com_ui_settings_section_layout' },
       { id: 'accessibility', labelKey: 'com_ui_settings_section_accessibility' },
+      { id: 'notifications', labelKey: 'com_ui_settings_section_notifications' },
       { id: 'providers', labelKey: 'com_ui_settings_section_providers' },
       { id: 'admin', labelKey: 'com_ui_settings_section_admin' },
     ],

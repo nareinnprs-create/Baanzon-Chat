@@ -102,6 +102,7 @@ export * from './schedules/service';
 export * from './skills';
 export * from './favorites';
 export * from './notifications';
+export * from './push';
 export * from './devices';
 export * from './subscriptions';
 export * from './usageRecords';

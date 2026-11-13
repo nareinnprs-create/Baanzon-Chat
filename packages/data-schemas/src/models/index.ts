@@ -7,6 +7,7 @@ import { createKnowledgeCollectionModel } from './knowledgeCollection';
 import { createAgentTriggerUserPurgeModel } from './triggerUserPurge';
 import { createRefreshTokenBridgeModel } from './refreshTokenBridge';
 import { createAgentTriggerDeliveryModel } from './triggerDelivery';
+import { createPushSubscriptionModel } from './pushSubscription';
 import { createArtifactVersionModel } from './artifactVersion';
 import { createSkillSyncStatusModel } from './skillSyncStatus';
 import { createConversationTagModel } from './conversationTag';
@@ -103,6 +104,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
   SharedLink: ReturnType<typeof createSharedLinkModel>;
   ToolCall: ReturnType<typeof createToolCallModel>;
   MemoryEntry: ReturnType<typeof createMemoryModel>;
+  PushSubscription: ReturnType<typeof createPushSubscriptionModel>;
   KnowledgeCollection: ReturnType<typeof createKnowledgeCollectionModel>;
   ToolFavorite: ReturnType<typeof createToolFavoriteModel>;
   AccessRole: ReturnType<typeof createAccessRoleModel>;
@@ -175,6 +177,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
     SharedLink: createSharedLinkModel(mongoose),
     ToolCall: createToolCallModel(mongoose),
     MemoryEntry: createMemoryModel(mongoose),
+    PushSubscription: createPushSubscriptionModel(mongoose),
     KnowledgeCollection: createKnowledgeCollectionModel(mongoose),
     ToolFavorite: createToolFavoriteModel(mongoose),
     AccessRole: createAccessRoleModel(mongoose),

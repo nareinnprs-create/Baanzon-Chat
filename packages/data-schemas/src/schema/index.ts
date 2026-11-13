@@ -30,6 +30,7 @@ export { default as toolCallSchema } from './toolCall';
 export { default as transactionSchema } from './transaction';
 export { default as userSchema } from './user';
 export { default as memorySchema, isValidMemoryKey } from './memory';
+export { default as pushSubscriptionSchema } from './pushSubscription';
 export {
   default as knowledgeCollectionSchema,
   KNOWLEDGE_COLLECTION_NAME,
