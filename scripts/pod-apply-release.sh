@@ -94,9 +94,11 @@ if [ -z "$(env_value OPRAIZ_API_KEY)" ] || [ -z "$(env_value OPRAIZ_BASEURL)" ];
   echo "[apply] WARNING: OPRAIZ_API_KEY and/or OPRAIZ_BASEURL empty - Opraiz models will not resolve until the operator re-enters them"
 fi
 
-echo "[apply] validating Cloudflare provider routing"
-node "$STAGE_DIR/scripts/validate-provider-routing.js" "$STAGE_DIR/baanzon.yaml" --fix || true
-node "$STAGE_DIR/scripts/validate-provider-routing.js" "$STAGE_DIR/baanzon.yaml" || true
+echo "[apply] validating served model catalog (yaml parse + public-key contract)"
+if ! node "$STAGE_DIR/scripts/validate-provider-routing.js" "$STAGE_DIR/baanzon.yaml"; then
+  echo "[apply] baanzon.yaml validation FAILED - active release untouched, no flip"
+  exit 1
+fi
 
 echo "[apply] preparing prod deps (lockfile cache)"
 cd "$STAGE_DIR" || exit 1

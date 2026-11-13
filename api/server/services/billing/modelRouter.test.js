@@ -53,3 +53,40 @@ describe('public model keys', () => {
     expect(toPublicModelId(undefined)).toBeUndefined();
   });
 });
+
+describe('composite ephemeral agent id rebranding', () => {
+  const { toPublicAgentId } = require('./modelRouter');
+
+  it('rebrands the model part of a stored composite id', () => {
+    expect(toPublicAgentId('Opraiz__@cf/zai-org/glm-5.3___Baanzon Intelligence')).toBe(
+      'Opraiz__baanzon-intelligence___Baanzon Intelligence',
+    );
+  });
+
+  it('keeps parallel index suffixes intact', () => {
+    expect(toPublicAgentId('Opraiz__@cf/zai-org/glm-4.7-flash___Baanzon Swift____2')).toBe(
+      'Opraiz__baanzon-swift___Baanzon Swift____2',
+    );
+  });
+
+  it('passes through real agent ids and already-public composites untouched', () => {
+    expect(toPublicAgentId('agent_abc123')).toBe('agent_abc123');
+    expect(toPublicAgentId('Opraiz__baanzon-intelligence___Baanzon Intelligence')).toBe(
+      'Opraiz__baanzon-intelligence___Baanzon Intelligence',
+    );
+    expect(toPublicAgentId('Opraiz__opraiz-small___Opraiz Small')).toBe(
+      'Opraiz__opraiz-small___Opraiz Small',
+    );
+  });
+
+  it('drops attribution for concrete vendor ids with no public key', () => {
+    expect(
+      toPublicAgentId('Opraiz__@cf/meta/llama-3.3-70b-instruct-fp8-fast___Baanzon Vision'),
+    ).toBeNull();
+  });
+
+  it('leaves non-string values untouched', () => {
+    expect(toPublicAgentId(undefined)).toBeUndefined();
+    expect(toPublicAgentId(null)).toBeNull();
+  });
+});

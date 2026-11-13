@@ -29,6 +29,7 @@ const {
 } = require('@librechat/api');
 const { logger } = require('@librechat/data-schemas');
 const { CacheKeys, EModelEndpoint } = require('librechat-data-provider');
+const { toPublicAgentId } = require('~/server/services/billing/modelRouter');
 const {
   createImportLimiters,
   validateConvoAccess,
@@ -177,6 +178,9 @@ router.get('/', async (req, res) => {
       sortDirection,
       projectId,
     });
+    for (const convo of result.conversations ?? []) {
+      convo.agent_id = toPublicAgentId(convo.agent_id);
+    }
     res.status(200).json(result);
   } catch (error) {
     logger.error('Error fetching conversations', error);
@@ -205,6 +209,7 @@ router.get('/:conversationId', async (req, res) => {
   const convo = await db.getConvo(req.user.id, conversationId);
 
   if (convo && convo.subagentThread == null) {
+    convo.agent_id = toPublicAgentId(convo.agent_id);
     res.status(200).json(convo);
   } else {
     res.status(404).end();

@@ -26,6 +26,7 @@ const {
   mergeUserSubmittedMessageFieldPaths,
   isContentFilterError,
 } = require('@librechat/api');
+const { toPublicAgentId } = require('~/server/services/billing/modelRouter');
 const subagentThreadTaskStore = require('~/server/services/Endpoints/agents/subagentThreadStore');
 const { findAllArtifacts, replaceArtifactContent } = require('~/server/services/Artifacts/update');
 const {
@@ -206,6 +207,9 @@ router.get('/', async (req, res) => {
       response = { messages: [], nextCursor: null };
     }
 
+    for (const message of response.messages) {
+      message.agentId = toPublicAgentId(message.agentId);
+    }
     res.status(200).json(response);
   } catch (error) {
     logger.error('Error fetching messages:', error);
@@ -232,6 +236,7 @@ router.get('/', async (req, res) => {
 function toClientMessage(message) {
   const clientMessage = { ...message };
   delete clientMessage.contextMeta;
+  clientMessage.agentId = toPublicAgentId(clientMessage.agentId);
   return clientMessage;
 }
 
@@ -506,6 +511,9 @@ router.get('/:conversationId', prepareMessageRequestValidation, async (req, res)
     }
 
     const messages = messagesResult?.messages ?? [];
+    for (const message of messages) {
+      message.agentId = toPublicAgentId(message.agentId);
+    }
     res.status(200).json(messages);
   } catch (error) {
     logger.error('Error fetching messages:', error);
@@ -566,6 +574,7 @@ router.get('/:conversationId/:messageId', validateMessageReq, async (req, res) =
     if (!message) {
       return res.status(404).json({ error: 'Message not found' });
     }
+    message.agentId = toPublicAgentId(message.agentId);
     res.status(200).json(message);
   } catch (error) {
     logger.error('Error fetching message:', error);

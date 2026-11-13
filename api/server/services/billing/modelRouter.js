@@ -10,6 +10,8 @@
  * Windows (from CF catalog): glm-4.7-flash 131k, glm-5.3-flash/glm-5.3/deepseek-v4-flash 1M,
  * gpt-oss-120b 128k, r1-32b 80k, coder-32b 32k, kimi 262k. Budgets stay under the window.
  */
+const { encodeEphemeralAgentId, parseEphemeralAgentId } = require('librechat-data-provider');
+
 const MATRIX = {
   'baanzon-ai': {
     free: { model: '@cf/zai-org/glm-4.7-flash', maxContextTokens: 120000, max_tokens: 8000 },
@@ -56,8 +58,7 @@ const MATRIX = {
  * Selecting a spec sends its slug; this is the only server-side place that
  * knows which concrete model stands behind it. Order matters for the reverse
  * map: when two keys share a raw id (glm-5.3), the first (the default spec) wins.
- */
-const PUBLIC_MODELS = {
+ */ const PUBLIC_MODELS = {
   'baanzon-intelligence': '@cf/zai-org/glm-5.3',
   'baanzon-flash': '@cf/zai-org/glm-5.3-flash',
   'baanzon-polyglot': '@cf/qwen/qwen3-30b-a3b-fp8',
@@ -82,6 +83,33 @@ for (const [key, raw] of Object.entries(PUBLIC_MODELS)) {
 /** Maps a concrete model id back to its public key, for user-facing payloads. */
 function toPublicModelId(model) {
   return PUBLIC_MODEL_BY_RAW[String(model || '')];
+}
+
+/**
+ * Rebrands the model part of a stored composite ephemeral agent id
+ * (`endpoint__model___sender`, optionally `____index`) for user-facing reads.
+ * Real `agent_*` ids, unparseable values and already-public keys pass through
+ * untouched; a concrete vendor id with no public key drops the attribution
+ * (returns null) rather than leaking the raw id.
+ */
+function toPublicAgentId(agentId) {
+  if (typeof agentId !== 'string' || agentId.startsWith('agent_')) {
+    return agentId;
+  }
+  const parsed = parseEphemeralAgentId(agentId);
+  if (!parsed) {
+    return agentId;
+  }
+  const pub = toPublicModelId(parsed.model);
+  if (pub) {
+    return encodeEphemeralAgentId({ ...parsed, model: pub });
+  }
+  // shortcut: only @cf/ ids count as unmappable vendor ids; a future raw id
+  // with another prefix would pass through and needs this check widened.
+  if (parsed.model.startsWith('@cf/')) {
+    return null;
+  }
+  return agentId;
 }
 
 const FALLBACK = {
@@ -123,4 +151,5 @@ module.exports = {
   CHAT_LANE_BRANDS,
   PUBLIC_MODELS,
   toPublicModelId,
+  toPublicAgentId,
 };
