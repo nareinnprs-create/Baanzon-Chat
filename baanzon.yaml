@@ -812,11 +812,12 @@ endpoints:
   #     #     deploymentName: claude-3-5-haiku@20241022  # Override for this model
 
   agents:
-    # Approved rollout: HITL tool approvals. dontAsk mode pauses only explicitly
-    # listed tools (today: MCP tool calls); built-in sandboxed tools run free.
+    # Approved rollout: HITL tool approvals. bypass mode auto-approves every
+    # unlisted tool (built-in sandboxed tools run free); ask rules still pause
+    # listed tools (today: MCP tool calls) for human review.
     toolApproval:
       enabled: true
-      mode: dontAsk
+      mode: bypass
       ask:
         - 'mcp:*:*'
       reason: 'Review {tool} before it runs.'
