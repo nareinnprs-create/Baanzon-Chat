@@ -6,7 +6,7 @@ import { VOICE_LABELS as L } from '../labels';
 import VoicePanel from '../VoicePanel';
 
 jest.mock('~/hooks/AuthContext', () => ({
-  useAuthContext: () => ({ token: 'tok-123' }),
+  useAuthToken: () => 'tok-123',
 }));
 
 /**
