@@ -68,6 +68,9 @@ export interface LoadAddedAgentDeps {
     userId: string,
     role?: string,
   ) => Promise<Record<string, ParsedServerConfig>>;
+  /** Client-facing masking: the ephemeral id reaches SSE events and stored
+   *  rows, so it must carry the public model key, not the vendor id. */
+  toPublicModelId?: (model: string) => string | undefined;
 }
 
 interface LoadAddedAgentParams {
@@ -163,7 +166,12 @@ export async function loadAddedAgent(
       specLabel: modelSpec?.label,
       modelDisplayLabel: endpointConfig?.modelDisplayLabel as string | undefined,
     });
-    const ephemeralId = encodeEphemeralAgentId({ endpoint, model, sender, index: 1 });
+    const ephemeralId = encodeEphemeralAgentId({
+      endpoint,
+      model: deps.toPublicModelId?.(model) ?? model,
+      sender,
+      index: 1,
+    });
 
     const result: Record<string, unknown> = {
       id: ephemeralId,
@@ -292,7 +300,13 @@ export async function loadAddedAgent(
     specLabel: modelSpec?.label,
     modelDisplayLabel: endpointConfig?.modelDisplayLabel as string | undefined,
   });
-  const ephemeralId = encodeEphemeralAgentId({ endpoint, model, sender, index: 1 });
+  // Client-facing: the id is born public so no SSE event or stored row leaks the vendor id.
+  const ephemeralId = encodeEphemeralAgentId({
+    endpoint,
+    model: deps.toPublicModelId?.(model) ?? model,
+    sender,
+    index: 1,
+  });
 
   const result: Record<string, unknown> = {
     id: ephemeralId,

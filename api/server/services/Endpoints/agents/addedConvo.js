@@ -1,5 +1,5 @@
 const { logger } = require('@librechat/data-schemas');
-const { toPublicModelId } = require('~/server/services/billing/modelRouter');
+const { toPublicModelId, routeModel } = require('~/server/services/billing/modelRouter');
 const {
   ADDED_AGENT_ID,
   initializeAgent,
@@ -21,6 +21,7 @@ const loadAddedAgent = (params) =>
     getAgent: db.getAgent,
     getMCPServerTools,
     getAccessibleMCPServers,
+    toPublicModelId,
   });
 
 /**
@@ -112,6 +113,13 @@ const processAddedConvo = async ({
 
   try {
     const skillDbMethods = getSkillDbMethods();
+    // The stored lane model is a public key (masked rows/reads); the added run
+    // needs the concrete id, resolved with the same routing the primary lane uses.
+    if (typeof addedConvo.model === 'string' && addedConvo.model !== '') {
+      addedConvo.model =
+        routeModel(String(req.user?.subscriptionTier || 'free'), addedConvo.model)?.model ??
+        addedConvo.model;
+    }
     const addedAgent = await loadAddedAgent({ req, conversation: addedConvo, primaryAgent });
     if (!addedAgent) {
       return { userMCPAuthMap };

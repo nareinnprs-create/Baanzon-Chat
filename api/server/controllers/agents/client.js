@@ -216,6 +216,7 @@ const loadAgent = (params) =>
     getAgent: db.getAgent,
     getMCPServerTools,
     getAccessibleMCPServers,
+    toPublicModelId,
   });
 
 const MEMORY_INPUT_CHARS_PER_TOKEN = 8;
@@ -1978,6 +1979,13 @@ class AgentClient extends BaseClient {
    */
   checkVisionRequest() {}
 
+  /** Client-facing: stored rows and SSE name only the public model key;
+   *  pricing above stays on the raw id via `this.model`. */
+  getResponseModel() {
+    const model = super.getResponseModel();
+    return toPublicModelId(model) ?? model;
+  }
+
   getSaveOptions() {
     let runOptions = {};
     try {
@@ -1987,6 +1995,10 @@ class AgentClient extends BaseClient {
         '[api/server/controllers/agents/client.js #getSaveOptions] Error parsing options',
         getSafeErrorMetadata(error),
       );
+    }
+    // Client-facing: stored conversation rows name only the public model key.
+    if (typeof runOptions.model === 'string') {
+      runOptions.model = toPublicModelId(runOptions.model) ?? runOptions.model;
     }
 
     const agentsEConfig = this.options.req.config?.endpoints?.[EModelEndpoint.agents];

@@ -44,6 +44,9 @@ export interface LoadAgentDeps {
     userId: string,
     role?: string,
   ) => Promise<Record<string, ParsedServerConfig>>;
+  /** Client-facing masking: the ephemeral id reaches SSE events and stored
+   *  rows, so it must carry the public model key, not the vendor id. */
+  toPublicModelId?: (model: string) => string | undefined;
 }
 
 export interface LoadAgentParams {
@@ -170,9 +173,10 @@ export async function loadEphemeralAgent(
   });
 
   // Encode ephemeral agent ID with endpoint, model, and computed sender for display
+  // Client-facing: the id is born public so no SSE event or stored row leaks the vendor id.
   const ephemeralId = encodeEphemeralAgentId({
     endpoint,
-    model: model as string,
+    model: deps.toPublicModelId?.(model as string) ?? (model as string),
     sender,
   });
 

@@ -51,6 +51,26 @@ describe('loadEphemeralAgent ephemeral id stability (#14253 Bug 2)', () => {
     const b = await idFor({ model: 'claude-opus-4', modelLabel: 'My Opus' });
     expect(a).toEqual(b);
   });
+
+  test('the id carries the public model key when toPublicModelId is injected', async () => {
+    const agent = await loadEphemeralAgent(
+      {
+        req: baseReq,
+        spec: 'my-opus-spec',
+        endpoint: 'my-custom-endpoint',
+        model_parameters: { model: '@cf/zai-org/glm-5.3-flash' } as never,
+      },
+      {
+        ...deps,
+        toPublicModelId: (raw) => (raw === '@cf/zai-org/glm-5.3-flash' ? 'baanzon-flash' : raw),
+      },
+    );
+    const parsed = parseEphemeralAgentId(agent?.id ?? '');
+    // The id is born public: SSE events and stored rows never carry the vendor id.
+    expect(parsed?.model).toBe('baanzon-flash');
+    // The agent keeps the concrete model for the provider call.
+    expect((agent as { model?: string } | null)?.model).toBe('@cf/zai-org/glm-5.3-flash');
+  });
 });
 
 /** Custom endpoints carry their configured name in `endpoint` at runtime,

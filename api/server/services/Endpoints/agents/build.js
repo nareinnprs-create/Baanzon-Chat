@@ -7,7 +7,7 @@ const {
 const { isAgentsEndpoint, removeNullishValues, Constants } = require('librechat-data-provider');
 const { getMCPServerTools } = require('~/server/services/Config');
 const { getAccessibleMCPServers } = require('~/server/services/MCP');
-const { routeModel } = require('~/server/services/billing/modelRouter');
+const { routeModel, toPublicModelId } = require('~/server/services/billing/modelRouter');
 const db = require('~/models');
 
 const loadAgent = (params) =>
@@ -15,6 +15,7 @@ const loadAgent = (params) =>
     getAgent: db.getAgent,
     getMCPServerTools,
     getAccessibleMCPServers,
+    toPublicModelId,
   });
 
 const buildOptions = (req, endpoint, parsedBody, endpointType) => {

@@ -29,7 +29,7 @@ const {
 } = require('@librechat/api');
 const { logger } = require('@librechat/data-schemas');
 const { CacheKeys, EModelEndpoint } = require('librechat-data-provider');
-const { toPublicAgentId } = require('~/server/services/billing/modelRouter');
+const { toPublicAgentId, toPublicModelId } = require('~/server/services/billing/modelRouter');
 const {
   createImportLimiters,
   validateConvoAccess,
@@ -180,6 +180,7 @@ router.get('/', async (req, res) => {
     });
     for (const convo of result.conversations ?? []) {
       convo.agent_id = toPublicAgentId(convo.agent_id);
+      convo.model = toPublicModelId(convo.model) ?? convo.model;
     }
     res.status(200).json(result);
   } catch (error) {
@@ -210,6 +211,7 @@ router.get('/:conversationId', async (req, res) => {
 
   if (convo && convo.subagentThread == null) {
     convo.agent_id = toPublicAgentId(convo.agent_id);
+    convo.model = toPublicModelId(convo.model) ?? convo.model;
     res.status(200).json(convo);
   } else {
     res.status(404).end();
