@@ -430,4 +430,34 @@ describe('validateAgentModel', () => {
     expect(result.error?.message).toContain('illegal_model_request');
     expect(logViolation).toHaveBeenCalledTimes(1);
   });
+
+  it('maps a routed concrete model id back to its public key', async () => {
+    const result = await validateAgentModel({
+      req: request,
+      res: response,
+      agent: { provider: Providers.VERTEXAI, model: '@cf/zai-org/gemini-3.7-flash' } as Agent,
+      modelsConfig: { [EModelEndpoint.google]: ['gemini-3.7-flash'] },
+      logViolation,
+      toPublicModelId: (model) =>
+        model === '@cf/zai-org/gemini-3.7-flash' ? 'gemini-3.7-flash' : undefined,
+    });
+
+    expect(result).toEqual({ isValid: true });
+    expect(logViolation).not.toHaveBeenCalled();
+  });
+
+  it('still rejects a concrete model id the resolver cannot map', async () => {
+    const result = await validateAgentModel({
+      req: request,
+      res: response,
+      agent: { provider: Providers.VERTEXAI, model: '@cf/meta/unmapped-model' } as Agent,
+      modelsConfig: { [EModelEndpoint.google]: ['gemini-3.7-flash'] },
+      logViolation,
+      toPublicModelId: () => undefined,
+    });
+
+    expect(result.isValid).toBe(false);
+    expect(result.error?.message).toContain('"info": "vertexai|unknown"');
+    expect(logViolation).toHaveBeenCalledTimes(1);
+  });
 });

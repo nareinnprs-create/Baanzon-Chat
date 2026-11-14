@@ -396,6 +396,12 @@ export interface ValidateAgentModelParams {
     errorMessage: Record<string, unknown>,
     score?: number | string,
   ) => Promise<void>;
+  /**
+   * Maps a concrete (vendor) model id back to its public key. Supplied by the
+   * app layer, which owns the routing table; generation may route a public key
+   * to a concrete id before validation, so the catalog compare needs the key.
+   */
+  toPublicModelId?: (model: string) => string | undefined;
 }
 
 interface ValidateAgentModelResult {
@@ -416,7 +422,7 @@ interface ValidateAgentModelResult {
 export async function validateAgentModel(
   params: ValidateAgentModelParams,
 ): Promise<ValidateAgentModelResult> {
-  const { req, res, agent, modelsConfig, logViolation } = params;
+  const { req, res, agent, modelsConfig, logViolation, toPublicModelId } = params;
   const { model, provider: endpoint } = agent;
 
   if (!model) {
@@ -447,7 +453,10 @@ export async function validateAgentModel(
     };
   }
 
-  const validModel = !!availableModels.find((availableModel) => availableModel === model);
+  // A routed request carries the concrete id; map it back to the public key
+  // the catalog lists. Unmapped ids compare as themselves and stay rejected.
+  const catalogModel = toPublicModelId?.(model) ?? model;
+  const validModel = !!availableModels.find((availableModel) => availableModel === catalogModel);
 
   if (validModel) {
     return { isValid: true };

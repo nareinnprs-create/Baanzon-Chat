@@ -1,4 +1,5 @@
 const { logger } = require('@librechat/data-schemas');
+const { toPublicModelId } = require('~/server/services/billing/modelRouter');
 const {
   ADDED_AGENT_ID,
   initializeAgent,
@@ -122,6 +123,7 @@ const processAddedConvo = async ({
       modelsConfig,
       logViolation,
       agent: addedAgent,
+      toPublicModelId,
     });
 
     if (!addedValidation.isValid) {

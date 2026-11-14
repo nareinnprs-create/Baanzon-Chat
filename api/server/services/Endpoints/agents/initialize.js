@@ -1,4 +1,5 @@
 const { logger } = require('@librechat/data-schemas');
+const { toPublicModelId } = require('~/server/services/billing/modelRouter');
 const { createContentAggregator, GraphNodeKeys } = require('@librechat/agents');
 const {
   resolveSender,
@@ -319,6 +320,7 @@ const initializeClient = async ({
         modelsConfig,
         logViolation,
         agent: primaryAgent,
+        toPublicModelId,
       });
       if (!validationResult.isValid) {
         throw new Error(validationResult.error?.message);
@@ -781,7 +783,7 @@ const initializeClient = async ({
       // Pass through the `@librechat/api` exports so that tests which
       // `jest.mock('@librechat/api')` can override the initializer/validator.
       initializeAgent,
-      validateAgentModel,
+      validateAgentModel: (params) => validateAgentModel({ ...params, toPublicModelId }),
     },
   );
 
@@ -1158,7 +1160,7 @@ const initializeClient = async ({
       throw new Error(`You no longer have access to subagent ${agentId}.`);
     }
     const validation = await waitForAbort(
-      validateAgentModel({ req, res, agent, modelsConfig, logViolation }),
+      validateAgentModel({ req, res, agent, modelsConfig, logViolation, toPublicModelId }),
       context.signal,
     );
     throwIfAborted(context.signal);
