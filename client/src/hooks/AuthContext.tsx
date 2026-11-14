@@ -362,4 +362,11 @@ const useAuthContext = () => {
   return context;
 };
 
-export { AuthContextProvider, useAuthContext, AuthContext };
+/**
+ * Tolerant token read for feature shells that must mount outside an
+ * AuthProvider (route-shell specs, isolated previews): returns undefined
+ * instead of throwing, and the feature degrades to its unauthenticated path.
+ */
+const useAuthToken = (): string | undefined => useContext(AuthContext)?.token ?? undefined;
+
+export { AuthContextProvider, useAuthContext, useAuthToken, AuthContext };

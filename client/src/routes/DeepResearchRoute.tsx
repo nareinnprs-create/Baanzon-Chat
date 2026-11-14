@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Provider } from 'jotai';
 import { createBackendDeepResearchExecutor, DeepResearchView } from '~/components/DeepResearch';
-import { useAuthContext } from '~/hooks/AuthContext';
+import { useAuthToken } from '~/hooks/AuthContext';
 
 /**
  * Route shell for Deep Research. `createBackendDeepResearchExecutor` talks to
@@ -13,7 +13,7 @@ import { useAuthContext } from '~/hooks/AuthContext';
  * flow's state from the rest of the app.
  */
 export default function DeepResearchRoute() {
-  const { token } = useAuthContext();
+  const token = useAuthToken();
   const executor = useMemo(
     () => createBackendDeepResearchExecutor({ getToken: () => token }),
     [token],

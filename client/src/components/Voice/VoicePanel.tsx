@@ -3,7 +3,7 @@ import { CircleSlash2, Waves } from 'lucide-react';
 import { Alert, Button, EmptyState, Spinner } from '@librechat/client';
 import type { ReactNode } from 'react';
 import type { VoiceHistoryTurn, VoiceOptions, VoiceStatus, VoiceTranscriptRole } from './types';
-import { useAuthContext } from '~/hooks/AuthContext';
+import { useAuthToken } from '~/hooks/AuthContext';
 import useDiyaVoice from '~/hooks/useDiyaVoice';
 import { VOICE_LABELS as L } from './labels';
 import { requestDiyaTurn } from './api';
@@ -66,7 +66,7 @@ export default function VoicePanel({
   title,
   className,
 }: VoicePanelProps) {
-  const { token } = useAuthContext();
+  const token = useAuthToken();
   const defaultTurn = useCallback(
     (text: string, history: VoiceHistoryTurn[], signal: AbortSignal) =>
       requestDiyaTurn(text, history, signal, token ?? undefined),

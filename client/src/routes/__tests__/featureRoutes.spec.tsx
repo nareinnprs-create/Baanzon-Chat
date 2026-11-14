@@ -38,6 +38,7 @@ jest.mock('~/components/OAuth', () => ({
 }));
 jest.mock('~/hooks/AuthContext', () => ({
   AuthContextProvider: ({ children }: { children: ReactNode }) => children,
+  useAuthToken: () => 'test-token',
 }));
 
 jest.mock('../RouteErrorBoundary', () => () => null);
