@@ -192,7 +192,11 @@ function runStepOverStream(
           }
           return;
         }
-        fail(caught instanceof Error && caught.message ? caught.message : 'Deep research stream failed');
+        fail(
+          caught instanceof Error && caught.message
+            ? caught.message
+            : 'Deep research stream failed',
+        );
       }
     })();
   });

@@ -477,6 +477,7 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
   }, [
     handleResults,
     resumeRecognition,
+    setBargeIn,
     setError,
     setStatus,
     startCapture,
