@@ -204,6 +204,136 @@ textarea {
   }
 }
 
+/*
+ * Diya Orb — the voice session's round control. Custom CSS because the orb is
+ * three stacked layers (halo, ring, core) whose breathing, pulse and ripple
+ * animations key off the session status and the live mic level; the shared
+ * Tailwind primitives have no animation-capable layered primitive for this.
+ * All colors come from theme variables so both themes stay coherent.
+ */
+.diya-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 5.5rem;
+  height: 5.5rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+}
+.diya-orb:focus-visible {
+  outline: 2px solid rgb(var(--accent-primary));
+  outline-offset: 3px;
+}
+.diya-orb:disabled {
+  cursor: default;
+}
+.diya-orb__halo,
+.diya-orb__ring,
+.diya-orb__core {
+  grid-area: 1 / 1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.diya-orb__core {
+  width: 3.5rem;
+  height: 3.5rem;
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgb(var(--accent-primary)) 0%,
+    rgb(var(--link-hover)) 100%
+  );
+  box-shadow: 0 4px 14px rgb(var(--accent-primary) / 0.35);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+/* Mic level lifts the core (0..1 via --diya-level) while listening. */
+.diya-orb--listening .diya-orb__core {
+  transform: scale(calc(1 + var(--diya-level, 0) * 0.18));
+}
+.diya-orb--muted .diya-orb__core {
+  background: var(--surface-secondary);
+  box-shadow: inset 0 0 0 2px rgb(var(--text-secondary));
+}
+.diya-orb--error .diya-orb__core,
+.diya-orb--unsupported .diya-orb__core {
+  background: var(--surface-secondary);
+  box-shadow: inset 0 0 0 2px rgb(var(--text-destructive));
+}
+.diya-orb__ring {
+  width: 4.75rem;
+  height: 4.75rem;
+  border: 2px solid rgb(var(--accent-primary) / 0.45);
+  opacity: 0;
+}
+.diya-orb__halo {
+  width: 5.5rem;
+  height: 5.5rem;
+  background: rgb(var(--accent-primary) / 0.18);
+  opacity: 0;
+}
+/* Breathing halo while the session is live. */
+.diya-orb--active .diya-orb__halo {
+  opacity: 1;
+  animation: diya-orb-breathe 2.4s ease-in-out infinite;
+}
+/* Ripple ring while the assistant speaks or thinks. */
+.diya-orb--speaking .diya-orb__ring,
+.diya-orb--thinking .diya-orb__ring {
+  opacity: 1;
+  animation: diya-orb-ripple 1.6s ease-out infinite;
+}
+.diya-orb--speaking .diya-orb__core,
+.diya-orb--thinking .diya-orb__core {
+  animation: diya-orb-glow 1.2s ease-in-out infinite;
+}
+@keyframes diya-orb-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+@keyframes diya-orb-ripple {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+@keyframes diya-orb-glow {
+  0%,
+  100% {
+    box-shadow: 0 4px 14px rgb(var(--accent-primary) / 0.35);
+  }
+  50% {
+    box-shadow: 0 4px 22px rgb(var(--accent-primary) / 0.6);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .diya-orb__halo,
+  .diya-orb__ring,
+  .diya-orb__core {
+    animation: none !important;
+  }
+  .diya-orb--speaking .diya-orb__ring,
+  .diya-orb--thinking .diya-orb__ring {
+    opacity: 0.5;
+    transform: scale(1.15);
+  }
+  .diya-orb--listening .diya-orb__core {
+    transform: none;
+  }
+}
+
 /* Icon swap — cross-fade two icons sharing a slot. */
 .t-icon-swap {
   position: relative;

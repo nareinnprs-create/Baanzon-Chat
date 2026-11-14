@@ -30,27 +30,29 @@ export function createDeepResearchRunner(deps: DeepResearchRunnerDeps): DeepRese
     if (signal.aborted) {
       throw abortError();
     }
-    return {
-      id: `plan-${randomUUID()}`,
-      topic,
-      steps: [
-        {
-          id: 'step-1',
-          title: `Background: ${topic}`,
-          query: `${topic} background context overview`,
-        },
-        {
-          id: 'step-2',
-          title: `Evidence: ${topic}`,
-          query: `${topic} key evidence data findings`,
-        },
-        {
-          id: 'step-3',
-          title: `Synthesis: ${topic}`,
-          query: `${topic} analysis implications outlook`,
-        },
-      ],
-    };
+    const template = buildTemplatePlan(topic);
+    if (llm == null) {
+      return template;
+    }
+    try {
+      const prompt = [
+        'You are a research planner. Break the topic into 3 to 5 sequential research steps.',
+        `Topic: ${topic}`,
+        'Respond with ONLY a JSON array, no prose and no code fences. Each element is an object with exactly two string fields: "title" (a short step title) and "query" (a web search query for that step).',
+        'Order steps so they build on each other: background first, then evidence, then analysis or synthesis last.',
+      ].join('\n\n');
+      const steps = parsePlanSteps(await llm.complete(prompt, signal));
+      if (steps.length === 0) {
+        return template;
+      }
+      return { id: `plan-${randomUUID()}`, topic, steps };
+    } catch (caught) {
+      if (caught instanceof Error && caught.name === 'AbortError') {
+        throw caught;
+      }
+      /** A failed planner call degrades to the deterministic template. */
+      return template;
+    }
   }
 
   async function runStep(
@@ -120,19 +122,113 @@ export function createDeepResearchRunner(deps: DeepResearchRunnerDeps): DeepRese
     return {
       planId: plan.id,
       title: `Research report: ${plan.topic}`,
-      summary: `Completed ${plan.steps.length} step${
-        plan.steps.length === 1 ? '' : 's'
-      } on ${plan.topic}.`,
+      summary: await reportSummary(plan, signal),
       sections,
       citations,
       generatedAt: new Date().toISOString(),
     };
   }
 
+  async function reportSummary(plan: TDeepResearchPlan, signal: AbortSignal): Promise<string> {
+    const fallback = `Completed ${plan.steps.length} step${
+      plan.steps.length === 1 ? '' : 's'
+    } on ${plan.topic}.`;
+    if (llm == null) {
+      return fallback;
+    }
+    try {
+      const material = plan.steps
+        .map((step) => `## ${step.title}\n${(step.detail ?? '').slice(0, 8000)}`)
+        .join('\n\n')
+        .slice(0, 24000);
+      const summary = (
+        await llm.complete(
+          [
+            'Write an executive summary of this research report in three sentences or fewer.',
+            'Answer in plain prose, no headings, no lists, no citations.',
+            'Material:',
+            material,
+          ].join('\n\n'),
+          signal,
+        )
+      ).trim();
+      return summary || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
   return { createPlan, runStep, buildReport };
 }
 
 const EMPTY_STEP_BODY = 'This step did not produce a summary.';
+
+/** Bounded plan shape: at least one, at most five steps. */
+const PLAN_MIN_STEPS = 1;
+const PLAN_MAX_STEPS = 5;
+
+/**
+ * Extracts plan steps from the planner LLM's reply. Tolerates code fences and
+ * prose around the JSON array; anything not cleanly shaped is dropped, and an
+ * empty result sends the caller to the deterministic template.
+ */
+function parsePlanSteps(raw: string): TDeepResearchPlan['steps'] {
+  const start = raw.indexOf('[');
+  const end = raw.lastIndexOf(']');
+  if (start === -1 || end <= start) {
+    return [];
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw.slice(start, end + 1));
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) {
+    return [];
+  }
+  const steps = parsed
+    .map((entry) => {
+      const shape = entry as { title?: unknown; query?: unknown };
+      const title = typeof shape.title === 'string' ? shape.title.trim() : '';
+      const query = typeof shape.query === 'string' ? shape.query.trim() : '';
+      if (!title || !query) {
+        return null;
+      }
+      return { title: title.slice(0, 500), query: query.slice(0, 4000) };
+    })
+    .filter((step): step is { title: string; query: string } => step != null)
+    .slice(0, PLAN_MAX_STEPS);
+  if (steps.length < PLAN_MIN_STEPS) {
+    return [];
+  }
+  return steps.map((step, index) => ({ id: `step-${index + 1}`, ...step }));
+}
+
+/** The deterministic fallback plan used when no LLM is wired or parsing fails. */
+function buildTemplatePlan(topic: string): TDeepResearchPlan {
+  return {
+    id: `plan-${randomUUID()}`,
+    topic,
+    steps: [
+      {
+        id: 'step-1',
+        title: `Background: ${topic}`,
+        query: `${topic} background context overview`,
+      },
+      {
+        id: 'step-2',
+        title: `Evidence: ${topic}`,
+        query: `${topic} key evidence data findings`,
+      },
+      {
+        id: 'step-3',
+        title: `Synthesis: ${topic}`,
+        query: `${topic} analysis implications outlook`,
+      },
+    ],
+  };
+}
 
 function progress(
   value: number,

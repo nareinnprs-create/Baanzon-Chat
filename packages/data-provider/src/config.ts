@@ -2811,6 +2811,19 @@ export const deepResearchConfigSchema = z
 export type DeepResearchConfig = z.infer<typeof deepResearchConfigSchema>;
 
 /**
+ * Diya Orb voice levers. `enabled` is the master switch: when false the
+ * `/api/diya/turn` route answers 503 with `diya_unavailable`, and the client's
+ * orb shows its unsupported state. Default enabled.
+ */
+export const diyaConfigSchema = z
+  .object({
+    enabled: z.boolean().optional().default(true),
+  })
+  .strict();
+
+export type DiyaConfig = z.infer<typeof diyaConfigSchema>;
+
+/**
  * Administrative levers for the `endpoints.custom` block. Defaults preserve
  * current behavior: custom endpoints are enabled and the deployment caps
  * how many upstreams may be configured at once (`maxUpstreams`) so a
@@ -2843,6 +2856,7 @@ export const configSchema = z.object({
   notifications: notificationsConfigSchema.optional(),
   trustEngine: trustEngineConfigSchema.optional(),
   deepResearch: deepResearchConfigSchema.optional(),
+  diya: diyaConfigSchema.optional(),
   customEndpoints: customEndpointsConfigSchema.optional(),
   featureFlags: featureFlagsConfigSchema,
   billing: billingConfigSchema.optional(),

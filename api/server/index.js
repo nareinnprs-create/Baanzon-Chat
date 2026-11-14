@@ -443,6 +443,7 @@ const startServer = async () => {
   app.use('/api/presets', routes.presets);
   app.use('/api/projects', routes.projects);
   app.use('/api/deep-research', routes.deepResearch);
+  app.use('/api/diya', routes.diya);
   app.use('/api/flags', routes.flags);
   app.use('/api/billing', routes.billingPayments);
   app.use('/api/billing', routes.billing);

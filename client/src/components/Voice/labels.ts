@@ -1,7 +1,7 @@
 import i18n from '~/locales/i18n';
 
 /**
- * Voice strings for realtime voice (P5.2), promoted into
+ * Voice strings for Diya Orb, promoted into
  * `client/src/locales/en/translation.json` under the `com_ui_voice_*` keys.
  * The map resolves each key through i18next at access time, so components
  * keep the plain `VOICE_LABELS.key` API while every string stays translatable.
@@ -20,6 +20,7 @@ const KEYS = {
   statusIdle: 'com_ui_voice_status_idle',
   statusConnecting: 'com_ui_voice_status_connecting',
   statusListening: 'com_ui_voice_status_listening',
+  statusThinking: 'com_ui_voice_status_thinking',
   statusSpeaking: 'com_ui_voice_status_speaking',
   statusMuted: 'com_ui_voice_status_muted',
   statusError: 'com_ui_voice_status_error',
@@ -37,6 +38,10 @@ const KEYS = {
   errorDescription: 'com_ui_voice_error_description',
   micPermissionDenied: 'com_ui_voice_mic_permission_denied',
   micUnavailable: 'com_ui_voice_mic_unavailable',
+  turnUnavailable: 'com_ui_voice_turn_unavailable',
+  turnDenied: 'com_ui_voice_turn_denied',
+  turnInvalid: 'com_ui_voice_turn_invalid',
+  turnUpstream: 'com_ui_voice_turn_upstream',
   retry: 'com_ui_voice_retry',
   announceConnecting: 'com_ui_voice_announce_connecting',
   announceListening: 'com_ui_voice_announce_listening',

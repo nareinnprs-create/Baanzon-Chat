@@ -1,15 +1,16 @@
+import { useCallback } from 'react';
 import { CircleSlash2, Waves } from 'lucide-react';
 import { Alert, Button, EmptyState, Spinner } from '@librechat/client';
 import type { ReactNode } from 'react';
-import type { VoiceOptions, VoiceStatus, VoiceTranscriptRole } from './types';
-import useRealtimeVoice from '~/hooks/useRealtimeVoice';
+import type { VoiceHistoryTurn, VoiceOptions, VoiceStatus, VoiceTranscriptRole } from './types';
+import { useAuthContext } from '~/hooks/AuthContext';
+import useDiyaVoice from '~/hooks/useDiyaVoice';
 import { VOICE_LABELS as L } from './labels';
-import VoiceButton from './VoiceButton';
+import { requestDiyaTurn } from './api';
 import { cn } from '~/utils';
+import Orb from './Orb';
 
 export interface VoicePanelProps extends VoiceOptions {
-  /** Control style for the microphone button. Default `toggle`. */
-  mode?: 'toggle' | 'push-to-talk';
   title?: string;
   className?: string;
 }
@@ -18,6 +19,7 @@ const STATUS_LABELS: Record<VoiceStatus, string> = {
   idle: L.statusIdle,
   connecting: L.statusConnecting,
   listening: L.statusListening,
+  thinking: L.statusThinking,
   speaking: L.statusSpeaking,
   muted: L.statusMuted,
   error: L.statusError,
@@ -32,9 +34,6 @@ const ROLE_LABELS: Record<VoiceTranscriptRole, string> = {
 function statusAnnouncement(status: VoiceStatus, bargeIn: boolean): string {
   if (bargeIn) {
     return L.announceBargeIn;
-  }
-  if (status === 'connecting') {
-    return L.announceConnecting;
   }
   if (status === 'listening') {
     return L.announceListening;
@@ -51,47 +50,31 @@ function statusAnnouncement(status: VoiceStatus, bargeIn: boolean): string {
   return '';
 }
 
-function MicMeter({ level }: { level: number }) {
-  const percent = Math.round(Math.min(Math.max(level, 0), 1) * 100);
-  return (
-    <div
-      role="meter"
-      aria-label={L.micLevel}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={percent}
-      className="h-2 w-full overflow-hidden rounded-full bg-surface-tertiary"
-    >
-      <div
-        className="h-full rounded-full bg-series-1 transition-[width] duration-100 motion-reduce:transition-none"
-        style={{ width: `${percent}%` }}
-      />
-    </div>
-  );
-}
-
 /**
- * The realtime-voice session panel: status, microphone level, transcript, mute,
- * barge-in and end-call, across explicit loading, empty, error and unsupported
- * states. It owns the session through {@link useRealtimeVoice} and renders one
- * branch per lifecycle status.
+ * The Diya Orb session panel: status, orb, transcript, mute, barge-in and end
+ * session, across explicit error and unsupported states. It owns the session
+ * through {@link useDiyaVoice} and renders one branch per lifecycle status.
+ * The default `turn` posts to the backend turn endpoint with the session's
+ * Bearer token; the model identity stays on the server.
  */
 export default function VoicePanel({
-  transport,
-  createTransport,
-  rtcConfig,
+  turn,
   vad,
   tickMs,
   autoStart,
   onTranscript,
-  mode = 'toggle',
   title,
   className,
 }: VoicePanelProps) {
-  const voice = useRealtimeVoice({
-    transport,
-    createTransport,
-    rtcConfig,
+  const { token } = useAuthContext();
+  const defaultTurn = useCallback(
+    (text: string, history: VoiceHistoryTurn[], signal: AbortSignal) =>
+      requestDiyaTurn(text, history, signal, token ?? undefined),
+    [token],
+  );
+
+  const voice = useDiyaVoice({
+    turn: turn ?? defaultTurn,
     vad,
     tickMs,
     autoStart,
@@ -102,6 +85,7 @@ export default function VoicePanel({
   const active =
     status === 'connecting' ||
     status === 'listening' ||
+    status === 'thinking' ||
     status === 'speaking' ||
     status === 'muted';
 
@@ -125,7 +109,7 @@ export default function VoicePanel({
           className="flex items-center gap-2 text-sm text-text-secondary"
           data-testid="voice-status"
         >
-          {status === 'connecting' ? (
+          {status === 'connecting' || status === 'thinking' ? (
             <Spinner className="size-4" aria-hidden="true" />
           ) : (
             <Waves className="size-4" aria-hidden="true" />
@@ -134,11 +118,11 @@ export default function VoicePanel({
           <span className="sr-only">{statusAnnouncement(status, voice.bargeIn)}</span>
         </p>
 
-        {status === 'error' ? (
+        {voice.error != null ? (
           <Alert variant="error" data-testid="voice-error">
             <div className="flex flex-col gap-2">
               <span className="font-medium">{L.errorTitle}</span>
-              <span>{voice.error ?? L.errorDescription}</span>
+              <span>{voice.error}</span>
               <div>
                 <Button
                   type="button"
@@ -153,29 +137,17 @@ export default function VoicePanel({
           </Alert>
         ) : null}
 
-        {active && status !== 'connecting' ? (
-          <div className="flex flex-col gap-3 rounded-xl border border-border-light bg-surface-secondary p-4">
-            {voice.muted ? (
-              <p className="text-xs text-text-secondary">{L.statusMuted}</p>
-            ) : (
-              <MicMeter level={voice.micLevel} />
-            )}
-            {voice.bargeIn ? (
-              <p role="status" className="text-xs font-medium text-text-primary">
-                {L.bargeInActive}
-              </p>
-            ) : null}
-          </div>
+        {voice.bargeIn ? (
+          <p role="status" className="text-xs font-medium text-text-primary">
+            {L.bargeInActive}
+          </p>
         ) : null}
 
-        <div className="flex flex-wrap items-center gap-2">
-          <VoiceButton
-            status={status}
-            mode={mode}
-            onToggle={voice.toggle}
-            onStart={() => void voice.start()}
-            onStop={voice.stop}
-          />
+        <div className="flex items-center justify-center py-2">
+          <Orb status={status} micLevel={voice.micLevel} onToggle={voice.toggle} />
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-2">
           {active ? (
             <Button
               type="button"
@@ -187,7 +159,7 @@ export default function VoicePanel({
               {voice.muted ? L.unmute : L.mute}
             </Button>
           ) : null}
-          {status === 'speaking' ? (
+          {status === 'speaking' || status === 'thinking' ? (
             <Button type="button" variant="outline" size="default" onClick={voice.interrupt}>
               {L.bargeIn}
             </Button>

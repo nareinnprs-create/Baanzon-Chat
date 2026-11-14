@@ -1,10 +1,11 @@
 /**
- * Shared vocabulary for the realtime voice feature (P5.2).
+ * Shared vocabulary for the Diya Orb voice feature.
  *
- * The session is deliberately transport-agnostic: {@link VoiceTransport} is the
- * only seam to the network, so the hook and the panels are written against it
- * and a fake implementation drives the tests. The default implementation over
- * native `RTCPeerConnection` lives in `~/utils/voice/transport`.
+ * The session runs entirely in the browser: Web Speech recognition captures
+ * the user, each finalized utterance goes to the backend turn endpoint, and
+ * the reply is spoken through `speechSynthesis`. There is no WebRTC seam
+ * anymore — the only network call is {@link VoiceTurnFn}, which the hook and
+ * the panels are written against.
  */
 
 import type { VadOptions } from '~/utils/voice/vad';
@@ -14,6 +15,7 @@ export type VoiceStatus =
   | 'idle'
   | 'connecting'
   | 'listening'
+  | 'thinking'
   | 'speaking'
   | 'muted'
   | 'error'
@@ -31,72 +33,33 @@ export interface VoiceTranscript {
   at: number;
 }
 
-/**
- * Sends a locally created SDP offer and resolves the remote answer. The
- * transport calls this; a self-contained integration supplies its own network
- * call.
- */
-export type VoiceSignalFn = (
-  offer: RTCSessionDescriptionInit,
-) => Promise<RTCSessionDescriptionInit>;
-
-/** Everything the transport can report asynchronously. */
-export type VoiceTransportEvent =
-  | { type: 'open' }
-  | { type: 'close' }
-  | { type: 'error'; message: string }
-  | { type: 'assistant-speaking'; speaking: boolean }
-  | { type: 'transcript'; transcript: VoiceTranscript };
-
-/**
- * The network seam. A real implementation negotiates WebRTC and carries the
- * microphone track on the peer connection; a fake one can be a plain object,
- * which is what the lifecycle tests use.
- */
-export interface VoiceTransport {
-  /**
-   * Negotiates the session. With an `offer` the transport answers it; without
-   * one it creates its own offer (optionally signalling it through
-   * {@link VoiceSignalFn}) and resolves the negotiated answer. Call
-   * {@link VoiceTransport.setMicrophoneStream} first so the initial offer
-   * already carries the microphone track.
-   */
-  connect(offer?: RTCSessionDescriptionInit): Promise<RTCSessionDescriptionInit | void>;
-  /**
-   * Attaches the microphone stream to the session, replacing any previous one;
-   * `null` detaches it. The hook calls this after `getUserMedia` resolves and
-   * again while tearing down.
-   */
-  setMicrophoneStream(stream: MediaStream | null): void;
-  /** Subscribes to remote audio tracks; returns an unsubscribe. */
-  onTrack(listener: (track: MediaStreamTrack) => void): () => void;
-  /** Subscribes to session events; returns an unsubscribe. */
-  onEvent(listener: (event: VoiceTransportEvent) => void): () => void;
-  /** Signals the remote to stop its current utterance (barge-in). */
-  bargeIn(): void;
-  /** Tears the session down; safe to call more than once. */
-  close(): void;
+/** One prior turn sent to the backend so replies keep their context. */
+export interface VoiceHistoryTurn {
+  role: VoiceTranscriptRole;
+  content: string;
 }
 
-/** Options accepted by {@link useRealtimeVoice} and `VoicePanel`. */
+/**
+ * The conversation seam. Receives the user's finalized text plus the settled
+ * history so far, resolves the assistant's reply text. Rejecting fails the
+ * turn; the hook surfaces the failure and returns to listening.
+ */
+export type VoiceTurnFn = (
+  text: string,
+  history: VoiceHistoryTurn[],
+  signal: AbortSignal,
+) => Promise<string>;
+
+/** Options accepted by {@link useDiyaVoice} and `VoicePanel`. */
 export interface VoiceOptions {
-  /**
-   * A ready transport. When supplied it also proves the environment is usable.
-   * A session that ends closes it, so a transport here must tolerate
-   * `connect()` after `close()` for the error-retry path to work; pass
-   * `createTransport` for transports that are single-use.
-   */
-  transport?: VoiceTransport | null;
-  /** Builds a transport when none is injected; `null` means unsupported. */
-  createTransport?: (config?: RTCConfiguration) => VoiceTransport | null;
-  /** Passed to the default WebRTC transport. */
-  rtcConfig?: RTCConfiguration;
+  /** The conversation seam; the panel supplies the authenticated default. */
+  turn?: VoiceTurnFn;
   /** VAD tuning; see {@link VadOptions}. */
   vad?: VadOptions;
   /** Level-sampling interval for the meter and VAD, in milliseconds. Default `100`. */
   tickMs?: number;
   /** Starts the session as soon as a supported environment is detected. */
   autoStart?: boolean;
-  /** Called for each transcript line the transport reports. */
+  /** Called for each transcript line the session produces. */
   onTranscript?: (transcript: VoiceTranscript) => void;
 }

@@ -27,6 +27,7 @@ const workflows = require('./workflows');
 const presets = require('./presets');
 const projects = require('./projects');
 const deepResearch = require('./deepResearch');
+const diya = require('./diya');
 const flags = require('./flags');
 const billing = require('./billing');
 const billingPayments = require('./billing-payments');
@@ -98,6 +99,7 @@ module.exports = {
   recall,
   projects,
   deepResearch,
+  diya,
   flags,
   billing,
   billingPayments,

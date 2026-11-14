@@ -463,10 +463,15 @@ export async function validateAgentModel(
 
   await logViolation(req, res, type, errorMessage, score);
 
+  // User model identity is never echoed back: only plain public names survive;
+  // anything carrying provider-internal separators (@ / :) is masked.
+  const PUBLIC_MODEL_NAME = /^[\w.+-]+$/;
+  const safeModel = PUBLIC_MODEL_NAME.test(model) ? model : 'unknown';
+
   return {
     isValid: false,
     error: {
-      message: `{ "type": "${ViolationTypes.ILLEGAL_MODEL_REQUEST}", "info": "${endpoint}|${model}" }`,
+      message: `{ "type": "${ViolationTypes.ILLEGAL_MODEL_REQUEST}", "info": "${endpoint}|${safeModel}" }`,
     },
   };
 }

@@ -105,9 +105,9 @@ export async function loadEphemeralAgent(
   if (ephemeralAgent?.file_search === true || modelSpec?.fileSearch === true) {
     tools.push(Tools.file_search);
   }
-  if (ephemeralAgent?.web_search === true || modelSpec?.webSearch === true) {
-    tools.push(Tools.web_search);
-  }
+  // Web search is default and always active server-side; the client toggle
+  // cannot turn it off. Tool-definition gating downstream still applies.
+  tools.push(Tools.web_search);
   if (ephemeralAgent?.memory === true || modelSpec?.memory === true) {
     tools.push(Tools.memory);
   }

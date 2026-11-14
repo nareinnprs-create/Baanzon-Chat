@@ -29,17 +29,34 @@ export const voiceTranscriptsAtom = atom<VoiceTranscript[]>([]);
 /** The last failure message, or `null`. */
 export const voiceErrorAtom = atom<string | null>(null);
 
-/** Derived: `true` while a session occupies the transport. */
+/** Derived: `true` while a session occupies the microphone. */
 export const voiceActiveAtom = atom<boolean>((get) => {
   const status = get(voiceStatusAtom);
   return (
-    status === 'connecting' || status === 'listening' || status === 'speaking' || status === 'muted'
+    status === 'connecting' ||
+    status === 'listening' ||
+    status === 'thinking' ||
+    status === 'speaking' ||
+    status === 'muted'
   );
 });
 
 /** Appends one transcript line. */
 export const appendVoiceTranscriptAtom = atom(null, (get, set, transcript: VoiceTranscript) => {
   set(voiceTranscriptsAtom, [...get(voiceTranscriptsAtom), transcript]);
+});
+
+/** Inserts or updates one transcript line by id (interim lines mutate in place). */
+export const upsertVoiceTranscriptAtom = atom(null, (get, set, transcript: VoiceTranscript) => {
+  const existing = get(voiceTranscriptsAtom);
+  const index = existing.findIndex((line) => line.id === transcript.id);
+  if (index === -1) {
+    set(voiceTranscriptsAtom, [...existing, transcript]);
+    return;
+  }
+  const next = existing.slice();
+  next[index] = transcript;
+  set(voiceTranscriptsAtom, next);
 });
 
 /** Returns every atom above to its initial value, e.g. when a session ends. */

@@ -76,44 +76,58 @@ function abortError(): Error {
   return error;
 }
 
+/**
+ * Runs one step against `GET /run` and parses its SSE stream. The request is a
+ * plain `fetch` (not `EventSource`) because the transport must carry the
+ * JWT Bearer header — `EventSource` cannot set headers and the route rejects
+ * anonymous streams.
+ */
 function runStepOverStream(
   topic: string,
   step: ResearchStep,
   signal: AbortSignal,
+  token: string | undefined,
   onProgress?: StepProgressCallback,
 ): Promise<ResearchStepResult> {
   return new Promise((resolve, reject) => {
-    const url = dataService.deepResearchStepRunUrl({
-      topic,
-      stepId: step.id,
-      title: step.title,
-      query: step.query,
-    });
-
-    let source: EventSource;
-    try {
-      source = new EventSource(url);
-    } catch (error) {
-      reject(normalizeError(error));
-      return;
-    }
-
-    const onAbortCleanup = () => {
-      signal.removeEventListener('abort', onAbort);
-      source.close();
-    };
-
+    let settled = false;
     const onAbort = () => {
-      onAbortCleanup();
-      reject(abortError());
+      if (!settled) {
+        settled = true;
+        reject(abortError());
+      }
+    };
+    signal.addEventListener('abort', onAbort, { once: true });
+    const cleanup = () => signal.removeEventListener('abort', onAbort);
+    const finish = (settle: (value: ResearchStepResult) => void, value: ResearchStepResult) => {
+      settled = true;
+      cleanup();
+      settle(value);
+    };
+    const fail = (message: string) => {
+      if (!settled) {
+        settled = true;
+        cleanup();
+        reject(new Error(message));
+      }
     };
 
-    signal.addEventListener('abort', onAbort, { once: true });
-
-    source.addEventListener(DEEP_RESEARCH_STREAM_EVENT, (event: MessageEvent) => {
+    const handleEventBlock = (block: string, settle: (value: ResearchStepResult) => void) => {
+      let name = '';
+      let data = '';
+      for (const line of block.split('\n')) {
+        if (line.startsWith('event:')) {
+          name = line.slice('event:'.length).trim();
+        } else if (line.startsWith('data:')) {
+          data += line.slice('data:'.length).trim();
+        }
+      }
+      if (name !== DEEP_RESEARCH_STREAM_EVENT) {
+        return;
+      }
       let payload: TDeepResearchEvent;
       try {
-        payload = JSON.parse(event.data) as TDeepResearchEvent;
+        payload = JSON.parse(data) as TDeepResearchEvent;
       } catch {
         return;
       }
@@ -122,32 +136,80 @@ function runStepOverStream(
         return;
       }
       if (payload.kind === 'step') {
-        onAbortCleanup();
-        resolve({ detail: payload.detail });
+        finish(settle, { detail: payload.detail });
         return;
       }
       if (payload.kind === 'error') {
-        onAbortCleanup();
-        reject(new Error(payload.detail ?? payload.code));
+        fail(payload.detail ?? payload.code);
       }
-    });
-
-    source.onerror = () => {
-      onAbortCleanup();
-      reject(new Error('Deep research stream failed'));
     };
+
+    void (async () => {
+      try {
+        const url = dataService.deepResearchStepRunUrl({
+          topic,
+          stepId: step.id,
+          title: step.title,
+          query: step.query,
+        });
+        const response = await fetch(url, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          signal,
+        });
+        if (!response.ok || !response.body) {
+          fail(`Deep research stream failed (${response.status})`);
+          return;
+        }
+        const settle = (value: ResearchStepResult) => finish(resolve, value);
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        for (;;) {
+          const { value: chunk, done: finished } = await reader.read();
+          if (settled) {
+            return;
+          }
+          if (finished) {
+            break;
+          }
+          buffer += decoder.decode(chunk, { stream: true });
+          let boundary = buffer.indexOf('\n\n');
+          while (boundary !== -1 && !settled) {
+            handleEventBlock(buffer.slice(0, boundary), settle);
+            buffer = buffer.slice(boundary + 2);
+            boundary = buffer.indexOf('\n\n');
+          }
+        }
+        if (!settled) {
+          fail('Deep research stream failed');
+        }
+      } catch (caught) {
+        if (caught instanceof Error && caught.name === 'AbortError') {
+          if (!settled) {
+            settled = true;
+            cleanup();
+            reject(abortError());
+          }
+          return;
+        }
+        fail(caught instanceof Error && caught.message ? caught.message : 'Deep research stream failed');
+      }
+    })();
   });
 }
 
 export type BackendDeepResearchExecutorOptions = {
   /** The executor used when the backend cannot serve the flow. */
   fallback?: DeepResearchExecutor;
+  /** Supplies the current auth token for the run stream's Bearer header. */
+  getToken?: () => string | undefined;
 };
 
 export function createBackendDeepResearchExecutor(
   options: BackendDeepResearchExecutorOptions = {},
 ): DeepResearchExecutor {
   const fallback = options.fallback ?? createInMemoryExecutor();
+  const { getToken } = options;
   /** Flipped off the first time the backend answers as unavailable; sticky for the flow. */
   let backendAvailable = true;
   /** The plan topic, remembered so the run stream URL can carry it. */
@@ -179,7 +241,7 @@ export function createBackendDeepResearchExecutor(
       if (!backendAvailable) {
         return fallback.runStep(step, signal, onProgress);
       }
-      return runStepOverStream(topic, step, signal, onProgress);
+      return runStepOverStream(topic, step, signal, getToken?.(), onProgress);
     },
 
     async buildReport(plan: ResearchPlan, signal: AbortSignal): Promise<ResearchReport> {
