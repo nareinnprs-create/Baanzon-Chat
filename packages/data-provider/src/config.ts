@@ -2266,6 +2266,7 @@ export enum ScraperProviders {
   SERPER = 'serper',
   TAVILY = 'tavily',
   KEENABLE = 'keenable',
+  CRW = 'crw',
 }
 
 export enum RerankerTypes {
@@ -2313,6 +2314,8 @@ export const webSearchSchema = z.object({
   tavilyExtractUrl: z.string().optional().default('${TAVILY_EXTRACT_URL}'),
   keenableApiKey: z.string().optional().default('${KEENABLE_API_KEY}'),
   keenableApiUrl: z.string().optional().default('${KEENABLE_API_URL}'),
+  crwApiKey: z.string().optional().default('${CRW_API_KEY}'),
+  crwApiUrl: z.string().optional().default('${CRW_API_URL}'),
   jinaApiKey: z.string().optional().default('${JINA_API_KEY}'),
   jinaApiKeyPreview: apiKeyPreviewSchema,
   jinaApiUrl: z.string().optional().default('${JINA_API_URL}'),

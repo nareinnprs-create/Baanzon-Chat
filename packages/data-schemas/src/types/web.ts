@@ -12,6 +12,8 @@ export type TWebSearchKeys =
   | 'tavilyExtractUrl'
   | 'keenableApiKey'
   | 'keenableApiUrl'
+  | 'crwApiKey'
+  | 'crwApiUrl'
   | 'jinaApiKey'
   | 'jinaApiUrl'
   | 'cohereApiKey';

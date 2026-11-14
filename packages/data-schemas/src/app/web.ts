@@ -42,6 +42,13 @@ export const webSearchAuth = {
        * `KEENABLE_FETCH_URL` env var, not through this config. */
       keenableApiKey: 0 as const,
     },
+    crw: {
+      /** Optional (0) — self-hosted fastCRW runs keyless; a key only matters
+       * for its managed cloud. Pinned-scrape auth is special-cased in
+       * `checkAuth` because the generic loop skips all-optional services. */
+      crwApiKey: 0 as const,
+      crwApiUrl: 0 as const,
+    },
   },
   rerankers: {
     jina: {
@@ -99,6 +106,8 @@ export function loadWebSearchConfig(
   const tavilyExtractUrl = config?.tavilyExtractUrl ?? '${TAVILY_EXTRACT_URL}';
   const keenableApiKey = config?.keenableApiKey ?? '${KEENABLE_API_KEY}';
   const keenableApiUrl = config?.keenableApiUrl ?? '${KEENABLE_API_URL}';
+  const crwApiKey = config?.crwApiKey ?? '${CRW_API_KEY}';
+  const crwApiUrl = config?.crwApiUrl ?? '${CRW_API_URL}';
   const jinaApiKey = config?.jinaApiKey ?? '${JINA_API_KEY}';
   const jinaApiUrl = config?.jinaApiUrl ?? '${JINA_API_URL}';
   const cohereApiKey = config?.cohereApiKey ?? '${COHERE_API_KEY}';
@@ -123,6 +132,8 @@ export function loadWebSearchConfig(
     tavilyExtractUrl,
     keenableApiKey,
     keenableApiUrl,
+    crwApiKey,
+    crwApiUrl,
     firecrawlApiKey,
     firecrawlApiUrl,
     firecrawlVersion,

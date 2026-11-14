@@ -62,6 +62,8 @@ describe('loadWebSearchConfig', () => {
         tavilyExtractUrl: '${TAVILY_EXTRACT_URL}',
         keenableApiKey: '${KEENABLE_API_KEY}',
         keenableApiUrl: '${KEENABLE_API_URL}',
+        crwApiKey: '${CRW_API_KEY}',
+        crwApiUrl: '${CRW_API_URL}',
       });
     });
 

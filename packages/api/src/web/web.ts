@@ -429,6 +429,32 @@ export async function loadWebSearchAuth({
       }
       return [true, isUserProvided || keenable.isUserProvided || !keenable.hasSystemApiKey];
     }
+    // Special case: self-hosted fastCRW is keyless. Both fields stay optional
+    // and only feed the SSRF agents and the SDK's own env fallbacks, so a
+    // pinned CRW authenticates with no key — the generic loop below skips
+    // all-optional services, exactly why Keenable needs its case above.
+    if (category === SearchCategories.SCRAPERS && specificService === ScraperProviders.CRW) {
+      authResult.scraperProvider = ScraperProviders.CRW;
+      const crwFields = extractWebSearchEnvVars({
+        keys: ['crwApiKey', 'crwApiUrl'],
+        config: webSearchConfig,
+      });
+      if (crwFields.length > 0) {
+        const crwValues = await loadAuthValues({
+          userId,
+          authFields: crwFields,
+          optional: new Set(crwFields),
+          throwError,
+        });
+        if (crwValues.crwApiKey) {
+          authResult.crwApiKey = crwValues.crwApiKey;
+        }
+        if (crwValues.crwApiUrl) {
+          authResult.crwApiUrl = crwValues.crwApiUrl;
+        }
+      }
+      return [true, isUserProvided];
+    }
 
     // If a specific service is specified, only check that one
     const services = specificService
