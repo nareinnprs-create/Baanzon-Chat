@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Button, Spinner, ThemeSelector } from '@librechat/client';
 import { useVerifyEmailMutation, useResendVerificationEmail } from '~/data-provider';
@@ -58,13 +58,21 @@ function RequestPasswordReset() {
     resendEmailMutation.mutate({ email });
   };
 
+  // One verify request per mount: the mutation-object dep re-runs this effect
+  // before isLoading flips, and a second POST consumes the token and paints the
+  // failure screen over a success that already happened.
+  const verifyRequested = useRef(false);
+
   useEffect(() => {
     if (verificationStatus || verifyEmailMutation.isLoading) {
       return;
     }
 
     if (token && email) {
-      verifyEmailMutation.mutate({ email, token });
+      if (!verifyRequested.current) {
+        verifyRequested.current = true;
+        verifyEmailMutation.mutate({ email, token });
+      }
     } else {
       if (email) {
         setHeaderText(localize('com_auth_email_verification_failed_token_missing') + ' 😢');

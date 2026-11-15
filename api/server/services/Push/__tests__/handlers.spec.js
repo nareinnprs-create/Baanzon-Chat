@@ -44,7 +44,7 @@ describe('Push handlers wiring', () => {
     const { api, webpush, wired } = loadWired();
 
     expect(webpush.setVapidDetails).toHaveBeenCalledWith(
-      'mailto:support@baanzonchat.opraiz.com',
+      'mailto:support@opraiz.com',
       'pub-key',
       'priv-key',
     );

@@ -504,6 +504,9 @@ const startServer = async () => {
   /** Error handler (must be last - Express identifies error middleware by its 4-arg signature) */
   app.use(ErrorController);
 
+  /** One-time fetch wrapper: retry/switch models on gateway failures (see gatewayFailover.js). */
+  require('~/server/services/Endpoints/gatewayFailover').installGatewayFailover();
+
   configureGenerationStreams();
 
   const server = app.listen(port, host, async (err) => {
