@@ -1153,11 +1153,34 @@ modelSpecs:
 # scripts/pod-searxng.sh); SEARXNG_INSTANCE_URL also powers Deep Research.
 webSearch:
   searchProvider: searxng
-  scraperProvider: keenable
+  scraperProvider: crw
   searxngInstanceUrl: '${SEARXNG_INSTANCE_URL}'
+  searxngSearchOptions:
+    # Engines enabled on the pod instance (google/duckduckgo serve captchas;
+    # presearch/mojeek are keyless and return results).
+    engines:
+      - bing
+      - brave
+      - startpage
+      - mojeek
+      - presearch
   # Loopback pin: the SearXNG upstream is local-only on the pod (SSRF guard).
   allowedAddresses:
     - '127.0.0.1:8888'
+    # crw scraper service (keyless) runs on the pod's loopback.
+    - '127.0.0.1:3999'
+
+# Model lanes: the vision lane serves image attachments via the configured
+# CF vision model (chat/completions image parts are rewritten to /ai/run).
+modelLanes:
+  visionModels:
+    - '@cf/meta/llama-3.2-11b-vision-instruct'
+
+# DALLE3 tool init fails at boot against the CF-only provider; no image
+# generation tool is offered, so filter it out.
+filteredTools:
+  - 'DALLE3.js'
+
 # (reference examples below kept commented)
 # webSearch:
 #   # Jina Reranking Configuration

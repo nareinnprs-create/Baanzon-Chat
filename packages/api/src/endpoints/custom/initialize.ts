@@ -14,6 +14,7 @@ import type {
   AnthropicModelOptions,
   ProviderInitializeParams,
 } from '~/types';
+import { attachCloudflareVisionRunFetch } from '~/endpoints/custom/cloudflareVisionRun';
 import { getLLMConfig as getAnthropicLLMConfig } from '~/endpoints/anthropic/llm';
 import { extractDefaultParams } from '~/endpoints/openai/llm';
 import { isUserProvided, checkUserKeyExpiry } from '~/utils';
@@ -355,6 +356,7 @@ export async function initializeCustom(
     if (options != null) {
       options.useLegacyContent = true;
       options.endpointTokenConfig = endpointTokenConfig;
+      attachCloudflareVisionRunFetch(options.configOptions);
     }
   }
 

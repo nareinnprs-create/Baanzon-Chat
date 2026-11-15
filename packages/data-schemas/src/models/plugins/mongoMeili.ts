@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { parseTextParts } from 'librechat-data-provider';
-import { MeiliSearch, MeiliSearchTimeOutError } from 'meilisearch';
+import { MeiliSearch, MeiliSearchCommunicationError, MeiliSearchTimeOutError } from 'meilisearch';
 import type {
   CallbackWithoutResultAndOptionalError,
   FilterQuery,
@@ -995,7 +995,6 @@ export default function mongoMeili(schema: Schema, options: MongoMeiliOptions): 
         partialFilterExpression: {
           [options.excludeFromIndexPath]: { $exists: true },
           _meiliIndex: { $eq: false },
-          _meiliCleanupVersion: { $exists: false },
         },
       },
     );
@@ -1024,7 +1023,21 @@ export default function mongoMeili(schema: Schema, options: MongoMeiliOptions): 
 
   (async () => {
     try {
-      await index.getRawInfo();
+      try {
+        await index.getRawInfo();
+      } catch (error) {
+        // NFS-cold boots can exceed the 10s request timeout before meili answers;
+        // one delayed retry avoids a dead index for the rest of the boot.
+        const timedOut =
+          error instanceof MeiliSearchTimeOutError ||
+          (error instanceof MeiliSearchCommunicationError &&
+            /timed out/i.test(String(error.message)));
+        if (!timedOut) {
+          throw error;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await index.getRawInfo();
+      }
       logger.debug(`[mongoMeili] Index ${indexName} already exists`);
     } catch (error) {
       const errorCode = (error as { code?: string })?.code;
