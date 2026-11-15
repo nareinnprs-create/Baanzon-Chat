@@ -38,11 +38,12 @@ function extractVisionModel(requestBody: string): string | null {
   if (!model.startsWith('@cf/') || !Array.isArray(parsed?.messages)) {
     return null;
   }
-  const hasImage = parsed.messages.some((message) =>
-    Array.isArray((message as { content?: unknown })?.content) &&
-    ((message as { content: unknown[] }).content as unknown[]).some(
-      (part) => (part as { type?: unknown })?.type === 'image_url',
-    ),
+  const hasImage = parsed.messages.some(
+    (message) =>
+      Array.isArray((message as { content?: unknown })?.content) &&
+      ((message as { content: unknown[] }).content as unknown[]).some(
+        (part) => (part as { type?: unknown })?.type === 'image_url',
+      ),
   );
   return hasImage ? model : null;
 }
@@ -57,7 +58,10 @@ const cloudflareVisionRunFetch = async (
     return fetch(input, init);
   }
   const url = String(input instanceof Request ? input.url : input);
-  const runUrl = url.replace(/\/ai\/v1\/chat\/completions.*$/, `/ai/run/${encodeURIComponent(model)}`);
+  const runUrl = url.replace(
+    /\/ai\/v1\/chat\/completions.*$/,
+    `/ai/run/${encodeURIComponent(model)}`,
+  );
   if (runUrl === url) {
     return fetch(input, init);
   }
