@@ -1975,6 +1975,33 @@ describe('defaultLLMDeliveryPath config merging', () => {
     const merged = mergeFileConfig(undefined);
     expect(merged.legacyFileUploadUX).toBeUndefined();
   });
+
+  it('routes a global application/pdf override to text while images stay on provider', () => {
+    const merged = mergeFileConfig({
+      defaultLLMDeliveryPath: { overrides: { 'application/pdf': 'text' } },
+    });
+    const endpointConfig = getEndpointFileConfig({
+      fileConfig: merged,
+      endpoint: EModelEndpoint.custom,
+    });
+
+    expect(
+      resolveDefaultLLMDeliveryPath(
+        'application/pdf',
+        endpointConfig.defaultLLMDeliveryPath,
+        merged.defaultLLMDeliveryPath,
+        EModelEndpoint.custom,
+      ),
+    ).toBe('text');
+    expect(
+      resolveDefaultLLMDeliveryPath(
+        'image/png',
+        endpointConfig.defaultLLMDeliveryPath,
+        merged.defaultLLMDeliveryPath,
+        EModelEndpoint.custom,
+      ),
+    ).toBe('provider');
+  });
 });
 
 describe('agent attachment context limits', () => {
