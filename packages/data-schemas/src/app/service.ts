@@ -189,6 +189,7 @@ export const AppService = async (params?: {
     transactions,
     filteredTools,
     includedTools,
+    modelLanes: config.modelLanes,
     filters,
     langfuse,
     messageFilter,

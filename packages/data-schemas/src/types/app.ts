@@ -89,6 +89,8 @@ export interface AppConfig {
   filteredTools?: string[];
   /** Admin-included tools */
   includedTools?: string[];
+  /** Vision model lane configuration */
+  modelLanes?: TCustomConfig['modelLanes'];
   /** Image output type configuration */
   imageOutputType: string;
   /** Interface configuration */
