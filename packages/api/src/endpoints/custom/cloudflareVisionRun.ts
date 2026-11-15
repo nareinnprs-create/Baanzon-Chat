@@ -58,10 +58,9 @@ const cloudflareVisionRunFetch = async (
     return fetch(input, init);
   }
   const url = String(input instanceof Request ? input.url : input);
-  const runUrl = url.replace(
-    /\/ai\/v1\/chat\/completions.*$/,
-    `/ai/run/${encodeURIComponent(model)}`,
-  );
+  // model ids are path-safe by construction (^@cf/ + [a-z0-9./-]); do not
+  // percent-encode — CF's run router would not decode %40 back to '@'.
+  const runUrl = url.replace(/\/ai\/v1\/chat\/completions.*$/, `/ai/run/${model}`);
   if (runUrl === url) {
     return fetch(input, init);
   }

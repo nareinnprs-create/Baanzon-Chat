@@ -77,9 +77,7 @@ describe('attachCloudflareVisionRunFetch', () => {
       body: imageBody(),
     });
     expect(global.fetch).toHaveBeenCalledWith(
-      `https://api.cloudflare.com/client/v4/accounts/acct123/ai/run/${encodeURIComponent(
-        '@cf/meta/llama-3.2-11b-vision-instruct',
-      )}`,
+      'https://api.cloudflare.com/client/v4/accounts/acct123/ai/run/@cf/meta/llama-3.2-11b-vision-instruct',
       expect.objectContaining({ method: 'POST', body: imageBody() }),
     );
     const completion = await res.json();
