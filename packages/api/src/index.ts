@@ -3,6 +3,8 @@ export * from './acl/accessControlService';
 export * from './acl/insightsPermissions';
 export * from './acl/middleware';
 export * from './credentials';
+/* Voice mode */
+export * from './voice';
 /* Image generation */
 export * from './imageModelRouter';
 /* Artifacts */

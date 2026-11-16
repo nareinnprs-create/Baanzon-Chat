@@ -32,6 +32,7 @@ const flags = require('./flags');
 const billing = require('./billing');
 const billingPayments = require('./billing-payments');
 const imagesGenerate = require('./images-generate');
+const voice = require('./voice');
 const evals = require('./evals');
 const trust = require('./trust');
 const searchAll = require('./search-all');
@@ -104,6 +105,7 @@ module.exports = {
   billing,
   billingPayments,
   imagesGenerate,
+  voice,
   evals,
   trust,
   searchAll,

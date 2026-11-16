@@ -1503,3 +1503,12 @@ filteredTools:
 #       - id: anthropic_api_key
 #         label: Anthropic API key
 #         regex: "sk-ant-[A-Za-z0-9_-]{20,}"
+
+voice:
+  enabled: true
+  # hands-free default; hold-to-talk available client-side
+  defaultMode: hands-free
+  captionsDefault: true
+  maxContextTurns: 12
+  eotThreshold: 0.7
+  eotTimeoutMs: 2500

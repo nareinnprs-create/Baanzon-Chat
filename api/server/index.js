@@ -86,6 +86,7 @@ const staticCache = require('./utils/staticCache');
 const createBaanzonCors = require('./middleware/cors');
 const noIndex = require('./middleware/noIndex');
 const routes = require('./routes');
+const { attachVoiceGateway } = require('~/server/services/Voice/voiceGateway');
 const agentEventMethods = require('~/models');
 
 /** Route admin file-config MIME patterns through a linear-time engine (ReDoS-safe) on upload. */
@@ -434,6 +435,7 @@ const startServer = async () => {
   app.use('/api/api-keys', routes.apiKeys);
   app.use('/api/user', routes.user);
   app.use('/api/images/generate', routes.imagesGenerate);
+  app.use('/api/voice', routes.voice);
   /** Cross-entity palette search — mounted before `/api/search` so `/all` is
    *  claimed by its own router instead of falling through to MeiliSearch. */
   app.use('/api/search/all', routes.searchAll);
@@ -532,6 +534,10 @@ const startServer = async () => {
      * initialized — passing liveness checks while serving broken requests.
      */
     try {
+      // Voice Mode: WebSocket upgrade hook for /api/voice/realtime.
+      attachVoiceGateway(server).catch((err) =>
+        logger.error('[voiceGateway] failed to attach', err),
+      );
       await runAsSystem(async () => {
         await initializeMCPs();
         await initializeOAuthReconnectManager();

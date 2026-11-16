@@ -1439,3 +1439,14 @@ endpoints:
 #       - id: anthropic_api_key
 #         label: Anthropic API key
 #         regex: "sk-ant-[A-Za-z0-9_-]{20,}"
+
+# Voice Mode: CF cascade (streaming STT -> LLM -> streaming TTS) over one
+# WebSocket at /api/voice/realtime. Requires CF_ACCOUNT_ID + CF_API_TOKEN and
+# the Opraiz endpoint credentials in .env.
+voice:
+  enabled: true
+  defaultMode: hands-free
+  captionsDefault: true
+  maxContextTurns: 12
+  eotThreshold: 0.7
+  eotTimeoutMs: 2500

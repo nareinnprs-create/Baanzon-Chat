@@ -1666,6 +1666,15 @@ const sttSchema = z.object({
   azureOpenAI: sttAzureOpenAISchema.optional(),
 });
 
+const voiceConfigSchema = z.object({
+  enabled: z.boolean().optional(),
+  defaultMode: z.enum(['hands-free', 'hold-to-talk']).optional(),
+  captionsDefault: z.boolean().optional(),
+  maxContextTurns: z.number().int().min(1).max(50).optional(),
+  eotThreshold: z.number().min(0.1).max(0.95).optional(),
+  eotTimeoutMs: z.number().int().min(500).max(10000).optional(),
+});
+
 /**
  * The speech providers a schema actually configures. `allowedAddresses` is transport
  * policy rather than a provider, and a provider key present but empty configures
@@ -2897,6 +2906,7 @@ export const configSchema = z.object({
       speechTab: speechTab.optional(),
     })
     .optional(),
+  voice: voiceConfigSchema.optional(),
   rateLimits: rateLimitSchema.optional(),
   fileConfig: fileConfigSchema.optional(),
   modelSpecs: specsConfigSchema.optional(),
