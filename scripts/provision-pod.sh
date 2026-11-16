@@ -130,7 +130,8 @@ redirect_stderr=true
 EOF
 
 mkdir -p /workspace/data/mongodb /workspace/data/meili_data /workspace/baanzon/logs /workspace/baanzon/images /workspace/baanzon/uploads /workspace/baanzon-next/logs /workspace/gate
-printf '3090' > /workspace/data/active-port
+# Default the gate slot only when there is no prior choice on the volume.
+[ -s /workspace/data/active-port ] || printf '3090' > /workspace/data/active-port
 if [ -f "$(dirname "$0")/pod-gate.js" ]; then cp "$(dirname "$0")/pod-gate.js" /workspace/gate/pod-gate.js; fi
 supervisorctl reread && supervisorctl update || true
 echo "PROVISION COMPLETE"
