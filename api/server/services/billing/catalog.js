@@ -3,7 +3,7 @@
  * Dodo product catalog. Prices are INR list prices; Dodo presents local
  * payment methods and currency at checkout.
  */
-const TIER_LIMITS = { free: 15, lite: 33, pro: 110, enterprise: 200 };
+const TIER_LIMITS = { free: 30, lite: 50, pro: 150, enterprise: 300 };
 
 const PACKS = {
   lite_pack: {
