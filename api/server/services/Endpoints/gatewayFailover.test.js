@@ -55,6 +55,44 @@ describe('gateway failover', () => {
     expect(JSON.parse(inner.calls[1].body).model).toBe('@cf/zai-org/glm-4.7-flash');
   });
 
+  it('resolves a public model key before the first send', async () => {
+    const inner = makeInner([null]);
+    const fetcher = wrapGatewayFetch(inner, GW);
+    const res = await fetcher(gatewayUrl('chat/completions'), {
+      method: 'POST',
+      body: JSON.stringify({ model: 'baanzon-flash', messages: [] }),
+    });
+    expect(res.status).toBe(200);
+    expect(inner.calls).toHaveLength(1);
+    expect(JSON.parse(inner.calls[0].body).model).toBe('@cf/zai-org/glm-5.3-flash');
+    expect(await res.json()).toMatchObject({ model: '@cf/zai-org/glm-5.3-flash' });
+  });
+
+  it('chains from the resolved model when a public key fails', async () => {
+    const inner = makeInner([400, null]);
+    const fetcher = wrapGatewayFetch(inner, GW);
+    const res = await fetcher(gatewayUrl('chat/completions'), {
+      method: 'POST',
+      body: JSON.stringify({ model: 'baanzon-flash', messages: [] }),
+    });
+    expect(res.status).toBe(200);
+    expect(inner.calls).toHaveLength(2);
+    expect(JSON.parse(inner.calls[0].body).model).toBe('@cf/zai-org/glm-5.3-flash');
+    expect(JSON.parse(inner.calls[1].body).model).toBe('@cf/zai-org/glm-4.7-flash');
+  });
+
+  it('still retries an unknown non-@cf model with the same body', async () => {
+    const inner = makeInner([400, null]);
+    const fetcher = wrapGatewayFetch(inner, GW);
+    const res = await fetcher(gatewayUrl('chat/completions'), {
+      method: 'POST',
+      body: JSON.stringify({ model: 'mystery-model', messages: [] }),
+    });
+    expect(res.status).toBe(200);
+    expect(inner.calls).toHaveLength(2);
+    expect(JSON.parse(inner.calls[1].body).model).toBe('mystery-model');
+  });
+
   it('falls through to the FALLBACK model after repeated failures', async () => {
     const inner = makeInner([500, 503, null]);
     const fetcher = wrapGatewayFetch(inner, GW);

@@ -8,6 +8,9 @@
  *   model to the next id in the chain (primary -> glm-4.7-flash -> FALLBACK)
  *   and retry. Retries happen before any response reaches the caller, so a
  *   consumed SSE stream is never re-run.
+ * - Public model keys (e.g. the memory agent's 'baanzon-flash') resolve to
+ *   their concrete @cf/ ids before the first send — the gateway rejects
+ *   anything else with "No such model".
  * - Other gateway calls (embeddings etc.): retry the same body once on
  *   5xx/429/network errors — the model must not change.
  * - Non-gateway traffic passes through untouched.
@@ -16,7 +19,7 @@
  * ever switches to axios, it needs its own wrapper here.
  */
 const { logger } = require('@librechat/data-schemas');
-const { FALLBACK } = require('../billing/modelRouter');
+const { FALLBACK, PUBLIC_MODELS } = require('../billing/modelRouter');
 
 /** Cheap always-provisioned model, second in every chain. */
 const SECONDARY = '@cf/zai-org/glm-4.7-flash';
@@ -28,14 +31,14 @@ function isRetryable(status, chat) {
   return status >= 500 || (chat ? CHAT_RETRY_STATUS.has(status) : PLAIN_RETRY_STATUS.has(status));
 }
 
-/** Rewrites the JSON body's @cf/ model id; returns the original body if not rewriteable. */
+/** Rewrites the JSON body's model id; returns the original body if not rewriteable. */
 function rewriteBody(body, nextModel) {
   if (typeof body !== 'string') {
     return body;
   }
   try {
     const parsed = JSON.parse(body);
-    if (parsed && typeof parsed.model === 'string' && parsed.model.startsWith('@cf/')) {
+    if (parsed && typeof parsed.model === 'string') {
       parsed.model = nextModel;
       return JSON.stringify(parsed);
     }
@@ -96,16 +99,21 @@ function wrapGatewayFetch(inner, gatewayBase) {
         return '';
       }
     })();
+    // Public model keys (baanzon.yaml agent configs like the memory agent's
+    // 'baanzon-flash') resolve to their concrete ids before the first send;
+    // the gateway only knows @cf/ ids.
+    const resolvedModel = PUBLIC_MODELS[rawModel] || rawModel;
+    const baseBody = resolvedModel === rawModel ? init.body : rewriteBody(init.body, resolvedModel);
     // chat: primary -> SECONDARY -> FALLBACK (model rewritten per attempt);
     // anything else: two attempts with the same body.
-    const chain = chat && rawModel.startsWith('@cf/') ? chatChain(rawModel) : [null, null];
+    const chain = chat && resolvedModel.startsWith('@cf/') ? chatChain(resolvedModel) : [null, null];
     const headers = new Headers(init?.headers);
     headers.delete('content-length');
 
     let lastResponse = null;
     let lastError = null;
     for (let i = 0; i < chain.length; i++) {
-      const body = chain[i] ? rewriteBody(init.body, chain[i]) : init.body;
+      const body = chain[i] ? rewriteBody(baseBody, chain[i]) : baseBody;
       try {
         const response = await inner(url, { ...init, headers, body });
         if (!isRetryable(response.status, chat)) {
