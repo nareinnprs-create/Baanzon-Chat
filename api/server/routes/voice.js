@@ -7,7 +7,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
 const configMiddleware = require('~/server/middleware/config/app');
-const { buildVoiceConfig, voiceClientConfig, remainingSeconds, normalizeTier } = require('@librechat/api');
+const {
+  buildVoiceConfig,
+  voiceClientConfig,
+  remainingSeconds,
+  normalizeTier,
+} = require('@librechat/api');
 
 const router = express.Router();
 
@@ -31,7 +36,7 @@ router.get('/config', requireJwtAuth, configMiddleware, async (req, res) => {
       .findOne({ key: `voice:${req.user.id}:${today}` });
     const remaining = remainingSeconds(tier, counter?.count || 0, config.tierMinutes);
     return res.json(voiceClientConfig(config, remaining));
-  } catch (err) {
+  } catch {
     // Quota lookups fail open: a broken counter must not break voice setup.
     const fallback = buildVoiceConfig(req?.config?.voice ?? null);
     return res.json(voiceClientConfig(fallback, remainingSeconds('free', 0, fallback.tierMinutes)));

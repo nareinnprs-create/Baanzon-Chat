@@ -10,8 +10,8 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 const { WebSocketServer } = require('ws');
 const { logger } = require('@librechat/data-schemas');
-const { createVoiceGateway, buildVoiceConfig, remainingSeconds, normalizeTier } = require('@librechat/api');
-const loadCustomConfig = require('~/server/Services/Config/loadCustomConfig');
+const { createVoiceGateway, buildVoiceConfig } = require('@librechat/api');
+const loadCustomConfig = require('~/server/services/Config/loadCustomConfig');
 const { saveMessage, getMessages, saveConvo, getConvo } = require('~/models');
 
 const REALTIME_PATH = '/api/voice/realtime';
@@ -26,7 +26,7 @@ function voiceDay() {
   return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 }
 
-async function usedSeconds(userId, tier) {
+async function usedSeconds(userId) {
   const counter = await counters().findOne({ key: `voice:${userId}:${voiceDay()}` });
   return counter?.count || 0;
 }
@@ -98,7 +98,9 @@ async function loadContext(userId, conversationId) {
         text: m.text,
       }))
       .slice(-CONTEXT_TURNS),
-    parentMessageId: recent.length ? recent[recent.length - 1].messageId?.toString() ?? null : null,
+    parentMessageId: recent.length
+      ? (recent[recent.length - 1].messageId?.toString() ?? null)
+      : null,
   };
 }
 
@@ -154,17 +156,19 @@ async function attachVoiceGateway(server) {
     llm,
     verifyToken,
     tierOf,
-    usedSeconds: (userId, tier) => usedSeconds(userId, tier),
+    usedSeconds,
     addSeconds: (userId, tier, seconds) => addSeconds(userId, tier, seconds),
     store: {
-      loadContext: (userId, cid) => loadContext(userId, cid).catch((err) => {
-        logger.error('[voiceGateway] loadContext failed', err);
-        return null;
-      }),
-      saveTurn: (input) => saveTurn(input).catch((err) => {
-        logger.error('[voiceGateway] saveTurn failed', err);
-        return null;
-      }),
+      loadContext: (userId, cid) =>
+        loadContext(userId, cid).catch((err) => {
+          logger.error('[voiceGateway] loadContext failed', err);
+          return null;
+        }),
+      saveTurn: (input) =>
+        saveTurn(input).catch((err) => {
+          logger.error('[voiceGateway] saveTurn failed', err);
+          return null;
+        }),
     },
     log: (level, message, meta) => logger[level](`[voiceGateway] ${message}`, meta),
   });

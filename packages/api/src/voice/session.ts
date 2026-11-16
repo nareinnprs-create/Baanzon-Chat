@@ -105,7 +105,7 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
     const uid: string = userId;
 
     let voice: VoiceCatalogEntry | undefined;
-    let mode: VoiceMode = deps.config.defaultMode;
+    const mode: VoiceMode = deps.config.defaultMode;
     // Boxed so closures can read/write it without TS narrowing fights.
     type TurnState = 'listening' | 'thinking' | 'speaking';
     // Reads go through a function so TS can't narrow the box across closures.
@@ -128,7 +128,11 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
     }
 
     const tier = normalizeTier(await deps.tierOf(uid));
-    const remaining = remainingSeconds(tier, await deps.usedSeconds(uid, tier), deps.config.tierMinutes);
+    const remaining = remainingSeconds(
+      tier,
+      await deps.usedSeconds(uid, tier),
+      deps.config.tierMinutes,
+    );
     if (remaining <= 0) {
       send(ws, { type: 'error', code: 'cap', message: "You're out of voice time for today" });
       ws.close(1000, 'cap');
@@ -154,7 +158,11 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
       deps.addSeconds(uid, tier, METER_INTERVAL_SECONDS);
       meterAnchor = now();
       void (async () => {
-        const left = remainingSeconds(tier, await deps.usedSeconds(uid, tier), deps.config.tierMinutes);
+        const left = remainingSeconds(
+          tier,
+          await deps.usedSeconds(uid, tier),
+          deps.config.tierMinutes,
+        );
         if (left <= 0) {
           send(ws, { type: 'error', code: 'cap', message: "You're out of voice time for today" });
           close();
@@ -269,11 +277,7 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
             send(ws, { type: 'user-transcript', text: event.text, final: false });
             return;
           }
-          if (
-            event.kind === 'end-of-turn' &&
-            state() === 'listening' &&
-            event.text.trim()
-          ) {
+          if (event.kind === 'end-of-turn' && state() === 'listening' && event.text.trim()) {
             void beginTurn(event.text.trim());
           }
         },
@@ -426,7 +430,7 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
         send(ws, { type: 'interrupted', text: kept });
         void deps.store
           .saveTurn({
-        userId: uid,
+            userId: uid,
             conversationId: ctx.conversationId,
             parentMessageId: ctx.parentMessageId ?? null,
             role: 'assistant',
@@ -470,7 +474,10 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
       abort?.abort();
       // Wall-clock metering: bill the part-interval remainder since the last
       // tick, capped so a restart loop can't double-bill a full interval.
-      const elapsed = Math.min(METER_INTERVAL_SECONDS, Math.max(0, Math.round((now() - meterAnchor) / 1000)));
+      const elapsed = Math.min(
+        METER_INTERVAL_SECONDS,
+        Math.max(0, Math.round((now() - meterAnchor) / 1000)),
+      );
       if (elapsed > 0) {
         deps.addSeconds(uid, tier, elapsed);
       }

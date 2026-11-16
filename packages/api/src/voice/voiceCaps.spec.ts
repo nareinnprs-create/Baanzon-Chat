@@ -1,4 +1,9 @@
-import { DEFAULT_VOICE_CONFIG, VOICE_SPEAKERS, buildVoiceConfig, voiceClientConfig } from './config';
+import {
+  DEFAULT_VOICE_CONFIG,
+  VOICE_SPEAKERS,
+  buildVoiceConfig,
+  voiceClientConfig,
+} from './config';
 import { VOICE_TIER_MINUTES, normalizeTier, remainingSeconds, voiceDayKey } from './caps';
 import { createSentenceSplitter } from './providers/sentences';
 import { parseFluxMessage } from './providers/sttFlux';

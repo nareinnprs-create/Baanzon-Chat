@@ -125,7 +125,10 @@ describe('voice session', () => {
   });
 
   it('runs a full turn: audio → end-of-turn → spoken sentences → persisted turns', async () => {
-    const stt = fakeStt([{ kind: 'interim', text: 'hel' }, { kind: 'end-of-turn', text: 'hello there' }]);
+    const stt = fakeStt([
+      { kind: 'interim', text: 'hel' },
+      { kind: 'end-of-turn', text: 'hello there' },
+    ]);
     const { deps, saveTurns, spoken } = makeDeps({ createStt: stt.open });
     const gateway = createVoiceGateway(deps);
     const client = fakeSocket();
@@ -149,7 +152,11 @@ describe('voice session', () => {
       'thinking',
       'speaking',
     ]);
-    expect(msgs.some((m) => m.type === 'assistant-transcript' && m.text === 'Hello there. Second sentence.')).toBe(true);
+    expect(
+      msgs.some(
+        (m) => m.type === 'assistant-transcript' && m.text === 'Hello there. Second sentence.',
+      ),
+    ).toBe(true);
     expect(saveTurns.map((t) => t.role)).toEqual(['user', 'assistant']);
     expect(saveTurns[1].text).toBe('Hello there. Second sentence.');
   });
