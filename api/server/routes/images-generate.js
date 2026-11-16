@@ -1,20 +1,22 @@
 /**
- * Image generation via Cloudflare Workers AI. Tier-based models + daily caps:
- * Free 5/day (flux-1-schnell), Lite 15/day (SDXL-lightning), Pro 75/day (flux-2-klein),
- * Enterprise 300/day (flux-2-dev). Requires CF_ACCOUNT_ID + CF_API_TOKEN in .env.
+ * Image generation via Cloudflare Workers AI. Model is picked per prompt by
+ * pickImageModel (packages/api imageModelRouter) from the approved catalog;
+ * tiers gate daily caps: Free 5/day, Lite 15/day, Pro 75/day, Enterprise
+ * 300/day. Requires CF_ACCOUNT_ID + CF_API_TOKEN in .env.
  */
 const express = require('express');
 const mongoose = require('mongoose');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
+const { pickImageModel, IMAGE_MODELS } = require('@librechat/api');
 
 const router = express.Router();
 const MAX_PER_WINDOW = 5;
 const hits = new Map(); // userId -> [timestamps] (burst guard)
 const DAILY = {
-  free: { model: '@cf/black-forest-labs/flux-1-schnell', cap: 5 },
-  lite: { model: '@cf/bytedance/stable-diffusion-xl-lightning', cap: 15 },
-  pro: { model: '@cf/black-forest-labs/flux-2-klein-9b', cap: 75 },
-  enterprise: { model: '@cf/black-forest-labs/flux-2-dev', cap: 300 },
+  free: { cap: 5 },
+  lite: { cap: 15 },
+  pro: { cap: 75 },
+  enterprise: { cap: 300 },
 };
 
 function limited(userId, cap) {
@@ -66,7 +68,15 @@ router.post('/', requireJwtAuth, async (req, res) => {
     return res.status(400).json({ message: 'prompt is required' });
   }
   const tier = await userTier(req.user.id);
-  const { model, cap } = DAILY[tier] || DAILY.free;
+  const { cap } = DAILY[tier] || DAILY.free;
+  const model = pickImageModel(prompt);
+  if (model === IMAGE_MODELS.inpaint) {
+    // Inpainting requires an image+mask input, which no entry point sends yet.
+    return res.status(400).json({
+      message:
+        'Inpainting needs an input image, which is not wired up yet — name another model or drop the word.',
+    });
+  }
   const account = process.env.CF_ACCOUNT_ID;
   const token = process.env.CF_API_TOKEN;
   if (!account || !token) {
