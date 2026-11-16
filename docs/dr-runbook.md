@@ -37,10 +37,17 @@ Roll the fix forward via CI afterwards.
 
 ## Known gaps (not yet implemented)
 
-- **Off-pod backups**: the dump archive lives on the same NFS volume it protects.
-  True DR needs the R2 push from `scripts/cloudflare-backup.sh`, which requires a
-  Cloudflare API token with R2 write on bucket `baanzon-backups` (account
-  `4e15812ef9050c3973a906ff4dbc386a`) in the pod `.env`.
-- **Uploads/images and Meili snapshots** are not backed up yet.
-- **`.env` secret store**: operator holds the values; nothing automated.
+- **Uploads/images and Meili snapshots** are not backed up yet (Mongo + `.env` are).
 - **Restore drill**: has not been rehearsed end-to-end.
+
+## Backup layout (R2 bucket `baanzon-backups`)
+
+| Key | Content | Retention |
+|---|---|---|
+| `mongo/mongo-<UTC>.gz` | mongodump archive | 7 daily, pruned by the loop |
+| `env/env-<UTC>` | full slot `.env` (all operator secrets) | manual pushes |
+
+The backup loop reads the ACTIVE slot's `.env` (resolves via
+`/workspace/data/active-port`) — safe across blue-green flips. Operator secrets
+in R2 are protected by bucket access control; the `CF_TOKEN` that unlocks the
+bucket lives in `.env` itself, so the snapshot and its key co-locate by design.
