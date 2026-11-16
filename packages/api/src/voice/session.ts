@@ -205,11 +205,12 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
       }
       // TTS drain: once the LLM stream is finished, return to listening only
       // after aura has stopped streaming, so late PCM bytes are never dropped.
-      // With no audio at all (aura failure), llmDoneAt is the fallback clock.
+      // With no audio yet (aura connect ~1s + synth latency), wait longer —
+      // flipping early would drop the whole reply's audio.
       if (
         llmDoneAt &&
         (state() === 'speaking' || state() === 'thinking') &&
-        now() - Math.max(lastTtsAudio, llmDoneAt) > 2000
+        (lastTtsAudio > 0 ? now() - lastTtsAudio > 2000 : now() - llmDoneAt > 8000)
       ) {
         backToListening();
       }
@@ -264,7 +265,8 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
           if (!stt?.usable) {
             stt = openStt();
           }
-          tts = openTts(voice?.id);
+          // tts stays lazy: an aura socket idling through the user's speech
+          // gets killed by the CF edge, and its first Speak would be lost.
           break;
         }
         case 'mute':
