@@ -6,7 +6,8 @@ function gatewayUrl(path) {
   return `${GW}/${path}`;
 }
 
-const okBody = (model) => JSON.stringify({ id: 'x', model, choices: [{ message: { content: 'ok' } }] });
+const okBody = (model) =>
+  JSON.stringify({ id: 'x', model, choices: [{ message: { content: 'ok' } }] });
 
 /**
  * Scripted mock: array entries are numbers (respond with that status and body

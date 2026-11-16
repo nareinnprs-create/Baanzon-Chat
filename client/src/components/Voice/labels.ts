@@ -49,6 +49,20 @@ const KEYS = {
   announceMuted: 'com_ui_voice_announce_muted',
   announceIdle: 'com_ui_voice_announce_idle',
   announceBargeIn: 'com_ui_voice_announce_barge_in',
+  /* Realtime (server cascade) surface */
+  openMode: 'com_ui_voice_open_mode',
+  endSession: 'com_ui_voice_end_session',
+  close: 'com_ui_voice_close',
+  captions: 'com_ui_voice_captions',
+  voicePicker: 'com_ui_voice_voice_picker',
+  remaining: 'com_ui_voice_remaining',
+  connectingHint: 'com_ui_voice_rt_connecting',
+  listeningHint: 'com_ui_voice_rt_listening',
+  speakingHint: 'com_ui_voice_rt_speaking',
+  mutedHint: 'com_ui_voice_rt_muted',
+  errorHint: 'com_ui_voice_rt_error',
+  connectionLost: 'com_ui_voice_connection_lost',
+  connectionFailed: 'com_ui_voice_connection_failed',
 } as const satisfies Record<string, string>;
 
 export type VoiceLabelKey = keyof typeof KEYS;

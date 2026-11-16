@@ -1673,6 +1673,7 @@ const voiceConfigSchema = z.object({
   maxContextTurns: z.number().int().min(1).max(50).optional(),
   eotThreshold: z.number().min(0.1).max(0.95).optional(),
   eotTimeoutMs: z.number().int().min(500).max(10000).optional(),
+  eagerEotThreshold: z.number().min(0.1).max(0.95).optional(),
 });
 
 /**

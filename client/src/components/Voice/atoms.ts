@@ -1,5 +1,6 @@
 import { atom } from 'jotai';
 import type { VoiceStatus, VoiceTranscript } from './types';
+import type { VoiceCatalogEntry } from './types';
 
 /**
  * Feature-owned Jotai state for realtime voice.
@@ -68,3 +69,20 @@ export const resetVoiceSessionAtom = atom(null, (_get, set) => {
   set(voiceTranscriptsAtom, []);
   set(voiceErrorAtom, null);
 });
+
+/* ── Realtime voice (server cascade) ──────────────────────────────────── */
+
+/** Whether the realtime voice overlay is open. Read in the app's default store. */
+export const voiceRealtimeOpenAtom = atom<boolean>(false);
+
+/** The server's voice catalog, as delivered by the `ready` frame. */
+export const voiceVoicesAtom = atom<VoiceCatalogEntry[]>([]);
+
+/** The user's remaining voice seconds today, as delivered by the `ready` frame. */
+export const voiceRemainingSecondsAtom = atom<number>(0);
+
+/** Captions toggle, seeded from the server's `captionsDefault`. */
+export const voiceCaptionsAtom = atom<boolean>(false);
+
+/** The selected voice catalog id, or `null` for the server default. */
+export const voiceSelectedVoiceAtom = atom<string | null>(null);

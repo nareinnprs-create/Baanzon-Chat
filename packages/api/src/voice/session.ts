@@ -265,6 +265,7 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
         sampleRate: CLIENT_SAMPLE_RATE,
         eotThreshold: deps.config.eotThreshold,
         eotTimeoutMs: deps.config.eotTimeoutMs,
+        eagerEotThreshold: deps.config.eagerEotThreshold,
         onEvent: (event) => {
           if (closed) {
             return;

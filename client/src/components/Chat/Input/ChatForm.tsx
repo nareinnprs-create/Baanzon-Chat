@@ -38,6 +38,7 @@ import {
   PendingToolApprovalButton,
   PendingToolApprovalPanel,
 } from '~/components/Chat/approval/Review';
+import { VoiceRealtimeOverlay, VoiceRealtimeToggle } from '~/components/Voice/VoiceRealtime';
 import PendingManualSkillsChips from './PendingManualSkillsChips';
 import usePastedTextEdit from '~/hooks/Files/usePastedTextEdit';
 import useAskAnswerMode from '~/hooks/Input/useAskAnswerMode';
@@ -859,6 +860,8 @@ const ChatForm = memo(function ChatForm({
                   </div>
                 )}
                 <VoiceControls index={index} textAreaRef={textAreaRef} />
+                {index === 0 && <VoiceRealtimeToggle />}
+                {index === 0 && <VoiceRealtimeOverlay />}
                 <div className="mx-auto flex" />
                 <TokenUsage index={index} conversation={conversation} isSubmitting={isSubmitting} />
                 {SpeechToText && (

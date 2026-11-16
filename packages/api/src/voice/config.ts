@@ -53,6 +53,7 @@ export interface VoiceYamlConfig {
   maxContextTurns?: number;
   eotThreshold?: number;
   eotTimeoutMs?: number;
+  eagerEotThreshold?: number;
 }
 
 export function buildVoiceConfig(yaml?: VoiceYamlConfig | null): VoiceConfig {

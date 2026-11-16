@@ -63,3 +63,39 @@ export interface VoiceOptions {
   /** Called for each transcript line the session produces. */
   onTranscript?: (transcript: VoiceTranscript) => void;
 }
+
+/* ── Realtime voice (server cascade) ────────────────────────────────────
+ * One WebSocket to `/api/voice/realtime`: JSON control frames plus raw
+ * binary PCM frames (16 kHz up, 24 kHz down). The server never exposes
+ * provider identities — voices arrive as generic catalog entries.
+ */
+
+/** A selectable server voice. Ids are generic catalog vocabulary. */
+export interface VoiceCatalogEntry {
+  id: string;
+  label: string;
+}
+
+/** Server → client control frames; reply audio travels as binary frames. */
+export type RealtimeServerMessage =
+  | {
+      type: 'ready';
+      voices: VoiceCatalogEntry[];
+      mode: 'hands-free' | 'hold-to-talk';
+      captions: boolean;
+      remainingSeconds: number;
+    }
+  | { type: 'state'; state: 'listening' | 'thinking' | 'speaking' }
+  | { type: 'user-transcript'; text: string; final: boolean }
+  | { type: 'assistant-transcript'; text: string }
+  | { type: 'interrupted'; text: string }
+  | { type: 'error'; code: 'cap' | 'auth' | 'server'; message: string }
+  | { type: 'pong' };
+
+/** Client → server control frames; mic audio travels as binary frames. */
+export type RealtimeClientMessage =
+  | { type: 'start'; voice?: string }
+  | { type: 'barge-in' }
+  | { type: 'mute'; muted: boolean }
+  | { type: 'stop' }
+  | { type: 'ping' };

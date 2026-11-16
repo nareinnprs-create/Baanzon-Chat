@@ -17,6 +17,18 @@ const { saveMessage, getMessages, saveConvo, getConvo } = require('~/models');
 const REALTIME_PATH = '/api/voice/realtime';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CONTEXT_TURNS = 12;
+/** Reconnect spam would open paid provider sockets; cap attempts per IP/min. */
+const MAX_CONN_PER_MINUTE = 10;
+
+// Same in-memory pattern as images-generate: small key space, pruned on use.
+const connHits = new Map();
+function connLimited(ip) {
+  const now = Date.now();
+  const hits = (connHits.get(ip) || []).filter((t) => now - t < 60_000);
+  hits.push(now);
+  connHits.set(ip, hits);
+  return hits.length > MAX_CONN_PER_MINUTE;
+}
 
 function counters() {
   return mongoose.connection.db.collection('usage_counters');
@@ -181,6 +193,11 @@ async function attachVoiceGateway(server) {
 
   server.on('upgrade', (req, socket, head) => {
     if (req.url?.split('?')[0] !== REALTIME_PATH) {
+      return;
+    }
+    if (connLimited(req.socket?.remoteAddress || 'unknown')) {
+      socket.write('HTTP/1.1 429 Too Many Requests\r\nConnection: close\r\n\r\n');
+      socket.destroy();
       return;
     }
     // Token rides the subprotocol header; cid rides the query string.

@@ -42,7 +42,7 @@ function rewriteBody(body, nextModel) {
       parsed.model = nextModel;
       return JSON.stringify(parsed);
     }
-  } catch (e) {
+  } catch (_e) {
     // not JSON — transient retry can still help
   }
   return body;
@@ -50,8 +50,12 @@ function rewriteBody(body, nextModel) {
 
 /** True when this init's body can be re-sent (streams cannot). */
 function bodyReusable(body) {
-  return body == null || typeof body === 'string' || body instanceof ArrayBuffer ||
-    ArrayBuffer.isView(body);
+  return (
+    body == null ||
+    typeof body === 'string' ||
+    body instanceof ArrayBuffer ||
+    ArrayBuffer.isView(body)
+  );
 }
 
 function chatChain(model) {
@@ -66,8 +70,10 @@ function wrapGatewayFetch(inner, gatewayBase) {
   let gw;
   try {
     gw = new URL(gatewayBase);
-  } catch (e) {
-    logger.error(`[gatewayFailover] invalid OPRAIZ_BASEURL, failover not installed: ${gatewayBase}`);
+  } catch (_e) {
+    logger.error(
+      `[gatewayFailover] invalid OPRAIZ_BASEURL, failover not installed: ${gatewayBase}`,
+    );
     return inner;
   }
   let seenFirst = false;
@@ -79,10 +85,11 @@ function wrapGatewayFetch(inner, gatewayBase) {
     let url;
     try {
       url = new URL(input, gw);
-    } catch (e) {
+    } catch (_e) {
       return inner(input, init);
     }
-    const onGateway = url.origin === gw.origin && url.pathname.startsWith(gw.pathname.replace(/\/$/, ''));
+    const onGateway =
+      url.origin === gw.origin && url.pathname.startsWith(gw.pathname.replace(/\/$/, ''));
     if (!onGateway || !bodyReusable(init?.body)) {
       return inner(input, init);
     }
@@ -95,7 +102,7 @@ function wrapGatewayFetch(inner, gatewayBase) {
     const rawModel = (() => {
       try {
         return JSON.parse(init.body || '{}').model || '';
-      } catch (e) {
+      } catch (_e) {
         return '';
       }
     })();
@@ -106,7 +113,8 @@ function wrapGatewayFetch(inner, gatewayBase) {
     const baseBody = resolvedModel === rawModel ? init.body : rewriteBody(init.body, resolvedModel);
     // chat: primary -> SECONDARY -> FALLBACK (model rewritten per attempt);
     // anything else: two attempts with the same body.
-    const chain = chat && resolvedModel.startsWith('@cf/') ? chatChain(resolvedModel) : [null, null];
+    const chain =
+      chat && resolvedModel.startsWith('@cf/') ? chatChain(resolvedModel) : [null, null];
     const headers = new Headers(init?.headers);
     headers.delete('content-length');
 

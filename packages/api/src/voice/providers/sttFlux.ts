@@ -44,13 +44,16 @@ export function openFluxStt(opts: {
   sampleRate?: number;
   eotThreshold?: number;
   eotTimeoutMs?: number;
+  /** Eager end-of-turn confidence; omitted = eager triggering off (v1 default). */
+  eagerEotThreshold?: number;
   onEvent: (event: FluxEvent) => void;
 }): FluxStt {
   const model = opts.model || '@cf/deepgram/flux';
   const url =
     `wss://api.cloudflare.com/client/v4/accounts/${opts.accountId}/ai/run/${model}` +
     `?encoding=linear16&sample_rate=${opts.sampleRate || 16000}` +
-    `&eot_threshold=${opts.eotThreshold ?? 0.7}&eot_timeout_ms=${opts.eotTimeoutMs ?? 2500}`;
+    `&eot_threshold=${opts.eotThreshold ?? 0.7}&eot_timeout_ms=${opts.eotTimeoutMs ?? 2500}` +
+    (opts.eagerEotThreshold != null ? `&eager_eot_threshold=${opts.eagerEotThreshold}` : '');
   const ws = new WebSocket(url, { headers: { Authorization: `Bearer ${opts.token}` } });
   let usable = true;
   ws.on('message', (data, isBinary) => {

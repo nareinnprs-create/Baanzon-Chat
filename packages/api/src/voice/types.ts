@@ -49,6 +49,8 @@ export interface VoiceConfig {
   temperature: number;
   eotThreshold: number;
   eotTimeoutMs: number;
+  /** Unset = eager end-of-turn off; operators opt in via yaml (v1.1 lever). */
+  eagerEotThreshold?: number;
   tierMinutes: Record<VoiceTier, number>;
 }
 
