@@ -1,10 +1,11 @@
 #!/bin/bash
-# Nightly MongoDB backup loop (supervisor keeps this alive).
-# Local: /workspace/backups (7-day retention). Off-pod: Cloudflare R2 bucket baanzon-backups.
-# Vars are extracted directly from .env (sourcing it breaks on the EMAIL_FROM line).
-ENVF=$( [ "$(cat /workspace/data/active-port 2>/dev/null)" = "3090" ] && echo /workspace/baanzon/.env || echo /workspace/baanzon-next/.env )
-MONGO_URI=$(grep -m1 '^MONGO_URI=' "$ENVF" | sed 's/^MONGO_URI=//; s/^"//; s/"$//')
-CF_TOKEN=$(grep -m1 '^CF_TOKEN=' "$ENVF" | sed 's/^CF_TOKEN=//; s/^"//; s/"$//')
+# Nightly backup loop (supervisor keeps this alive).
+# Mongo: mongodump archive. Uploads: tar of the ACTIVE slot's uploads/ (it
+# always holds the union — pod-apply-release.sh copies uploads active->staged
+# on every deploy). Meili: consistent dump via its HTTP API. All three push to
+# the R2 bucket, 7 nightly objects per prefix. Vars are extracted directly
+# from .env (sourcing it breaks on the EMAIL_FROM line) and re-resolved every
+# cycle so blue-green flips are picked up.
 CF_ACCOUNT=4e15812ef9050c3973a906ff4dbc386a
 BUCKET=baanzon-backups
 mkdir -p /workspace/backups
@@ -31,26 +32,68 @@ r2_prune() { # keep newest N objects under prefix (keys sort chronologically)
     done
 }
 
+env_val() { grep -m1 "^$1=" "$2" | sed "s/^$1=//; s/^\"//; s/\"\$//"; }
+
 while true; do
   NOW=$(date -u +%Y%m%d_%H%M%S)
+  SLOT=$([ "$(cat /workspace/data/active-port 2>/dev/null)" = "3090" ] && echo /workspace/baanzon || echo /workspace/baanzon-next)
+  ENVF=$SLOT/.env
+  MONGO_URI=$(env_val MONGO_URI "$ENVF")
+  CF_TOKEN=$(env_val CF_TOKEN "$ENVF")
+  MEILI_HOST=$(env_val MEILI_HOST "$ENVF")
+  MEILI_MASTER_KEY=$(env_val MEILI_MASTER_KEY "$ENVF")
+
   if [ -z "$MONGO_URI" ]; then
     echo "[$NOW] backup SKIPPED: no MONGO_URI"
   else
     S=$(date +%s)
     if /usr/local/bin/mongodump --uri "$MONGO_URI" --archive=/workspace/backups/mongo-$NOW.gz --gzip --quiet; then
-      SZ=$(du -h /workspace/backups/mongo-$NOW.gz | cut -f1)
-      echo "[$NOW] backup ok ${SZ} took $(( $(date +%s) - S ))s"
+      echo "[$NOW] backup ok $(du -h /workspace/backups/mongo-$NOW.gz | cut -f1) took $(( $(date +%s) - S ))s"
       if [ -n "$CF_TOKEN" ]; then
-        CODE=$(r2 PUT "mongo/mongo-$NOW.gz" "/workspace/backups/mongo-$NOW.gz")
-        echo "[$NOW] r2 push: $CODE"
+        echo "[$NOW] mongo r2 push: $(r2 PUT "mongo/mongo-$NOW.gz" "/workspace/backups/mongo-$NOW.gz")"
         r2_prune "mongo/" 7
-      else
-        echo "[$NOW] r2 push SKIPPED: no CF_TOKEN"
       fi
     else
       echo "[$NOW] backup FAILED rc=$?"
     fi
   fi
-  ls -t /workspace/backups/mongo-*.gz 2>/dev/null | tail -n +8 | xargs -r rm -f
+
+  if [ -n "$(ls -A "$SLOT/uploads" 2>/dev/null)" ]; then
+    tar -czf /workspace/backups/uploads-$NOW.tar.gz -C "$SLOT" uploads 2>/dev/null
+    if [ -n "$CF_TOKEN" ]; then
+      echo "[$NOW] uploads r2 push: $(r2 PUT "uploads/uploads-$NOW.tar.gz" "/workspace/backups/uploads-$NOW.tar.gz") ($(du -h /workspace/backups/uploads-$NOW.tar.gz | cut -f1))"
+      r2_prune "uploads/" 7
+    fi
+  fi
+
+  if [ -n "$MEILI_HOST" ] && [ -n "$MEILI_MASTER_KEY" ]; then
+    rm -f /workspace/dumps/*.dump 2>/dev/null
+    MCODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$MEILI_HOST/dumps" -H "Authorization: Bearer $MEILI_MASTER_KEY")
+    D=""
+    if [ "$MCODE" = "202" ]; then
+      for i in $(seq 1 36); do # up to ~6 min for the dump to appear and finish
+        sleep 10
+        D=$(ls -t /workspace/dumps/*.dump 2>/dev/null | head -1)
+        if [ -n "$D" ]; then
+          S1=$(stat -c%s "$D"); sleep 4; S2=$(stat -c%s "$D")
+          [ "$S1" = "$S2" ] && [ "$S1" != "0" ] && break
+        fi
+      done
+    fi
+    if [ -n "$D" ]; then
+      cp "$D" /workspace/backups/meili-$NOW.dump
+      if [ -n "$CF_TOKEN" ]; then
+        echo "[$NOW] meili r2 push: $(r2 PUT "meili/meili-$NOW.dump" "/workspace/backups/meili-$NOW.dump") ($(du -h /workspace/backups/meili-$NOW.dump | cut -f1))"
+        r2_prune "meili/" 7
+      fi
+      rm -f "$D"
+    else
+      echo "[$NOW] meili dump trigger: $MCODE, no dump file produced"
+    fi
+  fi
+
+  for p in mongo uploads meili; do
+    ls -t /workspace/backups/$p-* 2>/dev/null | tail -n +8 | xargs -r rm -f
+  done
   sleep 86400
 done

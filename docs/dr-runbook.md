@@ -7,7 +7,7 @@ blue-green apply). State lives on the pod's NFS volume and is what DR protects.
 
 | Asset | Location | Purpose |
 |---|---|---|
-| `db-backup` supervisor program | pod, `/workspace/tools/db-backup.sh` | Nightly `mongodump --archive` to `/workspace/backups/`, 7-day retention, log `/workspace/logs/db-backup.log` |
+| `db-backup` supervisor program | pod, `/workspace/tools/db-backup.sh` | Nightly: `mongodump --archive` + tar of the active slot's `uploads/` + Meili HTTP dump, all pushed to R2 with 7-nightly retention per prefix; log `/workspace/logs/db-backup.log` |
 | Mongo restore | repo `scripts/dr-restore-mongo.sh` | `--drop` restore of a dump archive |
 | NFS watchdog | pod, `/workspace/tools/nfs-watchdog.sh` | Kills frozen node pids after 3 slow cycles, revives FATAL supervisor programs |
 | Blue-green slots | pod | blue `/workspace/baanzon`:3090, green `/workspace/baanzon-next`:3091; `/workspace/data/active-port` selects; inactive slot is instant rollback |
@@ -35,16 +35,24 @@ Roll the fix forward via CI afterwards.
 2. `bash scripts/dr-restore-mongo.sh <archive>` (drops + restores).
 3. `supervisorctl restart baanzon-api`.
 
+### Restore drill (repeatable, prod-safe)
+
+`bash scripts/dr-drill-mongo.sh` restores the newest archive into a scratch db
+(`drill_restore.*`), prints document counts, drops the scratch db. Last run:
+2026-11-16 (PASS — update this line each time you drill).
+
 ## Known gaps (not yet implemented)
 
-- **Uploads/images and Meili snapshots** are not backed up yet (Mongo + `.env` are).
-- **Restore drill**: has not been rehearsed end-to-end.
+- **Off-pod `.env` snapshots are manual** — mongo/uploads/meili rotate nightly;
+  push a fresh `env/env-<UTC>` whenever a secret changes.
 
 ## Backup layout (R2 bucket `baanzon-backups`)
 
 | Key | Content | Retention |
 |---|---|---|
 | `mongo/mongo-<UTC>.gz` | mongodump archive | 7 daily, pruned by the loop |
+| `uploads/uploads-<UTC>.tar.gz` | active slot's `uploads/` (it always holds the union — the apply copies uploads active→staged on every deploy) | 7 daily |
+| `meili/meili-<UTC>.dump` | Meilisearch dump (consistent snapshot via its HTTP API) | 7 daily |
 | `env/env-<UTC>` | full slot `.env` (all operator secrets) | manual pushes |
 
 The backup loop reads the ACTIVE slot's `.env` (resolves via
