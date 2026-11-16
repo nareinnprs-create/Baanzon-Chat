@@ -188,7 +188,11 @@ async function attachVoiceGateway(server) {
   const wss = new WebSocketServer({
     noServer: true,
     // Echo the client's subprotocol (carries the JWT) or browsers abort.
-    handleProtocols: (protocols) => protocols?.[0] ?? true,
+    // `protocols` is a Set; index access is always undefined and ws would
+    // serialize the boolean fallback into the response header. Echo the
+    // client's first offered protocol (the auth token) instead.
+    handleProtocols: (protocols) =>
+      (protocols instanceof Set ? [...protocols][0] : protocols?.[0]) ?? true,
   });
 
   server.on('upgrade', (req, socket, head) => {

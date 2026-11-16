@@ -76,6 +76,8 @@ const METER_INTERVAL_SECONDS = 30;
 const PING_INTERVAL_MS = 25_000;
 /** Muted keepalive: 1s of silence at 16kHz linear16. */
 const SILENCE_FRAME = Buffer.alloc(CLIENT_SAMPLE_RATE * 2, 0);
+/** CF's edge idles a socket after ~5s of quiet; stay under it. */
+const SILENCE_INTERVAL_MS = 2000;
 
 export interface VoiceGateway {
   handleConnection(ws: VoiceSocket, auth: { token?: string; cid?: string }): Promise<void>;
@@ -113,8 +115,13 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
     const state = (): TurnState => box.value;
     let muted = false;
     let currentUserText = '';
+    let lastClientAudio = 0;
+    let lastTtsAudio = 0;
+    /** Stream finished; the drain detector may return the session to listening. */
+    let llmDoneAt = 0;
 
     let stt: FluxStt | null = null;
+    let sttOpenedAt = 0;
     let tts: AuraTts | null = null;
     let abort: AbortController | null = null;
     let spokenSentences = '';
@@ -179,11 +186,34 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
     ping.unref();
 
     const silence = setInterval(() => {
-      // Muted keepalive: flux sees motion, the CF edge stays warm.
-      if (!closed && muted && stt?.usable) {
+      // CF's edge injects `{"type":"KeepAlive"}` after ~5s of client quiet
+      // and flux closes the socket on it (1011). Stream silence while the
+      // user is idle so the edge never sees a quiet socket; if it dies
+      // anyway, reopen it so the next utterance still lands.
+      if (closed) {
+        return;
+      }
+      if (!stt?.usable) {
+        // Grace so a still-connecting socket isn't recreated every tick.
+        if (now() - sttOpenedAt > 5000) {
+          stt = openStt();
+        }
+        return;
+      }
+      if (muted || now() - lastClientAudio > 1500) {
         stt.sendAudio(SILENCE_FRAME);
       }
-    }, 1000);
+      // TTS drain: once the LLM stream is finished, return to listening only
+      // after aura has stopped streaming, so late PCM bytes are never dropped.
+      // With no audio at all (aura failure), llmDoneAt is the fallback clock.
+      if (
+        llmDoneAt &&
+        (state() === 'speaking' || state() === 'thinking') &&
+        now() - Math.max(lastTtsAudio, llmDoneAt) > 2000
+      ) {
+        backToListening();
+      }
+    }, SILENCE_INTERVAL_MS);
     silence.unref();
 
     ws.on('close', () => close('client closed'));
@@ -203,6 +233,10 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
     });
 
     // Providers open lazily; `ready` lands first so the client can show UI.
+    // flux opens now anyway: its connect handshake takes ~1s, and a user
+    // already mid-utterance would lose that audio if it opened on first
+    // audio instead.
+    stt = openStt();
     send(ws, {
       type: 'ready',
       voices: deps.config.voices,
@@ -227,7 +261,9 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
           if (msg.muted === true) {
             muted = true;
           }
-          stt = openStt();
+          if (!stt?.usable) {
+            stt = openStt();
+          }
           tts = openTts(voice?.id);
           break;
         }
@@ -249,6 +285,7 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
     }
 
     function onAudio(chunk: Buffer) {
+      lastClientAudio = now();
       if (muted || state() !== 'listening') {
         return;
       }
@@ -259,6 +296,7 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
     }
 
     function openStt(): FluxStt {
+      sttOpenedAt = now();
       return createStt({
         accountId: deps.cf.accountId,
         token: deps.cf.token,
@@ -291,6 +329,7 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
         token: deps.cf.token,
         speaker,
         onAudio: (pcm) => {
+          lastTtsAudio = now();
           if (!closed && state() === 'speaking') {
             ws.send(pcm);
           }
@@ -363,17 +402,17 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
           // turn and notified the client; the aborted stream resolves late.
           return;
         }
-        if (state() === 'speaking') {
-          const tail = splitter.tail();
-          if (tail) {
-            speakSentence(tail);
-          }
-          await finishTurn(full.trim() || spokenSentences.trim());
-        } else {
-          // Nothing was spoken (empty reply) → straight back to listening.
-          await finishTurn(full.trim());
-          backToListening();
+        // Short replies often arrive as one delta after the splitter's ender
+        // regex (no trailing whitespace) — the tail must be spoken too, or
+        // the user gets a silent reply.
+        const tail = splitter.tail();
+        if (tail) {
+          speakSentence(tail);
         }
+        await finishTurn(full.trim() || spokenSentences.trim());
+        // The drain detector (silence interval) flips back to listening once
+        // aura has stopped streaming, so late TTS bytes are never dropped.
+        llmDoneAt = now();
       } catch (err) {
         if (closed || turnInterrupted) {
           return;
@@ -422,12 +461,15 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
       if (state() !== 'speaking' && state() !== 'thinking') {
         return;
       }
+      // Only persist here when a live stream was cut: a drain-phase interrupt
+      // (LLM already finished) would double-save what finishTurn already kept.
+      const wasStreaming = abort != null;
       abort?.abort();
       abort = null;
       turnInterrupted = true;
       const kept = spokenSentences.trim();
       spokenSentences = '';
-      if (kept) {
+      if (kept && wasStreaming) {
         send(ws, { type: 'interrupted', text: kept });
         void deps.store
           .saveTurn({
