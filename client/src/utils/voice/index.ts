@@ -6,7 +6,12 @@
 
 export { createVoiceActivityDetector } from './vad';
 export { createWebAudioVadSampler } from './webAudioVad';
-export { createRecognizer, isDiyaVoiceSupported, pickAssistantVoice } from './speech';
+export {
+  createRecognizer,
+  isDiyaVoiceSupported,
+  pickAssistantVoice,
+  unlockSpeechSynthesis,
+} from './speech';
 export type {
   AudioLevelSampler,
   VadOptions,

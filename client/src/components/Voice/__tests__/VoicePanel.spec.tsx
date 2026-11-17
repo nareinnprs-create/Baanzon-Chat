@@ -54,19 +54,29 @@ class FakeRecognition {
 
 interface SpeechFakes {
   recognition: FakeRecognition;
-  spoken: Array<{ onstart?: () => void; onend?: () => void; onerror?: () => void }>;
+  spoken: Array<{ text: string; onstart?: () => void; onend?: () => void; onerror?: () => void }>;
 }
 
 function installSpeechFakes(): SpeechFakes {
   const recognition = new FakeRecognition();
-  const spoken: Array<{ onstart?: () => void; onend?: () => void; onerror?: () => void }> = [];
+  const spoken: Array<{
+    text: string;
+    onstart?: () => void;
+    onend?: () => void;
+    onerror?: () => void;
+  }> = [];
   Object.defineProperty(window, 'SpeechRecognition', {
     value: jest.fn(() => recognition),
     configurable: true,
   });
   Object.defineProperty(window, 'speechSynthesis', {
     value: {
-      speak: (utterance: { onstart?: () => void; onend?: () => void; onerror?: () => void }) => {
+      speak: (utterance: {
+        text: string;
+        onstart?: () => void;
+        onend?: () => void;
+        onerror?: () => void;
+      }) => {
         spoken.push(utterance);
       },
       cancel: jest.fn(),
@@ -199,8 +209,10 @@ describe('VoicePanel', () => {
     expect(String(init.body)).toContain('who are you');
     expect(String(init.body)).not.toMatch(/@cf|llama|gpt/i);
 
-    // The reply is appended to the transcript and spoken through synthesis.
-    act(() => fakes.spoken[0]?.onstart?.());
+    // The reply is appended to the transcript and spoken through synthesis;
+    // the gesture-time unlock queues a silent utterance first, so target the
+    // non-silent reply utterance.
+    act(() => fakes.spoken.find((u) => u.text !== ' ')?.onstart?.());
     await waitFor(() =>
       expect(screen.getByTestId('voice-status')).toHaveTextContent(L.statusSpeaking),
     );

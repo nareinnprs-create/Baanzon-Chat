@@ -60,6 +60,7 @@ class FakeRecognition {
 interface FakeUtterance {
   text: string;
   lang: string;
+  volume?: number;
   onstart: (() => void) | null;
   onend: (() => void) | null;
   onerror: (() => void) | null;
@@ -104,6 +105,7 @@ function restoreSpeech(): void {
 interface Harness {
   result: ReturnType<typeof useDiyaVoice>;
   recognition: FakeRecognition;
+  spoken: FakeUtterance[];
   turnCalls: Array<{ text: string; history: VoiceHistoryTurn[] }>;
   /** Resolves the pending turn and lets synthesis lifecycle run. */
   replyWith: (text: string) => Promise<void>;
@@ -179,6 +181,7 @@ function renderVoice(
   return {
     result,
     recognition,
+    spoken,
     turnCalls,
     // Awaited so the turn's continuation (transcript append + speak) flushes
     // before the caller drives the next lifecycle step.
@@ -187,8 +190,10 @@ function renderVoice(
         resolver?.(text);
       });
     },
-    startSpeaking: () => act(() => spoken[0]?.onstart?.()),
-    endSpeaking: () => act(() => spoken[0]?.onend?.()),
+    // The gesture-time unlock queues a silent utterance first; lifecycle
+    // drivers target the first real (non-silent) reply utterance.
+    startSpeaking: () => act(() => spoken.find((u) => u.text !== ' ')?.onstart?.()),
+    endSpeaking: () => act(() => spoken.find((u) => u.text !== ' ')?.onend?.()),
     failWith: async (error) => {
       await act(async () => {
         rejecter?.(error);
@@ -234,6 +239,20 @@ describe('useDiyaVoice', () => {
     expect(recognition.startCalls).toBeGreaterThan(0);
     expect(recognition.continuous).toBe(true);
     expect(recognition.interimResults).toBe(true);
+    harness.unmount();
+  });
+
+  it('primes the speech engine with a silent gesture-time utterance on start', async () => {
+    const harness = renderVoice();
+    const { result, spoken } = harness;
+
+    await act(async () => {
+      await result.start();
+    });
+
+    // The unlock utterance queues first, so the later async reply speak() is
+    // not the engine's first call — mobile engines drop that one.
+    expect(spoken[0]).toMatchObject({ text: ' ', volume: 0 });
     harness.unmount();
   });
 

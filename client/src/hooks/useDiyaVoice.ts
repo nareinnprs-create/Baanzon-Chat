@@ -26,6 +26,7 @@ import {
   createWebAudioVadSampler,
   isDiyaVoiceSupported,
   pickAssistantVoice,
+  unlockSpeechSynthesis,
 } from '~/utils/voice';
 import { VOICE_LABELS } from '~/components/Voice/labels';
 import { DiyaTurnError } from '~/components/Voice/api';
@@ -415,6 +416,10 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
     if (isActive(statusRef.current)) {
       return;
     }
+
+    // Runs before the first await, so the tap gesture is still live: mobile
+    // engines drop speak() later in the async turn unless the gesture spoke once.
+    unlockSpeechSynthesis();
 
     setStatus('connecting');
     setError(null);

@@ -96,3 +96,28 @@ export function pickAssistantVoice(lang: string): SpeechSynthesisVoice | null {
   );
   return premium ?? pool.find((voice) => voice.default) ?? pool[0] ?? null;
 }
+
+/**
+ * Primes the speech engine from inside a user gesture. Mobile engines drop
+ * `speak()` when its first call happens after an await (the Diya turn fetch),
+ * so the session start queues a silent utterance within the tap. Stateless by
+ * design: repeated silent utterances are ignored by the engines, so no
+ * once-per-page bookkeeping is needed.
+ */
+export function unlockSpeechSynthesis(): void {
+  if (
+    typeof window === 'undefined' ||
+    typeof window.speechSynthesis?.speak !== 'function' ||
+    typeof SpeechSynthesisUtterance === 'undefined'
+  ) {
+    return;
+  }
+  try {
+    const utterance = new SpeechSynthesisUtterance(' ');
+    utterance.volume = 0;
+    window.speechSynthesis.speak(utterance);
+    window.speechSynthesis.resume();
+  } catch {
+    /* Blocked or unsupported; real speech stays guarded by its own callers. */
+  }
+}
