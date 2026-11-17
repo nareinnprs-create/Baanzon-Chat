@@ -2,12 +2,41 @@
  * server and opens the linked page on click. No model or endpoint metadata is
  * ever present in a payload — servers send user-facing title/body/link only. */
 
-self.addEventListener('install', () => {
-  self.skipWaiting();
+self.addEventListener('install', (event) => {
+  // Offline fallback for navigations: the shell needs a network round-trip
+  // (versioned assets), so a cached HTML page is the only reliable offline UX.
+  event.waitUntil(
+    caches
+      .open('baanzon-offline-v1')
+      .then((cache) => cache.add('/offline.html'))
+      .then(() => self.skipWaiting()),
+  );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
+});
+
+/** Navigation requests only: network first, offline page on failure. Every
+ *  other request passes through untouched — this worker never caches app
+ *  assets or API traffic. */
+self.addEventListener('fetch', (event) => {
+  const request = event.request;
+  if (request.method !== 'GET' || request.mode !== 'navigate') {
+    return;
+  }
+  event.respondWith(
+    fetch(request).catch(() =>
+      caches.match('/offline.html').then(
+        (cached) =>
+          cached ||
+          new Response('<h1>You are offline</h1>', {
+            status: 503,
+            headers: { 'Content-Type': 'text/html' },
+          }),
+      ),
+    ),
+  );
 });
 
 self.addEventListener('push', (event) => {

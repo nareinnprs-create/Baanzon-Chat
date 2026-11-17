@@ -14,6 +14,7 @@ offline fallback page, app shortcuts, CI build lane, staged rollout.
 | assetlinks.json | live; upload-key SHA-256 `E8:16:…:E0:13` verified matching |
 | Notifications | delegated (`POST_NOTIFICATIONS` permission, TrustedWebActivityService) |
 | Purchase gate | `client/src/utils/androidApp.ts` + `PricingView` gate (no purchase surface in-app) |
+| Offline fallback | `client/public/sw.js` serves cached `/offline.html` for failed navigations (covers TWA, PWA, mobile web); before SW activation Chrome's own offline page shows |
 
 ## 1. Store listing (Play Console → Main store listing)
 

@@ -25,24 +25,23 @@
   "shortcuts": [
     {
       "name": "New chat",
-      "short_name": "Chat",
+      "shortName": "Chat",
       "url": "/",
       "chosenIconUrl": "https://baanzonchat.opraiz.com/assets/ic_shortcut_chat.png"
     },
     {
       "name": "Voice",
-      "short_name": "Voice",
+      "shortName": "Voice",
       "url": "/voice",
       "chosenIconUrl": "https://baanzonchat.opraiz.com/assets/ic_shortcut_voice.png"
     },
     {
       "name": "Agent marketplace",
-      "short_name": "Explore",
+      "shortName": "Explore",
       "url": "/agents",
       "chosenIconUrl": "https://baanzonchat.opraiz.com/assets/ic_shortcut_market.png"
     }
   ],
-  "offlinePage": "offline.html",
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://baanzonchat.opraiz.com/manifest.webmanifest",
   "fallbackType": "customtabs",
