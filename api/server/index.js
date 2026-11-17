@@ -330,6 +330,21 @@ const startServer = async () => {
   };
 
   app.get('/health', (_req, res) => res.status(200).send('OK'));
+  /* Android TWA digital asset links (Play verification of baanzonchat.opraiz.com). */
+  app.get('/.well-known/assetlinks.json', (_req, res) =>
+    res.status(200).json([
+      {
+        relation: ['delegate_permission/common.handle_all_urls'],
+        target: {
+          namespace: 'android_app',
+          package_name: 'com.opraiz.baanzonchat',
+          sha256_cert_fingerprints: [
+            'E8:16:29:02:FD:28:DF:EB:A3:C3:47:1D:B5:DB:61:CE:4A:4E:47:B3:08:40:68:37:30:13:0C:3F:7B:EC:E0:13',
+          ],
+        },
+      },
+    ]),
+  );
   app.get('/livez', (_req, res) => res.status(200).send('OK'));
   app.get('/readyz', async (_req, res) => {
     if (!serverReady) {
