@@ -31,12 +31,10 @@ const userSchema: Schema<IUser> = new Schema<IUser>(
     username: {
       type: String,
       lowercase: true,
-      default: '',
     },
     /** E.164 (`+<country code><number>`), collected at signup; OTP verification pending. */
     phone: {
       type: String,
-      default: '',
     },
     /** Whether the phone number has passed OTP verification. */
     phoneVerified: {
@@ -230,14 +228,16 @@ for (const field of oAuthIdFields) {
   );
 }
 
-// username and phone default to '' so the unique index ignores empty values.
+// username and phone are optional (no default) so the unique partial indexes
+// only cover documents where the field exists; MongoDB partial indexes do not
+// support $ne, so empty values are expressed as an absent field instead of ''.
 userSchema.index(
   { username: 1, tenantId: 1 },
-  { unique: true, partialFilterExpression: { username: { $exists: true, $ne: '' } } },
+  { unique: true, partialFilterExpression: { username: { $exists: true } } },
 );
 userSchema.index(
   { phone: 1, tenantId: 1 },
-  { unique: true, partialFilterExpression: { phone: { $exists: true, $ne: '' } } },
+  { unique: true, partialFilterExpression: { phone: { $exists: true } } },
 );
 
 export default userSchema;
