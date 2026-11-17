@@ -15,6 +15,13 @@
     // transitive) sits on zod@3 and the zod@4 major migration is deferred by
     // decision.
     // Review: at the zod@4 migration, or if a 3.x patched release lands.
-    "GHSA-mrhx-c7xc-m3w5"
+    "GHSA-mrhx-c7xc-m3w5",
+    // GHSA-fc5q-39xc-vjpf — picomatch ReDoS via repeated extglobs (<=4.0.7, no
+    // patched release upstream; the offered "fix" downgrades
+    // @rollup/plugin-commonjs a major). Build-time tooling only: the vite,
+    // rollup and jest chains never ship in the client bundle or server
+    // runtime, so the ReDoS surface is a developer machine mid-build.
+    // Review: when a patched picomatch lands; remove after `npm audit` clears.
+    "GHSA-fc5q-39xc-vjpf"
   ]
 }
