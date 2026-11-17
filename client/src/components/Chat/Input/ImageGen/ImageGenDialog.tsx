@@ -10,6 +10,7 @@ import {
   Textarea,
 } from '@librechat/client';
 import useFileUploadRouter from '~/hooks/Files/useFileUploadRouter';
+import { useAuthContext } from '~/hooks/AuthContext';
 import { useLocalize } from '~/hooks';
 
 /**
@@ -23,6 +24,7 @@ import { useLocalize } from '~/hooks';
 export default function ImageGenDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const localize = useLocalize();
   const attachFiles = useFileUploadRouter();
+  const { token } = useAuthContext();
   const fieldId = useId();
   const [prompt, setPrompt] = useState('');
   const [running, setRunning] = useState(false);
@@ -47,7 +49,10 @@ export default function ImageGenDialog({ open, onClose }: { open: boolean; onClo
     try {
       const res = await fetch('/api/images/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ prompt: text }),
       });
       if (!res.ok) {

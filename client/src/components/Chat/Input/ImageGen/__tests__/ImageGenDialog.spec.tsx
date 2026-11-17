@@ -7,6 +7,9 @@ const mockAttachFiles = jest.fn();
 jest.mock('~/hooks', () => ({
   useLocalize: () => (key: string) => key,
 }));
+jest.mock('~/hooks/AuthContext', () => ({
+  useAuthContext: () => ({ token: 'tok-123' }),
+}));
 jest.mock('~/hooks/Files/useFileUploadRouter', () => () => mockAttachFiles);
 
 describe('ImageGenDialog', () => {
@@ -46,7 +49,13 @@ describe('ImageGenDialog', () => {
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'a sunrise over water' } });
     fireEvent.click(screen.getByRole('button', { name: 'com_ui_image_gen_generate' }));
     await waitFor(() => {
-      expect(post).toHaveBeenCalledWith('/api/images/generate', expect.anything());
+      expect(post).toHaveBeenCalledWith(
+        '/api/images/generate',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({ Authorization: 'Bearer tok-123' }),
+        }),
+      );
       expect(screen.getByRole('img', { name: 'a sunrise over water' })).toHaveAttribute(
         'src',
         'blob:generated',

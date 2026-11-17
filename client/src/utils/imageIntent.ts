@@ -25,11 +25,16 @@ export function isImageRequest(text: string): boolean {
 export type ImageGenError = Error & { serverMessage?: string };
 
 /** POSTs the prompt to the tier-gated generation endpoint and wraps the blob
- *  as a File, the same shape the ImageGenDialog hands to the file pipeline. */
-export async function generateImageFile(prompt: string): Promise<File> {
+ *  as a File, the same shape the ImageGenDialog hands to the file pipeline.
+ *  The endpoint is requireJwtAuth'd; the access token comes from the caller's
+ *  auth context (same pattern as the Diya turn request). */
+export async function generateImageFile(prompt: string, token?: string): Promise<File> {
   const res = await fetch('/api/images/generate', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify({ prompt }),
   });
   if (!res.ok) {

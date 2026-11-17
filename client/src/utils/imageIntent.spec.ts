@@ -52,6 +52,15 @@ describe('generateImageFile', () => {
       '/api/images/generate',
       expect.objectContaining({ method: 'POST' }),
     );
+    expect(
+      (mockFetch.mock.calls[0][1] as { headers: Record<string, string> }).headers.Authorization,
+    ).toBeUndefined();
+
+    await generateImageFile('a cat', 'tok-1');
+    expect(
+      (mockFetch.mock.calls[1][1] as { headers: Record<string, string> }).headers.Authorization,
+    ).toBe('Bearer tok-1');
+
     expect(file.type).toBe('image/png');
     expect(file.name).toMatch(/^baanzon-image-\d+\.png$/);
   });

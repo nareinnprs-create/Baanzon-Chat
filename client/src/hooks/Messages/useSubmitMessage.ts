@@ -30,7 +30,7 @@ type Submission = {
 };
 
 export default function useSubmitMessage() {
-  const { user } = useAuthContext();
+  const { user, token } = useAuthContext();
   const methods = useChatFormContext();
   const { conversation: addedConvo } = useAddedChatContext();
   const { ask, index, getMessages, setMessages, conversation, files } = useChatContext();
@@ -134,7 +134,7 @@ export default function useSubmitMessage() {
       ) {
         void (async () => {
           try {
-            const file = await generateImageFile(data.text);
+            const file = await generateImageFile(data.text, token);
             const uploaded = await uploadGeneratedImage({ file, conversation, isTemporary });
             performSend({
               text: data.text,

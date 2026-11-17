@@ -144,7 +144,7 @@ describe('useSubmitMessage', () => {
     jest.clearAllMocks();
     mockUseRecoilValue.mockReturnValue(false);
     mockUseSetRecoilState.mockReturnValue(mockSetActivePrompt);
-    mockUseAuthContext.mockReturnValue({ user: { id: 'user-1' } });
+    mockUseAuthContext.mockReturnValue({ user: { id: 'user-1' }, token: 'tok-1' });
     mockUseAddedChatContext.mockReturnValue({ conversation: null });
     mockUseChatFormContext.mockReturnValue({ reset, getValues: jest.fn(() => '') });
     mockUseGetLatestMessage.mockReturnValue(() => ({ messageId: 'assistant-message' }));
@@ -272,7 +272,7 @@ describe('useSubmitMessage', () => {
         result.current.submitMessage({ text: 'generate an image of a cat' });
       });
 
-      expect(mockGenerateImageFile).toHaveBeenCalledWith('generate an image of a cat');
+      expect(mockGenerateImageFile).toHaveBeenCalledWith('generate an image of a cat', 'tok-1');
       expect(mockUploadGeneratedImage).toHaveBeenCalledWith({
         file: expect.any(File),
         conversation: undefined,
