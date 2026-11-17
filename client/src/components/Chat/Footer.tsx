@@ -1,8 +1,8 @@
 import React, { useEffect, memo } from 'react';
 import TagManager from 'react-gtm-module';
 import ReactMarkdown from 'react-markdown';
-import { Constants } from 'librechat-data-provider';
 import type { TStartupConfig } from 'librechat-data-provider';
+
 import { useGetStartupConfig } from '~/data-provider';
 import { useLocalize } from '~/hooks';
 
@@ -39,9 +39,7 @@ function Footer({ className, startupConfig }: FooterProps) {
   const mainContentParts = (
     typeof config?.customFooter === 'string'
       ? config.customFooter
-      : '[Baanzon Chat ' +
-        Constants.VERSION +
-        '](https://baanzon.chat) - ' +
+      : '[Baanzon Chat](https://baanzon.chat) - ' +
         localize('com_ui_latest_footer')
   ).split('|');
 

@@ -46,6 +46,7 @@ const renderView = () =>
 
 describe('PricingView', () => {
   beforeEach(() => {
+    localStorage.removeItem('baanzon_android_app');
     checkoutApi = useCreateCheckout() as { mutate: jest.Mock; isPending: boolean };
     checkoutApi.mutate.mockReset();
     checkoutApi.mutate.mockImplementation(
@@ -103,5 +104,15 @@ describe('PricingView', () => {
       { tier: 'lite', cycle: 'yearly' },
       expect.anything(),
     );
+  });
+
+  it('renders no purchase surface inside the Android app', () => {
+    localStorage.setItem('baanzon_android_app', '1');
+    renderView();
+
+    expect(screen.getByText('com_ui_pricing_on_web')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'com_ui_pricing_subscribe' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'com_ui_pricing_topup' })).not.toBeInTheDocument();
+    expect(checkoutApi.mutate).not.toHaveBeenCalled();
   });
 });

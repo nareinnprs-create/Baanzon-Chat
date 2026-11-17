@@ -7,6 +7,7 @@ import type { TranslationKeys } from '~/hooks';
 import { useBillingProducts, useBillingSubscription, useCreateCheckout } from '~/data-provider';
 import { useDocumentTitle, useLocalize } from '~/hooks';
 import { cn } from '~/utils';
+import { isAndroidApp } from '~/utils/androidApp';
 
 type Cycle = 'monthly' | 'yearly';
 
@@ -149,6 +150,9 @@ export function PricingView() {
   const productsQuery = useBillingProducts();
   const subscription = useBillingSubscription();
   const checkout = useCreateCheckout();
+  /** The Play app (TWA) never renders a purchase surface: the catalog below is
+   *  gated off entirely, so no in-app digital purchase can start. */
+  const inTwa = isAndroidApp();
 
   const buy = (payload: TCheckoutRequest) => {
     setError('');
@@ -157,6 +161,22 @@ export function PricingView() {
       onError: () => setError(localize('com_ui_checkout_error')),
     });
   };
+
+  if (inTwa) {
+    return (
+      <div className="mx-auto w-full max-w-3xl p-4">
+        <div role="region" aria-label={localize('com_ui_pricing_title')}>
+          <h1 className="text-xl font-semibold text-text-primary">
+            {localize('com_ui_pricing_title')}
+          </h1>
+        </div>
+        <p className="mt-3 flex items-center gap-2 rounded-md border border-border-light p-3 text-sm text-text-secondary">
+          <AlertCircle className="icon-md" aria-hidden="true" />
+          {localize('com_ui_pricing_on_web')}
+        </p>
+      </div>
+    );
+  }
 
   const busy = checkout.isPending;
   const products = productsQuery.data?.products ?? [];
@@ -176,6 +196,13 @@ export function PricingView() {
         <p className="mt-3 flex items-center gap-2 rounded-md border border-border-light p-3 text-sm text-text-secondary">
           <AlertCircle className="icon-md" aria-hidden="true" />
           {localize('com_ui_pricing_mock_note')}
+        </p>
+      )}
+
+      {inTwa && (
+        <p className="mt-3 flex items-center gap-2 rounded-md border border-border-light p-3 text-sm text-text-secondary">
+          <AlertCircle className="icon-md" aria-hidden="true" />
+          {localize('com_ui_pricing_on_web')}
         </p>
       )}
 

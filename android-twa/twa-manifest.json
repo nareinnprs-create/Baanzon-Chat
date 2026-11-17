@@ -22,7 +22,27 @@
   },
   "appVersionName": "1.0.0",
   "appVersionCode": 1,
-  "shortcuts": [],
+  "shortcuts": [
+    {
+      "name": "New chat",
+      "short_name": "Chat",
+      "url": "/",
+      "chosenIconUrl": "https://baanzonchat.opraiz.com/assets/ic_shortcut_chat.png"
+    },
+    {
+      "name": "Voice",
+      "short_name": "Voice",
+      "url": "/voice",
+      "chosenIconUrl": "https://baanzonchat.opraiz.com/assets/ic_shortcut_voice.png"
+    },
+    {
+      "name": "Agent marketplace",
+      "short_name": "Explore",
+      "url": "/agents",
+      "chosenIconUrl": "https://baanzonchat.opraiz.com/assets/ic_shortcut_market.png"
+    }
+  ],
+  "offlinePage": "offline.html",
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://baanzonchat.opraiz.com/manifest.webmanifest",
   "fallbackType": "customtabs",
