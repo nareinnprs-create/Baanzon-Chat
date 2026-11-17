@@ -16,6 +16,7 @@ import {
   voiceVoicesAtom,
 } from '~/components/Voice/atoms';
 import { createVoiceActivityDetector } from '~/utils/voice/vad';
+import { adoptPrimedContexts } from '~/utils/voice/primeAudio';
 import { VOICE_LABELS as L } from '~/components/Voice/labels';
 import { useAuthToken } from '~/hooks/AuthContext';
 
@@ -30,8 +31,8 @@ import { useAuthToken } from '~/hooks/AuthContext';
  * WebSocket subprotocol because there is no `jwt` cookie.
  */
 
-const CAPTURE_RATE = 16000;
-const PLAYBACK_RATE = 24000;
+export const CAPTURE_RATE = 16000;
+export const PLAYBACK_RATE = 24000;
 const CAPTURE_CHUNK = 1600; // 100 ms of samples per upstream frame
 /** Ring holds 8 s so a fast server burst never overwrites unsampled audio. */
 const PLAYBACK_RING = PLAYBACK_RATE * 8;
@@ -169,7 +170,9 @@ export function useVoiceRealtime(onEnd: () => void): VoiceRealtimeHandle {
     vad?: ReturnType<typeof createVoiceActivityDetector>;
     ended: boolean;
     unbound: Array<() => void>;
-  }>({ ended: true, unbound: [] });
+    /** Reply audio that arrived before the player existed; flushed on mount. */
+    pendingAudio: ArrayBuffer[];
+  }>({ ended: true, unbound: [], pendingAudio: [] });
 
   const teardown = useCallback(() => {
     const r = refs.current;
@@ -231,6 +234,7 @@ export function useVoiceRealtime(onEnd: () => void): VoiceRealtimeHandle {
     const r = refs.current;
     r.ended = false;
     r.unbound = [];
+    r.pendingAudio = [];
     reset();
     setStatus('connecting');
 
@@ -335,6 +339,15 @@ export function useVoiceRealtime(onEnd: () => void): VoiceRealtimeHandle {
       const node = refs.current.playbackNode;
       if (node) {
         node.port.postMessage(new Int16Array(event.data as ArrayBuffer));
+      } else {
+        // Player not mounted yet (slow worklet load): hold recent audio
+        // instead of dropping the reply. Same budget as the player ring.
+        const pending = refs.current.pendingAudio;
+        pending.push(event.data as ArrayBuffer);
+        let bytes = pending.reduce((sum, b) => sum + b.byteLength, 0);
+        while (bytes > PLAYBACK_RING * 2 && pending.length > 0) {
+          bytes -= pending.shift()?.byteLength ?? 0;
+        }
       }
     };
 
@@ -350,7 +363,11 @@ export function useVoiceRealtime(onEnd: () => void): VoiceRealtimeHandle {
           return;
         }
         r.stream = stream;
-        const ctx = new AudioContext({ sampleRate: CAPTURE_RATE });
+        // Contexts were primed inside the mic tap where possible; creating
+        // them here (after getUserMedia) would be outside the gesture, which
+        // leaves them suspended and the reply silent on mobile.
+        const pair = adoptPrimedContexts(CAPTURE_RATE, PLAYBACK_RATE);
+        const ctx = pair.capture;
         r.captureCtx = ctx;
         await ctx.audioWorklet.addModule(workletUrl(CAPTURE_WORKLET));
         const node = new AudioWorkletNode(ctx, 'baanzon-pcm-capture');
@@ -368,7 +385,7 @@ export function useVoiceRealtime(onEnd: () => void): VoiceRealtimeHandle {
         });
 
         // Reply playback graph: 24 kHz linear16 with a ring buffer.
-        const pctx = new AudioContext({ sampleRate: PLAYBACK_RATE });
+        const pctx = pair.playback;
         r.playbackCtx = pctx;
         await pctx.audioWorklet.addModule(workletUrl(PLAYBACK_WORKLET));
         const pnode = new AudioWorkletNode(pctx, 'baanzon-pcm-player');
@@ -385,6 +402,22 @@ export function useVoiceRealtime(onEnd: () => void): VoiceRealtimeHandle {
           pnode.port.onmessage = null;
           pnode.disconnect();
         });
+        // Audio that arrived before the player existed is flushed now.
+        for (const buffer of r.pendingAudio.splice(0)) {
+          pnode.port.postMessage(new Int16Array(buffer));
+        }
+
+        // Priming can be absent (overlay opened outside a tap): any context
+        // still suspended resumes on the first tap anywhere in the document —
+        // resume() must run inside the gesture itself.
+        if (ctx.state !== 'running' || pctx.state !== 'running') {
+          const resumeAll = () => {
+            void refs.current.captureCtx?.resume().catch(() => undefined);
+            void refs.current.playbackCtx?.resume().catch(() => undefined);
+          };
+          document.addEventListener('pointerdown', resumeAll, { once: true });
+          r.unbound.push(() => document.removeEventListener('pointerdown', resumeAll));
+        }
 
         // Level meter + barge-in VAD run off the same capture context.
         const analyser = ctx.createAnalyser();

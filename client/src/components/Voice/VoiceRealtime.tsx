@@ -14,8 +14,9 @@ import {
   voiceTranscriptsAtom,
   voiceVoicesAtom,
 } from './atoms';
+import { CAPTURE_RATE, PLAYBACK_RATE, useVoiceRealtime } from '~/hooks/useVoiceRealtime';
 import { VOICE_LABELS as L, formatVoiceLabel } from './labels';
-import { useVoiceRealtime } from '~/hooks/useVoiceRealtime';
+import { primeAudio } from '~/utils/voice/primeAudio';
 import { cn } from '~/utils';
 import Orb from './Orb';
 
@@ -171,7 +172,12 @@ export function VoiceRealtimeToggle() {
       size="sm"
       aria-pressed={open}
       aria-label={L.openMode}
-      onClick={() => setOpen(true)}
+      onClick={() => {
+        // The AudioContexts must be born inside this gesture on mobile or
+        // their output stays suspended; the session hook adopts them.
+        primeAudio(CAPTURE_RATE, PLAYBACK_RATE);
+        setOpen(true);
+      }}
       className={cn(open && 'text-text-primary')}
       data-testid="voice-mode-button"
     >
