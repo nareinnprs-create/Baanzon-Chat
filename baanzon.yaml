@@ -348,6 +348,30 @@ registration:
 # Note: If balance.enabled is true, transactions will always be enabled
 # regardless of this setting to ensure balance tracking works correctly
 
+# Gateway failover for the Opraiz gateway (Cloudflare Workers AI). Keys of
+# `chains` are concrete @cf/ model ids; each value is the ordered list tried
+# after that model fails (5xx/429/400/403/404/410, network errors, or an
+# empty 200), starting fresh with the primary on every request. Lane/tier
+# routing resolves the request to one primary model first, so a model-keyed
+# chain is the per-lane/tier ladder; models without an entry use
+# `defaultChain`. After `failureThreshold` consecutive failures a model is
+# benched for `cooldownMs` and skipped (a fully benched chain still runs).
+# Defaults when the whole block is omitted: built-in chains
+# (primary -> glm-4.7-flash -> llama-3.1-8b-fp8), threshold 2, cooldown 10m.
+#failover:
+#  failureThreshold: 2
+#  cooldownMs: 600000
+#  defaultChain:
+#  - '@cf/zai-org/glm-4.7-flash'
+#  chains:
+#    '@cf/zai-org/glm-5.3':
+#    - '@cf/zai-org/glm-5.3-flash'
+#    - '@cf/zai-org/glm-4.7-flash'
+#    '@cf/zai-org/glm-5.3-flash':
+#    - '@cf/zai-org/glm-4.7-flash'
+#    '@cf/openai/gpt-oss-120b':
+#    - '@cf/zai-org/glm-4.7-flash'
+
 # User memory (approved rollout): persistent per-user memories with automatic
 # extraction by an ephemeral agent. The model key is a public spec key;
 # modelRouter resolves it at generation like any Opraiz request.

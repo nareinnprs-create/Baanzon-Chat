@@ -2859,10 +2859,30 @@ export const customEndpointsConfigSchema = z.object({
 
 export type CustomEndpointsLeverConfig = z.infer<typeof customEndpointsConfigSchema>;
 
+/**
+ * Gateway failover chains. Keys are concrete model ids; each value is the
+ * ordered chain tried on failure, starting with the key itself. `defaultChain`
+ * covers models without an entry. Lane/tier routing (modelRouter) resolves the
+ * user's request to one primary model first, so a model-keyed chain is the
+ * per-lane/tier ladder. Omitted entirely reproduces the built-in chain:
+ * primary -> glm-4.7-flash -> the FALLBACK model.
+ */
+export const failoverConfigSchema = z.object({
+  chains: z.record(z.string(), z.array(z.string().min(1))).optional(),
+  defaultChain: z.array(z.string().min(1)).optional(),
+  /** Consecutive failed attempts before a model is benched. Default 2. */
+  failureThreshold: z.number().int().min(1).optional(),
+  /** How long a benched model is skipped, in ms. Default 600000. */
+  cooldownMs: z.number().int().min(1000).optional(),
+});
+
+export type FailoverConfig = z.infer<typeof failoverConfigSchema>;
+
 export const configSchema = z.object({
   version: z.string(),
   cache: z.boolean().default(true),
   modelLanes: modelLaneConfigSchema.optional(),
+  failover: failoverConfigSchema.optional(),
   crossEntitySearch: crossEntitySearchConfigSchema.optional(),
   ocr: ocrSchema.optional(),
   webSearch: webSearchSchema.optional(),
