@@ -48,6 +48,7 @@ export * from './types/insights';
 export * from './types/subagents';
 export * from './types/queuedTurns';
 export * from './types/admin-users';
+export * from './types/feedback-reports';
 export * from './types/usage-summary';
 export * from './types/knowledge';
 export * from './types/notifications';

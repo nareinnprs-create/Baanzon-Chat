@@ -83,4 +83,8 @@ export interface FeedbackHandlers {
   create: (req: ServerRequest, res: Response) => Promise<Response>;
   update: (req: ServerRequest, res: Response) => Promise<Response>;
   delete: (req: ServerRequest, res: Response) => Promise<Response>;
+  /** Admin triage queue: every report, not just the caller's own. */
+  adminList: (req: ServerRequest, res: Response) => Promise<Response>;
+  /** Admin triage: moves any report's status and records the acting admin. */
+  adminUpdate: (req: ServerRequest, res: Response) => Promise<Response>;
 }

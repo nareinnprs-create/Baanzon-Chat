@@ -35,6 +35,7 @@ export * from './rewrite';
 export * from './recall';
 export * from './CodeEnvironments';
 export * from './Admin/Providers';
+export * from './Feedback';
 export * from './mutations';
 export * from './prompts';
 export * from './queries';

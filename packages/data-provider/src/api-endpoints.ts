@@ -560,6 +560,11 @@ export const adminUsers = () => `${BASE_URL}/api/admin/users`;
 export const adminUsersSearch = (q: string, limit = 20) =>
   `${adminUsers()}/search?${new URLSearchParams({ q, limit: String(limit) }).toString()}`;
 
+/* In-app feedback reports */
+export const feedbackList = () => `${BASE_URL}/api/feedback`;
+export const feedbackAdmin = () => `${feedbackList()}/admin`;
+export const feedbackAdminItem = (id: string) => `${feedbackAdmin()}/${id}`;
+
 /* Usage (self, all-time) */
 export const usageSummary = () => `${BASE_URL}/api/usage/summary`;
 

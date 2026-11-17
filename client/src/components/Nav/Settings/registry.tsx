@@ -39,6 +39,8 @@ import DensitySwitch from '../SettingsTabs/General/DensitySwitch';
 import DeleteAccount from '../SettingsTabs/Account/DeleteAccount';
 import StatefulWorkspaceDefault from './StatefulWorkspaceDefault';
 import UsersManagement from '~/components/Admin/UsersManagement';
+import FeedbackManagement from '~/components/Admin/FeedbackManagement';
+import FeedbackDialog from '~/components/Feedback/FeedbackDialog';
 import { ForkSettings } from '../SettingsTabs/Chat/ForkSettings';
 import PushNotificationsToggle from './PushNotificationsToggle';
 import ChatDirection from '../SettingsTabs/Chat/ChatDirection';
@@ -223,6 +225,15 @@ export const registry: SettingEntry[] = [
     keywords: ['push', 'notifications', 'browser', 'web push'],
     Component: PushNotificationsToggle,
   },
+  // General · Feedback (user-facing)
+  {
+    id: 'feedback',
+    tab: GENERAL,
+    section: 'feedback',
+    labelKey: 'com_ui_feedback_entry',
+    keywords: ['feedback', 'report', 'issue', 'bug', 'suggestion', 'idea', 'improve'],
+    Component: FeedbackDialog,
+  },
   // General · Admin
   {
     id: 'adminPanel',
@@ -267,6 +278,15 @@ export const registry: SettingEntry[] = [
     labelKey: 'com_ui_admin_users',
     keywords: ['users', 'accounts', 'people', 'admin', 'roles'],
     Component: UsersManagement,
+    show: (ctx) => ctx.isAdmin === true,
+  },
+  {
+    id: 'feedbackManagement',
+    tab: GENERAL,
+    section: 'admin',
+    labelKey: 'com_ui_feedback_admin',
+    keywords: ['feedback', 'reports', 'triage', 'admin', 'bugs'],
+    Component: FeedbackManagement,
     show: (ctx) => ctx.isAdmin === true,
   },
 

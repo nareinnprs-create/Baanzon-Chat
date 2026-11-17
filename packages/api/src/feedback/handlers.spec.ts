@@ -93,6 +93,14 @@ describe('createFeedbackHandlers', () => {
     const remove = mockResponse();
     await local.delete(unauthenticated, remove.res);
     expect(remove.statusCode).toBe(401);
+
+    const adminList = mockResponse();
+    await local.adminList(unauthenticated, adminList.res);
+    expect(adminList.statusCode).toBe(401);
+
+    const adminUpdate = mockResponse();
+    await local.adminUpdate(unauthenticated, adminUpdate.res);
+    expect(adminUpdate.statusCode).toBe(401);
   });
 
   it('lists only the authenticated user feedback with filters applied', async () => {
@@ -304,5 +312,134 @@ describe('createFeedbackHandlers', () => {
     await local.list(request(), response.res);
 
     expect(response.statusCode).toBe(500);
+  });
+
+  it('adminList returns every report with no owner filter', async () => {
+    const listFeedback = jest
+      .fn()
+      .mockResolvedValue([record({ userId: 'user-2', status: 'in_progress' })]);
+    const local = createFeedbackHandlers({ ...dataSource(), listFeedback });
+    const response = mockResponse();
+
+    await local.adminList(request(), response.res);
+
+    expect(listFeedback).toHaveBeenCalledWith({});
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({
+      feedback: [
+        {
+          id: FEEDBACK_ID,
+          userId: 'user-2',
+          type: 'bug',
+          subject: 'Bug',
+          message: 'Something broke',
+          submittedAt: SUBMITTED_AT.toISOString(),
+          status: 'in_progress',
+        },
+      ],
+    });
+  });
+
+  it('adminList applies type and status filters', async () => {
+    const listFeedback = jest.fn().mockResolvedValue([]);
+    const local = createFeedbackHandlers({ ...dataSource(), listFeedback });
+    const response = mockResponse();
+
+    await local.adminList(request({ query: { type: 'feature', status: 'open' } }), response.res);
+
+    expect(listFeedback).toHaveBeenCalledWith({ type: 'feature', status: 'open' });
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('adminList rejects an invalid status filter', async () => {
+    const listFeedback = jest.fn();
+    const local = createFeedbackHandlers({ ...dataSource(), listFeedback });
+    const response = mockResponse();
+
+    await local.adminList(request({ query: { status: 'lost' } }), response.res);
+
+    expect(response.statusCode).toBe(400);
+    expect(listFeedback).not.toHaveBeenCalled();
+  });
+
+  it('adminUpdate triages any report and records the acting admin', async () => {
+    const adminId = '507f1f77bcf86cd799439012';
+    const updateFeedback = jest
+      .fn()
+      .mockResolvedValue(record({ status: 'resolved', processedBy: adminId }));
+    const local = createFeedbackHandlers({ ...dataSource(), updateFeedback });
+    const response = mockResponse();
+
+    await local.adminUpdate(
+      request({
+        user: { id: adminId, _id: adminId, tenantId: 'tenant-a' },
+        params: { id: FEEDBACK_ID },
+        body: { status: 'resolved' },
+      }),
+      response.res,
+    );
+
+    expect(updateFeedback).toHaveBeenCalledWith(FEEDBACK_ID, {
+      status: 'resolved',
+      processedBy: adminId,
+    });
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('adminUpdate rejects an empty patch', async () => {
+    const updateFeedback = jest.fn();
+    const local = createFeedbackHandlers({ ...dataSource(), updateFeedback });
+    const response = mockResponse();
+
+    await local.adminUpdate(request({ params: { id: FEEDBACK_ID }, body: {} }), response.res);
+
+    expect(response.statusCode).toBe(400);
+    expect(updateFeedback).not.toHaveBeenCalled();
+  });
+
+  it('adminUpdate rejects a processedBy that is not an object id', async () => {
+    const updateFeedback = jest.fn();
+    const local = createFeedbackHandlers({ ...dataSource(), updateFeedback });
+    const response = mockResponse();
+
+    await local.adminUpdate(
+      request({ params: { id: FEEDBACK_ID }, body: { status: 'closed', processedBy: 'nope' } }),
+      response.res,
+    );
+
+    expect(response.statusCode).toBe(400);
+    expect(updateFeedback).not.toHaveBeenCalled();
+  });
+
+  it('adminUpdate returns 404 for an unknown id', async () => {
+    const adminId = '507f1f77bcf86cd799439012';
+    const updateFeedback = jest.fn().mockResolvedValue(null);
+    const local = createFeedbackHandlers({ ...dataSource(), updateFeedback });
+    const response = mockResponse();
+
+    await local.adminUpdate(
+      request({
+        user: { id: adminId, _id: adminId, tenantId: 'tenant-a' },
+        params: { id: FEEDBACK_ID },
+        body: { status: 'closed' },
+      }),
+      response.res,
+    );
+
+    expect(response.statusCode).toBe(404);
+  });
+
+  it('adminUpdate rejects a malformed id', async () => {
+    const updateFeedback = jest.fn();
+    const local = createFeedbackHandlers({ ...dataSource(), updateFeedback });
+    const response = mockResponse();
+
+    await local.adminUpdate(
+      request({ params: { id: 'not-an-id' }, body: { status: 'closed' } }),
+      response.res,
+    );
+
+    expect(response.statusCode).toBe(400);
+    expect(updateFeedback).not.toHaveBeenCalled();
   });
 });

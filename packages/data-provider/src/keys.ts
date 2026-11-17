@@ -21,6 +21,7 @@ export enum QueryKeys {
   pushConfig = 'pushConfig',
   adminDodoPayments = 'adminDodoPayments',
   adminUsers = 'adminUsers',
+  feedback = 'feedback',
   usageSummary = 'usageSummary',
   endpoints = 'endpoints',
   tokenConfig = 'tokenConfig',

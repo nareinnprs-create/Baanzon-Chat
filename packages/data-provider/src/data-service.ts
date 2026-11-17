@@ -5,6 +5,13 @@ import type {
   TAdminUsersSearchParams,
   TAdminUsersSearchResponse,
 } from './types/admin-users';
+import type {
+  TCreateFeedbackReport,
+  TFeedbackReport,
+  TFeedbackReportListParams,
+  TFeedbackReportsResponse,
+  TUpdateFeedbackReport,
+} from './types/feedback-reports';
 import type { TInsightsAccessResponse, TInsightsParams, TInsightsResponse } from './types/insights';
 import type { TUsageSummary } from './types/usage-summary';
 import type { TFileConfig } from './file-config';
@@ -1103,6 +1110,39 @@ export function searchAdminUsers(
   params: TAdminUsersSearchParams,
 ): Promise<TAdminUsersSearchResponse> {
   return request.get(endpoints.adminUsersSearch(params.q, params.limit));
+}
+
+/** The signed-in user's own feedback reports (`GET /api/feedback`). */
+export function listMyFeedbackReports(): Promise<TFeedbackReportsResponse> {
+  return request.get(endpoints.feedbackList());
+}
+
+/** Submits a feedback report attributed to the caller (`POST /api/feedback`). */
+export function createFeedbackReport(payload: TCreateFeedbackReport): Promise<TFeedbackReport> {
+  return request.post(endpoints.feedbackList(), payload);
+}
+
+/** Admin triage queue across all users (`GET /api/feedback/admin`). */
+export function listAllFeedbackReports(
+  params?: TFeedbackReportListParams,
+): Promise<TFeedbackReportsResponse> {
+  const query = new URLSearchParams();
+  if (params?.type != null) {
+    query.set('type', params.type);
+  }
+  if (params?.status != null) {
+    query.set('status', params.status);
+  }
+  const qs = query.toString();
+  return request.get(qs ? `${endpoints.feedbackAdmin()}?${qs}` : endpoints.feedbackAdmin());
+}
+
+/** Marks a report's triage status (`PATCH /api/feedback/admin/:id`). */
+export function updateFeedbackReportStatus(
+  id: string,
+  patch: TUpdateFeedbackReport,
+): Promise<TFeedbackReport> {
+  return request.patch(endpoints.feedbackAdminItem(id), patch);
 }
 
 /** All-time usage totals for the signed-in user (`GET /api/usage/summary`). */

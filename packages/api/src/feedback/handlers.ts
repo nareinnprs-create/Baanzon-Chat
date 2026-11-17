@@ -99,29 +99,42 @@ export function createFeedbackHandlers(deps: FeedbackDataSource): FeedbackHandle
     return id;
   }
 
+  /** Shared type/status filter parsing for the owner and admin lists. */
+  function parseListFilters(
+    req: ServerRequest,
+    res: Response,
+  ): { type?: (typeof TYPES)[number]; status?: (typeof STATUSES)[number] } | null {
+    const filters: { type?: (typeof TYPES)[number]; status?: (typeof STATUSES)[number] } = {};
+    const rawType = queryString(req.query.type);
+    if (rawType != null) {
+      if (!isOneOf(TYPES, rawType)) {
+        res.status(400).json({ error: 'type is invalid' });
+        return null;
+      }
+      filters.type = rawType;
+    }
+    const rawStatus = queryString(req.query.status);
+    if (rawStatus != null) {
+      if (!isOneOf(STATUSES, rawStatus)) {
+        res.status(400).json({ error: 'status is invalid' });
+        return null;
+      }
+      filters.status = rawStatus;
+    }
+    return filters;
+  }
+
   async function list(req: ServerRequest, res: Response): Promise<Response> {
     const actor = resolveActor(req, res);
     if (!actor) {
       return res;
     }
-    const rawType = queryString(req.query.type);
-    let type: (typeof TYPES)[number] | undefined;
-    if (rawType != null) {
-      if (!isOneOf(TYPES, rawType)) {
-        return res.status(400).json({ error: 'type is invalid' });
-      }
-      type = rawType;
-    }
-    const rawStatus = queryString(req.query.status);
-    let status: (typeof STATUSES)[number] | undefined;
-    if (rawStatus != null) {
-      if (!isOneOf(STATUSES, rawStatus)) {
-        return res.status(400).json({ error: 'status is invalid' });
-      }
-      status = rawStatus;
+    const filters = parseListFilters(req, res);
+    if (!filters) {
+      return res;
     }
     try {
-      const feedback = await deps.listFeedback({ userId: actor.userId, type, status });
+      const feedback = await deps.listFeedback({ userId: actor.userId, ...filters });
       return res.status(200).json({ feedback: feedback.map(serializeFeedback) });
     } catch (error) {
       logger.error('[feedback] Error listing feedback', error);
@@ -230,5 +243,61 @@ export function createFeedbackHandlers(deps: FeedbackDataSource): FeedbackHandle
     }
   }
 
-  return { list, get, create, update, delete: remove };
+  /** Admin: every report across users; the tenant plugin still scopes by tenant. */
+  async function adminList(req: ServerRequest, res: Response): Promise<Response> {
+    const actor = resolveActor(req, res);
+    if (!actor) {
+      return res;
+    }
+    const filters = parseListFilters(req, res);
+    if (!filters) {
+      return res;
+    }
+    try {
+      const feedback = await deps.listFeedback(filters);
+      return res.status(200).json({ feedback: feedback.map(serializeFeedback) });
+    } catch (error) {
+      logger.error('[feedback] Error listing feedback', error);
+      return res.status(500).json({ error: 'Error listing feedback' });
+    }
+  }
+
+  /** Admin: triage any report; changing status records the acting admin. */
+  async function adminUpdate(req: ServerRequest, res: Response): Promise<Response> {
+    const actor = resolveActor(req, res);
+    if (!actor) {
+      return res;
+    }
+    const id = resolveId(req, res);
+    if (!id) {
+      return res;
+    }
+    const parsed = updateFeedbackSchema.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      return res.status(400).json({ error: describeIssue(parsed.error) });
+    }
+    const patch: UpdateFeedbackInput = {
+      ...parsed.data,
+      // Attribute the triage action to the acting admin unless they set someone else.
+      processedBy: parsed.data.processedBy ?? actor.userId,
+    };
+    if (Object.keys(parsed.data).length === 0) {
+      return res.status(400).json({ error: 'At least one field must be provided for update' });
+    }
+    if (patch.processedBy != null && !isValidObjectIdString(patch.processedBy)) {
+      return res.status(400).json({ error: 'processedBy must be a valid id' });
+    }
+    try {
+      const updated = await deps.updateFeedback(id, patch);
+      if (!updated) {
+        return res.status(404).json({ error: 'Feedback not found' });
+      }
+      return res.status(200).json(serializeFeedback(updated));
+    } catch (error) {
+      logger.error('[feedback] Error updating feedback', error);
+      return res.status(500).json({ error: 'Error updating feedback' });
+    }
+  }
+
+  return { list, get, create, update, delete: remove, adminList, adminUpdate };
 }
