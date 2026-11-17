@@ -125,6 +125,8 @@ test('renders registration form', () => {
   expect(getByRole('form', { name: /Registration form/i })).toBeVisible();
   expect(getByRole('textbox', { name: /Username/i })).toBeInTheDocument();
   expect(getByRole('textbox', { name: /Email/i })).toBeInTheDocument();
+  expect(getByTestId('phone-country')).toBeInTheDocument();
+  expect(getByTestId('phone-national')).toBeInTheDocument();
   expect(getByTestId('password')).toBeInTheDocument();
   expect(getByTestId('confirm_password')).toBeInTheDocument();
   expect(getByRole('button', { name: /Submit registration/i })).toBeInTheDocument();
@@ -203,6 +205,40 @@ test('shows validation error messages', async () => {
   expect(alerts[5]).toHaveTextContent(/Passwords do not match/i);
 });
 
+test('composes the E.164 phone number from the country code on submit', async () => {
+  const mutate = jest.fn();
+  const { getByRole, getByTestId } = setup({
+    useRegisterUserMutationReturnValue: {
+      isLoading: false,
+      isError: false,
+      mutate,
+      data: {},
+      isSuccess: false,
+      error: null as Error | null,
+    },
+  });
+
+  await userEvent.type(getByRole('textbox', { name: /Full name/i }), 'John Doe');
+  await userEvent.type(getByRole('textbox', { name: /Username/i }), 'johndoe');
+  await userEvent.type(getByRole('textbox', { name: /Email/i }), 'test@test.com');
+  await userEvent.selectOptions(getByTestId('phone-country'), 'IN');
+  await userEvent.type(getByTestId('phone-national'), '98765 43210');
+  await userEvent.type(getByTestId('password'), 'password');
+  await userEvent.type(getByTestId('confirm_password'), 'password');
+  await userEvent.click(getByRole('button', { name: /Submit registration/i }));
+
+  await waitFor(() => {
+    expect(mutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'John Doe',
+        username: 'johndoe',
+        email: 'test@test.com',
+        phone: '+919876543210',
+      }),
+    );
+  });
+});
+
 test('shows error message when registration fails', async () => {
   const mutate = jest.fn();
   const { getByTestId, getByRole } = setup({
@@ -219,6 +255,7 @@ test('shows error message when registration fails', async () => {
   await userEvent.type(getByRole('textbox', { name: /Full name/i }), 'John Doe');
   await userEvent.type(getByRole('textbox', { name: /Username/i }), 'johndoe');
   await userEvent.type(getByRole('textbox', { name: /Email/i }), 'test@test.com');
+  await userEvent.type(getByTestId('phone-national'), '2065551234');
   await userEvent.type(getByTestId('password'), 'password');
   await userEvent.type(getByTestId('confirm_password'), 'password');
   await userEvent.click(getByRole('button', { name: /Submit registration/i }));

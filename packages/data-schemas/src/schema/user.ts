@@ -33,6 +33,16 @@ const userSchema: Schema<IUser> = new Schema<IUser>(
       lowercase: true,
       default: '',
     },
+    /** E.164 (`+<country code><number>`), collected at signup; OTP verification pending. */
+    phone: {
+      type: String,
+      default: '',
+    },
+    /** Whether the phone number has passed OTP verification. */
+    phoneVerified: {
+      type: Boolean,
+      default: false,
+    },
     email: {
       type: String,
       required: [true, "can't be blank"],
@@ -219,5 +229,15 @@ for (const field of oAuthIdFields) {
     { unique: true, partialFilterExpression: { [field]: { $exists: true } } },
   );
 }
+
+// username and phone default to '' so the unique index ignores empty values.
+userSchema.index(
+  { username: 1, tenantId: 1 },
+  { unique: true, partialFilterExpression: { username: { $exists: true, $ne: '' } } },
+);
+userSchema.index(
+  { phone: 1, tenantId: 1 },
+  { unique: true, partialFilterExpression: { phone: { $exists: true, $ne: '' } } },
+);
 
 export default userSchema;

@@ -324,6 +324,10 @@ interface:
 # Example Registration Object Structure (optional)
 registration:
   socialLogins: ['github', 'google', 'discord', 'openid', 'facebook', 'apple', 'saml']
+  # Usernames no new registration may claim, compared case-insensitively.
+  # reservedUsernames:
+  # - "admin"
+  # - "support"
   # allowedDomains:
   # - "gmail.com"
 

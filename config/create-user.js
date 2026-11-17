@@ -26,7 +26,7 @@ const connect = require('./connect');
   }
 
   // Parse command line arguments
-  let email, password, name, username, emailVerified, provider;
+  let email, password, name, username, phone, emailVerified, provider;
   for (let i = 2; i < process.argv.length; i++) {
     if (process.argv[i].startsWith('--email-verified=')) {
       emailVerified = process.argv[i].split('=')[1].toLowerCase() !== 'false';
@@ -44,6 +44,8 @@ const connect = require('./connect');
       name = process.argv[i];
     } else if (username === undefined) {
       username = process.argv[i];
+    } else if (phone === undefined) {
+      phone = process.argv[i];
     } else if (password === undefined) {
       console.red('Warning: password passed in as argument, this is not secure!');
       password = process.argv[i];
@@ -70,6 +72,13 @@ const connect = require('./connect');
     if (!username) {
       username = defaultName;
     }
+  }
+  if (phone === undefined) {
+    phone = await askQuestion('Phone (E.164, e.g. +919876543210):');
+  }
+  if (!/^\+[1-9]\d{6,14}$/.test(phone)) {
+    console.red('Error: Invalid phone number! Use +<country code><number>.');
+    silentExit(1);
   }
   if (password === undefined) {
     password = await askQuestion('Password: (leave blank, to generate one)');
@@ -105,7 +114,7 @@ or the user will need to attempt logging in to have a verification link sent to 
     silentExit(1);
   }
 
-  const user = { email, password, name, username, confirm_password: password };
+  const user = { email, password, name, username, phone, confirm_password: password };
   const additionalData = { emailVerified, ...(provider !== undefined ? { provider } : {}) };
   let result;
   try {

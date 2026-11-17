@@ -4,8 +4,7 @@ import { Turnstile } from '@marsidev/react-turnstile';
 import { ThemeContext, SecretInput, Spinner, Button, Input, isDark } from '@librechat/client';
 import type { TLoginUser, TStartupConfig } from 'librechat-data-provider';
 import type { TAuthContext } from '~/common';
-import { useResendVerificationEmail, useGetStartupConfig } from '~/data-provider';
-import { validateEmail } from '~/utils';
+import { useResendVerificationEmail } from '~/data-provider';
 import { useLocalize } from '~/hooks';
 
 type TLoginFormProps = {
@@ -27,8 +26,6 @@ const LoginForm: React.FC<TLoginFormProps> = ({ onSubmit, startupConfig, error, 
   const [showResendLink, setShowResendLink] = useState<boolean>(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
-  const { data: config } = useGetStartupConfig();
-  const useUsernameLogin = config?.ldap?.username;
   const validTheme = isDark(theme) ? 'dark' : 'light';
   const requireCaptcha = Boolean(startupConfig.turnstile?.siteKey);
   const authInputClassName =
@@ -99,23 +96,18 @@ const LoginForm: React.FC<TLoginFormProps> = ({ onSubmit, startupConfig, error, 
             <Input
               type="text"
               id="email"
-              autoComplete={useUsernameLogin ? 'username' : 'email'}
-              aria-label={localize('com_auth_email')}
+              autoComplete="username"
+              aria-label={localize('com_auth_email_or_username')}
               {...register('email', {
                 required: localize('com_auth_email_required'),
-                maxLength: { value: 120, message: localize('com_auth_email_max_length') },
-                validate: useUsernameLogin
-                  ? undefined
-                  : (value) => validateEmail(value, localize('com_auth_email_pattern')),
+                maxLength: { value: 320, message: localize('com_auth_email_max_length') },
               })}
               aria-invalid={!!errors.email}
               className={authInputClassName}
               placeholder=" "
             />
             <label htmlFor="email" className={authLabelClassName}>
-              {useUsernameLogin
-                ? localize('com_auth_username').replace(/ \(.*$/, '')
-                : localize('com_auth_email_address')}
+              {localize('com_auth_email_or_username')}
             </label>
           </div>
           {renderError('email')}

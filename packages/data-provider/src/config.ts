@@ -2097,6 +2097,11 @@ export const registrationConfigSchema = z
      * authenticates an unverified local user.
      */
     emailVerificationRequiredInProduction: z.boolean().default(true),
+    /**
+     * Usernames no new registration may claim, compared case-insensitively.
+     * Defaults to an empty list, so every valid username is claimable.
+     */
+    reservedUsernames: z.array(z.string()).optional(),
   })
   .default({
     inviteOnly: false,

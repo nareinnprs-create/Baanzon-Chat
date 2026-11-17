@@ -1,4 +1,5 @@
 const { z } = require('zod');
+const { phoneSchema } = require('@librechat/api');
 
 const MIN_PASSWORD_LENGTH = parseInt(process.env.MIN_PASSWORD_LENGTH, 10) || 8;
 
@@ -44,12 +45,9 @@ const loginSchema = z.object({
 const registerSchema = z
   .object({
     name: z.string().min(3).max(80),
-    username: z
-      .union([z.literal(''), usernameSchema])
-      .transform((value) => (value === '' ? null : value))
-      .optional()
-      .nullable(),
+    username: usernameSchema,
     email: z.string().email(),
+    phone: phoneSchema,
     password: z
       .string()
       .min(MIN_PASSWORD_LENGTH)

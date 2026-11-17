@@ -13,4 +13,5 @@ export * from './openidRoleSync';
 export * from './userDocCache';
 export * from './reuse';
 export * from './registration';
+export * from './signup';
 export * from './openid/index';

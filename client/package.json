@@ -79,6 +79,7 @@
     "input-otp": "^1.4.2",
     "jotai": "^2.12.5",
     "js-cookie": "^3.0.5",
+    "libphonenumber-js": "^1.13.16",
     "librechat-data-provider": "*",
     "lodash": "^4.17.23",
     "lucide": "^0.525.0",

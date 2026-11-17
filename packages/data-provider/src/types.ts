@@ -308,6 +308,8 @@ export type TBackupCode = {
 export type TUser = {
   id: string;
   username: string;
+  /** E.164 (`+<country code><number>`); collected at signup, OTP verification pending. */
+  phone?: string;
   email: string;
   name: string;
   avatar: string;
@@ -712,6 +714,8 @@ export type TRegisterUser = {
   name: string;
   email: string;
   username: string;
+  /** E.164 (`+<country code><number>`), composed from the country-code selector. */
+  phone: string;
   password: string;
   confirm_password?: string;
   token?: string;

@@ -18,6 +18,9 @@ export interface IUser extends Document {
   id: string;
   name?: string;
   username?: string;
+  /** E.164 (`+<country code><number>`); collected at signup, OTP verification pending. */
+  phone?: string;
+  phoneVerified?: boolean;
   email: string;
   emailVerified: boolean;
   password?: string;

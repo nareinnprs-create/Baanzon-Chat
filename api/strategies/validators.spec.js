@@ -80,6 +80,7 @@ describe('Zod Schemas', () => {
         name: 'John Doe',
         username: 'john_doe',
         email: 'john@example.com',
+        phone: '+919876543210',
         password: 'password123',
         confirm_password: 'password123',
       });
@@ -87,15 +88,38 @@ describe('Zod Schemas', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should allow the username to be omitted', () => {
-      const result = registerSchema.safeParse({
-        name: 'John Doe',
-        email: 'john@example.com',
-        password: 'password123',
-        confirm_password: 'password123',
-      });
+    it('should require the username and phone', () => {
+      expect(
+        registerSchema.safeParse({
+          name: 'John Doe',
+          email: 'john@example.com',
+          phone: '+919876543210',
+          password: 'password123',
+          confirm_password: 'password123',
+        }).success,
+      ).toBe(false);
+    });
 
-      expect(result.success).toBe(true);
+    it('should reject a missing or malformed phone number', () => {
+      expect(
+        registerSchema.safeParse({
+          name: 'John Doe',
+          username: 'john_doe',
+          email: 'john@example.com',
+          phone: '919876543210',
+          password: 'password123',
+          confirm_password: 'password123',
+        }).success,
+      ).toBe(false);
+      expect(
+        registerSchema.safeParse({
+          name: 'John Doe',
+          username: 'john_doe',
+          email: 'john@example.com',
+          password: 'password123',
+          confirm_password: 'password123',
+        }).success,
+      ).toBe(false);
     });
 
     it('should invalidate a short name', () => {
@@ -103,6 +127,7 @@ describe('Zod Schemas', () => {
         name: 'Jo',
         username: 'john_doe',
         email: 'john@example.com',
+        phone: '+919876543210',
         password: 'password123',
         confirm_password: 'password123',
       });
@@ -110,17 +135,17 @@ describe('Zod Schemas', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should handle empty username by transforming to null', () => {
+    it('should reject an empty username', () => {
       const result = registerSchema.safeParse({
         name: 'John Doe',
         username: '',
         email: 'john@example.com',
+        phone: '+919876543210',
         password: 'password123',
         confirm_password: 'password123',
       });
 
-      expect(result.success).toBe(true);
-      expect(result.data.username).toBe(null);
+      expect(result.success).toBe(false);
     });
 
     it('should handle name with special characters', () => {
@@ -130,6 +155,7 @@ describe('Zod Schemas', () => {
           name,
           username: 'john_doe',
           email: 'john@example.com',
+          phone: '+919876543210',
           password: 'password123',
           confirm_password: 'password123',
         });
@@ -144,6 +170,7 @@ describe('Zod Schemas', () => {
           name: 'John Doe',
           username,
           email: 'john@example.com',
+          phone: '+919876543210',
           password: 'password123',
           confirm_password: 'password123',
         });
@@ -156,6 +183,7 @@ describe('Zod Schemas', () => {
         name: 'John Doe',
         username: 'john_doe',
         email: 'john@example.com',
+        phone: '+919876543210',
         password: 'password123',
         confirm_password: 'password124',
       });
@@ -189,6 +217,7 @@ describe('Zod Schemas', () => {
         name: 'a'.repeat(81),
         username: 'john_doe',
         email: 'john@example.com',
+        phone: '+919876543210',
         password: 'password123',
         confirm_password: 'password123',
       });
@@ -200,6 +229,7 @@ describe('Zod Schemas', () => {
         name: 'John Doe',
         username: 'a'.repeat(81),
         email: 'john@example.com',
+        phone: '+919876543210',
         password: 'password123',
         confirm_password: 'password123',
       });
@@ -255,6 +285,7 @@ describe('Zod Schemas', () => {
         name: 'John Doe',
         username: 'john_doe',
         email: 'john@example.com',
+        phone: '+919876543210',
         password: 'password123',
         confirm_password: 'password123',
         extraField: "I shouldn't be here",
@@ -384,6 +415,7 @@ describe('Zod Schemas', () => {
           name: 'John Doe',
           username,
           email: 'john@example.com',
+          phone: '+919876543210',
           password: 'password123',
           confirm_password: 'password123',
         });
@@ -419,6 +451,7 @@ describe('Zod Schemas', () => {
           name: 'John Doe',
           username,
           email: 'john@example.com',
+          phone: '+919876543210',
           password: 'password123',
           confirm_password: 'password123',
         });
@@ -444,6 +477,7 @@ describe('Zod Schemas', () => {
         name: 'Jo',
         username: 'john_doe',
         email: 'john@example.com',
+        phone: '+919876543210',
         password: 'password123',
         confirm_password: 'password123',
       });
@@ -480,7 +514,9 @@ describe('Zod Schemas', () => {
       // Test password exactly at minimum length
       const resultValid = registerSchema.safeParse({
         name: 'John Doe',
+        username: 'john_doe',
         email: 'john@example.com',
+        phone: '+919876543210',
         password: 'a'.repeat(minLength),
         confirm_password: 'a'.repeat(minLength),
       });

@@ -25,6 +25,7 @@ const {
   normalizeExpiresIn,
   createOpenIDSessionIdentity,
   resolveAppConfigForUser,
+  checkSignupIdentity,
 } = require('@librechat/api');
 const {
   findUser,
@@ -389,7 +390,7 @@ const registerUser = async (user, additionalData = {}) => {
     return { status: 404, message: errorMessage };
   }
 
-  const { email, password, name, username } = result.data;
+  const { email, password, name, username, phone } = result.data;
   const { provider, ...trustedAdditionalData } = additionalData ?? {};
 
   let newUserId;
@@ -419,6 +420,19 @@ const registerUser = async (user, additionalData = {}) => {
 
     // Only the first user in the unscoped, single-tenant deployment bootstraps ADMIN.
     // Tenant administrators must be provisioned through a trusted administrative flow.
+    const identityCheck = await checkSignupIdentity(
+      { username, phone },
+      { findUser, reservedUsernames: appConfig?.registration?.reservedUsernames },
+    );
+    if (!identityCheck.ok) {
+      logger.info(
+        'Register User - Identity conflict',
+        { name: 'Request params:', value: { username, phone } },
+        { name: 'Result:', value: identityCheck.message },
+      );
+      return { status: identityCheck.status, message: identityCheck.message };
+    }
+
     const isFirstRegisteredUser = !tenantId && (await countUsers()) === 0;
 
     const salt = bcrypt.genSaltSync(10);
@@ -426,6 +440,7 @@ const registerUser = async (user, additionalData = {}) => {
       provider: provider ?? 'local',
       email,
       username,
+      phone,
       name,
       avatar: null,
       role: isFirstRegisteredUser ? SystemRoles.ADMIN : SystemRoles.USER,

@@ -1,14 +1,25 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { loginPage } from 'librechat-data-provider';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { useNavigate, useOutletContext, useLocation } from 'react-router-dom';
 import { useRegisterUserMutation } from 'librechat-data-provider/react-query';
 import { ThemeContext, SecretInput, Spinner, Button, Input, isDark } from '@librechat/client';
+import {
+  getCountries,
+  getCountryCallingCode,
+  isValidPhoneNumber,
+  type CountryCode,
+} from 'libphonenumber-js';
 import type { TRegisterUser, TError } from 'librechat-data-provider';
 import type { TLoginLayoutContext } from '~/common';
 import { useLocalize, TranslationKeys } from '~/hooks';
 import { ErrorMessage } from './ErrorMessage';
+
+type TRegistrationFormValues = TRegisterUser & { phoneNational: string };
+
+/** Fallback matches the deployment's primary audience; overridden by the browser locale. */
+const DEFAULT_COUNTRY: CountryCode = 'IN';
 
 const Registration: React.FC = () => {
   const navigate = useNavigate();
@@ -21,8 +32,32 @@ const Registration: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<TRegisterUser>({ mode: 'onChange' });
+  } = useForm<TRegistrationFormValues>({ mode: 'onChange' });
   const password = watch('password');
+
+  const region = navigator.language.split('-')[1];
+  const [country, setCountry] = useState<CountryCode>(
+    region && getCountries().includes(region as CountryCode) ? (region as CountryCode) : DEFAULT_COUNTRY,
+  );
+  // Ref keeps the live country reachable from callbacks RHF may have captured earlier.
+  const countryRef = useRef(country);
+  countryRef.current = country;
+  const displayNames = useMemo(
+    () => new Intl.DisplayNames([navigator.language], { type: 'region' }),
+    [],
+  );
+  const countryOptions = useMemo(
+    () =>
+      getCountries()
+        .map((code) => ({
+          code,
+          dial: getCountryCallingCode(code),
+          name: displayNames.of(code) ?? code,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [displayNames],
+  );
+  const dial = getCountryCallingCode(country);
 
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,6 +78,9 @@ const Registration: React.FC = () => {
     'absolute start-3 top-1.5 z-10 origin-[0] -translate-y-4 scale-75 transform bg-surface-primary px-2 text-sm text-text-secondary-alt duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-1.5 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-accent-primary rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4';
   const authSecretButtonClassName =
     'size-9 rounded-xl text-text-secondary-alt hover:bg-transparent hover:text-text-primary';
+  // Label for a control that always holds a value (country select), so it sits floated permanently.
+  const authStaticLabelClassName =
+    'absolute start-3 top-1.5 z-10 origin-[0] -translate-y-4 scale-75 transform bg-surface-primary px-2 text-sm text-text-secondary-alt';
 
   const registerUser = useRegisterUserMutation({
     onMutate: () => {
@@ -151,9 +189,13 @@ const Registration: React.FC = () => {
             className="mt-6"
             aria-label="Registration form"
             method="POST"
-            onSubmit={handleSubmit((data: TRegisterUser) =>
-              registerUser.mutate({ ...data, token: token ?? undefined }),
-            )}
+            onSubmit={handleSubmit(({ phoneNational, ...data }: TRegistrationFormValues) => {
+              registerUser.mutate({
+                ...data,
+                phone: `+${dial}${phoneNational.replace(/\D/g, '')}`,
+                token: token ?? undefined,
+              });
+            })}
           >
             {renderInput('name', 'com_auth_full_name', 'text', {
               required: localize('com_auth_name_required'),
@@ -167,6 +209,7 @@ const Registration: React.FC = () => {
               },
             })}
             {renderInput('username', 'com_auth_username', 'text', {
+              required: localize('com_auth_username_required'),
               minLength: {
                 value: 2,
                 message: localize('com_auth_username_min_length'),
@@ -191,6 +234,56 @@ const Registration: React.FC = () => {
                 message: localize('com_auth_email_pattern'),
               },
             })}
+            <div className="mb-4">
+              <div className="relative flex gap-2">
+                <div className="relative w-2/5">
+                  <select
+                    id="phoneCountry"
+                    aria-label={localize('com_auth_phone_country')}
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value as CountryCode)}
+                    className={`${authInputClassName} appearance-none pr-8`}
+                    data-testid="phone-country"
+                  >
+                    {countryOptions.map((option) => (
+                      <option key={option.code} value={option.code}>
+                        {option.name} (+{option.dial})
+                      </option>
+                    ))}
+                  </select>
+                  <label htmlFor="phoneCountry" className={authStaticLabelClassName}>
+                    {localize('com_auth_phone_country')}
+                  </label>
+                </div>
+                <div className="relative w-3/5">
+                  <Input
+                    id="phoneNational"
+                    type="tel"
+                    autoComplete="tel-national"
+                    aria-label={localize('com_auth_phone')}
+                    {...register('phoneNational', {
+                      required: localize('com_auth_phone_required'),
+                      validate: (value: string) =>
+                        isValidPhoneNumber(
+                          `+${getCountryCallingCode(countryRef.current)}${value.replace(/\D/g, '')}`,
+                        ) || localize('com_auth_phone_invalid'),
+                    })}
+                    aria-invalid={!!errors.phoneNational}
+                    className={authInputClassName}
+                    placeholder=" "
+                    data-testid="phone-national"
+                  />
+                  <label htmlFor="phoneNational" className={authLabelClassName}>
+                    {localize('com_auth_phone')}
+                  </label>
+                </div>
+              </div>
+              {errors.phoneNational && (
+                <span role="alert" className="mt-1 text-sm text-text-destructive">
+                  {String(errors.phoneNational?.message) ?? ''}
+                </span>
+              )}
+            </div>
             {renderInput('password', 'com_auth_password', 'password', {
               required: localize('com_auth_password_required'),
               minLength: {
