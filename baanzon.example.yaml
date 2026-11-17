@@ -153,10 +153,8 @@ interface:
   fileSearch: true
   # Privacy policy settings
   privacyPolicy:
-    # Point this at Baanzon's own policy. The stock LibreChat URL was removed
-    # because it is not Baanzon's policy; set your real URL to re-enable the
-    # external link (do not point users at another product's legal pages).
-    # externalUrl: 'https://example.com/privacy-policy'
+    # Baanzon's own policy, served server-side as plain HTML from the API.
+    externalUrl: 'https://baanzonchat.opraiz.com/privacy'
     openNewTab: true
 
   # Terms of service

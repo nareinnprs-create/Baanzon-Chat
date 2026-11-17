@@ -345,6 +345,8 @@ const startServer = async () => {
       },
     ]),
   );
+  /* Privacy policy served as plain HTML (Play listing requires a non-JS URL). */
+  app.get('/privacy', (_req, res) => res.sendFile(path.join(__dirname, 'privacy.html')));
   app.get('/livez', (_req, res) => res.status(200).send('OK'));
   app.get('/readyz', async (_req, res) => {
     if (!serverReady) {
