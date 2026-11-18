@@ -349,6 +349,8 @@ const startServer = async () => {
   app.get('/privacy', (_req, res) => res.sendFile(path.join(__dirname, 'privacy.html')));
   /* Same for the terms of service. */
   app.get('/terms', (_req, res) => res.sendFile(path.join(__dirname, 'terms.html')));
+  /* Public account-deletion page (Play data-safety requires the URL). */
+  app.get('/data-deletion', (_req, res) => res.sendFile(path.join(__dirname, 'data-deletion.html')));
   app.get('/livez', (_req, res) => res.status(200).send('OK'));
   app.get('/readyz', async (_req, res) => {
     if (!serverReady) {
