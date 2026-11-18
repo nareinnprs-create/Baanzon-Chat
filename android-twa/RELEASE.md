@@ -18,7 +18,7 @@ offline fallback page, app shortcuts, CI build lane, staged rollout.
 
 ## 1. Store listing (Play Console → Main store listing)
 
-- **App name** (≤30): `Baanzon Chat: AI Assistant`
+- **App name** (≤30): `Baanzon Chat`
 - **Short description** (≤80): `Every AI for everyone. Chat, voice, agents & deep research — 9+ languages.`
 - **Full description** (draft):
   > Baanzon Chat brings every AI to everyone — one assistant for conversations, voice,

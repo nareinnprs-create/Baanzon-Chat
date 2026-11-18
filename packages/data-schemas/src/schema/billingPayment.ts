@@ -75,4 +75,4 @@ const billingPaymentSchema: Schema<IBillingPaymentDocument> = new Schema<IBillin
 billingPaymentSchema.index({ createdAt: -1 });
 billingPaymentSchema.index({ source: 1, externalId: 1 }, { unique: true });
 
-export default model<IBillingPaymentDocument>('BillingPayment', billingPaymentSchema);
+export default billingPaymentSchema;

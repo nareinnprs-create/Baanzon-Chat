@@ -1,3 +1,5 @@
+import type { Document } from 'mongoose';
+
 /** A completed, entitlement-granting purchase on any payment rail. */
 export interface IBillingPayment {
   source: 'play' | 'dodo';
