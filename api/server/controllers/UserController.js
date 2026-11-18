@@ -178,6 +178,40 @@ const acceptTermsController = async (req, res) => {
   }
 };
 
+const getTrainingConsentController = async (req, res) => {
+  try {
+    const user = await db.getUserById(req.user.id, 'trainingConsent');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({
+      trainingConsent: !!user.trainingConsent?.accepted,
+      trainingConsentAt: user.trainingConsent?.at || null,
+    });
+  } catch (error) {
+    logger.error('Error fetching training consent:', error);
+    res.status(500).json({ message: 'Error fetching training consent' });
+  }
+};
+
+const updateTrainingConsentController = async (req, res) => {
+  try {
+    const accepted = req.body?.accepted === true;
+    const user = await db.setTrainingConsent(req.user.id, accepted);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({
+      message: 'Training consent updated',
+      trainingConsent: !!user.trainingConsent?.accepted,
+      trainingConsentAt: user.trainingConsent?.at || null,
+    });
+  } catch (error) {
+    logger.error('Error updating training consent:', error);
+    res.status(500).json({ message: 'Error updating training consent' });
+  }
+};
+
 const deleteUserFiles = async (req) => {
   try {
     const userFiles = await db.getFiles({ user: req.user.id });
@@ -680,6 +714,8 @@ module.exports = {
   exportUserDataController,
   getTermsStatusController,
   acceptTermsController,
+  getTrainingConsentController,
+  updateTrainingConsentController,
   deleteUserController,
   verifyEmailController,
   updateUserPluginsController,

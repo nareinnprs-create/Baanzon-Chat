@@ -8,6 +8,7 @@ import { useBillingProducts, useBillingSubscription, useCreateCheckout } from '~
 import { useDocumentTitle, useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 import { isAndroidApp } from '~/utils/androidApp';
+import PlayBilling from './PlayBilling';
 
 type Cycle = 'monthly' | 'yearly';
 
@@ -170,10 +171,7 @@ export function PricingView() {
             {localize('com_ui_pricing_title')}
           </h1>
         </div>
-        <p className="mt-3 flex items-center gap-2 rounded-md border border-border-light p-3 text-sm text-text-secondary">
-          <AlertCircle className="icon-md" aria-hidden="true" />
-          {localize('com_ui_pricing_on_web')}
-        </p>
+        <PlayBilling />
       </div>
     );
   }

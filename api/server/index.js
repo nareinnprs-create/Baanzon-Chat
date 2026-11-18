@@ -347,6 +347,8 @@ const startServer = async () => {
   );
   /* Privacy policy served as plain HTML (Play listing requires a non-JS URL). */
   app.get('/privacy', (_req, res) => res.sendFile(path.join(__dirname, 'privacy.html')));
+  /* Same for the terms of service. */
+  app.get('/terms', (_req, res) => res.sendFile(path.join(__dirname, 'terms.html')));
   app.get('/livez', (_req, res) => res.status(200).send('OK'));
   app.get('/readyz', async (_req, res) => {
     if (!serverReady) {
@@ -465,6 +467,7 @@ const startServer = async () => {
   app.use('/api/diya', routes.diya);
   app.use('/api/flags', routes.flags);
   app.use('/api/billing', routes.billingPayments);
+  app.use('/api/billing/play', routes.billingPlay);
   app.use('/api/billing', routes.billing);
   app.use('/api/evals', routes.evals);
   app.use('/api/trust', routes.trust);

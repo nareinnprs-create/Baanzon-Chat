@@ -53,6 +53,7 @@ export function createUserMethods(
     profileData: Pick<Partial<IUser>, 'username' | 'name'>,
   ) => Promise<IUser | null>;
   acceptTerms: (userId: string) => Promise<IUser | null>;
+  setTrainingConsent: (userId: string, accepted: boolean) => Promise<IUser | null>;
   searchUsers: ({
     searchPattern,
     limit,
@@ -389,6 +390,25 @@ export function createUserMethods(
       }
     }
     return null;
+  }
+
+  /** Records the user's explicit AI-training opt-in/withdrawal (Play policy:
+   *  consent must be informed, separate, and revocable). */
+  async function setTrainingConsent(userId: string, accepted: boolean): Promise<IUser | null> {
+    const User = mongoose.models.User;
+    const updated = await User.findOneAndUpdate(
+      { _id: userId },
+      {
+        $set: {
+          trainingConsent: { accepted, at: new Date(), version: '2026-11-18' },
+        },
+      },
+      { new: true, runValidators: true },
+    ).lean<IUser>();
+    if (updated) {
+      await invalidateAuthUserDocCache(userId);
+    }
+    return updated;
   }
 
   /**
@@ -832,6 +852,7 @@ export function createUserMethods(
     updateUser,
     claimSamlIdentity,
     acceptTerms,
+    setTrainingConsent,
     searchUsers,
     getUserById,
     generateToken,

@@ -300,6 +300,27 @@ const Registration: React.FC = () => {
                 value === password || localize('com_auth_password_not_match'),
             })}
 
+            <div className="mt-4 flex items-start gap-2">
+              <input
+                id="trainingConsent"
+                type="checkbox"
+                className="mt-1 size-4 accent-accent-primary"
+                aria-describedby="trainingConsentHint"
+                {...register('trainingConsentAccepted')}
+              />
+              <label htmlFor="trainingConsent" className="text-xs text-text-secondary">
+                {localize('com_auth_training_consent')}{' '}
+                <a
+                  href="/privacy"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-accent-primary hover:underline"
+                >
+                  {localize('com_ui_privacy_policy')}
+                </a>
+              </label>
+            </div>
+
             {startupConfig?.turnstile?.siteKey && (
               <div className="my-4 flex justify-center">
                 <Turnstile

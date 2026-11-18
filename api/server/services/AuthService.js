@@ -390,7 +390,7 @@ const registerUser = async (user, additionalData = {}) => {
     return { status: 404, message: errorMessage };
   }
 
-  const { email, password, name, username, phone } = result.data;
+  const { email, password, name, username, phone, trainingConsentAccepted } = result.data;
   const { provider, ...trustedAdditionalData } = additionalData ?? {};
 
   let newUserId;
@@ -444,6 +444,11 @@ const registerUser = async (user, additionalData = {}) => {
       name,
       avatar: null,
       role: isFirstRegisteredUser ? SystemRoles.ADMIN : SystemRoles.USER,
+      trainingConsent: {
+        accepted: trainingConsentAccepted === true,
+        at: new Date(),
+        version: '2026-11-18',
+      },
       password: bcrypt.hashSync(password, salt),
       ...trustedAdditionalData,
     };

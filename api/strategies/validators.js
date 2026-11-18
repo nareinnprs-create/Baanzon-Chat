@@ -48,6 +48,8 @@ const registerSchema = z
     username: usernameSchema,
     email: z.string().email(),
     phone: phoneSchema,
+    /** Explicit opt-in to have conversation content used for AI improvement. */
+    trainingConsentAccepted: z.boolean().optional(),
     password: z
       .string()
       .min(MIN_PASSWORD_LENGTH)

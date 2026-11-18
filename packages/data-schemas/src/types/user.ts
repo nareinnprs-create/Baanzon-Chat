@@ -23,6 +23,12 @@ export interface IUser extends Document {
   phoneVerified?: boolean;
   email: string;
   emailVerified: boolean;
+  /** Explicit opt-in to use conversation content for AI model improvement. */
+  trainingConsent?: {
+    accepted: boolean;
+    at?: Date;
+    version?: string;
+  };
   password?: string;
   avatar?: string;
   provider: string;

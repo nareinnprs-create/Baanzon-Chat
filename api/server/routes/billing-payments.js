@@ -62,6 +62,7 @@ function verifyWebhookSignature(req) {
 }
 
 /* products (public) */
+/* products (public) */
 router.get('/products', (req, res) => {
   const products = Object.entries(PRODUCTS).map(([tier, p]) => ({
     tier,
@@ -200,9 +201,34 @@ router.get('/admin/recent-dodo', authed, async (req, res) => {
       currency: p.currency,
       email: p.customer?.email,
       createdAt: p.created_at,
+      source: 'dodo',
       metadata: p.metadata || {},
     }));
-    return res.json({ items });
+    // Play purchases recorded locally at verify time (Google has no admin API
+    // for this view): merged so one list covers both rails.
+    let playItems = [];
+    try {
+      playItems = await BillingPayment.find({ source: 'play' })
+        .sort({ createdAt: -1 })
+        .limit(20)
+        .lean();
+    } catch (_e) {
+      playItems = [];
+    }
+    return res.json({
+      items,
+      playItems: playItems.map((p) => ({
+        orderId: p.externalId,
+        status: p.status || 'paid',
+        amount: p.amount,
+        currency: p.currency || 'INR',
+        email: p.email,
+        createdAt: p.createdAt,
+        productId: p.productId,
+        kind: p.kind,
+        source: 'play',
+      })),
+    });
   } catch (err) {
     return res.status(502).json({ message: err.message });
   }

@@ -604,6 +604,10 @@ export const addTagToConversation = (conversationId: string) =>
 
 export const userTerms = () => `${BASE_URL}/api/user/terms`;
 export const acceptUserTerms = () => `${BASE_URL}/api/user/terms/accept`;
+export const trainingConsent = () => `${BASE_URL}/api/user/training-consent`;
+export const billingPlayProducts = () => `${BASE_URL}/api/billing/play/products`;
+export const billingPlayVerify = () => `${BASE_URL}/api/billing/play/verify`;
+export const billingPlayPurchases = () => `${BASE_URL}/api/billing/play/purchases`;
 export const banner = () => `${BASE_URL}/api/banner`;
 
 // Message Feedback

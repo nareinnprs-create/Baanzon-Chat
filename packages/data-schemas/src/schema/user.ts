@@ -53,6 +53,13 @@ const userSchema: Schema<IUser> = new Schema<IUser>(
       required: true,
       default: false,
     },
+    /** Explicit opt-in for using conversation content to improve AI models.
+     *  Never set by default; versioned so policy changes can re-consent. */
+    trainingConsent: {
+      accepted: { type: Boolean, default: false },
+      at: Date,
+      version: { type: String, default: '2026-11-18' },
+    },
     password: {
       type: String,
       trim: true,

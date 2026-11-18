@@ -12,6 +12,7 @@ const PACKS = {
     credits: 200,
     validDays: 30,
     dodoProductId: process.env.DODO_PRODUCT_LITE_PACK || 'pdt_0NrCa0mcDz1W3X7SyIKl9',
+    playProductId: process.env.PLAY_PRODUCT_LITE_PACK || 'baanzon_pack_lite',
   },
   pro_pack: {
     label: 'Pro pack',
@@ -19,6 +20,7 @@ const PACKS = {
     credits: 500,
     validDays: 30,
     dodoProductId: process.env.DODO_PRODUCT_PRO_PACK || 'pdt_0NrCa0pLQIuSHJfO1P4kl',
+    playProductId: process.env.PLAY_PRODUCT_PRO_PACK || 'baanzon_pack_pro',
   },
 };
 
@@ -34,6 +36,8 @@ const PRODUCTS = {
     yearlyInr: 2990,
     dodoProductId: process.env.DODO_PRODUCT_LITE || 'pdt_0NrCZm4oJpnpvLLCUWAw2',
     dodoProductIdYearly: process.env.DODO_PRODUCT_LITE_YEARLY || 'pdt_0NrCa0cM7TU6Veh0MDmQ5',
+    playProductId: process.env.PLAY_PRODUCT_LITE || 'baanzon_lite_monthly',
+    playProductIdYearly: process.env.PLAY_PRODUCT_LITE_YEARLY || 'baanzon_lite_yearly',
   },
   pro: {
     tier: 'pro',
@@ -42,6 +46,8 @@ const PRODUCTS = {
     yearlyInr: 9990,
     dodoProductId: process.env.DODO_PRODUCT_PRO || 'pdt_0NrCa0fQT8txsnXAe9DVn',
     dodoProductIdYearly: process.env.DODO_PRODUCT_PRO_YEARLY || 'pdt_0NrCa0hZR9JFyr9nbSTN9',
+    playProductId: process.env.PLAY_PRODUCT_PRO || 'baanzon_pro_monthly',
+    playProductIdYearly: process.env.PLAY_PRODUCT_PRO_YEARLY || 'baanzon_pro_yearly',
   },
   enterprise: {
     tier: 'enterprise',
@@ -66,8 +72,32 @@ function resolveProductId(productId) {
   return null;
 }
 
+/** Play Billing catalog: sku -> { kind, tier?, pack?, cycle?, amountInr }. */
+const PLAY_PRODUCTS = {};
+for (const key of Object.keys(PACKS)) {
+  PLAY_PRODUCTS[PACKS[key].playProductId] = {
+    kind: 'pack',
+    pack: key,
+    credits: PACKS[key].credits,
+    amountInr: PACKS[key].priceInr,
+  };
+}
+for (const tier of Object.keys(PRODUCTS)) {
+  const p = PRODUCTS[tier];
+  if (p.playProductId) {
+    PLAY_PRODUCTS[p.playProductId] = { kind: 'subscription', tier, cycle: 'monthly', amountInr: p.inr };
+  }
+  if (p.playProductIdYearly) {
+    PLAY_PRODUCTS[p.playProductIdYearly] = { kind: 'subscription', tier, cycle: 'yearly', amountInr: p.yearlyInr };
+  }
+}
+
+function resolvePlayProduct(playProductId) {
+  return PLAY_PRODUCTS[playProductId] || null;
+}
+
 function isMock() {
   return (process.env.DODO_MODE || 'mock').toLowerCase() === 'mock';
 }
 
-module.exports = { TIER_LIMITS, PACKS, PRODUCTS, resolveProductId, isMock };
+module.exports = { TIER_LIMITS, PACKS, PRODUCTS, PLAY_PRODUCTS, resolveProductId, resolvePlayProduct, isMock };

@@ -37,6 +37,7 @@ import AdvancedPrompts from '../SettingsTabs/Chat/AdvancedPrompts';
 import DuringRunAction from '../SettingsTabs/Chat/DuringRunAction';
 import DensitySwitch from '../SettingsTabs/General/DensitySwitch';
 import DeleteAccount from '../SettingsTabs/Account/DeleteAccount';
+import TrainingConsent from '../SettingsTabs/Account/TrainingConsent';
 import StatefulWorkspaceDefault from './StatefulWorkspaceDefault';
 import UsersManagement from '~/components/Admin/UsersManagement';
 import FeedbackManagement from '~/components/Admin/FeedbackManagement';
@@ -850,6 +851,13 @@ export const registry: SettingEntry[] = [
     Component: AutoRefill,
   },
   // Account · Danger zone
+  {
+    id: 'trainingConsent',
+    tab: ACCOUNT,
+    section: 'danger',
+    labelKey: 'com_ui_settings_label_training_consent',
+    Component: TrainingConsent,
+  },
   {
     id: 'deleteAccount',
     tab: ACCOUNT,

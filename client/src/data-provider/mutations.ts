@@ -1,4 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@tanstack/react-query';
 import { dataService, MutationKeys, QueryKeys, defaultOrderQuery } from 'librechat-data-provider';
 import {
   Constants,
@@ -1361,5 +1362,49 @@ export const useAcceptTermsMutation = (
     },
     onError: options?.onError,
     onMutate: options?.onMutate,
+  });
+};
+
+export const useUpdateTrainingConsentMutation = (
+  options?: UseMutationOptions<t.TTrainingConsentResponse, unknown, boolean>,
+): UseMutationResult<t.TTrainingConsentResponse, unknown, boolean, unknown> => {
+  return useMutation({
+    mutationFn: (accepted: boolean) => dataService.updateTrainingConsent(accepted),
+    ...(options || {}),
+  });
+};
+
+export const useGetTrainingConsent = (options?: { enabled?: boolean }) => {
+  return useQuery<t.TTrainingConsentResponse>(
+    [QueryKeys.trainingConsent],
+    () => dataService.getTrainingConsent(),
+    options,
+  );
+};
+
+export const useBillingPlayProducts = (options?: { enabled?: boolean }) => {
+  return useQuery<{ items: t.TPlayProduct[] }>(
+    [QueryKeys.billingPlayProducts],
+    () => dataService.getBillingPlayProducts(),
+    options,
+  );
+};
+
+export const useVerifyBillingPlayPurchase = (
+  options?: UseMutationOptions<
+    t.TPlayVerifyResponse,
+    unknown,
+    { purchaseToken: string; productId: string }
+  >,
+): UseMutationResult<
+  t.TPlayVerifyResponse,
+  unknown,
+  { purchaseToken: string; productId: string },
+  unknown
+> => {
+  return useMutation({
+    mutationFn: (payload: { purchaseToken: string; productId: string }) =>
+      dataService.verifyBillingPlayPurchase(payload),
+    ...(options || {}),
   });
 };

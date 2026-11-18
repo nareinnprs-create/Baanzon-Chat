@@ -1666,6 +1666,24 @@ export function acceptTerms(): Promise<t.TAcceptTermsResponse> {
   return request.post(endpoints.acceptUserTerms());
 }
 
+export function getTrainingConsent(): Promise<t.TTrainingConsentResponse> {
+  return request.get(endpoints.trainingConsent());
+}
+
+export function updateTrainingConsent(accepted: boolean): Promise<t.TTrainingConsentResponse> {
+  return request.post(endpoints.trainingConsent(), { accepted });
+}
+
+export function getBillingPlayProducts(): Promise<{ items: t.TPlayProduct[] }> {
+  return request.get(endpoints.billingPlayProducts());
+}
+
+export function verifyBillingPlayPurchase(
+  payload: { purchaseToken: string; productId: string },
+): Promise<t.TPlayVerifyResponse> {
+  return request.post(endpoints.billingPlayVerify(), payload);
+}
+
 export function getBanner(): Promise<t.TBannerResponse> {
   return request.get(endpoints.banner());
 }

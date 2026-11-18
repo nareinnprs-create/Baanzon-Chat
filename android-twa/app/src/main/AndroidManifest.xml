@@ -22,6 +22,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.opraiz.baanzonchat">
 
+    <!-- Play Billing: Digital Goods API in-app purchases. Re-add after bubblewrap update. -->
+    <uses-permission android:name="com.android.vending.BILLING"/>
+
     
         <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     

@@ -5,6 +5,8 @@ const {
   resendVerificationController,
   getTermsStatusController,
   acceptTermsController,
+  getTrainingConsentController,
+  updateTrainingConsentController,
   verifyEmailController,
   deleteUserController,
   getUserController,
@@ -33,6 +35,8 @@ router.get('/export', requireJwtAuth, exportUserDataController);
 router.patch('/preferences', requireJwtAuth, configMiddleware, updateUserPreferences);
 router.get('/terms', requireJwtAuth, getTermsStatusController);
 router.post('/terms/accept', requireJwtAuth, acceptTermsController);
+router.get('/training-consent', requireJwtAuth, getTrainingConsentController);
+router.post('/training-consent', requireJwtAuth, updateTrainingConsentController);
 router.post('/plugins', requireJwtAuth, updateUserPluginsController);
 router.delete('/delete', requireJwtAuth, canDeleteAccount, configMiddleware, deleteUserController);
 router.post('/verify', verifyEmailSubmissionLimiter, verifyEmailController);

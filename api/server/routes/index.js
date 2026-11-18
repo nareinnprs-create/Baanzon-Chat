@@ -104,6 +104,7 @@ module.exports = {
   flags,
   billing,
   billingPayments,
+  billingPlay,
   imagesGenerate,
   voice,
   evals,

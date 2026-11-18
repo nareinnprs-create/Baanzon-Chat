@@ -39,6 +39,7 @@ import { createSkillFileModel } from './skillFile';
 import { createWorkspaceModel } from './workspace';
 import { createConversationModel } from './convo';
 import { createFeedbackModel } from './feedback';
+import { createBillingPaymentModel } from './billingPayment';
 import { createWorkflowModel } from './workflow';
 import { createArtifactModel } from './artifact';
 import { createCitationModel } from './citation';
@@ -144,6 +145,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
   PlanEntitlement: ReturnType<typeof createPlanEntitlementModel>;
   EvalRun: ReturnType<typeof createEvalRunModel>;
   Feedback: ReturnType<typeof createFeedbackModel>;
+  BillingPayment: ReturnType<typeof createBillingPaymentModel>;
 } {
   const models = {
     User: createUserModel(mongoose),
@@ -217,6 +219,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
     PlanEntitlement: createPlanEntitlementModel(mongoose),
     EvalRun: createEvalRunModel(mongoose),
     Feedback: createFeedbackModel(mongoose),
+    BillingPayment: createBillingPaymentModel(mongoose),
   };
   /**
    * Background index builds fail silently unless an 'index' listener is

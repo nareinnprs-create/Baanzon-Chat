@@ -718,6 +718,8 @@ export type TRegisterUser = {
   phone: string;
   password: string;
   confirm_password?: string;
+  /** Explicit opt-in to have conversation content used for AI improvement. */
+  trainingConsentAccepted?: boolean;
   token?: string;
 };
 
@@ -964,6 +966,26 @@ export type TUserTermsResponse = {
 export type TAcceptTermsResponse = {
   message: string;
   termsAcceptedAt: Date | string;
+};
+
+export type TTrainingConsentResponse = {
+  trainingConsent: boolean;
+  trainingConsentAt: Date | string | null;
+};
+
+export type TPlayProduct = {
+  sku: string;
+  kind: 'subscription' | 'pack';
+};
+
+export type TPlayVerifyResponse = {
+  verified: boolean;
+  acknowledged: boolean;
+  kind: 'subscription' | 'pack';
+  tier?: string;
+  pack?: string;
+  credits?: number;
+  orderId?: string;
 };
 
 export type TBannerResponse = TBanner | null;
