@@ -10,7 +10,6 @@ import SocialButton from '~/components/Auth/SocialButton';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { useLocalize } from '~/hooks';
 import LoginForm from './LoginForm';
-import SocialLoginRender from './SocialLoginRender';
 
 interface LoginLocationState {
   redirect_to?: string;
@@ -123,7 +122,6 @@ function Login() {
           setError={setError}
         />
       )}
-      <SocialLoginRender startupConfig={startupConfig} />
       {startupConfig?.registrationEnabled === true && (
         <p className="my-4 text-center text-sm font-light text-text-secondary">
           {' '}
