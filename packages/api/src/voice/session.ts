@@ -322,7 +322,12 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
         turnPcmBytes += chunk.length;
       }
       if (!stt?.usable) {
-        stt = openStt();
+        // Same grace as the silence interval: without it a dead socket
+        // becomes one CF reconnect per frame, and CF answers with 429s.
+        if (now() - sttOpenedAt > 5000) {
+          stt = openStt();
+        }
+        return;
       }
       stt.sendAudio(chunk);
     }
