@@ -31,6 +31,7 @@ const diya = require('./diya');
 const flags = require('./flags');
 const billing = require('./billing');
 const billingPayments = require('./billing-payments');
+const billingPlay = require('./billing-play');
 const imagesGenerate = require('./images-generate');
 const voice = require('./voice');
 const evals = require('./evals');
