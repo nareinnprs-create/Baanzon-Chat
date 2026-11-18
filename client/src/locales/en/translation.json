@@ -2426,6 +2426,8 @@
   "com_ui_previous_sibling": "Previous sibling message",
   "com_ui_privacy_policy": "Privacy policy",
   "com_auth_training_consent": "Allow my chats to be used to improve Baanzon AI. This is optional and can be changed later in Settings.",
+  "com_auth_phone_required_title": "Add your phone number",
+  "com_auth_phone_required_hint": "One last step — we collect a phone number for every account (used only for account security). You can continue right after.",
   "com_ui_privacy_policy_url": "Privacy Policy URL",
   "com_ui_pro": "Pro",
   "com_ui_production": "Production",

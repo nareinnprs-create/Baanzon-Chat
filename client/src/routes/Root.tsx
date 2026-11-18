@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, startTransition } from 'react
 import { useRecoilValue } from 'recoil';
 import { Outlet } from 'react-router-dom';
 import { useMediaQuery } from '@librechat/client';
+import PhoneRequired from '~/components/Auth/PhoneRequired';
 import {
   UnifiedSidebar,
   SIDEBAR_TRANSITION,
@@ -96,9 +97,17 @@ export default function Root() {
     },
     [setSidebarExpanded],
   );
-  const { isAuthenticated, logout } = useAuthContext();
+  const { isAuthenticated, logout, user } = useAuthContext();
   /** Releases feature-catalog queries after first paint on browser idle. */
   useCatalogWarmup(isAuthenticated);
+
+  /** Google OAuth accounts are created without a phone number; the terms
+   *  allow it, but our signup policy collects one — gate the app until the
+   *  user adds it (once per account; `phoneGateCleared` survives re-renders
+   *  until the auth context refreshes with the saved number). */
+  const [phoneGateCleared, setPhoneGateCleared] = useState(false);
+  const needsPhone =
+    isAuthenticated && user?.provider === 'google' && !user?.phone && !phoneGateCleared;
 
   useDrawerSwipe({
     paneRef,
@@ -140,6 +149,18 @@ export default function Root() {
 
   if (!isAuthenticated) {
     return null;
+  }
+
+  if (needsPhone) {
+    return (
+      <PhoneRequired
+        onDone={() => setPhoneGateCleared(true)}
+        onSignOut={() => {
+          setPhoneGateCleared(false);
+          logout('/login?redirect=false');
+        }}
+      />
+    );
   }
 
   return (

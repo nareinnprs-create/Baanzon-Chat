@@ -212,6 +212,29 @@ const updateTrainingConsentController = async (req, res) => {
   }
 };
 
+/** OAuth providers (Google) don't share a phone number; accounts created
+ *  through them collect it on first login. The number must be E.164 and
+ *  unique across users. */
+const updatePhoneController = async (req, res) => {
+  try {
+    const phone = (req.body?.phone || '').trim();
+    if (!/^\+[1-9]\d{6,14}$/.test(phone)) {
+      return res.status(400).json({ message: 'Invalid phone number. Use +<country code><number>.' });
+    }
+    const result = await db.setPhone(req.user.id, phone);
+    if (result === 'taken') {
+      return res.status(409).json({ message: 'This phone number is already in use.' });
+    }
+    if (!result) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({ message: 'Phone number updated', phone: result.phone });
+  } catch (error) {
+    logger.error('Error updating phone:', error);
+    res.status(500).json({ message: 'Error updating phone number' });
+  }
+};
+
 const deleteUserFiles = async (req) => {
   try {
     const userFiles = await db.getFiles({ user: req.user.id });
@@ -716,6 +739,7 @@ module.exports = {
   acceptTermsController,
   getTrainingConsentController,
   updateTrainingConsentController,
+  updatePhoneController,
   deleteUserController,
   verifyEmailController,
   updateUserPluginsController,

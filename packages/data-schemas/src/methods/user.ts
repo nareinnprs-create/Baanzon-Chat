@@ -54,6 +54,7 @@ export function createUserMethods(
   ) => Promise<IUser | null>;
   acceptTerms: (userId: string) => Promise<IUser | null>;
   setTrainingConsent: (userId: string, accepted: boolean) => Promise<IUser | null>;
+  setPhone: (userId: string, phone: string) => Promise<IUser | 'taken' | null>;
   searchUsers: ({
     searchPattern,
     limit,
@@ -403,6 +404,31 @@ export function createUserMethods(
           trainingConsent: { accepted, at: new Date(), version: '2026-11-18' },
         },
       },
+      { new: true, runValidators: true },
+    ).lean<IUser>();
+    if (updated) {
+      await invalidateAuthUserDocCache(userId);
+    }
+    return updated;
+  }
+
+  /**
+   * Sets the phone number for OAuth-created accounts (Google provides no
+   * phone). Rejects a number another user already holds. Returns 'taken' on
+   * collision so the caller can surface a 409 without a second lookup.
+   */
+  async function setPhone(
+    userId: string,
+    phone: string,
+  ): Promise<IUser | 'taken' | null> {
+    const User = mongoose.models.User;
+    const clash = await User.exists({ phone, _id: { $ne: userId } });
+    if (clash) {
+      return 'taken';
+    }
+    const updated = await User.findOneAndUpdate(
+      { _id: userId },
+      { $set: { phone } },
       { new: true, runValidators: true },
     ).lean<IUser>();
     if (updated) {
@@ -853,6 +879,7 @@ export function createUserMethods(
     claimSamlIdentity,
     acceptTerms,
     setTrainingConsent,
+    setPhone,
     searchUsers,
     getUserById,
     generateToken,
