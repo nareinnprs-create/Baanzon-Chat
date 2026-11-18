@@ -4,6 +4,7 @@ import { Turnstile } from '@marsidev/react-turnstile';
 import { ThemeContext, SecretInput, Spinner, Button, Input, isDark } from '@librechat/client';
 import type { TLoginUser, TStartupConfig } from 'librechat-data-provider';
 import type { TAuthContext } from '~/common';
+import SocialLoginRender from './SocialLoginRender';
 import { useResendVerificationEmail } from '~/data-provider';
 import { useLocalize } from '~/hooks';
 
