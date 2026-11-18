@@ -51,6 +51,8 @@ export interface VoiceConfig {
   eotTimeoutMs: number;
   /** Unset = eager end-of-turn off; operators opt in via yaml (v1.1 lever). */
   eagerEotThreshold?: number;
+  /** Unset = whisper decodes every turn; 'en' opts into the flux-only fast path. */
+  sttLanguage?: string;
   tierMinutes: Record<VoiceTier, number>;
 }
 
@@ -59,6 +61,7 @@ export type ClientVoiceMessage =
   | { type: 'start'; conversationId?: string; voice?: string }
   | { type: 'barge-in' }
   | { type: 'mute'; muted: boolean }
+  | { type: 'tts-done' }
   | { type: 'stop' }
   | { type: 'ping' };
 
@@ -75,6 +78,7 @@ export type ServerVoiceMessage =
   | { type: 'user-transcript'; text: string; final: boolean }
   | { type: 'assistant-transcript'; text: string }
   | { type: 'interrupted'; text: string }
+  | { type: 'tts-mode'; engine: 'server' | 'client'; lang: string }
   | { type: 'error'; code: 'cap' | 'auth' | 'server'; message: string }
   | { type: 'pong' };
 

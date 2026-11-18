@@ -89,6 +89,7 @@ export type RealtimeServerMessage =
   | { type: 'user-transcript'; text: string; final: boolean }
   | { type: 'assistant-transcript'; text: string }
   | { type: 'interrupted'; text: string }
+  | { type: 'tts-mode'; engine: 'server' | 'client'; lang: string }
   | { type: 'error'; code: 'cap' | 'auth' | 'server'; message: string }
   | { type: 'pong' };
 
@@ -97,5 +98,6 @@ export type RealtimeClientMessage =
   | { type: 'start'; voice?: string }
   | { type: 'barge-in' }
   | { type: 'mute'; muted: boolean }
+  | { type: 'tts-done' }
   | { type: 'stop' }
   | { type: 'ping' };

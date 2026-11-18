@@ -1674,6 +1674,8 @@ const voiceConfigSchema = z.object({
   eotThreshold: z.number().min(0.1).max(0.95).optional(),
   eotTimeoutMs: z.number().int().min(500).max(10000).optional(),
   eagerEotThreshold: z.number().min(0.1).max(0.95).optional(),
+  /** 'en' opts into flux-only STT for English-only traffic; default whisper-decodes every turn. */
+  sttLanguage: z.string().max(20).optional(),
 });
 
 /**

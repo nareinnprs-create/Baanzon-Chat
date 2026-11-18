@@ -11,7 +11,8 @@ import { VOICE_TIER_MINUTES } from './caps';
 export const VOICE_STYLE =
   'You are Baanzon, a warm voice assistant. Reply in 1-3 short conversational ' +
   'sentences. No markdown, no lists, no emoji. Spell out numbers, symbols and ' +
-  'URLs the way a person would say them aloud.';
+  'URLs the way a person would say them aloud. Always reply in the same ' +
+  'language and script the user used.';
 
 /**
  * Curated aura-1 speakers. Speaker ids are provider vocabulary, not model
@@ -32,7 +33,9 @@ export const DEFAULT_VOICE_CONFIG: VoiceConfig = {
   enabled: true,
   sttModel: '@cf/deepgram/flux',
   ttsModel: '@cf/deepgram/aura-1',
-  llmModel: '@cf/meta/llama-3.1-8b-instruct-fp8',
+  llmModel: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+  /** Whisper decodes every turn; 'en' opts into the flux-only fast path. */
+  sttLanguage: 'auto',
   voiceStyle: VOICE_STYLE,
   voices: VOICE_SPEAKERS,
   defaultMode: 'hands-free',
@@ -54,6 +57,8 @@ export interface VoiceYamlConfig {
   eotThreshold?: number;
   eotTimeoutMs?: number;
   eagerEotThreshold?: number;
+  /** 'en' = flux-only fast path for English-only traffic; default decodes every turn with whisper. */
+  sttLanguage?: string;
 }
 
 export function buildVoiceConfig(yaml?: VoiceYamlConfig | null): VoiceConfig {

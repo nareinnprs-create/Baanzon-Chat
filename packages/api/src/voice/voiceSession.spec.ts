@@ -77,6 +77,8 @@ function makeDeps(overrides: Partial<VoiceGatewayDeps> = {}): {
     tierOf: async () => 'free',
     usedSeconds: async () => 0,
     addSeconds: () => {},
+    /** Default off in tests; whisper-path specs override with a fake. */
+    whisper: async () => null,
     store: {
       loadContext: async () => ({
         conversationId: '11111111-1111-4111-8111-111111111111',
@@ -199,6 +201,73 @@ describe('voice session', () => {
     await gateway.handleConnection(second.ws, { token: 'jwt' });
     expect(first.closeCount()).toBe(1);
     expect(second.closeCount()).toBe(0);
+  });
+
+  it('re-decodes non-Latin turns with whisper and hands playback to the client', async () => {
+    const stt = fakeStt([{ kind: 'end-of-turn', text: 'gujarati words' }]);
+    const whisperCalls: Buffer[] = [];
+    const { deps, saveTurns, spoken } = makeDeps({
+      createStt: stt.open,
+      whisper: async (opts) => {
+        whisperCalls.push(opts.audio);
+        return { text: 'તમે કેમ છો?', language: 'gu' };
+      },
+    });
+    const gateway = createVoiceGateway(deps);
+    const client = fakeSocket();
+    await gateway.handleConnection(client.ws, { token: 'jwt' });
+    client.emitMessage(JSON.stringify({ type: 'start' }));
+    client.emitMessage(Buffer.from('pcm-audio'), true);
+    stt.fire();
+    await new Promise((r) => setTimeout(r, 5));
+
+    const msgs = client.json();
+    // flux's English-guessed transcript is replaced by the whisper text.
+    expect(msgs.some((m) => m.type === 'user-transcript' && m.text === 'તમે કેમ છો?')).toBe(true);
+    // Playback is delegated to the client; aura never speaks.
+    expect(msgs.some((m) => m.type === 'tts-mode' && m.engine === 'client' && m.lang === 'gu')).toBe(true);
+    expect(spoken).toEqual([]);
+    expect(whisperCalls.length).toBe(1);
+    expect(saveTurns.map((t) => t.text)).toEqual(['તમે કેમ છો?', 'Hello there. Second sentence.']);
+    expect(
+      msgs.some((m) => m.type === 'assistant-transcript' && m.text === 'Hello there. Second sentence.'),
+    ).toBe(true);
+  });
+
+  it('tts-done on a client-TTS turn returns the session to listening', async () => {
+    const stt = fakeStt([{ kind: 'end-of-turn', text: 'हिंदी में बात करो' }]);
+    const { deps } = makeDeps({
+      createStt: stt.open,
+      whisper: async () => ({ text: 'हिंदी में बात करो', language: 'hi' }),
+    });
+    const gateway = createVoiceGateway(deps);
+    const client = fakeSocket();
+    await gateway.handleConnection(client.ws, { token: 'jwt' });
+    client.emitMessage(JSON.stringify({ type: 'start' }));
+    client.emitMessage(Buffer.from('pcm-audio'), true);
+    stt.fire();
+    await new Promise((r) => setTimeout(r, 5));
+
+    const msgs = client.json();
+    // The session holds `speaking` for the client's local playback: no
+    // `listening` after the tts-mode handoff (the connection's initial
+    // listening frame predates the turn and doesn't count).
+    const modeIdx = msgs.findIndex((m) => m.type === 'tts-mode');
+    expect(modeIdx).toBeGreaterThan(-1);
+    expect(
+      msgs.slice(modeIdx).some((m) => m.type === 'state' && m.state === 'speaking'),
+    ).toBe(true);
+    expect(
+      msgs.slice(modeIdx).some((m) => m.type === 'state' && m.state === 'listening'),
+    ).toBe(false);
+
+    client.emitMessage(JSON.stringify({ type: 'tts-done' }));
+    await new Promise((r) => setTimeout(r, 5));
+    const after = client.json();
+    const doneIdx = after.map((m) => m.type).lastIndexOf('tts-mode');
+    expect(
+      after.slice(doneIdx).some((m) => m.type === 'state' && m.state === 'listening'),
+    ).toBe(true);
   });
 
   it('caps out users with no remaining seconds', async () => {
