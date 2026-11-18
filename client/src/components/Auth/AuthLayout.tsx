@@ -2,7 +2,6 @@ import { ThemeSelector } from '@librechat/client';
 import { TStartupConfig } from 'librechat-data-provider';
 import { ErrorMessage } from '~/components/Auth/ErrorMessage';
 import { TranslationKeys, useLocalize } from '~/hooks';
-import SocialLoginRender from './SocialLoginRender';
 import { BlinkAnimation } from './BlinkAnimation';
 import { Banner } from '../Banners';
 import Footer from './Footer';
@@ -116,10 +115,6 @@ function AuthLayout({
                 </h1>
               )}
               {children}
-              {!pathname.includes('2fa') &&
-                (pathname.includes('login') || pathname.includes('register')) && (
-                  <SocialLoginRender startupConfig={startupConfig} />
-                )}
             </div>
           </main>
           <div className="w-full">
