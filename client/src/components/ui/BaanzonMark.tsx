@@ -1,11 +1,20 @@
 import type { SVGProps } from 'react';
+import { cn } from '~/utils';
 
 /** The Baanzon Chat emblem, inline so it inherits size classes like any
- *  lucide icon. Replaces the generic robot icon wherever the brand should
- *  stand for "the assistant" (nav, model chip fallbacks, agent activity). */
+ *  lucide icon. Replaces the generic robot icon wherever the brand stands in
+ *  for "the assistant" (nav, model chip fallbacks, agent activity), with a
+ *  gentle celadon breathing glow (see .baanzon-mark in style.css). */
 export default function BaanzonMark({ className, ...rest }: SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="40 65 260 250" fill="none" aria-hidden focusable="false" className={className} {...rest}>
+    <svg
+      viewBox="40 65 260 250"
+      fill="none"
+      aria-hidden
+      focusable="false"
+      className={cn('baanzon-mark', className)}
+      {...rest}
+    >
       <path
         d="M130 105 L190 105 Q208 105 218 122 L250 174 Q260 192 250 208 L218 260 Q208 277 190 277 L130 277 Q112 277 102 260 L70 208 Q60 192 70 174 L102 122 Q112 105 130 105 Z"
         fill="#303438"

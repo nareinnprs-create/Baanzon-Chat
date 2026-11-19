@@ -344,8 +344,32 @@ textarea {
   }
 }
 
-/* Icon swap — cross-fade two icons sharing a slot. */
-.t-icon-swap {
+/* Baanzon emblem - a gentle celadon breathing glow wherever the logo stands
+   in for the assistant. Filter+scale animation on a small svg stays cheap. */
+.baanzon-mark {
+  filter: drop-shadow(0 0 3px rgb(var(--accent-primary) / 0.35));
+  animation: baanzon-mark-breathe 3.2s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes baanzon-mark-breathe {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 3px rgb(var(--accent-primary) / 0.3));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 7px rgb(var(--accent-primary) / 0.6));
+    transform: scale(1.06);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .baanzon-mark {
+    animation: none;
+    filter: drop-shadow(0 0 3px rgb(var(--accent-primary) / 0.35));
+  }
+}
+
+/* Icon swap - cross-fade two icons sharing a slot. */.t-icon-swap {
   position: relative;
   display: inline-grid;
 }

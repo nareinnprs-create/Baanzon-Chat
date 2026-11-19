@@ -3,6 +3,7 @@ import { ProviderIcon } from '@librechat/client';
 import type { TModelSpec, TEndpointsConfig } from 'librechat-data-provider';
 import { EntityEndpointMark, isEntityEndpoint } from '~/components/Endpoints/EntityEndpointMark';
 import { URLIcon } from '~/components/Endpoints/URLIcon';
+import BaanzonMark from '~/components/ui/BaanzonMark';
 import { useProviderIcon } from '~/hooks/Endpoint';
 import { getModelSpecIconURL } from '~/utils';
 
@@ -33,6 +34,11 @@ const SpecIcon: React.FC<SpecIconProps> = ({ currentSpec, endpointsConfig, agent
 
   if (isEntityEndpoint(iconURL || endpoint)) {
     return <EntityEndpointMark endpoint={iconURL || endpoint} />;
+  }
+
+  if (provider == null) {
+    // Unknown provider: the Baanzon emblem instead of the generic robot.
+    return <BaanzonMark className="icon-md shrink-0" />;
   }
 
   return (

@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react';
 import { ProviderIcon } from '@librechat/client';
 import type { ProviderId } from 'librechat-data-provider';
 import { URLIcon } from '~/components/Endpoints/URLIcon';
+import BaanzonMark from '~/components/ui/BaanzonMark';
 import { isImageURL } from '~/utils/icons';
 
 interface ConvoIconURLProps {
@@ -49,9 +50,16 @@ const ConvoIconURL: React.FC<ConvoIconURLProps> = ({
     );
   }
 
+  const art = (() => {
+    if (provider == null) {
+      return <BaanzonMark className="h-2/3 w-2/3" />;
+    }
+    return <ProviderIcon provider={provider} size={41} className="h-2/3 w-2/3" />;
+  })();
+
   return (
     <div className="shadow-stroke relative flex h-full items-center justify-center rounded-full bg-surface-primary text-text-primary">
-      <ProviderIcon provider={provider} size={41} className="h-2/3 w-2/3" />
+      {art}
     </div>
   );
 };

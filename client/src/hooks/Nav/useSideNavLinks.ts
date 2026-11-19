@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { MCPIcon, AttachmentIcon, OpenAIMinimalIcon } from '@librechat/client';
+import BaanzonMark from '~/components/ui/BaanzonMark';
 import {
-  Bot,
   Brain,
   Bookmark,
   NotebookPen,
@@ -111,7 +111,7 @@ export default function useSideNavLinks({
       links.push({
         title: 'com_sidepanel_agent_builder',
         label: '',
-        icon: Bot,
+        icon: BaanzonMark,
         id: EModelEndpoint.agents,
         Component: AgentPanelSwitch,
       });

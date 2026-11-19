@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bot } from 'lucide-react';
+import BaanzonMark from '~/components/ui/BaanzonMark';
 import { isAgentsEndpoint, isAssistantsEndpoint } from 'librechat-data-provider';
 import type {
   TModelSpec,
@@ -191,9 +191,8 @@ export function getSelectedIcon({
 
     return (
       selectedEndpoint.icon ||
-      React.createElement(Bot, {
-        size: 20,
-        className: 'icon-md shrink-0 text-text-primary',
+      React.createElement(BaanzonMark, {
+        className: 'icon-md shrink-0 baanzon-mark-glow text-text-primary',
       })
     );
   }
