@@ -137,7 +137,10 @@ export default function useSubmitMessage() {
        *  back to the plain chat send, so the request is never lost. */
       if (
         data.overrideFiles == null &&
-        (files == null || files.size === 0) &&
+        (!files ||
+          (typeof files.size === 'number'
+            ? files.size === 0
+            : Object.keys(files as unknown as Record<string, unknown>).length === 0)) &&
         isImageRequest(data.text)
       ) {
         void (async () => {
