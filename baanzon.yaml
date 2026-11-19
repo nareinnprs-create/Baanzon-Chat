@@ -836,27 +836,16 @@ endpoints:
       # above the largest Cloudflare Workers AI context window in the matrix.
       maxContextTokens: 900000
       models:
-        # Public keys only - these are the model ids users see in /api/models
-        # and may send; modelRouter resolves each to its concrete model at
-        # generation. The legacy v1 slugs stay listed so stored conversations
-        # keep validating; aliases resolve them server-side.
+        # Public keys only - the five spec slugs. Stored conversations sending
+        # retired slugs still route: modelRouter.ALIASES resolves them at
+        # generation, and the gateway never sees a slug.
         default:
           - 'baanzon-intelligence'
           - 'baanzon-reasoning'
           - 'baanzon-code'
           - 'baanzon-swift'
           - 'baanzon-vision'
-          # legacy v1 slugs (aliases in modelRouter.ALIASES)
-          - 'baanzon-flash'
-          - 'baanzon-polyglot'
-          - 'baanzon-reasoner'
-          - 'baanzon-scribe'
-          - 'baanzon-code-xl'
-          - 'baanzon-turbo'
-          - 'baanzon-rapid'
-          # Vision: image parts via the OpenAI-compatible chat endpoint
-          - 'baanzon-vision'
-        fetch: false # CF /ai/v1/models does not support GET — validate against the list above
+        fetch: false # CF /ai/v1/models does not support GET - validate against the list above
       titleConvo: true
       titleModel: '@cf/meta/llama-3.1-8b-instruct-fp8'
       dropParams: ['stop', 'user', 'frequency_penalty', 'presence_penalty']

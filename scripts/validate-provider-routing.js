@@ -11,8 +11,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const yaml = require('js-yaml');
 const {
-  MATRIX,
+  CHAINS,
   PUBLIC_MODELS,
+  TIER_BUDGETS,
   toPublicModelId,
 } = require('../api/server/services/billing/modelRouter');
 
@@ -37,21 +38,23 @@ if (!opraiz) {
 const specs = doc?.modelSpecs?.list ?? [];
 const specNames = new Set(specs.map((spec) => spec.name));
 
-// Every concrete model the tier router can pick must resolve to a served spec.
-for (const brand of Object.keys(MATRIX)) {
-  for (const [tier, { model }] of Object.entries(MATRIX[brand])) {
-    const pub = toPublicModelId(model);
-    if (!pub) {
-      failures.push(`MATRIX ${brand}.${tier} model '${model}' has no public mapping`);
-    } else if (!specNames.has(pub)) {
-      failures.push(`MATRIX ${brand}.${tier} maps to '${pub}' but no modelSpec serves it`);
+// Every concrete model a failover chain can pick must resolve to a served spec.
+for (const [slug, tiers] of Object.entries(CHAINS)) {
+  for (const [tier, chain] of Object.entries(tiers)) {
+    for (const model of chain) {
+      const pub = toPublicModelId(model);
+      if (!pub) {
+        failures.push(`CHAIN ${slug}.${tier} model '${model}' has no public mapping`);
+      } else if (!specNames.has(pub)) {
+        failures.push(`CHAIN ${slug}.${tier} maps to '${pub}' but no modelSpec serves it`);
+      }
     }
   }
 }
 
 // The spec catalog is exactly the public keys, and preset.model mirrors the name.
 for (const spec of specs) {
-  if (!PUBLIC_MODELS[spec.name]) {
+  if (!PUBLIC_MODELS.includes(spec.name)) {
     failures.push(`modelSpec '${spec.name}' is not a PUBLIC_MODELS key`);
   }
   const presetModel = spec.preset?.model;
@@ -61,7 +64,7 @@ for (const spec of specs) {
     );
   }
 }
-for (const key of Object.keys(PUBLIC_MODELS)) {
+for (const key of PUBLIC_MODELS) {
   if (!specNames.has(key)) {
     failures.push(`PUBLIC_MODELS key '${key}' has no modelSpec`);
   }
@@ -82,9 +85,7 @@ for (const key of specNames) {
 
 // Ceiling above the largest context window the router can hand out.
 const maxRoutedContext = Math.max(
-  ...Object.values(MATRIX).flatMap((tier) =>
-    Object.values(tier).map(({ maxContextTokens }) => maxContextTokens),
-  ),
+  ...Object.values(TIER_BUDGETS).map(({ maxContextTokens }) => maxContextTokens),
 );
 const endpointContext = Number(opraiz?.maxContextTokens);
 if (!Number.isFinite(endpointContext) || endpointContext < maxRoutedContext) {
