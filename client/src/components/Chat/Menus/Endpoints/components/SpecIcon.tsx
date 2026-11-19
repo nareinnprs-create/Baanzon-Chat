@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { ProviderIcon } from '@librechat/client';
+import { ProviderIcon, getProviderIconDef } from '@librechat/client';
 import type { TModelSpec, TEndpointsConfig } from 'librechat-data-provider';
 import { EntityEndpointMark, isEntityEndpoint } from '~/components/Endpoints/EntityEndpointMark';
 import { URLIcon } from '~/components/Endpoints/URLIcon';
@@ -36,7 +36,7 @@ const SpecIcon: React.FC<SpecIconProps> = ({ currentSpec, endpointsConfig, agent
     return <EntityEndpointMark endpoint={iconURL || endpoint} />;
   }
 
-  if (provider == null) {
+  if (provider == null || getProviderIconDef(provider).label === 'Custom') {
     // Unknown provider: the Baanzon emblem instead of the generic robot.
     return <BaanzonMark className="icon-md shrink-0" />;
   }

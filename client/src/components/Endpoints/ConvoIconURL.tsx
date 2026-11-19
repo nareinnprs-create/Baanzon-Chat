@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { ProviderIcon } from '@librechat/client';
+import { ProviderIcon, getProviderIconDef } from '@librechat/client';
 import type { ProviderId } from 'librechat-data-provider';
 import { URLIcon } from '~/components/Endpoints/URLIcon';
 import BaanzonMark from '~/components/ui/BaanzonMark';
@@ -51,7 +51,7 @@ const ConvoIconURL: React.FC<ConvoIconURLProps> = ({
   }
 
   const art = (() => {
-    if (provider == null) {
+    if (provider == null || getProviderIconDef(provider).label === 'Custom') {
       return <BaanzonMark className="h-2/3 w-2/3" />;
     }
     return <ProviderIcon provider={provider} size={41} className="h-2/3 w-2/3" />;
