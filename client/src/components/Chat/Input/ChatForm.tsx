@@ -38,7 +38,7 @@ import {
   PendingToolApprovalButton,
   PendingToolApprovalPanel,
 } from '~/components/Chat/approval/Review';
-import { VoiceRealtimeOverlay, VoiceRealtimeToggle } from '~/components/Voice/VoiceRealtime';
+import { VoiceRealtimeOverlay } from '~/components/Voice/VoiceRealtime';
 import PendingManualSkillsChips from './PendingManualSkillsChips';
 import usePastedTextEdit from '~/hooks/Files/usePastedTextEdit';
 import useAskAnswerMode from '~/hooks/Input/useAskAnswerMode';
@@ -62,7 +62,6 @@ import TextareaHeader from './TextareaHeader';
 import PromptsCommand from './PromptsCommand';
 import PromptLab from './PromptLab/PromptLab';
 import SkillsCommand from './SkillsCommand';
-import AudioRecorder from './AudioRecorder';
 import AutoPlayAudio from './AutoPlayAudio';
 import CollapseChat from './CollapseChat';
 import QuoteButton from './QuoteButton';
@@ -827,18 +826,9 @@ const ChatForm = memo(function ChatForm({
                   </div>
                 )}
                 <VoiceControls index={index} textAreaRef={textAreaRef} />
-                {index === 0 && <VoiceRealtimeToggle />}
                 {index === 0 && <VoiceRealtimeOverlay />}
                 <div className="mx-auto flex" />
                 <TokenUsage index={index} conversation={conversation} isSubmitting={isSubmitting} />
-                {SpeechToText && (
-                  <AudioRecorder
-                    methods={methods}
-                    ask={submitMessage}
-                    disabled={disableInputs || isNotAppendable}
-                    isSubmitting={isSubmitting}
-                  />
-                )}
                 {steering.duringRunActive &&
                   steering.canControlGeneration &&
                   (textValue?.trim() ?? '') !== '' && (

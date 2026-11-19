@@ -230,12 +230,9 @@ function VoiceControls({
   index: number;
   textAreaRef: RefObject<HTMLTextAreaElement>;
 }) {
-  return (
-    <>
-      <VoiceMic textAreaRef={textAreaRef} />
-      <ReadAloud index={index} />
-    </>
-  );
+  /** Composer carries ONE voice control: the dictation mic. Read-aloud lives
+   *  on each assistant message (message-level actions), matching ChatGPT. */
+  return <VoiceMic textAreaRef={textAreaRef} />;
 }
 
 export default VoiceControls;
