@@ -28,6 +28,15 @@ describe('isImageRequest', () => {
     ['generate an image gallery component', false],
     ['generated images are wrong', false],
     ['what is an image?', false],
+    ['draw a cat', true],
+    ['draw me a sunset', true],
+    ['make me a logo', true],
+    ['paint a watercolor landscape', true],
+    ['sketch a car', true],
+    ['create wallpaper of mountains', true],
+    ['design a poster for the event', true],
+    ['draw conclusions from the data', false],
+    ['sketch the architecture of the system', false],
     ['', false],
   ])('%s → %s', (text, expected) => {
     expect(isImageRequest(text)).toBe(expected);

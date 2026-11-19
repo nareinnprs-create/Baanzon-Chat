@@ -2,22 +2,42 @@ import { v4 } from 'uuid';
 import { dataService } from 'librechat-data-provider';
 import type { TConversation, TFile } from 'librechat-data-provider';
 
-/** Typed image requests: the interception only fires when the message opens
- *  with an unmistakable generate-image phrasing — the image noun must end the
- *  request or carry a connector ("of a cat", "showing X"), so messages that
- *  merely mention images ("fix the image carousel bug") stay plain chat. */
+/** Typed image requests: the interception fires when the message opens with
+ *  an unmistakable generate-image phrasing. Image nouns are word-bounded so
+ *  phrases like "fix the image carousel bug" stay plain chat, and drawing
+ *  verbs (draw/paint/sketch) intercept on their own with a blocklist that
+ *  keeps non-visual idioms ("draw conclusions", "sketch the architecture")
+ *  in plain chat. */
+const IMAGE_NOUNS =
+  'image|images|picture|pictures|photos?|photographs?|art|artwork|drawing|drawings|painting|paintings|sketch|sketches|illustration|illustrations|wallpapers?|logo|logos|icon|icons|poster|posters|banner|banners|avatar|avatars|mockups?|backgrounds?|tattoo|portrait';
+
 const IMAGE_CORE_RE =
-  /^(?:generate|create|make|draw|paint|render|produce)\s+(?:me\s+)?(?:an?\s+|some\s+|the\s+)?(?:image|images|picture|pictures|photos?|photographs?)(?:$|\s+(?:of|about|with|showing|featuring|depicting|from)\b|\s*:|,)/i;
+  new RegExp(
+    '^(?:generate|create|make|draw|paint|render|produce|design|sketch|doodle)\\s+(?:me\\s+)?(?:an?\\s+|some\\s+|the\\s+)?\\b(?:' +
+      IMAGE_NOUNS +
+      ')\\b(?:$|\\s+(?:of|about|with|showing|featuring|depicting|from|for|in|on)\\b|\\s*:|,)',
+    'i',
+  );
 
 const IMAGE_PREFIX_RE =
   /^(?:(?:hey|hi|hello)[,!.]?\s*)?(?:(?:please|pls)[,.!]?\s*)?(?:(?:can|could|would|will)\s+you\s+(?:please\s+)?)?(?:i\s+(?:want|need|would\s+like)\s+(?:you\s+)?(?:to\s+)?)?/i;
+
+/** Objects that turn drawing verbs into non-visual idioms ("draw
+ *  conclusions", "paint a bleak picture with words"). */
+const DRAW_BLOCK_RE =
+  /^\s*(?:an?\s+|the\s+|some\s+)?(?:conclusions?|attention|data|blood|strength|inspiration|straws?|blanks?|architecture|ideas?|concepts?|outline|line|distinction|contrast|parallel|picture with words|from)\b/i;
 
 export function isImageRequest(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed) {
     return false;
   }
-  return IMAGE_CORE_RE.test(trimmed.replace(IMAGE_PREFIX_RE, ''));
+  const stripped = trimmed.replace(IMAGE_PREFIX_RE, '');
+  if (/^(?:draw|paint|sketch|doodle)\b/i.test(stripped)) {
+    const rest = stripped.replace(/^(?:draw|paint|sketch|doodle)\b\s*/i, '');
+    return !DRAW_BLOCK_RE.test(rest);
+  }
+  return IMAGE_CORE_RE.test(stripped);
 }
 
 /** Error subtype carrying the server's own message (daily cap, burst limit,
@@ -59,11 +79,12 @@ export async function generateImageFile(prompt: string, token?: string): Promise
   } else if (mime.includes('png')) {
     extension = 'png';
   }
-  return new File([blob], `baanzon-image-${Date.now()}.${extension}`, { type: mime });
+  const filename = `baanzon-image-${Date.now()}.${extension}`;
+  return new File([blob], filename, { type: mime });
 }
 
-/** Uploads a generated image through the standard `/files/images` pipeline so
- *  the message carries a real file id, exactly like a composer attachment. */
+/** Uploads a generated image file into the conversation's file pipeline and
+ *  returns the stored TFile (same shape a manual upload produces). */
 export async function uploadGeneratedImage({
   file,
   conversation,
