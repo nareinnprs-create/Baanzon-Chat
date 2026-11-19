@@ -28,9 +28,9 @@
  * ever switches to axios, it needs its own wrapper here.
  */
 const { logger } = require('@librechat/data-schemas');
-const { FALLBACK, PUBLIC_MODELS } = require('../billing/modelRouter');
+const { FALLBACK, RAW_FAILOVER, resolvePublicModelKey } = require('../billing/modelRouter');
 
-/** Cheap always-provisioned model, second in every default chain. */
+/** Tail for ids with no approved chain (ad-hoc models). */
 const SECONDARY = '@cf/zai-org/glm-4.7-flash';
 
 /** Defaults that reproduce the pre-config behavior; overridden by failover config. */
@@ -75,12 +75,15 @@ function bodyReusable(body) {
 }
 
 /**
- * Ordered chain for a chat model: the configured ladder for this id, else
- * `defaultChain`, else the built-in primary -> secondary -> fallback chain.
+ * Ordered chain for a chat model: the configured ladder for this id (from
+ * `failover.chains` config), else the approved MODEL_CHAINS alternates for
+ * this concrete id, else the built-in primary -> secondary -> fallback tail.
  */
 function chatChain(model, cfg) {
   const configured = cfg?.chains?.[model] ?? cfg?.defaultChain;
-  const chain = configured ? [model, ...configured] : [model, SECONDARY, FALLBACK.model];
+  const chain = configured
+    ? [model, ...configured]
+    : [model, ...(RAW_FAILOVER[model] ?? [SECONDARY, FALLBACK.model])];
   return [...new Set(chain.filter(Boolean))];
 }
 
@@ -187,7 +190,7 @@ function wrapGatewayFetch(inner, gatewayBase, getCfg) {
     // Public model keys (baanzon.yaml agent configs like the memory agent's
     // 'baanzon-flash') resolve to their concrete ids before the first send;
     // the gateway only knows @cf/ ids.
-    const resolvedModel = PUBLIC_MODELS[rawModel] || rawModel;
+    const resolvedModel = resolvePublicModelKey(rawModel) || rawModel;
     const baseBody = resolvedModel === rawModel ? init.body : rewriteBody(init.body, resolvedModel);
     const cfg = getCfg ? await getCfg() : undefined;
 

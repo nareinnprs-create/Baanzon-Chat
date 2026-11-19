@@ -49,15 +49,19 @@ describe('gateway failover', () => {
     resetGatewayHealth();
   });
 
-  it('chains primary, the always-on secondary and the FALLBACK model', () => {
+  it('chains primary, its approved alternates and the FALLBACK tail', () => {
     expect(chatChain('@cf/zai-org/glm-5.3')).toEqual([
       '@cf/zai-org/glm-5.3',
-      '@cf/zai-org/glm-4.7-flash',
-      '@cf/meta/llama-3.1-8b-instruct-fp8',
+      '@cf/deepseek-ai/deepseek-v4-flash-0731',
+      '@cf/zai-org/glm-5.3-flash',
+      '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b',
+      '@cf/openai/gpt-oss-120b',
     ]);
     expect(chatChain('@cf/zai-org/glm-4.7-flash')).toEqual([
       '@cf/zai-org/glm-4.7-flash',
+      '@cf/qwen/qwen3-30b-a3b-fp8',
       '@cf/meta/llama-3.1-8b-instruct-fp8',
+      '@cf/zai-org/glm-5.3-flash',
     ]);
   });
 
@@ -92,9 +96,9 @@ describe('gateway failover', () => {
       body: JSON.stringify({ model: '@cf/zai-org/glm-5.3', messages: [] }),
     });
     expect(res.status).toBe(200);
-    expect(await res.json()).toMatchObject({ model: '@cf/zai-org/glm-4.7-flash' });
+    expect(await res.json()).toMatchObject({ model: '@cf/deepseek-ai/deepseek-v4-flash-0731' });
     expect(inner.calls).toHaveLength(2);
-    expect(JSON.parse(inner.calls[1].body).model).toBe('@cf/zai-org/glm-4.7-flash');
+    expect(JSON.parse(inner.calls[1].body).model).toBe('@cf/deepseek-ai/deepseek-v4-flash-0731');
   });
 
   it('retries a 403 (entitlement) by swapping the model', async () => {
@@ -106,7 +110,7 @@ describe('gateway failover', () => {
     });
     expect(res.status).toBe(200);
     expect(inner.calls).toHaveLength(2);
-    expect(JSON.parse(inner.calls[1].body).model).toBe('@cf/zai-org/glm-4.7-flash');
+    expect(JSON.parse(inner.calls[1].body).model).toBe('@cf/deepseek-ai/deepseek-v4-flash-0731');
   });
 
   it('retries a 410 (deprecated model) by swapping the model', async () => {
@@ -129,8 +133,8 @@ describe('gateway failover', () => {
     });
     expect(res.status).toBe(200);
     expect(inner.calls).toHaveLength(2);
-    expect(JSON.parse(inner.calls[1].body).model).toBe('@cf/zai-org/glm-4.7-flash');
-    expect(await res.json()).toMatchObject({ model: '@cf/zai-org/glm-4.7-flash' });
+    expect(JSON.parse(inner.calls[1].body).model).toBe('@cf/deepseek-ai/deepseek-v4-flash-0731');
+    expect(await res.json()).toMatchObject({ model: '@cf/deepseek-ai/deepseek-v4-flash-0731' });
   });
 
   it('returns the last response when even the final attempt is an empty 200', async () => {
@@ -160,7 +164,7 @@ describe('gateway failover', () => {
     const inner = makeInner([500, null, 500, null, null]);
     const fetcher = wrapGatewayFetch(inner, GW, () => cfg);
 
-    // Request 1: glm-5.3 fails once, glm-4.7-flash succeeds.
+    // Request 1: glm-5.3 fails once, deepseek-v4-flash succeeds.
     await fetcher(gatewayUrl('chat/completions'), {
       method: 'POST',
       body: JSON.stringify({ model: '@cf/zai-org/glm-5.3', messages: [] }),
@@ -173,15 +177,15 @@ describe('gateway failover', () => {
       body: JSON.stringify({ model: '@cf/zai-org/glm-5.3', messages: [] }),
     });
 
-    // Request 3: glm-5.3 is benched -> chain starts at glm-4.7-flash.
+    // Request 3: glm-5.3 is benched -> chain starts at deepseek-v4-flash.
     const res = await fetcher(gatewayUrl('chat/completions'), {
       method: 'POST',
       body: JSON.stringify({ model: '@cf/zai-org/glm-5.3', messages: [] }),
     });
     expect(res.status).toBe(200);
     expect(JSON.parse(inner.calls[2].body).model).toBe('@cf/zai-org/glm-5.3'); // 2nd failure
-    expect(JSON.parse(inner.calls[3].body).model).toBe('@cf/zai-org/glm-4.7-flash'); // its retry
-    expect(JSON.parse(inner.calls[4].body).model).toBe('@cf/zai-org/glm-4.7-flash'); // benched skip
+    expect(JSON.parse(inner.calls[3].body).model).toBe('@cf/deepseek-ai/deepseek-v4-flash-0731'); // its retry
+    expect(JSON.parse(inner.calls[4].body).model).toBe('@cf/deepseek-ai/deepseek-v4-flash-0731'); // benched skip
   });
 
   it('clears the failure counter after a success', async () => {
@@ -189,7 +193,7 @@ describe('gateway failover', () => {
     const inner = makeInner([500, null, null, 500, null]);
     const fetcher = wrapGatewayFetch(inner, GW, () => cfg);
 
-    // Request 1: glm-5.3 fails (count 1), glm-4.7-flash succeeds.
+    // Request 1: glm-5.3 fails (count 1), deepseek-v4-flash succeeds.
     await fetcher(gatewayUrl('chat/completions'), {
       method: 'POST',
       body: JSON.stringify({ model: '@cf/zai-org/glm-5.3', messages: [] }),
@@ -224,7 +228,7 @@ describe('gateway failover', () => {
       method: 'POST',
       body: JSON.stringify({ model: '@cf/zai-org/glm-5.3', messages: [] }),
     });
-    expect(JSON.parse(inner.calls[2].body).model).toBe('@cf/zai-org/glm-4.7-flash');
+    expect(JSON.parse(inner.calls[2].body).model).toBe('@cf/deepseek-ai/deepseek-v4-flash-0731');
 
     await new Promise((r) => setTimeout(r, 60));
     // Request 3: cooldown expired -> glm-5.3 tried again.
@@ -238,7 +242,7 @@ describe('gateway failover', () => {
 
   it('still runs a fully benched chain as a last resort', async () => {
     const cfg = { failureThreshold: 1, cooldownMs: 60000 };
-    const inner = makeInner([500, 500, 500, null]);
+    const inner = makeInner([500, 500, 500, 500, 500, null]);
     const fetcher = wrapGatewayFetch(inner, GW, () => cfg);
 
     // Request 1: every model in the chain fails -> all benched.
@@ -246,7 +250,7 @@ describe('gateway failover', () => {
       method: 'POST',
       body: JSON.stringify({ model: '@cf/zai-org/glm-5.3', messages: [] }),
     });
-    expect(inner.calls).toHaveLength(3);
+    expect(inner.calls).toHaveLength(5);
 
     // Request 2: nothing healthy -> the original chain runs anyway.
     const res = await fetcher(gatewayUrl('chat/completions'), {
@@ -254,7 +258,7 @@ describe('gateway failover', () => {
       body: JSON.stringify({ model: '@cf/zai-org/glm-5.3', messages: [] }),
     });
     expect(res.status).toBe(200);
-    expect(JSON.parse(inner.calls[3].body).model).toBe('@cf/zai-org/glm-5.3');
+    expect(JSON.parse(inner.calls[5].body).model).toBe('@cf/zai-org/glm-5.3');
   });
 
   it('resolves a public model key before the first send', async () => {
@@ -266,8 +270,8 @@ describe('gateway failover', () => {
     });
     expect(res.status).toBe(200);
     expect(inner.calls).toHaveLength(1);
-    expect(JSON.parse(inner.calls[0].body).model).toBe('@cf/zai-org/glm-5.3-flash');
-    expect(await res.json()).toMatchObject({ model: '@cf/zai-org/glm-5.3-flash' });
+    expect(JSON.parse(inner.calls[0].body).model).toBe('@cf/zai-org/glm-4.7-flash');
+    expect(await res.json()).toMatchObject({ model: '@cf/zai-org/glm-4.7-flash' });
   });
 
   it('chains from the resolved model when a public key fails', async () => {
@@ -279,8 +283,8 @@ describe('gateway failover', () => {
     });
     expect(res.status).toBe(200);
     expect(inner.calls).toHaveLength(2);
-    expect(JSON.parse(inner.calls[0].body).model).toBe('@cf/zai-org/glm-5.3-flash');
-    expect(JSON.parse(inner.calls[1].body).model).toBe('@cf/zai-org/glm-4.7-flash');
+    expect(JSON.parse(inner.calls[0].body).model).toBe('@cf/zai-org/glm-4.7-flash');
+    expect(JSON.parse(inner.calls[1].body).model).toBe('@cf/qwen/qwen3-30b-a3b-fp8');
   });
 
   it('still retries an unknown non-@cf model with the same body', async () => {
@@ -295,7 +299,7 @@ describe('gateway failover', () => {
     expect(JSON.parse(inner.calls[1].body).model).toBe('mystery-model');
   });
 
-  it('falls through to the FALLBACK model after repeated failures', async () => {
+  it('chains through the approved alternates after repeated failures', async () => {
     const inner = makeInner([500, 503, null]);
     const fetcher = wrapGatewayFetch(inner, GW);
     const res = await fetcher(gatewayUrl('chat/completions'), {
@@ -304,18 +308,20 @@ describe('gateway failover', () => {
     });
     expect(res.status).toBe(200);
     expect(inner.calls).toHaveLength(3);
-    expect(JSON.parse(inner.calls[2].body).model).toBe('@cf/meta/llama-3.1-8b-instruct-fp8');
+    expect(JSON.parse(inner.calls[2].body).model).toBe(
+      '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b',
+    );
   });
 
   it('returns the last response when the whole chain fails', async () => {
-    const inner = makeInner([500, 500, 500]);
+    const inner = makeInner([500, 500, 500, 500, 500]);
     const fetcher = wrapGatewayFetch(inner, GW);
     const res = await fetcher(gatewayUrl('chat/completions'), {
       method: 'POST',
-      body: JSON.stringify({ model: '@cf/zai-org/glm-5.3' }),
+      body: JSON.stringify({ model: '@cf/zai-org/glm-5.3', messages: [] }),
     });
     expect(res.status).toBe(500);
-    expect(inner.calls).toHaveLength(3);
+    expect(inner.calls).toHaveLength(5);
   });
 
   it('retries non-chat gateway calls with the same body', async () => {
@@ -349,7 +355,7 @@ describe('gateway failover', () => {
       body: JSON.stringify({ model: '@cf/zai-org/glm-5.3' }),
     });
     expect(res.status).toBe(200);
-    expect(JSON.parse(inner.calls[1].body).model).toBe('@cf/zai-org/glm-4.7-flash');
+    expect(JSON.parse(inner.calls[1].body).model).toBe('@cf/deepseek-ai/deepseek-v4-flash-0731');
   });
 
   it('leaves requests outside the gateway untouched', async () => {

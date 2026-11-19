@@ -77,7 +77,8 @@ export function createRecognizer(lang: string): SpeechRecognitionLike | null {
 
 /**
  * Picks the best installed voice for the assistant: prefer a voice matching
- * the session language, then one flagged as premium/neural/natural, then the
+ * the session language, then a natural/neural/premium one flagged female
+ * (Diya is a female assistant), then any premium/neural voice, then the
  * browser default.
  */
 export function pickAssistantVoice(lang: string): SpeechSynthesisVoice | null {
@@ -91,10 +92,11 @@ export function pickAssistantVoice(lang: string): SpeechSynthesisVoice | null {
   const langPrefix = lang.slice(0, 2).toLowerCase();
   const matches = voices.filter((voice) => voice.lang.toLowerCase().startsWith(langPrefix));
   const pool = matches.length > 0 ? matches : voices;
-  const premium = pool.find((voice) =>
+  const premium = pool.filter((voice) =>
     /natural|neural|premium|enhanced|google|siri/i.test(voice.name),
   );
-  return premium ?? pool.find((voice) => voice.default) ?? pool[0] ?? null;
+  const female = /female|woman|zira|aria|jenny|libby|sonia|samantha|karen|moira|tessa|fiona|neerja|kalpana|swara|heera|asha|priya|salli|kendra|kimberly|joanna|raveena|heami|yuna|kyoko|mei|amélie|ana|helena|paulina|monica/i;
+  return premium.find((voice) => female.test(voice.name)) ?? premium[0] ?? pool.find((voice) => voice.default) ?? pool[0] ?? null;
 }
 
 /**

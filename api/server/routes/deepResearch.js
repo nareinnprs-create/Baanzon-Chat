@@ -2,6 +2,7 @@ const express = require('express');
 const { createDeepResearchHandlers, createDeepResearchRunner } = require('@librechat/api');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
 const { projectsLimiter } = require('~/server/middleware/limiters');
+const { resolveModelChain } = require('~/server/services/billing/modelRouter');
 
 const router = express.Router();
 
@@ -30,7 +31,10 @@ const llm = {
   complete: async (prompt, signal) => {
     const base = process.env.OPRAIZ_BASEURL;
     const key = process.env.OPRAIZ_API_KEY;
-    const model = process.env.DEEP_RESEARCH_MODEL || '@cf/meta/llama-3.1-8b-instruct-fp8';
+    // Long-source synthesis rides the Baanzon Intelligence chain (1M-context
+    // backings); the fetch failover wrapper hops the chain on upstream errors.
+    const model =
+      process.env.DEEP_RESEARCH_MODEL || resolveModelChain('lite', 'baanzon-intelligence')[0];
     if (!base || !key) throw new Error('LLM not configured');
     const r = await fetch(`${base}/chat/completions`, {
       method: 'POST',

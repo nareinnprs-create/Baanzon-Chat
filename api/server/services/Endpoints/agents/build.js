@@ -32,7 +32,9 @@ const buildOptions = (req, endpoint, parsedBody, endpointType) => {
       : requestedModel;
   delete model_parameters.lane;
   const tier = String(req.user?.subscriptionTier || 'free').toLowerCase();
-  const routedCfg = routeModel(tier, routedModel, requestedLane) || { model: routedModel };
+  const routedCfg =
+    routeModel(tier, routedModel, requestedLane, String(req.body?.text || '')) ||
+    { model: routedModel };
   model_parameters.model = routedCfg.model;
   if (routedCfg.maxContextTokens) model_parameters.maxContextTokens = routedCfg.maxContextTokens;
   if (routedCfg.max_tokens) model_parameters.max_tokens = routedCfg.max_tokens;

@@ -7,7 +7,16 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
-const { pickImageModel, IMAGE_MODELS } = require('@librechat/api');
+const { pickImageChain, IMAGE_MODELS } = require('@librechat/api');
+
+/** Optional sharp import: the text overlay degrades to the plain image when
+ *  the module or the system fonts are missing. */
+let sharp = null;
+try {
+  sharp = require('sharp');
+} catch {
+  sharp = null;
+}
 
 const router = express.Router();
 const MAX_PER_WINDOW = 5;
@@ -50,6 +59,84 @@ function sendImage(res, buffer) {
   return res.send(buffer);
 }
 
+/** Quoted strings in the prompt ("..." / “...” / «...») are the text the user
+ *  wants IN the image. Diffusion models render Latin text passably but Indic
+ *  scripts as garbage, so we composite it ourselves with real fonts. */
+const QUOTED_RE = /["“«']([^"”»']{1,60})["”»']/g;
+const COMPOSITE_TRIGGER_RE =
+  /\b(add|with|saying|write|text|caption|include|put|तस्वीर|लिखो|लिखें|दिखाओ|text|எழுத|రాయండి|লেখো)\b/i;
+const INDIC_RE = /[\u0900-\u097F\u0980-\u09FF\u0A00-\u0A7F\u0A80-\u0AFF\u0B00-\u0B7F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F]/;
+
+/** Extracts the overlay texts from a prompt: quoted fragments only - never
+ *  the whole prompt (that would caption the image with instructions). */
+function extractOverlayText(prompt) {
+  if (!COMPOSITE_TRIGGER_RE.test(prompt)) {
+    return [];
+  }
+  const texts = [];
+  for (const match of prompt.matchAll(QUOTED_RE)) {
+    const piece = match[1].trim();
+    if (piece) {
+      texts.push(piece);
+    }
+  }
+  return texts.slice(0, 2);
+}
+
+/** Composites the overlay texts onto the image (centered band at the bottom,
+ *  auto-wrapped, white with a dark scrim) via an SVG overlay. Uses Noto fonts
+ *  (pod-level install) so Indic scripts render correctly. Degrades to the
+ *  plain image on any failure - generation itself never breaks. */
+async function compositeText(buffer, texts) {
+  if (!sharp || texts.length === 0) {
+    return buffer;
+  }
+  try {
+    const image = sharp(buffer);
+    const meta = await image.metadata();
+    const width = meta.width || 1024;
+    const height = meta.height || 1024;
+    const fontSize = Math.max(28, Math.round(width / 18));
+    const lineHeight = Math.round(fontSize * 1.3);
+    // Wrap each text to the image width (roughly fontSize chars per line).
+    const lines = [];
+    for (const text of texts) {
+      let current = '';
+      for (const word of text.split(/\s+/)) {
+        if ((current + ' ' + word).trim().length > Math.floor(width / (fontSize * 0.62))) {
+          if (current) lines.push(current.trim());
+          current = word;
+        } else {
+          current = `${current} ${word}`;
+        }
+      }
+      if (current.trim()) lines.push(current.trim());
+    }
+    if (lines.length === 0) {
+      return buffer;
+    }
+    const bandHeight = lines.length * lineHeight + Math.round(fontSize);
+    const y0 = height - bandHeight - Math.round(fontSize * 0.6);
+    const tspans = lines
+      .map(
+        (line, i) =>
+          `<text x="${Math.round(width / 2)}" y="${y0 + Math.round(fontSize * 1.1) + i * lineHeight}" text-anchor="middle" font-family="Noto Sans, Noto Sans Devanagari, Noto Sans Tamil, Noto Sans Telugu, sans-serif" font-size="${fontSize}" font-weight="600" fill="#ffffff" stroke="#000000" stroke-width="${Math.max(2, fontSize / 16)}" paint-order="stroke">${line
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')}</text>`,
+      )
+      .join('');
+    const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="${y0}" width="${width}" height="${bandHeight}" fill="#000000" opacity="0.45"/>${tspans}</svg>`;
+    const composited = await image
+      .composite([{ input: Buffer.from(svg), top: 0, left: 0 }])
+      .png()
+      .toBuffer();
+    return composited;
+  } catch {
+    return buffer;
+  }
+}
+
 async function userTier(userId) {
   const tier = await mongoose.connection.db
     .collection('users')
@@ -69,20 +156,10 @@ router.post('/', requireJwtAuth, async (req, res) => {
   }
   const tier = await userTier(req.user.id);
   const { cap } = DAILY[tier] || DAILY.free;
-  const model = pickImageModel(prompt);
-  if (model === IMAGE_MODELS.inpaint) {
-    // Inpainting requires an image+mask input, which no entry point sends yet.
-    return res.status(400).json({
-      message:
-        'Inpainting needs an input image, which is not wired up yet — name another model or drop the word.',
-    });
-  }
-  const account = process.env.CF_ACCOUNT_ID;
-  const token = process.env.CF_API_TOKEN;
-  if (!account || !token) {
-    return res
-      .status(501)
-      .json({ message: 'Image generation is not configured on this deployment.' });
+  // Equally-powerful failover chain: try the pick first, hop on failure.
+  const chain = pickImageChain(prompt).filter((m) => m !== IMAGE_MODELS.inpaint);
+  if (chain.length === 0) {
+    return res.status(400).json({ message: 'No image model available for this prompt.' });
   }
   if (limited(`${req.user.id}`, MAX_PER_WINDOW)) {
     return res.status(429).json({ message: 'Too many images this minute — try again shortly.' });
@@ -104,44 +181,62 @@ router.post('/', requireJwtAuth, async (req, res) => {
       { upsert: true },
     );
   try {
-    const isFlux2 = model.includes('flux-2');
-    const runUrl = `https://api.cloudflare.com/client/v4/accounts/${account}/ai/run/${model}`;
-    let r;
-    if (isFlux2) {
-      // flux-2 family requires multipart/form-data input
-      const fd = new FormData();
-      fd.append('prompt', prompt);
-      r = await fetch(runUrl, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: fd,
-      });
-      if (!r.ok) {
-        const detail = (await r.text()).slice(0, 300);
-        return res.status(502).json({ message: 'Image generation failed', detail });
+    const account = process.env.CF_ACCOUNT_ID;
+    const token = process.env.CF_API_TOKEN;
+    if (!account || !token) {
+      return res
+        .status(501)
+        .json({ message: 'Image generation is not configured on this deployment.' });
+    }
+    const runBase = `https://api.cloudflare.com/client/v4/accounts/${account}/ai/run`;
+    let lastDetail = '';
+    for (const model of chain) {
+      const runUrl = `${runBase}/${model}`;
+      const isFlux2 = model.includes('flux-2');
+      let r;
+      if (isFlux2) {
+        // flux-2 family requires multipart/form-data input
+        const fd = new FormData();
+        fd.append('prompt', prompt);
+        r = await fetch(runUrl, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: fd,
+        });
+      } else {
+        r = await fetch(runUrl, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt }),
+        });
       }
-      const j = await r.json();
-      const b64 = j.result && (j.result.image || j.result.content);
-      if (!b64) return res.status(502).json({ message: 'Image generation returned no image' });
-      return sendImage(res, decodeImage(b64));
+      if (!r.ok) {
+        lastDetail = (await r.text()).slice(0, 300);
+        console.warn(
+          `[images] ${model} failed (${r.status}), trying next in chain`,
+        );
+        continue;
+      }
+      const contentType = r.headers.get('content-type') || '';
+      let b64;
+      if (isFlux2 || contentType.includes('application/json')) {
+        const j = await r.json();
+        b64 = j.result && (j.result.image || j.result.content);
+      } else {
+        b64 = Buffer.from(await r.arrayBuffer()).toString('base64');
+      }
+      if (!b64) {
+        lastDetail = 'generation returned no image';
+        continue;
+      }
+      const rendered = decodeImage(b64);
+      const overlayTexts = extractOverlayText(prompt);
+      if (overlayTexts.length > 0) {
+        return sendImage(res, await compositeText(rendered, overlayTexts));
+      }
+      return sendImage(res, rendered);
     }
-    r = await fetch(runUrl, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt }),
-    });
-    if (!r.ok) {
-      const detail = (await r.text()).slice(0, 300);
-      return res.status(502).json({ message: 'Image generation failed', detail });
-    }
-    const contentType = r.headers.get('content-type') || '';
-    if (contentType.includes('application/json')) {
-      const j = await r.json();
-      const b64 = j.result && (j.result.image || j.result.content);
-      if (!b64) return res.status(502).json({ message: 'Image generation returned no image' });
-      return sendImage(res, decodeImage(b64));
-    }
-    return sendImage(res, Buffer.from(await r.arrayBuffer()));
+    return res.status(502).json({ message: 'Image generation failed', detail: lastDetail });
   } catch (err) {
     return res
       .status(502)

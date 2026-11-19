@@ -836,20 +836,23 @@ endpoints:
       # above the largest Cloudflare Workers AI context window in the matrix.
       maxContextTokens: 900000
       models:
-        # Public keys only — these are the model ids users see in /api/models
-        # and may send; modelRouter.PUBLIC_MODELS resolves each to its concrete
-        # model at generation. Never list a concrete model id here.
+        # Public keys only - these are the model ids users see in /api/models
+        # and may send; modelRouter resolves each to its concrete model at
+        # generation. The legacy v1 slugs stay listed so stored conversations
+        # keep validating; aliases resolve them server-side.
         default:
           - 'baanzon-intelligence'
+          - 'baanzon-reasoning'
+          - 'baanzon-code'
+          - 'baanzon-swift'
+          - 'baanzon-vision'
+          # legacy v1 slugs (aliases in modelRouter.ALIASES)
           - 'baanzon-flash'
           - 'baanzon-polyglot'
-          - 'baanzon-reasoning'
           - 'baanzon-reasoner'
           - 'baanzon-scribe'
-          - 'baanzon-code'
           - 'baanzon-code-xl'
           - 'baanzon-turbo'
-          - 'baanzon-swift'
           - 'baanzon-rapid'
           # Vision: image parts via the OpenAI-compatible chat endpoint
           - 'baanzon-vision'
@@ -1028,10 +1031,7 @@ fileConfig:
 # endpoint remains for legacy conversations; specs are how new chats pick.
 modelSpecs:
   list:
-    # Public-facing names only: the slug IS the model key users see and send;
-    # routeModel (modelRouter.js) resolves each slug to its concrete model.
-    # Never put a concrete model id in `preset.model`.
-    # --- Baanzon Intelligence (frontier general) ---
+    # --- Baanzon Intelligence (frontier general, default) ---
     - name: 'baanzon-intelligence'
       label: 'Baanzon Intelligence'
       description: 'Our most capable everyday model - fast, sharp, general'
@@ -1042,26 +1042,6 @@ modelSpecs:
       preset:
         endpoint: 'Opraiz'
         model: 'baanzon-intelligence'
-        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts. You are a Baanzon model. If asked which model you are or who made you, answer that you are a Baanzon model; do not claim any other model identity.'
-    - name: 'baanzon-flash'
-      label: 'Baanzon Flash'
-      description: 'Low-latency general model for quick exchanges'
-      group: 'Baanzon Intelligence'
-      groupIcon: '/assets/brand-mark.svg'
-      webSearch: true
-      preset:
-        endpoint: 'Opraiz'
-        model: 'baanzon-flash'
-        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts. You are a Baanzon model. If asked which model you are or who made you, answer that you are a Baanzon model; do not claim any other model identity.'
-    - name: 'baanzon-polyglot'
-      label: 'Baanzon Polyglot'
-      description: 'Strong multilingual and agentic work'
-      group: 'Baanzon Intelligence'
-      groupIcon: '/assets/brand-mark.svg'
-      webSearch: true
-      preset:
-        endpoint: 'Opraiz'
-        model: 'baanzon-polyglot'
         promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts. You are a Baanzon model. If asked which model you are or who made you, answer that you are a Baanzon model; do not claim any other model identity.'
     # --- Baanzon Deep Reasoning ---
     - name: 'baanzon-reasoning'
@@ -1074,26 +1054,6 @@ modelSpecs:
         endpoint: 'Opraiz'
         model: 'baanzon-reasoning'
         promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts. You are a Baanzon model. If asked which model you are or who made you, answer that you are a Baanzon model; do not claim any other model identity.'
-    - name: 'baanzon-reasoner'
-      label: 'Baanzon Reasoner'
-      description: 'Frontier model with visible reasoning traces'
-      group: 'Baanzon Deep Reasoning'
-      groupIcon: '/assets/brand-mark.svg'
-      webSearch: true
-      preset:
-        endpoint: 'Opraiz'
-        model: 'baanzon-reasoner'
-        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts. You are a Baanzon model. If asked which model you are or who made you, answer that you are a Baanzon model; do not claim any other model identity.'
-    - name: 'baanzon-scribe'
-      label: 'Baanzon Scribe'
-      description: 'Deliberate, high-quality long-form work'
-      group: 'Baanzon Deep Reasoning'
-      groupIcon: '/assets/brand-mark.svg'
-      webSearch: true
-      preset:
-        endpoint: 'Opraiz'
-        model: 'baanzon-scribe'
-        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts. You are a Baanzon model. If asked which model you are or who made you, answer that you are a Baanzon model; do not claim any other model identity.'
     # --- Baanzon Code ---
     - name: 'baanzon-code'
       label: 'Baanzon Code'
@@ -1105,51 +1065,21 @@ modelSpecs:
         endpoint: 'Opraiz'
         model: 'baanzon-code'
         promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts. You are a Baanzon model. If asked which model you are or who made you, answer that you are a Baanzon model; do not claim any other model identity.'
-    - name: 'baanzon-code-xl'
-      label: 'Baanzon Code XL'
-      description: 'Tuned for repository-scale coding tasks'
-      group: 'Baanzon Code'
-      groupIcon: '/assets/brand-mark.svg'
-      webSearch: true
-      preset:
-        endpoint: 'Opraiz'
-        model: 'baanzon-code-xl'
-        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts. You are a Baanzon model. If asked which model you are or who made you, answer that you are a Baanzon model; do not claim any other model identity.'
-    # --- Baanzon Turbo ---
-    - name: 'baanzon-turbo'
-      label: 'Baanzon Turbo'
-      description: 'Fastest responses for simple questions'
-      group: 'Baanzon Turbo'
-      groupIcon: '/assets/brand-mark.svg'
-      webSearch: true
-      preset:
-        endpoint: 'Opraiz'
-        model: 'baanzon-turbo'
-        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts. You are a Baanzon model. If asked which model you are or who made you, answer that you are a Baanzon model; do not claim any other model identity.'
+    # --- Baanzon Swift (fast lane + voice/titles/aux) ---
     - name: 'baanzon-swift'
       label: 'Baanzon Swift'
-      description: 'Quick and capable'
-      group: 'Baanzon Turbo'
+      description: 'Fastest responses for simple questions'
+      group: 'Baanzon Swift'
       groupIcon: '/assets/brand-mark.svg'
       webSearch: true
       preset:
         endpoint: 'Opraiz'
         model: 'baanzon-swift'
         promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts. You are a Baanzon model. If asked which model you are or who made you, answer that you are a Baanzon model; do not claim any other model identity.'
-    - name: 'baanzon-rapid'
-      label: 'Baanzon Rapid'
-      description: 'Fast with strong reasoning'
-      group: 'Baanzon Turbo'
-      groupIcon: '/assets/brand-mark.svg'
-      webSearch: true
-      preset:
-        endpoint: 'Opraiz'
-        model: 'baanzon-rapid'
-        promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts. You are a Baanzon model. If asked which model you are or who made you, answer that you are a Baanzon model; do not claim any other model identity.'
-    # --- Baanzon Vision ---
+    # --- Baanzon Vision (image understanding + generation) ---
     - name: 'baanzon-vision'
       label: 'Baanzon Vision'
-      description: 'Attach images and talk about them'
+      description: 'Attach images and talk about them - or generate and edit images'
       group: 'Baanzon Vision'
       groupIcon: '/assets/brand-mark.svg'
       webSearch: true
@@ -1157,7 +1087,6 @@ modelSpecs:
         endpoint: 'Opraiz'
         model: 'baanzon-vision'
         promptPrefix: 'Current date and time: {{current_datetime}}. For anything time-sensitive or beyond your training data, rely on web search results for the latest facts. You are a Baanzon model. If asked which model you are or who made you, answer that you are a Baanzon model; do not claim any other model identity.'
-
 # Web Search Configuration - Baanzon: self-hosted SearXNG (search) + Keenable
 # (scraper, keyless). The instance is supervised on 127.0.0.1:8888 (see
 # scripts/pod-searxng.sh); SEARXNG_INSTANCE_URL also powers Deep Research.

@@ -28,6 +28,7 @@ import {
   pickAssistantVoice,
   unlockSpeechSynthesis,
 } from '~/utils/voice';
+import { chunkForSpeech as chunkTextForSpeech } from '~/components/Chat/Input/Voice/speech';
 import { VOICE_LABELS } from '~/components/Voice/labels';
 import { DiyaTurnError } from '~/components/Voice/api';
 
@@ -246,36 +247,48 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
         return;
       }
       const lang = typeof navigator === 'undefined' ? 'en-US' : navigator.language || 'en-US';
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = lang;
-      utterance.voice = pickAssistantVoice(lang) ?? null;
-      utterance.onstart = () => {
-        if (stoppedRef.current) {
-          return;
+      // Sentence chunks queue instantly and play back-to-back: first audio
+      // starts sooner and long replies never hit the engines' big-utterance
+      // drop. Only the final chunk flips the status back to listening.
+      const chunks =
+        chunkTextForSpeech(text).length > 0
+          ? chunkTextForSpeech(text)
+          : [text];
+      chunks.forEach((chunk, index) => {
+        const utterance = new SpeechSynthesisUtterance(chunk);
+        utterance.lang = lang;
+        utterance.voice = pickAssistantVoice(lang) ?? null;
+        utterance.onstart = () => {
+          if (stoppedRef.current) {
+            return;
+          }
+          speakingRef.current = true;
+          if (!mutedRef.current) {
+            setStatus('speaking');
+          }
+        };
+        const finish = () => {
+          if (index < chunks.length - 1) {
+            return;
+          }
+          speakingRef.current = false;
+          if (stoppedRef.current) {
+            return;
+          }
+          setBargeIn(false);
+          if (!mutedRef.current) {
+            setStatus('listening');
+          }
+          resumeRecognition();
+        };
+        utterance.onend = finish;
+        utterance.onerror = finish;
+        try {
+          speechSynthesis.speak(utterance);
+        } catch {
+          finish();
         }
-        speakingRef.current = true;
-        if (!mutedRef.current) {
-          setStatus('speaking');
-        }
-      };
-      const finish = () => {
-        speakingRef.current = false;
-        if (stoppedRef.current) {
-          return;
-        }
-        setBargeIn(false);
-        if (!mutedRef.current) {
-          setStatus('listening');
-        }
-        resumeRecognition();
-      };
-      utterance.onend = finish;
-      utterance.onerror = finish;
-      try {
-        speechSynthesis.speak(utterance);
-      } catch {
-        finish();
-      }
+      });
     },
     [resumeRecognition, setBargeIn, setStatus],
   );
