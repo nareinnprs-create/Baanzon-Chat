@@ -28,7 +28,7 @@ const SYSTEM_PROMPT = [
  *  trip, so "hey Diya" acks in well under a second. Localized for the most
  *  common languages; the model handles everything else. */
 const GREETING_RE =
-  /^(hey|hi|hello|yo|namaste|namaskar|vanakkam|namaskaram|hola|salut|bonjour|ciao|olá|नमस्ते|नमस्कार|वणक्कम|నమస్కారం|নমস্কার|ਸਤ ਸ੍ਰੀ ਅਕਾਲ|નમસ્તે|ನಮಸ್ಕಾರ)[\s,.!]*(diya|ਦਿਆ|દિયા)?[\s!.]*$/i;
+  /^(hey|hi|hello|yo|namaste|namaskar|vanakkam|namaskaram|hola|salut|bonjour|ciao|good\s+(morning|afternoon|evening)|olá|नमस्ते|नमस्कार|वणक्कम|నమస్కారం|নমস্কার|ਸਤ ਸ੍ਰੀ ਅਕਾਲ|નમસ્તે|ನಮಸ್ಕಾರ)[\s,.!]*(diya|ਦਿਆ|દિયા)?[\s!.]*$/i;
 
 const GREETING_ACKS = {
   en: "Hey! I'm Diya - good to hear you. What's on your mind?",
