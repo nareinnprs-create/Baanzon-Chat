@@ -25,7 +25,6 @@ import InterfaceModeSwitch from '../SettingsTabs/General/InterfaceModeSwitch';
 import ImportConversations from '../SettingsTabs/Data/ImportConversations';
 import WeekStartSelector from '../SettingsTabs/General/WeekStartSelector';
 import ProvidersManagement from '~/components/Admin/ProvidersManagement';
-import SmartRouteSwitch from '../SettingsTabs/General/SmartRouteSwitch';
 import AIProvidersView from '~/components/AIProviders/AIProvidersView';
 import { ArchiveAllChats } from '../SettingsTabs/Data/ArchiveAllChats';
 import { toggleControl, ThemeSetting, LangSetting } from './controls';
@@ -101,14 +100,6 @@ export const registry: SettingEntry[] = [
     labelKey: 'com_nav_interface_atelier',
     keywords: ['interface', 'atelier', 'mode', 'shell', 'classic'],
     Component: InterfaceModeSwitch,
-  },
-  {
-    id: 'smartRoute',
-    tab: GENERAL,
-    section: 'appearance',
-    labelKey: 'com_nav_smart_route',
-    keywords: ['smart', 'route', 'auto', 'model', 'fast', 'deep'],
-    Component: SmartRouteSwitch,
   },
   {
     id: 'density',

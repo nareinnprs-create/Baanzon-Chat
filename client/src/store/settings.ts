@@ -170,14 +170,6 @@ export const interfaceMode = createStorageAtom<'classic' | 'atelier' | null>('in
 export const atelierFocusMode = createStorageAtom<boolean>('atelierFocusMode', false);
 
 /**
- * X5 Smart Route opt-in (localStorage-persisted, default off). When on, each
- * send runs the `pickSmartModel` heuristic (utils/smartRoute.ts) over the
- * prompt and, if it lands on a different model for this endpoint, sends that
- * turn with the routed model — the user's selector choice stays untouched.
- */
-export const smartRouteEnabled = createStorageAtom<boolean>('smartRouteEnabled', false);
-
-/**
  * Blueprint §63.7: 'comfortable' (low density) is the default; 'compact'
  * trades vertical air for more rows on screen.
  */

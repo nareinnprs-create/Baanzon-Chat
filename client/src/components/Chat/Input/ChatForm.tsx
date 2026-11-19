@@ -44,7 +44,6 @@ import usePastedTextEdit from '~/hooks/Files/usePastedTextEdit';
 import useAskAnswerMode from '~/hooks/Input/useAskAnswerMode';
 import AskUserQuestionPopover from './AskUserQuestionPopover';
 import InterruptSteerButton from './InterruptSteerButton';
-import { selectedModelLaneAtom } from '~/store/modelLane';
 import PastedTextDialog from './Files/PastedTextDialog';
 import DuringRunSendButton from './DuringRunSendButton';
 import PromptLabPanel from './PromptLab/PromptLabPanel';
@@ -157,9 +156,6 @@ const ChatForm = memo(function ChatForm({
   } = useAddedChatContext();
   const assistantMap = useAssistantsMapContext();
   const { data: startupConfig } = useGetStartupConfig();
-  const [selectedModelLane, setSelectedModelLane] = useAtom(selectedModelLaneAtom);
-  const chatLanes = ['fast', 'balanced', 'reasoning', 'vision', 'coding'] as const;
-  const laneConfig = startupConfig?.modelLanes;
 
   const endpoint = useMemo(
     () => conversation?.endpointType ?? conversation?.endpoint,
@@ -807,35 +803,6 @@ const ChatForm = memo(function ChatForm({
                     Array.isArray(conversation?.messages) && conversation.messages.length >= 1
                   }
                 />
-                {laneConfig?.enabled !== false && (
-                  <label className="flex items-center" htmlFor="model-lane-select">
-                    <span className="sr-only">{localize('com_ui_model_lane')}</span>
-                    <select
-                      id="model-lane-select"
-                      aria-label={localize('com_ui_model_lane')}
-                      className="min-h-10 rounded-lg border border-border-light bg-surface-secondary px-3 py-1.5 text-sm font-medium text-text-primary shadow-sm transition-colors hover:border-border-heavy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary"
-                      value={selectedModelLane ?? ''}
-                      onChange={(event) =>
-                        setSelectedModelLane(
-                          (event.target.value || null) as typeof selectedModelLane,
-                        )
-                      }
-                    >
-                      <option value="">{localize('com_ui_model_lane_default')}</option>
-                      {chatLanes.map((lane) => (
-                        <option
-                          key={lane}
-                          value={lane}
-                          disabled={
-                            lane === 'vision' && (laneConfig?.visionModels?.length ?? 0) === 0
-                          }
-                        >
-                          {localize(`com_ui_model_lane_${lane}`)}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                )}
                 <CodeApprovalMenu
                   conversation={conversation}
                   addedConversation={addedConvo}

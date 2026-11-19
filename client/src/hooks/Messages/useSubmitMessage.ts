@@ -7,12 +7,10 @@ import type { ModelLane, TMessage } from 'librechat-data-provider';
 import { generateImageFile, isImageRequest, uploadGeneratedImage } from '~/utils/imageIntent';
 import { useChatContext, useChatFormContext, useAddedChatContext } from '~/Providers';
 import { useGetLatestMessage } from '~/hooks/Messages/useLatestMessage';
-import { selectedModelLaneAtom } from '~/store/modelLane';
 import { useGetStartupConfig } from '~/data-provider';
 import useOfflineQueue from '~/hooks/useOfflineQueue';
-import { smartRouteEnabled } from '~/store/settings';
 import { useAuthContext } from '~/hooks/AuthContext';
-import { pickSmartModel } from '~/utils/smartRoute';
+import { pickLane, pickSmartModel } from '~/utils/smartRoute';
 import { mainTextareaId } from '~/common';
 import { useLocalize } from '~/hooks';
 import store from '~/store';
@@ -52,11 +50,10 @@ export default function useSubmitMessage() {
 
   const autoSendPrompts = useRecoilValue(store.autoSendPrompts);
   const setActivePrompt = useSetRecoilState(store.activePromptByIndex(index));
-  /** X5 Smart Route: read the toggle + specs here, resolve per-send below so
-   *  the heuristic always sees the exact text being submitted. */
-  const smartRouteOn = useAtomValue(smartRouteEnabled);
+  /** Lane auto-routing: resolved per message from what the user wrote, so
+   *  users never pick a model. The model-spec smart route stays layered on
+   *  top for deployments that expose named model specs. */
   const { data: startupConfig } = useGetStartupConfig();
-  const selectedModelLane = useAtomValue(selectedModelLaneAtom);
   const modelSpecsList = startupConfig?.modelSpecs?.list;
 
   const submitMessage = useCallback(
@@ -70,7 +67,7 @@ export default function useSubmitMessage() {
       if (offline.isOnline === false) {
         void offline.enqueueSend({
           text: data.text,
-          lane: data.overrideLane ?? selectedModelLane ?? undefined,
+          lane: pickLane(data.text, false),
         });
         return false;
       }
@@ -78,6 +75,16 @@ export default function useSubmitMessage() {
       /** Sync tail shared by the direct send and the image-intent flow: the
        *  reconciliation, ask, and composer reset all read state at call time. */
       const performSend = (submission: Submission) => {
+        /** Images force the vision lane. Composer files are browser Files
+         *  (mime in `type`); per-turn overrides carry `filetype`. */
+        const isImage = (f: unknown): boolean => {
+          const t = f as { filetype?: string; type?: string };
+          return String(t?.filetype ?? t?.type ?? '').startsWith('image');
+        };
+        const overrideHasImage = (submission.overrideFiles ?? []).some(isImage);
+        const composerValues: unknown[] =
+          files instanceof Map ? Array.from(files.values()) : Object.values(files ?? {});
+        const composerHasImage = composerValues.some(isImage);
         const latestMessage = getLatestMessage();
         const rootMessages = getMessages();
         const isLatestInRootMessages = rootMessages?.some(
@@ -97,7 +104,7 @@ export default function useSubmitMessage() {
           {
             addedConvo: addedConvo ?? undefined,
             overrideModel:
-              smartRouteOn && modelSpecsList
+              modelSpecsList
                 ? (pickSmartModel(
                     submission.text,
                     modelSpecsList,
@@ -105,7 +112,8 @@ export default function useSubmitMessage() {
                     conversation?.model,
                   ) ?? undefined)
                 : undefined,
-            overrideLane: submission.overrideLane ?? selectedModelLane ?? undefined,
+            overrideLane:
+              submission.overrideLane ?? pickLane(submission.text, overrideHasImage || composerHasImage),
             // Queued during-run messages carry their own consumed attachments,
             // quote chips, and manual skill picks (undefined = drain composer).
             overrideFiles: submission.overrideFiles,
@@ -174,8 +182,6 @@ export default function useSubmitMessage() {
       conversation,
       files,
       offline,
-      selectedModelLane,
-      smartRouteOn,
       modelSpecsList,
       showToast,
       localize,

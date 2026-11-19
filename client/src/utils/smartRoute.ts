@@ -1,6 +1,43 @@
 import type { TModelSpec } from 'librechat-data-provider';
 
-/** The slice of a model spec the heuristic needs — keeps callers and tests
+/**
+ * Chat lane auto-routing: picks fast/balanced/reasoning/vision/coding from
+ * what the message is, so users never choose a model. Mirrors the server's
+ * modelRouter lanes (tier×lane resolves the concrete model there).
+ */
+export type ChatLane = 'fast' | 'balanced' | 'reasoning' | 'vision' | 'coding';
+
+/** Code-intent signals: fences, and build/fix vocabulary. */
+const CODE_PATTERN =
+  /```|\b(code|function|class|script|api|bug|error|stack ?trace|compile|regex|sql|query|typescript|javascript|python)\b/i;
+
+/** Deep-work signals: long prompts and reasoning/explain vocabulary. */
+const DEEP_WORK_PATTERN =
+  /\b(derive|prove|architect|algorithm|analyz|step[- ]by[- ]step|explain why|math|proof|research|report|essay|strategy|plan for)\b/i;
+
+/**
+ * Picks the lane for a message. Images force vision; code intent wins over
+ * depth; long prompts land on reasoning; short conversational turns stay
+ * fast; the rest is balanced.
+ */
+export function pickLane(text: string, hasImages: boolean): ChatLane {
+  if (hasImages) {
+    return 'vision';
+  }
+  const t = text ?? '';
+  if (CODE_PATTERN.test(t)) {
+    return 'coding';
+  }
+  if (t.length > 600 || DEEP_WORK_PATTERN.test(t)) {
+    return 'reasoning';
+  }
+  if (t.length <= 60) {
+    return 'fast';
+  }
+  return 'balanced';
+}
+
+/** The slice of a model spec the heuristic needs - keeps callers and tests
  *  independent of the full TModelSpec shape. */
 export type SmartRouteSpec = Pick<TModelSpec, 'name' | 'label'> & { endpoint?: string };
 
