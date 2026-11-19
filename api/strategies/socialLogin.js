@@ -96,6 +96,22 @@ const socialLogin =
         await handleExistingUser(existingUser, avatarUrl, appConfig, email);
         return passResult(existingUser);
       } else if (existingUser) {
+        /** Verified-email linking: a local account whose email is verified can
+         *  be claimed by a social identity that proves the SAME verified
+         *  email (Google only returns verified addresses). Unverified local
+         *  accounts stay protected — claiming those would let anyone who
+         *  typed an address take over the account. */
+        const bothVerified =
+          existingUser.emailVerified === true && emailVerified === true;
+        if (bothVerified && (provider === 'google' || provider === 'openid')) {
+          await updateUser(existingUser._id, { [providerKey]: id });
+          existingUser[providerKey] = id;
+          logger.info(
+            `[${provider}Login] Linked ${provider} identity to verified local account: ${email}`,
+          );
+          await handleExistingUser(existingUser, avatarUrl, appConfig, email);
+          return passResult(existingUser);
+        }
         logger.info(
           `[${provider}Login] User ${email} already exists with provider ${existingUser.provider}`,
         );
