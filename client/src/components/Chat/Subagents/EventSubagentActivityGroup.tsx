@@ -1,7 +1,8 @@
 import { useCallback, useId, useMemo, useState } from 'react';
 import { useSetAtom } from 'jotai';
 import { Button, cn } from '@librechat/client';
-import { Bot, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
+import BaanzonMark from '~/components/ui/BaanzonMark';
 import type { ParentSubagentSummary } from 'librechat-data-provider';
 import { isLiveSubagentStatus, subagentStatusDotClass, subagentStatusLabelKey } from './status';
 import { getMessageRowWidthClass } from '~/components/Chat/Messages/ui/MessageRow';
@@ -161,7 +162,7 @@ function EventSubagentRows({
         aria-label={`${localize('com_ui_subagent_activity')}: ${summary}`}
         className="flex h-auto min-h-10 w-full items-center justify-start gap-2 rounded-lg px-3 py-2 text-left text-text-secondary hover:bg-surface-hover hover:text-text-primary focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring-primary focus-visible:ring-offset-0"
       >
-        <Bot size={15} className="shrink-0" aria-hidden="true" />
+        <BaanzonMark className="h-[15px] w-[15px] shrink-0" />
         <span className="min-w-0 flex-1 truncate text-sm font-medium">{summary}</span>
         <ChevronDown
           size={16}
@@ -196,7 +197,7 @@ function EventSubagentRows({
                 {agent ? (
                   renderAgentAvatar(agent, { size: 'icon', showBorder: false })
                 ) : (
-                  <Bot size={14} />
+                  <BaanzonMark className="h-3.5 w-3.5" />
                 )}
               </span>
               <span className="min-w-0 flex-1">

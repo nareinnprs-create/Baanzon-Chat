@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { CircleSlash2, Waves } from 'lucide-react';
-import { Alert, Button, EmptyState, Spinner } from '@librechat/client';
+import { CircleSlash2, Waves, X } from 'lucide-react';
+import { Alert, Button, EmptyState, Spinner, TooltipAnchor } from '@librechat/client';
 import type { ReactNode } from 'react';
 import type { VoiceHistoryTurn, VoiceOptions, VoiceStatus, VoiceTranscriptRole } from './types';
 import { useAuthToken } from '~/hooks/AuthContext';
@@ -13,6 +13,12 @@ import Orb from './Orb';
 export interface VoicePanelProps extends VoiceOptions {
   title?: string;
   className?: string;
+  /** `'page'` (default) is the documented route layout; `'overlay'` is the
+   *  ChatGPT-style full-screen voice mode: no header, a centered orb and a
+   *  carded transcript pinned to the bottom. */
+  variant?: 'page' | 'overlay';
+  /** Renders the close control (overlay mode) and is called by it. */
+  onClose?: () => void;
 }
 
 const STATUS_LABELS: Record<VoiceStatus, string> = {
@@ -65,6 +71,8 @@ export default function VoicePanel({
   onTranscript,
   title,
   className,
+  variant = 'page',
+  onClose,
 }: VoicePanelProps) {
   const token = useAuthToken();
   const defaultTurn = useCallback(
@@ -89,6 +97,8 @@ export default function VoicePanel({
     status === 'speaking' ||
     status === 'muted';
 
+  const overlay = variant === 'overlay';
+
   let body: ReactNode = null;
   if (status === 'unsupported') {
     body = (
@@ -102,11 +112,14 @@ export default function VoicePanel({
     );
   } else {
     body = (
-      <div className="flex flex-col gap-4">
+      <div className={cn('flex flex-col gap-4', overlay && 'flex-1 justify-center')}>
         <p
           role="status"
           aria-live="polite"
-          className="flex items-center gap-2 text-sm text-text-secondary"
+          className={cn(
+            'flex items-center gap-2 text-sm text-text-secondary',
+            overlay && 'justify-center',
+          )}
           data-testid="voice-status"
         >
           {status === 'connecting' || status === 'thinking' ? (
@@ -143,7 +156,7 @@ export default function VoicePanel({
           </p>
         ) : null}
 
-        <div className="flex items-center justify-center py-2">
+        <div className={cn('flex items-center justify-center py-2', overlay && 'py-8')}>
           <Orb status={status} micLevel={voice.micLevel} onToggle={voice.toggle} />
         </div>
 
@@ -166,8 +179,10 @@ export default function VoicePanel({
           ) : null}
         </div>
 
-        <section className="flex flex-col gap-2">
-          <h3 className="text-sm font-semibold text-text-primary">{L.transcriptHeading}</h3>
+        <section className={cn('flex flex-col gap-2', overlay && 'rounded-xl border border-border-light bg-surface-secondary-alt p-3')}>
+          <h3 className={cn('text-sm font-semibold text-text-primary', overlay && 'sr-only')}>
+            {L.transcriptHeading}
+          </h3>
           {voice.transcripts.length === 0 ? (
             <p className="text-sm text-text-secondary" data-testid="voice-transcript-empty">
               {L.transcriptEmpty}
@@ -197,15 +212,40 @@ export default function VoicePanel({
   return (
     <section
       aria-label={title ?? L.title}
-      className={cn('flex h-full min-h-0 flex-col gap-4 overflow-auto p-4', className)}
+      className={cn(
+        'flex h-full min-h-0 flex-col gap-4 overflow-auto p-4',
+        overlay && 'relative overflow-hidden bg-gradient-to-b from-surface-primary to-surface-secondary',
+        className,
+      )}
     >
-      <header className="flex flex-col gap-1">
-        <h2 className="flex items-center gap-2 text-base font-semibold text-text-primary">
-          <Waves className="size-4 text-text-secondary" aria-hidden="true" />
-          {title ?? L.title}
-        </h2>
-        <p className="text-sm text-text-secondary">{L.description}</p>
-      </header>
+      {overlay ? (
+        onClose && (
+          <TooltipAnchor
+            description={L.close}
+            render={
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label={L.close}
+                data-testid="voice-close-button"
+                onClick={onClose}
+                className="absolute right-3 top-3 z-10 rounded-full"
+              >
+                <X className="size-4" aria-hidden="true" />
+              </Button>
+            }
+          />
+        )
+      ) : (
+        <header className="flex flex-col gap-1">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-text-primary">
+            <Waves className="size-4 text-text-secondary" aria-hidden="true" />
+            {title ?? L.title}
+          </h2>
+          <p className="text-sm text-text-secondary">{L.description}</p>
+        </header>
+      )}
       {body}
     </section>
   );

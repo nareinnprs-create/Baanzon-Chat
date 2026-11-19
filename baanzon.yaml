@@ -831,6 +831,7 @@ endpoints:
     - name: 'Opraiz'
       apiKey: '${OPRAIZ_API_KEY}'
       baseURL: '${OPRAIZ_BASEURL}'
+      iconURL: '/assets/brand-mark.svg'
       # The tier router supplies the model-specific budget; keep this ceiling
       # above the largest Cloudflare Workers AI context window in the matrix.
       maxContextTokens: 900000
@@ -1035,7 +1036,7 @@ modelSpecs:
       label: 'Baanzon Intelligence'
       description: 'Our most capable everyday model - fast, sharp, general'
       group: 'Baanzon Intelligence'
-      groupIcon: 'Opraiz'
+      groupIcon: '/assets/brand-mark.svg'
       default: true
       webSearch: true
       preset:
@@ -1046,7 +1047,7 @@ modelSpecs:
       label: 'Baanzon Flash'
       description: 'Low-latency general model for quick exchanges'
       group: 'Baanzon Intelligence'
-      groupIcon: 'Opraiz'
+      groupIcon: '/assets/brand-mark.svg'
       webSearch: true
       preset:
         endpoint: 'Opraiz'
@@ -1056,7 +1057,7 @@ modelSpecs:
       label: 'Baanzon Polyglot'
       description: 'Strong multilingual and agentic work'
       group: 'Baanzon Intelligence'
-      groupIcon: 'Opraiz'
+      groupIcon: '/assets/brand-mark.svg'
       webSearch: true
       preset:
         endpoint: 'Opraiz'
@@ -1067,7 +1068,7 @@ modelSpecs:
       label: 'Baanzon Deep Reasoning'
       description: 'Extended-thinking model for hard problems (shows its reasoning)'
       group: 'Baanzon Deep Reasoning'
-      groupIcon: 'Opraiz'
+      groupIcon: '/assets/brand-mark.svg'
       webSearch: true
       preset:
         endpoint: 'Opraiz'
@@ -1077,7 +1078,7 @@ modelSpecs:
       label: 'Baanzon Reasoner'
       description: 'Frontier model with visible reasoning traces'
       group: 'Baanzon Deep Reasoning'
-      groupIcon: 'Opraiz'
+      groupIcon: '/assets/brand-mark.svg'
       webSearch: true
       preset:
         endpoint: 'Opraiz'
@@ -1087,7 +1088,7 @@ modelSpecs:
       label: 'Baanzon Scribe'
       description: 'Deliberate, high-quality long-form work'
       group: 'Baanzon Deep Reasoning'
-      groupIcon: 'Opraiz'
+      groupIcon: '/assets/brand-mark.svg'
       webSearch: true
       preset:
         endpoint: 'Opraiz'
@@ -1098,7 +1099,7 @@ modelSpecs:
       label: 'Baanzon Code'
       description: 'Coding specialist for writing, reviewing and refactoring code'
       group: 'Baanzon Code'
-      groupIcon: 'Opraiz'
+      groupIcon: '/assets/brand-mark.svg'
       webSearch: true
       preset:
         endpoint: 'Opraiz'
@@ -1108,7 +1109,7 @@ modelSpecs:
       label: 'Baanzon Code XL'
       description: 'Tuned for repository-scale coding tasks'
       group: 'Baanzon Code'
-      groupIcon: 'Opraiz'
+      groupIcon: '/assets/brand-mark.svg'
       webSearch: true
       preset:
         endpoint: 'Opraiz'
@@ -1119,7 +1120,7 @@ modelSpecs:
       label: 'Baanzon Turbo'
       description: 'Fastest responses for simple questions'
       group: 'Baanzon Turbo'
-      groupIcon: 'Opraiz'
+      groupIcon: '/assets/brand-mark.svg'
       webSearch: true
       preset:
         endpoint: 'Opraiz'
@@ -1129,7 +1130,7 @@ modelSpecs:
       label: 'Baanzon Swift'
       description: 'Quick and capable'
       group: 'Baanzon Turbo'
-      groupIcon: 'Opraiz'
+      groupIcon: '/assets/brand-mark.svg'
       webSearch: true
       preset:
         endpoint: 'Opraiz'
@@ -1139,7 +1140,7 @@ modelSpecs:
       label: 'Baanzon Rapid'
       description: 'Fast with strong reasoning'
       group: 'Baanzon Turbo'
-      groupIcon: 'Opraiz'
+      groupIcon: '/assets/brand-mark.svg'
       webSearch: true
       preset:
         endpoint: 'Opraiz'
@@ -1150,7 +1151,7 @@ modelSpecs:
       label: 'Baanzon Vision'
       description: 'Attach images and talk about them'
       group: 'Baanzon Vision'
-      groupIcon: 'Opraiz'
+      groupIcon: '/assets/brand-mark.svg'
       webSearch: true
       preset:
         endpoint: 'Opraiz'

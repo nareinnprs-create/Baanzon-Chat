@@ -1,6 +1,8 @@
 import { memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Bot, Folder, LibraryBig, MessagesSquare } from 'lucide-react';
+import { Folder, LibraryBig, MessagesSquare } from 'lucide-react';
+import type { ComponentType } from 'react';
+import BaanzonMark from '~/components/ui/BaanzonMark';
 import type { LucideIcon } from 'lucide-react';
 import type { TranslationKeys } from '~/hooks';
 import useSidebarState from '~/hooks/Nav/useSidebarState';
@@ -35,7 +37,7 @@ type Destination = {
   id: string;
   to: string;
   title: TranslationKeys;
-  icon: LucideIcon;
+  icon: ComponentType<{ className?: string }>;
   isActive: (pathname: string) => boolean;
 };
 
@@ -63,7 +65,7 @@ const DESTINATIONS: Destination[] = [
     id: 'explore',
     to: '/agents',
     title: 'com_ui_explore',
-    icon: Bot,
+    icon: BaanzonMark,
     isActive: (pathname) => pathname.startsWith('/agents'),
   },
   {
