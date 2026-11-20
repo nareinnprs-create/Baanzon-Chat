@@ -253,7 +253,9 @@ if [ -d "$STAGE_DIR/voice-tts" ]; then
   # Idempotent install; a slow model download must never block the release.
   (bash /workspace/voice-tts/install.sh >>/workspace/baanzon/logs/voice-install.log 2>&1 || true) &
 fi
-supervisorctl start baanzon-voice >/dev/null 2>&1 || true
+# Restart (not start) so a changed server.py is actually loaded; restart also
+# brings a stopped program up. In-flight TTS requests are dropped for a second.
+supervisorctl restart baanzon-voice >/dev/null 2>&1 || true
 
 # ---- boot the staging slot and health-gate it there ------------------------
 echo "[apply] starting $STAGE_PROG on :$STAGE_PORT"
