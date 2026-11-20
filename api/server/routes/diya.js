@@ -24,14 +24,17 @@ const SYSTEM_PROMPT = [
   'slang of that language - never textbook or translated-sounding phrasing.',
   'No markdown, no lists, no code, no emoji, no stage directions - the reply is read aloud.',
   'Keep replies under 120 words unless the user asks for more. Do not mention model names.',
-  'Always reply in the language the user wrote or spoke in.',
+  'Always reply in the language the user wrote or spoke in, and write it in that',
+  "language's own script (Devanagari for Hindi, Tamil script for Tamil, Bengali script",
+  'for Bengali, and so on). Never romanize an Indian language - the reply is spoken',
+  'by a native-script voice and Latin letters would be read with English sounds.',
 ].join(' ');
 
 /** Greeting fast-path: greetings answer instantly without the model round
  *  trip, so "hey Diya" acks in well under a second. Localized for the most
  *  common languages; the model handles everything else. */
 const GREETING_RE =
-  /^(hey|hi|hello|yo|namaste|namaskar|vanakkam|namaskaram|hola|salut|bonjour|ciao|good\s+(morning|afternoon|evening)|olá|नमस्ते|नमस्कार|वणक्कम|నమస్కారం|নমস্কার|ਸਤ ਸ੍ਰੀ ਅਕਾਲ|નમસ્તે|ನಮಸ್ಕಾರ)[\s,.!]*(diya|ਦਿਆ|દિયા)?[\s!.]*$/i;
+  /^(hey|hi|hello|yo|namaste|namaskar|vanakkam|namaskaram|hola|salut|bonjour|ciao|good\s+(morning|afternoon|evening)|olá|नमस्ते|नमस्कार|वणक्कम|నమస్కారం|নমস্কার|ਸਤ ਸ੍ਰੀ ਅਕਾਲ|નમસ્તે|ನಮಸ್ಕಾರ)[\s,.!]*(diya|दिया|தியா|దియా|দিয়া|ਦਿਆ|દિયા|ದಿಯಾ|ദിയ)?[\s!.]*$/i;
 
 const GREETING_ACKS = {
   en: "Hey! I'm Diya - good to hear you. What's on your mind?",
@@ -122,36 +125,38 @@ router.post('/turn', requireJwtAuth, projectsLimiter, async (req, res) => {
   }
   const tier = String(req.user?.subscriptionTier || 'free').toLowerCase();
   const chain = resolveModelChain(tier, 'baanzon-swift', trimmed);
-  const model = chain[0] || process.env.VOICE_MODEL || '@cf/zai-org/glm-4.7-flash';
+  const models = (
+    chain.length > 0 ? chain : [process.env.VOICE_MODEL || '@cf/zai-org/glm-4.7-flash']
+  ).slice(0, 3);
 
-  try {
-    const upstream = await fetch(`${base}/chat/completions`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model,
-        max_tokens: 1200,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          ...(history ?? []).slice(-12).map((turn) => ({ role: turn.role, content: turn.content })),
-          { role: 'user', content: trimmed },
-        ],
-      }),
-    });
-    if (!upstream.ok) {
-      logger.warn('[diya] upstream rejected the turn', { status: upstream.status });
-      return res.status(502).json({ error: UPSTREAM });
+  const messages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    ...(history ?? []).slice(-12).map((turn) => ({ role: turn.role, content: turn.content })),
+    { role: 'user', content: trimmed },
+  ];
+
+  // Walk the ranked chain: one dead model must not end the conversation.
+  for (const model of models) {
+    try {
+      const upstream = await fetch(`${base}/chat/completions`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, max_tokens: 1200, messages }),
+      });
+      if (!upstream.ok) {
+        logger.warn('[diya] upstream rejected the turn', { status: upstream.status });
+        continue;
+      }
+      const data = await upstream.json();
+      const reply = data?.choices?.[0]?.message?.content?.trim();
+      if (reply) {
+        return res.json({ reply });
+      }
+    } catch (err) {
+      logger.error('[diya] turn failed', err);
     }
-    const data = await upstream.json();
-    const reply = data?.choices?.[0]?.message?.content?.trim();
-    if (!reply) {
-      return res.status(502).json({ error: UPSTREAM });
-    }
-    return res.json({ reply });
-  } catch (err) {
-    logger.error('[diya] turn failed', err);
-    return res.status(502).json({ error: UPSTREAM });
   }
+  return res.status(502).json({ error: UPSTREAM });
 });
 
 module.exports = router;

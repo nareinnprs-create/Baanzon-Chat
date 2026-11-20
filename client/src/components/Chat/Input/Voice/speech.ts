@@ -55,7 +55,8 @@ export function chunkForSpeech(text: string, maxLen = 200): string[] {
   if (normalized.length === 0) {
     return [];
   }
-  const sentences = normalized.match(/[^.!?…]+[.!?…]+["')\]]*\s*|[^.!?…]+$/g) ?? [];
+  // Latin and Indic sentence marks (danda) so Hindi/Bengali stream by sentence.
+  const sentences = normalized.match(/[^.!?…।॥]+[.!?…।॥]+["')\]]*\s*|[^.!?…।॥]+$/g) ?? [];
   const chunks: string[] = [];
   let buffer = '';
   for (const sentence of sentences) {

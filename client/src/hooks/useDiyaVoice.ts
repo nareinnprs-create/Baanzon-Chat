@@ -449,7 +449,12 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
     }
     let stream: MediaStream;
     try {
-      stream = await mediaDevices.getUserMedia({ audio: true, video: false });
+      // Echo cancellation keeps Diya's own voice out of the VAD, so only the
+      // user's speech counts as barge-in.
+      stream = await mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true },
+        video: false,
+      });
     } catch (caught) {
       streamRef.current = null;
       const denied =
