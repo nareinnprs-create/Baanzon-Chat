@@ -13,10 +13,11 @@
  * scheduled languages), the same chain reorders Indic-strongest first, so
  * every public model answers Indian languages from its best backings.
  *
- * Windows (from CF catalog): glm-4.7-flash 131k, glm-5.3-flash/glm-5.3/
- * deepseek-v4-flash 1M, gpt-oss-120b 128k, r1-32b 80k, coder-32b 32k,
- * kimi 262k, llama-3.1-8b 128k, llama-3.2-11b-vision 128k. Budgets stay under
- * the window.
+ * Windows (live-probed 2026-11-20): glm-4.7-flash 131k, glm-5.3/
+ * deepseek-v4.1-flash 1M, gpt-oss-120b 128k, gpt-oss-20b 128k, coder-32b 32k,
+ * llama-3.3-70b 128k, llama-3.2-3b 128k, llama-4-scout 256k,
+ * llama-3.2-11b-vision 128k, mistral-small 128k, gemma-4-26b 128k. Budgets
+ * stay under the window.
  */
 const { encodeEphemeralAgentId, parseEphemeralAgentId } = require('librechat-data-provider');
 
@@ -40,6 +41,12 @@ const MODEL_BUDGET_OVERRIDES = {
     pro: { maxContextTokens: 240000, max_tokens: 16000 },
     enterprise: { maxContextTokens: 240000, max_tokens: 16000 },
   },
+  'baanzon-swift': {
+    free: { maxContextTokens: 120000, max_tokens: 8000 },
+    lite: { maxContextTokens: 120000, max_tokens: 12000 },
+    pro: { maxContextTokens: 900000, max_tokens: 16000 },
+    enterprise: { maxContextTokens: 900000, max_tokens: 16000 },
+  },
   'baanzon-vision': {
     free: { maxContextTokens: 112000, max_tokens: 8000 },
     lite: { maxContextTokens: 112000, max_tokens: 12000 },
@@ -50,106 +57,96 @@ const MODEL_BUDGET_OVERRIDES = {
 
 /**
  * Ordered failover chains: slug x tier -> concrete model ids, equally-powerful
- * primary first. installModelFailover hops to the next id on 404/410/429/5xx
+ * primary first. installGatewayFailover hops to the next id on 404/410/429/5xx
  * before the first token, so a deprecated or saturated model never errors.
+ * Every member was live-probed against the account (2026-11-20); the previous
+ * set lost 7 chat + 4 image models to deprecation.
  */
 const CHAINS = {
   'baanzon-intelligence': {
-    free: [
-      '@cf/zai-org/glm-4.7-flash',
-      '@cf/qwen/qwen3-30b-a3b-fp8',
-      '@cf/meta/llama-3.1-8b-instruct-fp8',
-    ],
-    lite: [
-      '@cf/zai-org/glm-5.3-flash',
-      '@cf/qwen/qwen3-30b-a3b-fp8',
-      '@cf/zai-org/glm-4.7-flash',
-    ],
+    free: ['@cf/zai-org/glm-4.7-flash', '@cf/openai/gpt-oss-20b', '@cf/zai-org/glm-5.3'],
+    lite: ['@cf/zai-org/glm-5.3', '@cf/zai-org/glm-4.7-flash', '@cf/openai/gpt-oss-20b'],
     pro: [
       '@cf/zai-org/glm-5.3',
-      '@cf/deepseek-ai/deepseek-v4-flash-0731',
-      '@cf/zai-org/glm-5.3-flash',
+      '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+      '@cf/openai/gpt-oss-120b',
     ],
     enterprise: [
       '@cf/zai-org/glm-5.3',
-      '@cf/deepseek-ai/deepseek-v4-flash-0731',
-      '@cf/zai-org/glm-5.3-flash',
+      '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+      '@cf/openai/gpt-oss-120b',
     ],
   },
   'baanzon-reasoning': {
     free: [
-      '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b',
+      '@cf/deepseek-ai/deepseek-v4.1-flash-1017',
       '@cf/openai/gpt-oss-120b',
       '@cf/zai-org/glm-5.3',
     ],
     lite: [
-      '@cf/deepseek-ai/deepseek-v4-flash-0731',
-      '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b',
+      '@cf/deepseek-ai/deepseek-v4.1-flash-1017',
       '@cf/openai/gpt-oss-120b',
+      '@cf/zai-org/glm-5.3',
     ],
     pro: [
       '@cf/openai/gpt-oss-120b',
       '@cf/zai-org/glm-5.3',
-      '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b',
+      '@cf/deepseek-ai/deepseek-v4.1-flash-1017',
     ],
     enterprise: [
-      '@cf/zai-org/glm-5.3',
       '@cf/openai/gpt-oss-120b',
-      '@cf/deepseek-ai/deepseek-v4-flash-0731',
+      '@cf/zai-org/glm-5.3',
+      '@cf/deepseek-ai/deepseek-v4.1-flash-1017',
     ],
   },
   'baanzon-code': {
     free: [
       '@cf/qwen/qwen2.5-coder-32b-instruct',
-      '@cf/moonshotai/kimi-k2.7-code',
+      '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
       '@cf/zai-org/glm-5.3',
     ],
     lite: [
       '@cf/qwen/qwen2.5-coder-32b-instruct',
-      '@cf/moonshotai/kimi-k2.7-code',
+      '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
       '@cf/zai-org/glm-5.3',
     ],
     pro: [
-      '@cf/moonshotai/kimi-k2.7-code',
       '@cf/qwen/qwen2.5-coder-32b-instruct',
+      '@cf/google/gemma-4-26b-a4b-it',
       '@cf/zai-org/glm-5.3',
     ],
     enterprise: [
-      '@cf/moonshotai/kimi-k2.7-code',
       '@cf/qwen/qwen2.5-coder-32b-instruct',
+      '@cf/google/gemma-4-26b-a4b-it',
       '@cf/zai-org/glm-5.3',
     ],
   },
   'baanzon-swift': {
-    free: ['@cf/meta/llama-3.1-8b-instruct-fp8', '@cf/zai-org/glm-4.7-flash'],
-    lite: [
-      '@cf/zai-org/glm-4.7-flash',
-      '@cf/meta/llama-3.1-8b-instruct-fp8',
-      '@cf/zai-org/glm-5.3-flash',
-    ],
-    pro: ['@cf/zai-org/glm-5.3-flash', '@cf/zai-org/glm-4.7-flash'],
-    enterprise: ['@cf/zai-org/glm-5.3-flash', '@cf/zai-org/glm-4.7-flash'],
+    free: ['@cf/meta/llama-3.2-3b-instruct', '@cf/zai-org/glm-4.7-flash'],
+    lite: ['@cf/zai-org/glm-4.7-flash', '@cf/meta/llama-3.3-70b-instruct-fp8-fast'],
+    pro: ['@cf/zai-org/glm-5.3', '@cf/openai/gpt-oss-20b'],
+    enterprise: ['@cf/zai-org/glm-5.3', '@cf/openai/gpt-oss-20b'],
   },
   'baanzon-vision': {
     free: [
       '@cf/meta/llama-3.2-11b-vision-instruct',
-      '@cf/meta/llama-4-scout-17b-16e-instruct',
-      '@cf/llava-hf/llava-1.5-7b-hf',
+      '@cf/deepseek-ai/deepseek-v4.1-flash-1017',
+      '@cf/mistralai/mistral-small-3.1-24b-instruct',
     ],
     lite: [
       '@cf/meta/llama-3.2-11b-vision-instruct',
-      '@cf/meta/llama-4-scout-17b-16e-instruct',
-      '@cf/llava-hf/llava-1.5-7b-hf',
+      '@cf/mistralai/mistral-small-3.1-24b-instruct',
+      '@cf/deepseek-ai/deepseek-v4.1-flash-1017',
     ],
     pro: [
       '@cf/meta/llama-4-scout-17b-16e-instruct',
-      '@cf/meta/llama-3.2-11b-vision-instruct',
-      '@cf/llava-hf/llava-1.5-7b-hf',
+      '@cf/mistralai/mistral-small-3.1-24b-instruct',
+      '@cf/deepseek-ai/deepseek-v4.1-flash-1017',
     ],
     enterprise: [
       '@cf/meta/llama-4-scout-17b-16e-instruct',
-      '@cf/meta/llama-3.2-11b-vision-instruct',
-      '@cf/llava-hf/llava-1.5-7b-hf',
+      '@cf/mistralai/mistral-small-3.1-24b-instruct',
+      '@cf/deepseek-ai/deepseek-v4.1-flash-1017',
     ],
   },
 };
@@ -192,18 +189,17 @@ const INDIC_SCRIPT_RE =
  *  message is Indic. Members absent from the map sort last, order preserved. */
 const INDIC_RANK = {
   '@cf/zai-org/glm-5.3': 0,
-  '@cf/zai-org/glm-5.3-flash': 1,
-  '@cf/qwen/qwen3-30b-a3b-fp8': 2,
-  '@cf/deepseek-ai/deepseek-v4-flash-0731': 3,
+  '@cf/deepseek-ai/deepseek-v4.1-flash-1017': 1,
+  '@cf/google/gemma-4-26b-a4b-it': 2,
+  '@cf/qwen/qwen2.5-coder-32b-instruct': 3,
   '@cf/zai-org/glm-4.7-flash': 4,
-  '@cf/openai/gpt-oss-120b': 5,
-  '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b': 6,
-  '@cf/moonshotai/kimi-k2.7-code': 7,
-  '@cf/qwen/qwen2.5-coder-32b-instruct': 8,
+  '@cf/meta/llama-3.3-70b-instruct-fp8-fast': 5,
+  '@cf/openai/gpt-oss-120b': 6,
+  '@cf/openai/gpt-oss-20b': 7,
+  '@cf/mistralai/mistral-small-3.1-24b-instruct': 8,
   '@cf/meta/llama-4-scout-17b-16e-instruct': 9,
   '@cf/meta/llama-3.2-11b-vision-instruct': 10,
-  '@cf/meta/llama-3.1-8b-instruct-fp8': 11,
-  '@cf/llava-hf/llava-1.5-7b-hf': 12,
+  '@cf/meta/llama-3.2-3b-instruct': 11,
 };
 
 /** Detects the 22 scheduled Indian languages by Unicode script range. */
@@ -247,9 +243,9 @@ for (const tiers of Object.values(CHAINS)) {
 }
 
 const FALLBACK = {
-  model: '@cf/meta/llama-3.1-8b-instruct-fp8',
-  maxContextTokens: 28000,
-  max_tokens: 4000,
+  model: '@cf/zai-org/glm-4.7-flash',
+  maxContextTokens: 120000,
+  max_tokens: 8000,
 };
 
 /**

@@ -157,7 +157,7 @@ router.post('/', requireJwtAuth, async (req, res) => {
   const tier = await userTier(req.user.id);
   const { cap } = DAILY[tier] || DAILY.free;
   // Equally-powerful failover chain: try the pick first, hop on failure.
-  const chain = pickImageChain(prompt).filter((m) => m !== IMAGE_MODELS.inpaint);
+  const chain = pickImageChain(prompt);
   if (chain.length === 0) {
     return res.status(400).json({ message: 'No image model available for this prompt.' });
   }

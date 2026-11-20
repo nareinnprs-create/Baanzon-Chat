@@ -101,6 +101,12 @@ if ! NODE_PATH="$ACTIVE_DIR/node_modules" node "$STAGE_DIR/scripts/validate-prov
   exit 1
 fi
 
+echo "[apply] probing live model health (deprecation guard)"
+if ! BAANZON_ENV="$ACTIVE_DIR/.env" NODE_PATH="$ACTIVE_DIR/node_modules" node "$STAGE_DIR/scripts/check-model-health.js"; then
+  echo "[apply] model health check FAILED - a routed model is deprecated; active release untouched, no flip"
+  exit 1
+fi
+
 echo "[apply] preparing prod deps (lockfile cache)"
 cd "$STAGE_DIR" || exit 1
 (NPM_CONFIG_CACHE=/workspace/.npm-cache npm ci --omit=dev --no-audit --no-fund) >/workspace/npminstall.log 2>&1 \

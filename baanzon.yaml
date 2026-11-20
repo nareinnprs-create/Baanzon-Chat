@@ -331,8 +331,8 @@ registration:
 # chain is the per-lane/tier ladder; models without an entry use
 # `defaultChain`. After `failureThreshold` consecutive failures a model is
 # benched for `cooldownMs` and skipped (a fully benched chain still runs).
-# Defaults when the whole block is omitted: built-in chains
-# (primary -> glm-4.7-flash -> llama-3.1-8b-fp8), threshold 2, cooldown 10m.
+# Defaults when the whole block is omitted: built-in chains from
+# modelRouter.MODEL_CHAINS (live-probed), threshold 2, cooldown 10m.
 #failover:
 #  failureThreshold: 2
 #  cooldownMs: 600000
@@ -847,7 +847,7 @@ endpoints:
           - 'baanzon-vision'
         fetch: false # CF /ai/v1/models does not support GET - validate against the list above
       titleConvo: true
-      titleModel: '@cf/meta/llama-3.1-8b-instruct-fp8'
+      titleModel: '@cf/zai-org/glm-4.7-flash'
       dropParams: ['stop', 'user', 'frequency_penalty', 'presence_penalty']
       modelDisplayLabel: 'Baanzon'
   # AWS Bedrock Example

@@ -119,7 +119,7 @@ router.post('/turn', requireJwtAuth, projectsLimiter, async (req, res) => {
   }
   const tier = String(req.user?.subscriptionTier || 'free').toLowerCase();
   const chain = resolveModelChain(tier, 'baanzon-swift', trimmed);
-  const model = chain[0] || process.env.VOICE_MODEL || '@cf/meta/llama-3.1-8b-instruct-fp8';
+  const model = chain[0] || process.env.VOICE_MODEL || '@cf/zai-org/glm-4.7-flash';
 
   try {
     const upstream = await fetch(`${base}/chat/completions`, {
