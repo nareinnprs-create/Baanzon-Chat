@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
 import { Feather } from 'lucide-react';
 import { ProviderId } from 'librechat-data-provider';
-import { Sparkles, AssistantIcon, ProviderIcon } from '@librechat/client';
+import { Sparkles, AssistantIcon, ProviderIcon, getProviderIconDef } from '@librechat/client';
 import type * as t from 'librechat-data-provider';
 import ConvoIconURL from '~/components/Endpoints/ConvoIconURL';
+import BaanzonMark from '~/components/ui/BaanzonMark';
 import { cn, getEntity, getIconEndpoint } from '~/utils';
 import { useProviderIcon } from '~/hooks/Endpoint';
 import { isImageURL } from '~/utils/icons';
@@ -144,6 +145,10 @@ export default function ConvoIcon({
 
     if (imageURL != null) {
       return <img src={imageURL} alt={`${endpoint} Icon`} className={className} />;
+    }
+
+    if (provider == null || getProviderIconDef(provider).label === 'Custom') {
+      return <BaanzonMark className={className} />;
     }
 
     return (

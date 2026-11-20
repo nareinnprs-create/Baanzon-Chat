@@ -1,8 +1,9 @@
 import React, { memo, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { ProviderIcon } from '@librechat/client';
+import { ProviderIcon, getProviderIconDef } from '@librechat/client';
 import { resolveProviderId } from 'librechat-data-provider';
 import { EntityEndpointMark, isEntityEndpoint } from '~/components/Endpoints/EntityEndpointMark';
+import BaanzonMark from '~/components/ui/BaanzonMark';
 import CustomIcon from '~/components/ui/CustomIcon';
 import { isImageURL } from '~/utils/icons';
 
@@ -30,7 +31,11 @@ const GroupIcon: React.FC<GroupIconProps> = ({ iconURL, groupName }) => {
   if (provider || !isImageURL(iconURL) || imageError) {
     return (
       <div className="relative" style={{ width: 20, height: 20, margin: '2px' }}>
-        <ProviderIcon provider={provider} size={20} className="icon-md shrink-0" />
+        {provider == null || getProviderIconDef(provider).label === 'Custom' ? (
+          <BaanzonMark className="icon-md shrink-0" />
+        ) : (
+          <ProviderIcon provider={provider} size={20} className="icon-md shrink-0" />
+        )}
         {imageError && (
           <div
             className="absolute flex items-center justify-center rounded-full bg-surface-destructive"

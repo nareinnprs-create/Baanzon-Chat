@@ -1,7 +1,8 @@
 import React, { memo, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { ProviderIcon } from '@librechat/client';
+import { ProviderIcon, getProviderIconDef } from '@librechat/client';
 import type { ProviderId } from 'librechat-data-provider';
+import BaanzonMark from '~/components/ui/BaanzonMark';
 
 export const URLIcon = memo(
   ({
@@ -31,7 +32,11 @@ export const URLIcon = memo(
       return (
         <div className="relative" style={{ ...containerStyle, margin: '2px' }}>
           <div className={className}>
-            <ProviderIcon provider={provider} size={numericSize} className="h-full w-full" />
+            {provider == null || getProviderIconDef(provider).label === 'Custom' ? (
+              <BaanzonMark className="h-full w-full" />
+            ) : (
+              <ProviderIcon provider={provider} size={numericSize} className="h-full w-full" />
+            )}
           </div>
           {imageError && iconURL && (
             <div

@@ -2,6 +2,7 @@ import { Feather } from 'lucide-react';
 import { EModelEndpoint, alternateName } from 'librechat-data-provider';
 import { Sparkles, ProviderIcon, getProviderIconDef } from '@librechat/client';
 import type { IconProps } from '~/common';
+import BaanzonMark from '~/components/ui/BaanzonMark';
 import { useProviderIcon } from '~/hooks/Endpoint';
 import { cn } from '~/utils';
 
@@ -64,6 +65,10 @@ const MinimalIcon: React.FC<IconProps> = (props) => {
       <img className={cn('icon-sm', iconClassName)} src={imageURL} alt={`${endpoint} Icon`} />,
       name,
     );
+  }
+
+  if (provider == null || def.label === 'Custom') {
+    return renderWrapper(<BaanzonMark className={cn('icon-sm', iconClassName)} />, name);
   }
 
   return renderWrapper(
