@@ -491,8 +491,9 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       setMicLevel(level);
       const transition = detector.push(level);
       if (transition === 'speech-start') {
-        // The user's voice while Diya speaks cancels playback (barge-in).
-        if (speakingRef.current) {
+        // The user's voice while Diya speaks, or before her reply lands,
+        // cancels the turn (barge-in) so only one reply can ever play.
+        if (speakingRef.current || turnControllerRef.current !== null) {
           cancelPlayback();
           setBargeIn(true);
           setStatus('listening');
