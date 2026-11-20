@@ -1,5 +1,5 @@
 import { Provider as JotaiProvider, createStore } from 'jotai';
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import useDiyaVoice from '~/hooks/useDiyaVoice';
 
@@ -50,7 +50,10 @@ class FakeRecorder {
 
   stop(): void {
     this.state = 'inactive';
-    this.ondataavailable?.({ data: new Blob(['audio-bytes'], { type: 'audio/webm' }) });
+    // The session ignores recordings under 1200 bytes as noise.
+    this.ondataavailable?.({
+      data: new Blob([new Uint8Array(4096)], { type: 'audio/webm' }),
+    });
     this.onstop?.();
   }
 }
@@ -139,6 +142,31 @@ describe('useDiyaVoice (server audio)', () => {
     });
     expect(result.current.status).toBe('listening');
     expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalled();
+  });
+
+  it('stops the sentence loop when the user barges in mid-reply', async () => {
+    const { result } = renderVoice({ turn: jest.fn(() => Promise.resolve('First part. Second part.')) });
+    await act(async () => {
+      await result.current.start();
+    });
+
+    mockVadState.level = 0.9;
+    await waitFor(() => expect(FakeRecorder.instances.length).toBe(1), { timeout: 2000 });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    });
+    mockVadState.level = 0;
+
+    // First sentence is playing; interrupt before the second is synthesized.
+    await waitFor(() => expect(audioState.instances.length).toBe(1), { timeout: 4000 });
+    mockVadState.level = 0.9;
+    await waitFor(() => expect(result.current.status).toBe('listening'), { timeout: 2000 });
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    });
+    const ttsCalls = fetchMock.mock.calls.filter(([url]) => String(url) === '/api/voice/tts');
+    expect(ttsCalls.length).toBe(1);
   });
 
   it('stops the session and releases the microphone', async () => {

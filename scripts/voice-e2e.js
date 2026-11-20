@@ -65,15 +65,27 @@ async function main() {
     const stt = await fetch(`${base}/api/voice/stt`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        audio: audio.toString('base64'),
-        mime: tts.headers.get('content-type'),
-      }),
+      body: JSON.stringify({ audio: audio.toString('base64') }),
     });
     const heard = await stt.json();
     console.log(
       `stt ${lang}: ${stt.status} lang=${heard.language} text=${JSON.stringify(heard.text || heard.error)}`,
     );
+  }
+
+  // The brain: greeting fast-path plus a real turn in a non-Latin script.
+  for (const [label, text] of [
+    ['en-greet', 'hey diya'],
+    ['hi-greet', 'नमस्ते दिया'],
+    ['ta-turn', 'உங்கள் பெயர் என்ன?'],
+  ]) {
+    const turn = await fetch(`${base}/api/diya/turn`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ text, history: [] }),
+    });
+    const data = await turn.json();
+    console.log(`turn ${label}: ${turn.status} ${JSON.stringify((data.reply || data.error || '').slice(0, 90))}`);
   }
 }
 

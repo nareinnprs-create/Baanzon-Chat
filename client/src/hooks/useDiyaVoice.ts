@@ -152,6 +152,8 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
   const turnControllerRef = useRef<AbortController | null>(null);
 
   const speakingRef = useRef(false);
+  /** Incremented on every cancel so a stale sentence loop stops. */
+  const speakTokenRef = useRef(0);
   const stoppedRef = useRef(false);
   const mutedRef = useRef(muted);
   const statusRef = useRef<VoiceStatus>(status);
@@ -198,6 +200,9 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
     turnControllerRef.current?.abort();
     turnControllerRef.current = null;
     speakingRef.current = false;
+    // Bumping the token stops a sentence loop that is between chunks, so the
+    // rest of the reply cannot play over the user who just interrupted.
+    speakTokenRef.current += 1;
     const audio = audioRef.current;
     if (audio) {
       try {
@@ -395,9 +400,12 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       const chunks = chunkTextForSpeech(text);
       const pieces = chunks.length > 0 ? chunks : [text];
       const lang = detectLang(text, sessionLangRef.current || 'en');
+      const token = speakTokenRef.current;
+      const cancelled = () =>
+        stoppedRef.current || mutedRef.current || speakTokenRef.current !== token;
       setStatus('speaking');
       for (const piece of pieces) {
-        if (stoppedRef.current) {
+        if (cancelled()) {
           return;
         }
         let blob: Blob;
@@ -406,7 +414,7 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
         } catch {
           continue;
         }
-        if (stoppedRef.current) {
+        if (cancelled()) {
           return;
         }
         const url = URL.createObjectURL(blob);
@@ -426,8 +434,8 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
         if (audioRef.current === audio) {
           audioRef.current = null;
         }
-        if (stoppedRef.current || mutedRef.current) {
-          break;
+        if (cancelled()) {
+          return;
         }
       }
       speakingRef.current = false;
