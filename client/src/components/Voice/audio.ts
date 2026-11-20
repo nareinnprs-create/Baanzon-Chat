@@ -57,7 +57,7 @@ export async function transcribeAudio(
   const response = await fetch('/api/voice/stt', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders(token) },
-    body: JSON.stringify({ audio, mime: blob.type || 'audio/webm' }),
+    body: JSON.stringify({ audio }),
   });
   if (!response.ok) {
     throw new Error(`transcription failed (${response.status})`);

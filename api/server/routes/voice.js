@@ -104,7 +104,8 @@ async function sidecarTts(text, lang) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text, lang }),
-    signal: AbortSignal.timeout(30000),
+    // Cold MMS loads pull weights from the HF cache; give the first call room.
+    signal: AbortSignal.timeout(60000),
   });
   if (!response.ok) {
     throw new Error(`sidecar ${response.status}`);
@@ -155,7 +156,7 @@ async function synthesize(text, lang) {
 
 /** Speech in: base64 audio -> text (+ language when the engine reports it). */
 router.post('/stt', requireJwtAuth, projectsLimiter, async (req, res) => {
-  const { audio, mime } = req.body ?? {};
+  const { audio } = req.body ?? {};
   if (typeof audio !== 'string' || audio.length === 0) {
     return res.status(400).json({ error: 'audio is required (base64)' });
   }
@@ -169,17 +170,16 @@ router.post('/stt', requireJwtAuth, projectsLimiter, async (req, res) => {
     return res.status(413).json({ error: 'audio size out of range' });
   }
   try {
-    const response = await cfRun('@cf/openai/whisper-large-v3-turbo', {
-      audio: Array.from(bytes),
-      ...(typeof mime === 'string' && mime ? { mime_type: mime } : {}),
-    });
+    // Whisper takes the container bytes as base64 and detects the format itself;
+    // an array of ints is only for raw PCM and is rejected for compressed audio.
+    const response = await cfRun('@cf/openai/whisper-large-v3-turbo', { audio });
     const data = await response.json();
     const text = typeof data?.result?.text === 'string' ? data.result.text.trim() : '';
     if (!text) {
       return res.status(422).json({ error: 'no speech detected' });
     }
-    const language = typeof data?.result?.language === 'string' ? data.result.language : null;
-    return res.json({ text, language });
+    const language = data?.result?.transcription_info?.language ?? data?.result?.language;
+    return res.json({ text, language: typeof language === 'string' ? language : null });
   } catch (error) {
     logger.warn(`[voice] stt failed: ${error.message}`);
     return res.status(502).json({ error: 'transcription failed' });

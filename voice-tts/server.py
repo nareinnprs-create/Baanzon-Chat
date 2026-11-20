@@ -24,8 +24,29 @@ import wave
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+# The pod shares a host with many cores but is capped at a couple of vCPUs.
+# onnxruntime otherwise sizes its thread pool from /proc/cpuinfo and thrashes
+# (one request can take a minute instead of seconds).
+CPU_THREADS = max(1, min(4, len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else 2))
+os.environ.setdefault("OMP_NUM_THREADS", str(CPU_THREADS))
+os.environ.setdefault("MKL_NUM_THREADS", str(CPU_THREADS))
+
 import numpy as np
 import onnxruntime as ort
+
+_ORT_SESSION = ort.InferenceSession
+
+
+def _limited_session(path, sess_options=None, **kwargs):
+    """Every session in this process (Kokoro included) gets a small pool."""
+    options = sess_options or ort.SessionOptions()
+    options.intra_op_num_threads = CPU_THREADS
+    options.inter_op_num_threads = 1
+    options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+    return _ORT_SESSION(path, options, **kwargs)
+
+
+ort.InferenceSession = _limited_session
 
 MODELS = os.environ.get("VOICE_MODELS_DIR", "/workspace/models")
 
@@ -120,6 +141,8 @@ def kokoro_wav(text, lang):
 def mms_wav(text, lang):
     import torch
 
+    # Torch sizes its pool from the host too; cap it like onnxruntime.
+    torch.set_num_threads(CPU_THREADS)
     code = MMS_LANGS[lang]
     model, tokenizer = load_mms(code)
     inputs = tokenizer(text, return_tensors="pt")
