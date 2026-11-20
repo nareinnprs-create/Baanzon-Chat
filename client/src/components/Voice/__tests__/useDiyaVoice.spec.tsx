@@ -145,7 +145,9 @@ describe('useDiyaVoice (server audio)', () => {
   });
 
   it('stops the sentence loop when the user barges in mid-reply', async () => {
-    const { result } = renderVoice({ turn: jest.fn(() => Promise.resolve('First part. Second part.')) });
+    const { result } = renderVoice({
+      turn: jest.fn(() => Promise.resolve('First part. Second part.')),
+    });
     await act(async () => {
       await result.current.start();
     });
