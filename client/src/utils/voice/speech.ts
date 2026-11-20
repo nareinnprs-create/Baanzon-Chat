@@ -96,8 +96,15 @@ export function pickAssistantVoice(lang: string): SpeechSynthesisVoice | null {
   const premium = pool.filter((voice) =>
     /natural|neural|premium|enhanced|google|siri/i.test(voice.name),
   );
-  const female = /female|woman|zira|aria|jenny|libby|sonia|samantha|karen|moira|tessa|fiona|neerja|kalpana|swara|heera|asha|priya|salli|kendra|kimberly|joanna|raveena|heami|yuna|kyoko|mei|amélie|ana|helena|paulina|monica/i;
-  return premium.find((voice) => female.test(voice.name)) ?? premium[0] ?? pool.find((voice) => voice.default) ?? pool[0] ?? null;
+  const female =
+    /female|woman|zira|aria|jenny|libby|sonia|samantha|karen|moira|tessa|fiona|neerja|kalpana|swara|heera|asha|priya|salli|kendra|kimberly|joanna|raveena|heami|yuna|kyoko|mei|amélie|ana|helena|paulina|monica/i;
+  return (
+    premium.find((voice) => female.test(voice.name)) ??
+    premium[0] ??
+    pool.find((voice) => voice.default) ??
+    pool[0] ??
+    null
+  );
 }
 
 /**

@@ -33,15 +33,14 @@ function authHeaders(token?: string | null): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-async function blobToBase64(blob: Blob): Promise<string> {
-  const buffer = await blob.arrayBuffer();
-  let binary = '';
-  const bytes = new Uint8Array(buffer);
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
-  }
-  return btoa(binary);
+function blobToBase64(blob: Blob): Promise<string> {
+  // FileReader works in every target browser and in jsdom, unlike Blob.arrayBuffer.
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '');
+    reader.onerror = () => reject(reader.error ?? new Error('could not read audio'));
+    reader.readAsDataURL(blob);
+  });
 }
 
 export interface TranscriptionResult {

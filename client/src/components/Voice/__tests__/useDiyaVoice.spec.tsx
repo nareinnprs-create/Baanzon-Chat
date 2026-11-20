@@ -1,5 +1,5 @@
 import { Provider as JotaiProvider, createStore } from 'jotai';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import useDiyaVoice from '~/hooks/useDiyaVoice';
 
@@ -33,7 +33,10 @@ class FakeRecorder {
   ondataavailable: ((event: { data: Blob }) => void) | null = null;
   onstop: (() => void) | null = null;
 
-  constructor(public stream: unknown, public options?: unknown) {
+  constructor(
+    public stream: unknown,
+    public options?: unknown,
+  ) {
     FakeRecorder.instances.push(this);
   }
 
@@ -62,9 +65,11 @@ class FakeAudio {
   constructor(_src: string) {
     audioState.instances.push(this);
   }
+
   play(): Promise<void> {
     return Promise.resolve();
   }
+
   pause(): void {
     this.onpause?.();
   }

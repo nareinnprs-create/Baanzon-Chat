@@ -194,7 +194,10 @@ router.post('/tts', requireJwtAuth, projectsLimiter, async (req, res) => {
   if (!text) {
     return res.status(400).json({ error: 'text is required' });
   }
-  const lang = String(req.body?.lang || '').toLowerCase().slice(0, 2) || detectLang(text);
+  const lang =
+    String(req.body?.lang || '')
+      .toLowerCase()
+      .slice(0, 2) || detectLang(text);
   try {
     const audio = await synthesize(text, lang);
     res.setHeader('Content-Type', audio.mime);

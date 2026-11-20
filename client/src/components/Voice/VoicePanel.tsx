@@ -181,7 +181,12 @@ export default function VoicePanel({
           ) : null}
         </div>
 
-        <section className={cn('flex flex-col gap-2', overlay && 'rounded-xl border border-border-light bg-surface-secondary-alt p-3')}>
+        <section
+          className={cn(
+            'flex flex-col gap-2',
+            overlay && 'rounded-xl border border-border-light bg-surface-secondary-alt p-3',
+          )}
+        >
           <h3 className={cn('text-sm font-semibold text-text-primary', overlay && 'sr-only')}>
             {L.transcriptHeading}
           </h3>
@@ -216,7 +221,8 @@ export default function VoicePanel({
       aria-label={title ?? L.title}
       className={cn(
         'flex h-full min-h-0 flex-col gap-4 overflow-auto p-4',
-        overlay && 'relative overflow-hidden bg-gradient-to-b from-surface-primary to-surface-secondary',
+        overlay &&
+          'relative overflow-hidden bg-gradient-to-b from-surface-primary to-surface-secondary',
         className,
       )}
     >

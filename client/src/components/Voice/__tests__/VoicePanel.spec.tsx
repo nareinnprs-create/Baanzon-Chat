@@ -11,90 +11,74 @@ jest.mock('~/hooks/AuthContext', () => ({
 }));
 
 /**
- * Renders the Diya Orb panel with Web Speech fakes and a mocked turn endpoint.
- * Covers the unsupported, idle, active, turn and error branches, and checks
- * the turn request carries the session's Bearer token with no model detail.
+ * Renders the Diya Orb panel with microphone/recorder/audio fakes and mocked
+ * server audio endpoints. Covers the unsupported, idle, active, turn and error
+ * branches, and checks the turn request carries the session's Bearer token with
+ * no model detail.
  */
 
-type FakeResult = { isFinal: boolean; transcript: string };
+const mockVadState = { level: 0, supported: true, dispose: jest.fn() };
 
-class FakeRecognition {
-  lang = '';
-  continuous = false;
-  interimResults = false;
-  maxAlternatives = 1;
-  onresult: ((event: unknown) => void) | null = null;
-  onerror: ((event: { error: string }) => void) | null = null;
-  onend: (() => void) | null = null;
-  started = false;
+jest.mock('~/utils/voice', () => ({
+  isDiyaVoiceSupported: () => mockVadState.supported,
+  createWebAudioVadSampler: () => ({
+    sampler: { sample: () => mockVadState.level, dispose: mockVadState.dispose },
+    close: () => undefined,
+  }),
+  createVoiceActivityDetector: () => ({
+    push: (level: number) => (level > 0.5 ? 'speech-start' : 'speech-end'),
+  }),
+}));
+
+class FakeRecorder {
+  static instances: FakeRecorder[] = [];
+  state: 'inactive' | 'recording' = 'inactive';
+  mimeType = 'audio/webm';
+  ondataavailable: ((event: { data: Blob }) => void) | null = null;
+  onstop: (() => void) | null = null;
+
+  constructor(
+    public stream: unknown,
+    public options?: unknown,
+  ) {
+    FakeRecorder.instances.push(this);
+  }
+
+  static isTypeSupported(): boolean {
+    return true;
+  }
 
   start(): void {
-    if (this.started) {
-      throw new DOMException('already started', 'InvalidStateError');
-    }
-    this.started = true;
+    this.state = 'recording';
   }
 
   stop(): void {
-    this.started = false;
-    this.onend?.();
-  }
-
-  abort(): void {
-    this.started = false;
-  }
-
-  emit(result: FakeResult, index = 0): void {
-    const item = { transcript: result.transcript };
-    this.onresult?.({
-      resultIndex: index,
-      results: { length: index + 1, [index]: { isFinal: result.isFinal, 0: item, length: 1 } },
+    this.state = 'inactive';
+    // The session ignores recordings under 1200 bytes as noise.
+    this.ondataavailable?.({
+      data: new Blob([new Uint8Array(4096)], { type: 'audio/webm' }),
     });
+    this.onstop?.();
   }
 }
 
-interface SpeechFakes {
-  recognition: FakeRecognition;
-  spoken: Array<{ text: string; onstart?: () => void; onend?: () => void; onerror?: () => void }>;
-}
+class FakeAudio {
+  static instances: FakeAudio[] = [];
+  onended: (() => void) | null = null;
+  onerror: (() => void) | null = null;
+  onpause: (() => void) | null = null;
+  src = '';
+  constructor(_src: string) {
+    FakeAudio.instances.push(this);
+  }
 
-function installSpeechFakes(): SpeechFakes {
-  const recognition = new FakeRecognition();
-  const spoken: Array<{
-    text: string;
-    onstart?: () => void;
-    onend?: () => void;
-    onerror?: () => void;
-  }> = [];
-  Object.defineProperty(window, 'SpeechRecognition', {
-    value: jest.fn(() => recognition),
-    configurable: true,
-  });
-  Object.defineProperty(window, 'speechSynthesis', {
-    value: {
-      speak: (utterance: {
-        text: string;
-        onstart?: () => void;
-        onend?: () => void;
-        onerror?: () => void;
-      }) => {
-        spoken.push(utterance);
-      },
-      cancel: jest.fn(),
-      getVoices: () => [],
-    },
-    configurable: true,
-  });
-  (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
-    text: string;
-    onstart: (() => void) | null = null;
-    onend: (() => void) | null = null;
-    onerror: (() => void) | null = null;
-    constructor(text: string) {
-      this.text = text;
-    }
-  };
-  return { recognition, spoken };
+  play(): Promise<void> {
+    return Promise.resolve();
+  }
+
+  pause(): void {
+    this.onpause?.();
+  }
 }
 
 function installStreamFake(): void {
@@ -107,17 +91,17 @@ function installStreamFake(): void {
     value: { getUserMedia: jest.fn(() => Promise.resolve(stream)) },
     configurable: true,
   });
+  (globalThis as unknown as { MediaRecorder: unknown }).MediaRecorder = FakeRecorder;
+  (globalThis as unknown as { Audio: unknown }).Audio = FakeAudio;
+  Object.defineProperty(URL, 'createObjectURL', { value: () => 'blob:voice', configurable: true });
+  Object.defineProperty(URL, 'revokeObjectURL', { value: () => undefined, configurable: true });
 }
 
 function restoreBrowser(): void {
-  Reflect.deleteProperty(window, 'SpeechRecognition');
-  Reflect.deleteProperty(window, 'webkitSpeechRecognition');
-  Reflect.deleteProperty(window, 'speechSynthesis');
-  Reflect.deleteProperty(window, 'SpeechSynthesisUtterance');
-  const descriptor = Object.getOwnPropertyDescriptor(navigator, 'mediaDevices');
-  if (descriptor?.configurable) {
-    Reflect.deleteProperty(navigator, 'mediaDevices');
-  }
+  Reflect.deleteProperty(navigator, 'mediaDevices');
+  Reflect.deleteProperty(globalThis as unknown as Record<string, unknown>, 'MediaRecorder');
+  Reflect.deleteProperty(globalThis as unknown as Record<string, unknown>, 'Audio');
+  Reflect.deleteProperty(globalThis as unknown as Record<string, unknown>, 'fetch');
 }
 
 function renderPanel(props: VoicePanelProps = {}) {
@@ -130,30 +114,48 @@ function renderPanel(props: VoicePanelProps = {}) {
   return render(<VoicePanel {...props} />, { wrapper });
 }
 
-function mockTurnEndpoint(status: number, body: unknown): jest.Mock {
-  // A plain object: jsdom does not ship the `Response` constructor.
-  return jest.fn(() =>
-    Promise.resolve({
-      ok: status >= 200 && status < 300,
-      status,
-      json: () => Promise.resolve(body),
-    }),
-  );
-}
-
-function stubFetch(mock: jest.Mock): void {
-  // jsdom has no global `fetch` and this jest lacks `stubGlobal`, so assign directly.
-  (globalThis as unknown as { fetch: unknown }).fetch = mock;
+/** Routes each endpoint the session calls; `turn` decides the Diya reply. */
+function mockVoiceFetch(
+  turn: { status: number; body: unknown } = { status: 200, body: { reply: 'Hi, I am Diya.' } },
+): jest.Mock {
+  return jest.fn((url: string) => {
+    if (url.includes('/api/voice/stt')) {
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ text: 'who are you', language: 'en' }),
+      });
+    }
+    if (url.includes('/api/diya/turn')) {
+      return Promise.resolve({
+        ok: turn.status >= 200 && turn.status < 300,
+        status: turn.status,
+        json: () => Promise.resolve(turn.body),
+      });
+    }
+    if (url.includes('/api/voice/tts')) {
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        blob: () => Promise.resolve(new Blob(['wav'])),
+      });
+    }
+    return Promise.resolve({ ok: false, status: 404, json: () => Promise.resolve({}) });
+  });
 }
 
 describe('VoicePanel', () => {
-  afterEach(restoreBrowser);
   afterEach(() => {
     jest.restoreAllMocks();
-    Reflect.deleteProperty(globalThis as unknown as Record<string, unknown>, 'fetch');
+    restoreBrowser();
+    FakeRecorder.instances = [];
+    FakeAudio.instances = [];
+    mockVadState.level = 0;
+    mockVadState.supported = true;
   });
 
-  it('renders an explicit unsupported state when the browser lacks the speech APIs', () => {
+  it('renders an explicit unsupported state when the browser lacks audio capture', () => {
+    mockVadState.supported = false;
     renderPanel();
 
     expect(screen.getByTestId('voice-unsupported')).toBeInTheDocument();
@@ -164,7 +166,6 @@ describe('VoicePanel', () => {
   });
 
   it('renders the idle state with the orb and an empty transcript', () => {
-    installSpeechFakes();
     installStreamFake();
     renderPanel();
 
@@ -175,7 +176,6 @@ describe('VoicePanel', () => {
   });
 
   it('moves from idle to listening when the orb starts the session', async () => {
-    installSpeechFakes();
     installStreamFake();
     renderPanel();
 
@@ -188,11 +188,10 @@ describe('VoicePanel', () => {
     expect(screen.getByRole('button', { name: L.mute })).toBeInTheDocument();
   });
 
-  it('sends a recognized utterance to the turn endpoint with the Bearer token', async () => {
-    const fakes = installSpeechFakes();
+  it('records speech, transcribes it, sends the turn with the Bearer token and speaks the reply', async () => {
     installStreamFake();
-    const fetchMock = mockTurnEndpoint(200, { reply: 'Hi, I am Diya.' });
-    stubFetch(fetchMock);
+    const fetchMock = mockVoiceFetch();
+    (globalThis as unknown as { fetch: jest.Mock }).fetch = fetchMock;
     renderPanel();
 
     fireEvent.click(screen.getByRole('button', { name: L.start }));
@@ -200,33 +199,45 @@ describe('VoicePanel', () => {
       expect(screen.getByTestId('voice-status')).toHaveTextContent(L.statusListening),
     );
 
-    act(() => fakes.recognition.emit({ isFinal: true, transcript: 'who are you' }));
-    await waitFor(() =>
-      expect(screen.getByTestId('voice-status')).toHaveTextContent(L.statusThinking),
-    );
+    mockVadState.level = 0.9;
+    await waitFor(() => expect(FakeRecorder.instances.length).toBe(1), { timeout: 2000 });
+    // Utterances under MIN_UTTERANCE_MS are dropped as noise.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    });
+    mockVadState.level = 0;
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
-    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(String(url)).toBe('/api/diya/turn');
+    await waitFor(
+      () =>
+        expect(fetchMock).toHaveBeenCalledWith(
+          '/api/diya/turn',
+          expect.objectContaining({ method: 'POST' }),
+        ),
+      { timeout: 4000 },
+    );
+    const turnCall = fetchMock.mock.calls.find(([url]) => String(url) === '/api/diya/turn') as
+      | [string, RequestInit]
+      | undefined;
+    expect(turnCall).toBeDefined();
+    const init = turnCall![1];
     expect((init.headers as Record<string, string>).Authorization).toBe('Bearer tok-123');
     expect(String(init.body)).toContain('who are you');
     expect(String(init.body)).not.toMatch(/@cf|llama|gpt/i);
 
-    // The reply is appended to the transcript and spoken through synthesis;
-    // the gesture-time unlock queues a silent utterance first, so target the
-    // non-silent reply utterance.
-    act(() => fakes.spoken.find((u) => u.text !== ' ')?.onstart?.());
-    await waitFor(() =>
-      expect(screen.getByTestId('voice-status')).toHaveTextContent(L.statusSpeaking),
-    );
-    expect(screen.getByText('Hi, I am Diya.')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Hi, I am Diya.')).toBeInTheDocument(), {
+      timeout: 4000,
+    });
     expect(screen.getByText(L.speakerAssistant)).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/voice/tts',
+      expect.objectContaining({ method: 'POST' }),
+    );
   });
 
   it('surfaces a turn-endpoint failure in the error alert and keeps listening', async () => {
-    const fakes = installSpeechFakes();
     installStreamFake();
-    stubFetch(mockTurnEndpoint(503, { error: 'diya_unavailable' }));
+    const fetchMock = mockVoiceFetch({ status: 503, body: { error: 'diya_unavailable' } });
+    (globalThis as unknown as { fetch: jest.Mock }).fetch = fetchMock;
     renderPanel();
 
     fireEvent.click(screen.getByRole('button', { name: L.start }));
@@ -234,8 +245,15 @@ describe('VoicePanel', () => {
       expect(screen.getByTestId('voice-status')).toHaveTextContent(L.statusListening),
     );
 
-    act(() => fakes.recognition.emit({ isFinal: true, transcript: 'hello' }));
-    const alert = await screen.findByRole('alert');
+    mockVadState.level = 0.9;
+    await waitFor(() => expect(FakeRecorder.instances.length).toBe(1), { timeout: 2000 });
+    // Utterances under MIN_UTTERANCE_MS are dropped as noise.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    });
+    mockVadState.level = 0;
+
+    const alert = await screen.findByRole('alert', undefined, { timeout: 4000 });
     expect(alert).toHaveTextContent(L.turnUnavailable);
     await waitFor(() =>
       expect(screen.getByTestId('voice-status')).toHaveTextContent(L.statusListening),
@@ -243,7 +261,7 @@ describe('VoicePanel', () => {
   });
 
   it('surfaces a denied microphone permission in the error alert', async () => {
-    installSpeechFakes();
+    installStreamFake();
     const denied = Object.assign(new Error('Permission denied'), { name: 'NotAllowedError' });
     Object.defineProperty(navigator, 'mediaDevices', {
       value: { getUserMedia: jest.fn(() => Promise.reject(denied)) },

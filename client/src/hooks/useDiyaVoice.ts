@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import type {
-  VoiceHistoryTurn,
   VoiceOptions,
   VoiceStatus,
   VoiceTranscript,
@@ -19,7 +18,11 @@ import {
   voiceStatusAtom,
   voiceTranscriptsAtom,
 } from '~/components/Voice/atoms';
-import { createVoiceActivityDetector, createWebAudioVadSampler, isDiyaVoiceSupported } from '~/utils/voice';
+import {
+  createVoiceActivityDetector,
+  createWebAudioVadSampler,
+  isDiyaVoiceSupported,
+} from '~/utils/voice';
 import { chunkForSpeech as chunkTextForSpeech } from '~/components/Chat/Input/Voice/speech';
 import { detectLang, synthesizeSpeech, transcribeAudio } from '~/components/Voice/audio';
 import { VOICE_LABELS } from '~/components/Voice/labels';
@@ -91,7 +94,10 @@ function pickRecorderMime(): string | undefined {
   }
   const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
   for (const candidate of candidates) {
-    if (typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(candidate)) {
+    if (
+      typeof MediaRecorder.isTypeSupported === 'function' &&
+      MediaRecorder.isTypeSupported(candidate)
+    ) {
       return candidate;
     }
   }
@@ -309,7 +315,7 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
         upsertTranscript(transcript);
         onTranscriptRef.current?.(transcript);
         void handleTurn(text);
-      } catch (caught) {
+      } catch {
         if (!stoppedRef.current) {
           setError(VOICE_LABELS.errorDescription);
         }
