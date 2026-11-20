@@ -32,7 +32,7 @@ describe('five public models resolve per tier', () => {
     ['pro', 'baanzon-reasoning', '@cf/openai/gpt-oss-120b'],
     ['free', 'baanzon-code', '@cf/qwen/qwen2.5-coder-32b-instruct'],
     ['pro', 'baanzon-code', '@cf/qwen/qwen2.5-coder-32b-instruct'],
-    ['free', 'baanzon-swift', '@cf/meta/llama-3.2-3b-instruct'],
+    ['free', 'baanzon-swift', '@cf/zai-org/glm-4.7-flash'],
     ['lite', 'baanzon-swift', '@cf/zai-org/glm-4.7-flash'],
     ['pro', 'baanzon-swift', '@cf/zai-org/glm-5.3'],
     ['free', 'baanzon-vision', '@cf/meta/llama-3.2-11b-vision-instruct'],
@@ -78,7 +78,7 @@ describe('five public models resolve per tier', () => {
 
 describe('capability lanes select their public model server-side', () => {
   it.each([
-    ['fast', 'free', '@cf/meta/llama-3.2-3b-instruct'],
+    ['fast', 'free', '@cf/zai-org/glm-4.7-flash'],
     ['fast', 'lite', '@cf/zai-org/glm-4.7-flash'],
     ['reasoning', 'pro', '@cf/openai/gpt-oss-120b'],
     ['coding', 'lite', '@cf/qwen/qwen2.5-coder-32b-instruct'],
@@ -133,7 +133,7 @@ describe('Indic lane reorders the same chain', () => {
 
   it('keeps the same members, Indic-strongest first', () => {
     const plain = resolveModelChain('free', 'baanzon-swift');
-    expect(plain[0]).toBe('@cf/meta/llama-3.2-3b-instruct');
+    expect(plain[0]).toBe('@cf/zai-org/glm-4.7-flash');
 
     const indic = resolveModelChain('free', 'baanzon-swift', 'मुझे एक कविता सुनाओ');
     expect(indic).toEqual(expect.arrayContaining(plain));

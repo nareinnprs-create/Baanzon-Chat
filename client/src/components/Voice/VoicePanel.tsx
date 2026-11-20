@@ -7,6 +7,7 @@ import { useAuthToken } from '~/hooks/AuthContext';
 import useDiyaVoice from '~/hooks/useDiyaVoice';
 import { VOICE_LABELS as L } from './labels';
 import { requestDiyaTurn } from './api';
+import OpenSidebar from '~/components/Chat/Menus/OpenSidebar';
 import { cn } from '~/utils';
 import Orb from './Orb';
 
@@ -239,6 +240,11 @@ export default function VoicePanel({
         )
       ) : (
         <header className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 md:hidden">
+            {/* The voice route renders no chat header; without this the
+                drawer is unreachable on narrow screens. */}
+            <OpenSidebar testId="voice-open-sidebar-button" />
+          </div>
           <h2 className="flex items-center gap-2 text-base font-semibold text-text-primary">
             <Waves className="size-4 text-text-secondary" aria-hidden="true" />
             {title ?? L.title}

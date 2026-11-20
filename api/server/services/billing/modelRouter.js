@@ -122,7 +122,7 @@ const CHAINS = {
     ],
   },
   'baanzon-swift': {
-    free: ['@cf/meta/llama-3.2-3b-instruct', '@cf/zai-org/glm-4.7-flash'],
+    free: ['@cf/zai-org/glm-4.7-flash', '@cf/meta/llama-3.2-3b-instruct'],
     lite: ['@cf/zai-org/glm-4.7-flash', '@cf/meta/llama-3.3-70b-instruct-fp8-fast'],
     pro: ['@cf/zai-org/glm-5.3', '@cf/openai/gpt-oss-20b'],
     enterprise: ['@cf/zai-org/glm-5.3', '@cf/openai/gpt-oss-20b'],

@@ -1,4 +1,5 @@
 import { Provider as JotaiProvider, createStore } from 'jotai';
+import { RecoilRoot } from 'recoil';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import type { VoicePanelProps } from '../VoicePanel';
@@ -122,7 +123,9 @@ function restoreBrowser(): void {
 function renderPanel(props: VoicePanelProps = {}) {
   const store = createStore();
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <JotaiProvider store={store}>{children}</JotaiProvider>
+    <RecoilRoot>
+      <JotaiProvider store={store}>{children}</JotaiProvider>
+    </RecoilRoot>
   );
   return render(<VoicePanel {...props} />, { wrapper });
 }
