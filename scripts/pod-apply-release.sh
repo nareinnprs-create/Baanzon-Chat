@@ -227,6 +227,34 @@ EOF
   echo "[apply] MIGRATION COMPLETE: gate serving :3080 -> api :$BLUE_PORT"
 fi
 
+# ---- Diya voice sidecar (Kokoro/MMS on 127.0.0.1:8471) ---------------------
+# One supervised service, independent of the blue/green slots: the api reaches
+# it over localhost, models are cached in /workspace/models.
+if ! grep -q "baanzon-voice" "$SUPERVISOR_CONF" 2>/dev/null; then
+  echo "[apply] installing Diya voice sidecar service"
+  cat >> "$SUPERVISOR_CONF" <<'EOF'
+
+[program:baanzon-voice]
+command=/bin/bash -lc 'exec python3 /workspace/voice-tts/server.py --port 8471'
+directory=/workspace/voice-tts
+autostart=true
+autorestart=true
+stopasgroup=true
+environment=VOICE_MODELS_DIR="/workspace/models"
+stdout_logfile=/workspace/baanzon/logs/supervisor-voice.log
+redirect_stderr=true
+EOF
+  supervisorctl reread >/dev/null 2>&1 || true
+  supervisorctl update >/dev/null 2>&1 || true
+fi
+if [ -d "$STAGE_DIR/voice-tts" ]; then
+  mkdir -p /workspace/voice-tts
+  cp -r "$STAGE_DIR/voice-tts/." /workspace/voice-tts/
+  # Idempotent install; a slow model download must never block the release.
+  (bash /workspace/voice-tts/install.sh >>/workspace/baanzon/logs/voice-install.log 2>&1 || true) &
+fi
+supervisorctl start baanzon-voice >/dev/null 2>&1 || true
+
 # ---- boot the staging slot and health-gate it there ------------------------
 echo "[apply] starting $STAGE_PROG on :$STAGE_PORT"
 supervisorctl reread >/dev/null 2>&1 || true

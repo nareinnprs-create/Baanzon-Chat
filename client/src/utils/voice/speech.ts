@@ -42,9 +42,10 @@ export interface SpeechRecognitionLike extends EventTarget {
 export function isDiyaVoiceSupported(): boolean {
   return typeof window === 'undefined'
     ? false
-    : getRecognitionCtor() != null &&
-        typeof window.speechSynthesis?.speak === 'function' &&
-        typeof SpeechSynthesisUtterance !== 'undefined';
+    : typeof navigator !== 'undefined' &&
+        typeof navigator.mediaDevices?.getUserMedia === 'function' &&
+        typeof MediaRecorder !== 'undefined' &&
+        typeof Audio !== 'undefined';
 }
 
 function getRecognitionCtor(): SpeechRecognitionCtor | null {

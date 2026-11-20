@@ -7,7 +7,6 @@ import type {
   VoiceTranscript,
   VoiceTurnFn,
 } from '~/components/Voice/types';
-import type { SpeechRecognitionEventLike, SpeechRecognitionLike } from '~/utils/voice/speech';
 import type { AudioLevelSampler, VoiceActivityDetector } from '~/utils/voice';
 import {
   appendVoiceTranscriptAtom,
@@ -20,15 +19,9 @@ import {
   voiceStatusAtom,
   voiceTranscriptsAtom,
 } from '~/components/Voice/atoms';
-import {
-  createRecognizer,
-  createVoiceActivityDetector,
-  createWebAudioVadSampler,
-  isDiyaVoiceSupported,
-  pickAssistantVoice,
-  unlockSpeechSynthesis,
-} from '~/utils/voice';
+import { createVoiceActivityDetector, createWebAudioVadSampler, isDiyaVoiceSupported } from '~/utils/voice';
 import { chunkForSpeech as chunkTextForSpeech } from '~/components/Chat/Input/Voice/speech';
+import { detectLang, synthesizeSpeech, transcribeAudio } from '~/components/Voice/audio';
 import { VOICE_LABELS } from '~/components/Voice/labels';
 import { DiyaTurnError } from '~/components/Voice/api';
 
@@ -63,6 +56,10 @@ const ACTIVE_STATUSES: readonly VoiceStatus[] = [
 ];
 /** How many settled turns are echoed back for context. */
 const HISTORY_TURNS = 12;
+/** Guard against one endless recording (e.g. a stuck VAD). */
+const MAX_UTTERANCE_MS = 20000;
+/** Recordings shorter than this are noise, not speech. */
+const MIN_UTTERANCE_MS = 350;
 
 function isActive(status: VoiceStatus): boolean {
   return ACTIVE_STATUSES.includes(status);
@@ -87,18 +84,29 @@ function turnErrorLabel(caught: unknown): string {
   return VOICE_LABELS.errorDescription;
 }
 
+/** Prefers opus/webm and falls back to whatever the browser supports. */
+function pickRecorderMime(): string | undefined {
+  if (typeof MediaRecorder === 'undefined') {
+    return undefined;
+  }
+  const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
+  for (const candidate of candidates) {
+    if (typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(candidate)) {
+      return candidate;
+    }
+  }
+  return undefined;
+}
+
 /**
- * Owns the lifecycle of one Diya Orb session in the browser. Web Speech
- * recognition turns the microphone into text, each finalized utterance goes
- * through the {@link VoiceTurnFn} seam, and the reply is spoken through
- * `speechSynthesis`. The WebAudio capture stays open for the level meter and
- * for barge-in: while the assistant speaks, the user's voice cancels the
- * playback and hands the floor back.
+ * Diya Orb session.
  *
- * Every browser global is optional. Without the speech APIs the hook reports
- * `unsupported`; a denied microphone is the one hard failure and surfaces as
- * `error`. A failed turn keeps the session alive: the label is surfaced and
- * the floor returns to listening.
+ * Audio never touches device speech engines: the microphone is recorded and
+ * sent to our Whisper endpoint (auto language), and replies are synthesized by
+ * our server (one fixed female voice per language) and played back as audio
+ * files. Capture is VAD-segmented and stays alive for the whole session, so
+ * there is no restart dead-zone after a reply; the same VAD cancels playback
+ * on barge-in and immediately records the interruption.
  */
 export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
   const {
@@ -107,6 +115,7 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
     tickMs = DEFAULT_TICK_MS,
     autoStart = false,
     onTranscript,
+    token,
   } = options;
 
   const status = useAtomValue(voiceStatusAtom);
@@ -129,7 +138,11 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
   const detectorRef = useRef<VoiceActivityDetector | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const recorderChunksRef = useRef<Blob[]>([]);
+  const recordingStartedAtRef = useRef(0);
+  const utteranceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const turnControllerRef = useRef<AbortController | null>(null);
 
   const speakingRef = useRef(false);
@@ -142,16 +155,19 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
   const turnRef = useRef<VoiceTurnFn | undefined>(injectedTurn);
   const vadRef = useRef(vad);
   const tickMsRef = useRef(tickMs);
+  const tokenRef = useRef(token);
   const transcriptsRef = useRef<VoiceTranscript[]>(transcripts);
   const startRef = useRef<() => Promise<void>>(async () => undefined);
+  /** Language detected by the last transcription; used when the reply text is Latin. */
+  const sessionLangRef = useRef('en');
 
-  mutedRef.current = muted;
   statusRef.current = status;
-  autoStartRef.current = autoStart;
+  mutedRef.current = muted;
   onTranscriptRef.current = onTranscript;
   turnRef.current = injectedTurn;
   vadRef.current = vad;
   tickMsRef.current = tickMs;
+  tokenRef.current = token;
   transcriptsRef.current = transcripts;
 
   const supported = useMemo(() => isDiyaVoiceSupported(), []);
@@ -164,148 +180,77 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
     }
   }, []);
 
-  /** Stops the synthesizer and aborts any in-flight turn. */
+  const clearUtteranceTimer = useCallback(() => {
+    if (utteranceTimerRef.current !== null) {
+      clearTimeout(utteranceTimerRef.current);
+      utteranceTimerRef.current = null;
+    }
+  }, []);
+
+  /** Stops audio playback and aborts any in-flight turn. */
   const cancelPlayback = useCallback(() => {
     turnControllerRef.current?.abort();
     turnControllerRef.current = null;
     speakingRef.current = false;
-    if (typeof speechSynthesis !== 'undefined') {
+    const audio = audioRef.current;
+    if (audio) {
       try {
-        speechSynthesis.cancel();
+        audio.pause();
+        audio.src = '';
       } catch {
-        /* Already silent. */
+        /* already released */
       }
+      audioRef.current = null;
     }
   }, []);
 
   const teardownCapture = useCallback(() => {
     clearTimer();
+    clearUtteranceTimer();
+    const recorder = recorderRef.current;
+    recorderRef.current = null;
+    if (recorder && recorder.state !== 'inactive') {
+      try {
+        recorder.stop();
+      } catch {
+        /* already stopped */
+      }
+    }
+    recorderChunksRef.current = [];
     samplerRef.current?.dispose();
     samplerRef.current = null;
     detectorRef.current = null;
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
     setMicLevel(0);
-  }, [clearTimer, setMicLevel]);
-
-  const teardownRecognition = useCallback(() => {
-    const recognition = recognitionRef.current;
-    recognitionRef.current = null;
-    if (recognition == null) {
-      return;
-    }
-    recognition.onresult = null;
-    recognition.onerror = null;
-    recognition.onend = null;
-    try {
-      recognition.abort();
-    } catch {
-      /* Already stopped. */
-    }
-  }, []);
+  }, [clearTimer, clearUtteranceTimer, setMicLevel]);
 
   const teardown = useCallback(() => {
     stoppedRef.current = true;
     cancelPlayback();
-    teardownRecognition();
     teardownCapture();
-  }, [cancelPlayback, teardownCapture, teardownRecognition]);
-
-  /** Restarts the recognizer while the floor is the user's and the session is live. */
-  const resumeRecognition = useCallback(() => {
-    const recognition = recognitionRef.current;
-    if (recognition == null || stoppedRef.current || mutedRef.current) {
-      return;
-    }
-    const current = statusRef.current;
-    if (current !== 'listening' && current !== 'muted') {
-      return;
-    }
-    try {
-      recognition.start();
-    } catch {
-      /* Already running; `onend` retries. */
-    }
-  }, []);
-
-  /** Pauses the recognizer for the turn so the microphone does not feed back. */
-  const pauseRecognition = useCallback(() => {
-    const recognition = recognitionRef.current;
-    if (recognition == null || stoppedRef.current) {
-      return;
-    }
-    try {
-      recognition.stop();
-    } catch {
-      /* Already stopped; `onend` fires regardless. */
-    }
-  }, []);
-
-  const speak = useCallback(
-    (text: string) => {
-      if (stoppedRef.current || typeof SpeechSynthesisUtterance === 'undefined') {
-        return;
-      }
-      const lang = typeof navigator === 'undefined' ? 'en-US' : navigator.language || 'en-US';
-      // Sentence chunks queue instantly and play back-to-back: first audio
-      // starts sooner and long replies never hit the engines' big-utterance
-      // drop. Only the final chunk flips the status back to listening.
-      const chunks =
-        chunkTextForSpeech(text).length > 0
-          ? chunkTextForSpeech(text)
-          : [text];
-      chunks.forEach((chunk, index) => {
-        const utterance = new SpeechSynthesisUtterance(chunk);
-        utterance.lang = lang;
-        utterance.voice = pickAssistantVoice(lang) ?? null;
-        utterance.onstart = () => {
-          if (stoppedRef.current) {
-            return;
-          }
-          speakingRef.current = true;
-          if (!mutedRef.current) {
-            setStatus('speaking');
-          }
-        };
-        const finish = () => {
-          if (index < chunks.length - 1) {
-            return;
-          }
-          speakingRef.current = false;
-          if (stoppedRef.current) {
-            return;
-          }
-          setBargeIn(false);
-          if (!mutedRef.current) {
-            setStatus('listening');
-          }
-          resumeRecognition();
-        };
-        utterance.onend = finish;
-        utterance.onerror = finish;
-        try {
-          speechSynthesis.speak(utterance);
-        } catch {
-          finish();
-        }
-      });
-    },
-    [resumeRecognition, setBargeIn, setStatus],
-  );
+  }, [cancelPlayback, teardownCapture]);
 
   const handleTurn = useCallback(
-    async (text: string, history: VoiceHistoryTurn[]) => {
+    async (text: string) => {
       const turnFn = turnRef.current;
       const controller = new AbortController();
       turnControllerRef.current = controller;
       // Mic off while Diya thinks and speaks; the VAD stays on for barge-in.
-      pauseRecognition();
+      stopRecordingRef.current();
       if (!mutedRef.current) {
         setStatus('thinking');
       }
       try {
         const reply = turnFn
-          ? await turnFn(text, history, controller.signal)
+          ? await turnFn(
+              text,
+              transcriptsRef.current
+                .filter((line) => line.final)
+                .slice(-HISTORY_TURNS)
+                .map((line) => ({ role: line.role, content: line.text })),
+              controller.signal,
+            )
           : await Promise.reject(new DiyaTurnError('unavailable'));
         if (controller.signal.aborted || stoppedRef.current) {
           return;
@@ -321,7 +266,7 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
         appendTranscript(transcript);
         onTranscriptRef.current?.(transcript);
         setError(null);
-        speak(reply);
+        speakRef.current(reply);
       } catch (caught) {
         if (controller.signal.aborted || stoppedRef.current) {
           return;
@@ -332,46 +277,164 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
         if (!mutedRef.current) {
           setStatus('listening');
         }
-        resumeRecognition();
       }
     },
-    [appendTranscript, pauseRecognition, resumeRecognition, setError, setStatus, speak],
+    [appendTranscript, setError, setStatus],
   );
 
-  const handleResults = useCallback(
-    (event: SpeechRecognitionEventLike) => {
+  /** Sends one recorded utterance to the server for transcription, then the turn. */
+  const submitRecording = useCallback(
+    async (blob: Blob, durationMs: number) => {
       if (stoppedRef.current || mutedRef.current) {
         return;
       }
-      for (let index = event.resultIndex; index < event.results.length; index += 1) {
-        const result = event.results[index];
-        const text = result[0]?.transcript?.trim() ?? '';
-        if (text === '') {
-          continue;
+      if (durationMs < MIN_UTTERANCE_MS || blob.size < 1200) {
+        return;
+      }
+      try {
+        const { text, language } = await transcribeAudio(blob, tokenRef.current);
+        if (!text || stoppedRef.current) {
+          return;
         }
-        const id = `t-${index}`;
-        if (result.isFinal) {
-          // History is snapshotted before this utterance joins the transcript.
-          const history = transcriptsRef.current
-            .filter((line) => line.final)
-            .slice(-HISTORY_TURNS)
-            .map((line) => ({ role: line.role, content: line.text }));
-          upsertTranscript({
-            id,
-            role: 'user',
-            text,
-            final: true,
-            at: Date.now(),
-          });
-          onTranscriptRef.current?.({ id, role: 'user', text, final: true, at: Date.now() });
-          void handleTurn(text, history);
-        } else {
-          upsertTranscript({ id, role: 'user', text, final: false, at: Date.now() });
+        if (language) {
+          sessionLangRef.current = language.slice(0, 2).toLowerCase();
+        }
+        const transcript: VoiceTranscript = {
+          id: `u-${Date.now()}`,
+          role: 'user',
+          text,
+          final: true,
+          at: Date.now(),
+        };
+        upsertTranscript(transcript);
+        onTranscriptRef.current?.(transcript);
+        void handleTurn(text);
+      } catch (caught) {
+        if (!stoppedRef.current) {
+          setError(VOICE_LABELS.errorDescription);
         }
       }
     },
-    [handleTurn, upsertTranscript],
+    [handleTurn, setError, upsertTranscript],
   );
+
+  /** Starts a fresh recording segment (no-op while one is running). */
+  const startRecording = useCallback(() => {
+    const stream = streamRef.current;
+    if (!stream || stoppedRef.current || mutedRef.current) {
+      return;
+    }
+    if (recorderRef.current && recorderRef.current.state === 'recording') {
+      return;
+    }
+    if (typeof MediaRecorder === 'undefined') {
+      return;
+    }
+    try {
+      const recorder = new MediaRecorder(stream, { mimeType: pickRecorderMime() });
+      recorderChunksRef.current = [];
+      recordingStartedAtRef.current = Date.now();
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          recorderChunksRef.current.push(event.data);
+        }
+      };
+      recorder.onstop = () => {
+        const duration = Date.now() - recordingStartedAtRef.current;
+        const chunks = recorderChunksRef.current;
+        recorderChunksRef.current = [];
+        recorderRef.current = null;
+        if (chunks.length === 0) {
+          return;
+        }
+        const blob = new Blob(chunks, { type: chunks[0].type || 'audio/webm' });
+        void submitRecording(blob, duration);
+      };
+      recorder.start();
+      recorderRef.current = recorder;
+      clearUtteranceTimer();
+      utteranceTimerRef.current = setTimeout(() => {
+        stopRecordingRef.current();
+      }, MAX_UTTERANCE_MS);
+    } catch {
+      /* recorder unavailable - the session keeps running without input */
+    }
+  }, [clearUtteranceTimer, submitRecording]);
+
+  /** Ends the current segment; `onstop` submits it. */
+  const stopRecording = useCallback(() => {
+    clearUtteranceTimer();
+    const recorder = recorderRef.current;
+    if (!recorder || recorder.state !== 'recording') {
+      return;
+    }
+    try {
+      recorder.stop();
+    } catch {
+      recorderRef.current = null;
+    }
+  }, [clearUtteranceTimer]);
+
+  const startRecordingRef = useRef(startRecording);
+  const stopRecordingRef = useRef(stopRecording);
+  startRecordingRef.current = startRecording;
+  stopRecordingRef.current = stopRecording;
+
+  /** Synthesizes and plays the reply sentence-by-sentence in the fixed voice. */
+  const speak = useCallback(
+    async (text: string) => {
+      if (stoppedRef.current || mutedRef.current) {
+        return;
+      }
+      const chunks = chunkTextForSpeech(text);
+      const pieces = chunks.length > 0 ? chunks : [text];
+      const lang = detectLang(text, sessionLangRef.current || 'en');
+      setStatus('speaking');
+      for (const piece of pieces) {
+        if (stoppedRef.current) {
+          return;
+        }
+        let blob: Blob;
+        try {
+          blob = await synthesizeSpeech(piece, lang, tokenRef.current);
+        } catch {
+          continue;
+        }
+        if (stoppedRef.current) {
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        speakingRef.current = true;
+        await new Promise<void>((resolve) => {
+          const release = () => {
+            URL.revokeObjectURL(url);
+            resolve();
+          };
+          audio.onended = release;
+          audio.onerror = release;
+          audio.onpause = release;
+          void audio.play().catch(release);
+        });
+        if (audioRef.current === audio) {
+          audioRef.current = null;
+        }
+        if (stoppedRef.current || mutedRef.current) {
+          break;
+        }
+      }
+      speakingRef.current = false;
+      if (!stoppedRef.current && !mutedRef.current) {
+        setBargeIn(false);
+        setStatus('listening');
+      }
+    },
+    [setBargeIn, setStatus],
+  );
+
+  const speakRef = useRef(speak);
+  speakRef.current = speak;
 
   const startCapture = useCallback(async (): Promise<CaptureOutcome> => {
     const mediaDevices = typeof navigator === 'undefined' ? undefined : navigator.mediaDevices;
@@ -408,18 +471,21 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       const level = sampler.sample();
       setMicLevel(level);
       const transition = detector.push(level);
-      // The user's voice while Diya speaks cancels the playback (barge-in).
-      if (transition === 'speech-start' && speakingRef.current) {
-        cancelPlayback();
-        setBargeIn(true);
-        setStatus('listening');
-        resumeRecognition();
+      if (transition === 'speech-start') {
+        // The user's voice while Diya speaks cancels playback (barge-in).
+        if (speakingRef.current) {
+          cancelPlayback();
+          setBargeIn(true);
+          setStatus('listening');
+        }
+        startRecordingRef.current();
       } else if (transition === 'speech-end') {
         setBargeIn(false);
+        stopRecordingRef.current();
       }
     }, tickMsRef.current);
     return 'ok';
-  }, [cancelPlayback, resumeRecognition, setBargeIn, setMicLevel, setStatus]);
+  }, [cancelPlayback, setBargeIn, setMicLevel, setStatus]);
 
   const start = useCallback(async () => {
     if (!supportRef.current) {
@@ -429,10 +495,6 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
     if (isActive(statusRef.current)) {
       return;
     }
-
-    // Runs before the first await, so the tap gesture is still live: mobile
-    // engines drop speak() later in the async turn unless the gesture spoke once.
-    unlockSpeechSynthesis();
 
     setStatus('connecting');
     setError(null);
@@ -448,60 +510,9 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       setStatus('error');
       return;
     }
+    setStatus(mutedRef.current ? 'muted' : 'listening');
+  }, [setBargeIn, setError, setStatus, startCapture, teardownCapture]);
 
-    const lang = typeof navigator === 'undefined' ? 'en-US' : navigator.language || 'en-US';
-    const recognition = createRecognizer(lang);
-    if (recognition == null) {
-      teardownCapture();
-      setStatus('unsupported');
-      return;
-    }
-    recognitionRef.current = recognition;
-    recognition.onresult = handleResults;
-    recognition.onerror = (event) => {
-      if (stoppedRef.current) {
-        return;
-      }
-      // `no-speech` and `aborted` are pauses, not failures; `onend` restarts.
-      if (event.error === 'no-speech' || event.error === 'aborted') {
-        return;
-      }
-      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-        teardown();
-        setError(VOICE_LABELS.micPermissionDenied);
-        setStatus('error');
-        return;
-      }
-      if (statusRef.current === 'listening' || statusRef.current === 'muted') {
-        setError(VOICE_LABELS.errorDescription);
-      }
-    };
-    recognition.onend = () => {
-      if (!stoppedRef.current) {
-        resumeRecognition();
-      }
-    };
-
-    try {
-      recognition.start();
-      setStatus(mutedRef.current ? 'muted' : 'listening');
-    } catch (caught) {
-      const message =
-        caught instanceof Error && caught.message ? caught.message : VOICE_LABELS.errorDescription;
-      teardown();
-      setError(message);
-      setStatus('error');
-    }
-  }, [
-    handleResults,
-    resumeRecognition,
-    setBargeIn,
-    setError,
-    setStatus,
-    startCapture,
-    teardown,
-    teardownCapture,
-  ]);
   startRef.current = start;
 
   const stop = useCallback(() => {
@@ -525,6 +536,7 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       const current = statusRef.current;
       if (next) {
         setMicLevel(0);
+        stopRecordingRef.current();
         if (current === 'listening' || current === 'speaking' || current === 'thinking') {
           setStatus('muted');
         }
@@ -538,16 +550,13 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
   );
 
   const interrupt = useCallback(() => {
-    if (!isActive(statusRef.current)) {
-      return;
-    }
     cancelPlayback();
     setBargeIn(true);
     if (statusRef.current === 'speaking' || statusRef.current === 'thinking') {
       setStatus('listening');
     }
-    resumeRecognition();
-  }, [cancelPlayback, resumeRecognition, setBargeIn, setStatus]);
+    startRecordingRef.current();
+  }, [cancelPlayback, setBargeIn, setStatus]);
 
   useEffect(() => {
     if (!supported) {

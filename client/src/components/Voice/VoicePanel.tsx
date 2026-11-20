@@ -88,6 +88,7 @@ export default function VoicePanel({
     tickMs,
     autoStart,
     onTranscript,
+    token,
   });
 
   const { status } = voice;

@@ -62,6 +62,8 @@ export interface VoiceOptions {
   autoStart?: boolean;
   /** Called for each transcript line the session produces. */
   onTranscript?: (transcript: VoiceTranscript) => void;
+  /** Access token for the server STT/TTS endpoints. */
+  token?: string | null;
 }
 
 /* ── Realtime voice (server cascade) ────────────────────────────────────
