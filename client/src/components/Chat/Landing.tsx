@@ -15,8 +15,8 @@ import {
 import { useChatContext, useAgentsMapContext, useAssistantsMapContext } from '~/Providers';
 import { useGetEndpointsQuery, useGetStartupConfig } from '~/data-provider';
 import { useLocalize, useAuthContext, useGreeting } from '~/hooks';
-import AgentContact from '~/components/Agents/AgentContact';
 import CapabilityCards from '~/components/Chat/CapabilityCards';
+import AgentContact from '~/components/Agents/AgentContact';
 import ConvoIcon from '~/components/Endpoints/ConvoIcon';
 import temporaryStore from '~/store/temporary';
 

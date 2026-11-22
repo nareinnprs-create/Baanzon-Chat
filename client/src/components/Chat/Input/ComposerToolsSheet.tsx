@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useLocalize } from '~/hooks';
 
 interface ComposerToolsSheetProps {

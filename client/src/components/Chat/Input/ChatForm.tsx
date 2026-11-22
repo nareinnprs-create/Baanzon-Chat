@@ -1,8 +1,7 @@
 import { memo, useRef, useMemo, useEffect, useState, useCallback } from 'react';
-import { useAtom } from 'jotai';
+import { Plus } from 'lucide-react';
 import { useWatch } from 'react-hook-form';
 import { useRecoilState, useRecoilValue, useRecoilCallback } from 'recoil';
-import { Plus } from 'lucide-react';
 import { Constants, isAssistantsEndpoint, isAgentsEndpoint } from 'librechat-data-provider';
 import {
   composerSurfaceClasses,
@@ -55,6 +54,7 @@ import DuringRunSendButton from './DuringRunSendButton';
 import PromptLabPanel from './PromptLab/PromptLabPanel';
 import ProjectLandingChip from '../ProjectLandingChip';
 import { useGetStartupConfig } from '~/data-provider';
+import ComposerToolsSheet from './ComposerToolsSheet';
 import { mainTextareaId, BadgeItem } from '~/common';
 import PendingSteerChips from './PendingSteerChips';
 import PendingQuoteChips from './PendingQuoteChips';
@@ -70,7 +70,6 @@ import PromptLab from './PromptLab/PromptLab';
 import SkillsCommand from './SkillsCommand';
 import AutoPlayAudio from './AutoPlayAudio';
 import CollapseChat from './CollapseChat';
-import ComposerToolsSheet from './ComposerToolsSheet';
 import QuoteButton from './QuoteButton';
 import TokenUsage from './TokenUsage';
 import StopButton from './StopButton';
@@ -142,7 +141,6 @@ const ChatForm = memo(function ChatForm({
   const isWide = useMediaQuery('(min-width: 768px)');
   const [toolsOpen, setToolsOpen] = useState(false);
 
-  const SpeechToText = useRecoilValue(store.speechToText);
   const TextToSpeech = useRecoilValue(store.textToSpeech);
   const chatDirection = useRecoilValue(store.chatDirection);
   const automaticPlayback = useRecoilValue(store.automaticPlayback);
