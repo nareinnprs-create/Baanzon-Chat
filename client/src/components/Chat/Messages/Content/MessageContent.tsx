@@ -4,11 +4,11 @@ import { Constants } from 'librechat-data-provider';
 import { Alert, DelayedRender } from '@librechat/client';
 import type { TMessage } from 'librechat-data-provider';
 import type { TMessageContentProps, TDisplayProps } from '~/common';
+import { useMessageContext, useOptionalMessagesOperations } from '~/Providers';
 import useSmoothStreaming from '~/hooks/Messages/useSmoothStreaming';
 import Error from '~/components/Messages/Content/Error';
 import ToolCallLimitNotice from './ToolCallLimitNotice';
 import CollapsibleText from './Parts/CollapsibleText';
-import { useMessageContext } from '~/Providers';
 import EmptyText from './Parts/EmptyText';
 import MarkdownLite from './MarkdownLite';
 import EditMessage from './EditMessage';
@@ -77,6 +77,9 @@ export const ErrorMessage = ({
   message,
   className = '',
 }: Pick<TDisplayProps, 'text' | 'className'> & { message?: TMessage }) => {
+  const localize = useLocalize();
+  const { regenerate } = useOptionalMessagesOperations();
+
   if (text === ERROR_CONNECTION_TEXT) {
     return <ConnectionError message={message} />;
   }
@@ -85,6 +88,16 @@ export const ErrorMessage = ({
     <Container message={message}>
       <ErrorBox className={className}>
         <Error text={text} />
+        {/* Regenerating is the retry: same request, same model chain. */}
+        <button
+          type="button"
+          onClick={() => message != null && regenerate(message)}
+          disabled={message == null}
+          data-testid="error-retry-button"
+          className="mt-1.5 rounded-lg border border-border-medium px-2.5 py-1 text-xs font-medium text-text-primary transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-primary"
+        >
+          {localize('com_ui_retry')}
+        </button>
       </ErrorBox>
     </Container>
   );
