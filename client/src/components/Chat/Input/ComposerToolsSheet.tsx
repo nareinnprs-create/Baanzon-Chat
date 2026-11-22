@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useLocalize } from '~/hooks';
@@ -16,6 +16,20 @@ interface ComposerToolsSheetProps {
  */
 export default function ComposerToolsSheet({ open, onClose, children }: ComposerToolsSheetProps) {
   const localize = useLocalize();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
+
+  // Move focus into the sheet and hand it back to the trigger on close, so a
+  // keyboard user is never stranded behind the backdrop.
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    previouslyFocused.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    panelRef.current?.querySelector<HTMLButtonElement>('[data-sheet-close]')?.focus();
+    return () => previouslyFocused.current?.focus?.();
+  }, [open]);
 
   useEffect(() => {
     if (!open) {
@@ -48,13 +62,17 @@ export default function ComposerToolsSheet({ open, onClose, children }: Composer
         className="absolute inset-0 bg-black/40"
         onClick={onClose}
       />
-      <div className="relative w-full rounded-t-2xl border-t border-border-light bg-surface-primary p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-xl">
+      <div
+        ref={panelRef}
+        className="relative w-full rounded-t-2xl border-t border-border-light bg-surface-primary p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-xl"
+      >
         <div className="mb-3 flex items-center justify-between">
           <span className="text-sm font-medium text-text-primary">
             {localize('com_ui_composer_tools')}
           </span>
           <button
             type="button"
+            data-sheet-close
             onClick={onClose}
             aria-label={localize('com_ui_close')}
             className="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-primary"

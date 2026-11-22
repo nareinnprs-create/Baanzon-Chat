@@ -41,4 +41,26 @@ describe('ComposerToolsSheet', () => {
     await userEvent.keyboard('{Escape}');
     expect(onClose).toHaveBeenCalled();
   });
+
+  it('moves focus into the sheet and back to the trigger on close', async () => {
+    const trigger = document.createElement('button');
+    trigger.textContent = 'trigger';
+    document.body.appendChild(trigger);
+    trigger.focus();
+
+    const { rerender } = render(
+      <ComposerToolsSheet open onClose={jest.fn()}>
+        {tool}
+      </ComposerToolsSheet>,
+    );
+    expect(screen.getByRole('button', { name: 'com_ui_close' })).toHaveFocus();
+
+    rerender(
+      <ComposerToolsSheet open={false} onClose={jest.fn()}>
+        {tool}
+      </ComposerToolsSheet>,
+    );
+    expect(trigger).toHaveFocus();
+    trigger.remove();
+  });
 });
