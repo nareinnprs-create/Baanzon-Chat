@@ -109,8 +109,25 @@ fi
 
 echo "[apply] preparing prod deps (lockfile cache)"
 cd "$STAGE_DIR" || exit 1
-(NPM_CONFIG_CACHE=/workspace/.npm-cache npm ci --omit=dev --no-audit --no-fund) >/workspace/npminstall.log 2>&1 \
-  || { echo "[apply] npm ci FAILED"; tail -20 /workspace/npminstall.log; exit 1; }
+# Reuse the active slot's dependency trees when the lockfile is unchanged.
+# npm ci over the network volume takes ~1h and starves the live API, which is
+# how a deploy ends up timing out with the previous release still serving.
+lock_hash() { sha256sum "$1/package-lock.json" 2>/dev/null | cut -d' ' -f1; }
+ACTIVE_LOCK=$(lock_hash "$ACTIVE_DIR")
+STAGE_LOCK=$(lock_hash "$STAGE_DIR")
+if [ -n "$ACTIVE_LOCK" ] && [ "$ACTIVE_LOCK" = "$STAGE_LOCK" ] && [ -d "$ACTIVE_DIR/node_modules" ]; then
+  echo "[apply] lockfile unchanged - reusing active node_modules"
+  (cd "$ACTIVE_DIR" && find . -maxdepth 2 -name node_modules -type d -prune) | while read -r rel; do
+    [ -d "$ACTIVE_DIR/$rel" ] || continue
+    mkdir -p "$(dirname "$STAGE_DIR/$rel")"
+    rm -rf "$STAGE_DIR/$rel"
+    cp -al "$ACTIVE_DIR/$rel" "$STAGE_DIR/$rel" 2>/dev/null \
+      || cp -a "$ACTIVE_DIR/$rel" "$STAGE_DIR/$rel"
+  done
+else
+  (NPM_CONFIG_CACHE=/workspace/.npm-cache npm ci --omit=dev --no-audit --no-fund) >/workspace/npminstall.log 2>&1 \
+    || { echo "[apply] npm ci FAILED"; tail -20 /workspace/npminstall.log; exit 1; }
+fi
 echo "[apply] deps ready: $(ls node_modules | wc -l) top-level packages"
 
 # ---- db audit: repoint MONGO_URI before the new slot boots ------------------

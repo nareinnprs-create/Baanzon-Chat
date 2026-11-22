@@ -151,11 +151,24 @@ export default defineConfig(({ command }) => ({
       },
       includeAssets: [],
       manifest: {
+        id: '/',
         name: 'Baanzon Chat',
         short_name: 'Baanzon',
+        description: 'Chat, create and research with Diya - in any language.',
+        lang: 'en',
+        start_url: '/',
+        scope: '/',
         display: 'standalone',
+        display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
+        orientation: 'any',
+        categories: ['productivity', 'utilities'],
         background_color: '#F0F0E9',
         theme_color: '#303438',
+        shortcuts: [
+          { name: 'New chat', short_name: 'New chat', url: '/c/new' },
+          { name: 'Talk to Diya', short_name: 'Diya', url: '/voice' },
+          { name: 'Deep research', short_name: 'Research', url: '/deep-research' },
+        ],
         icons: [
           {
             src: 'assets/favicon-32x32.png',

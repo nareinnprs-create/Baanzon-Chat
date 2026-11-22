@@ -76,6 +76,8 @@ export const hoverButtonClasses = ({
 }: HoverButtonStyleOptions = {}) =>
   cn(
     'hover-button size-auto rounded-lg p-1.5 text-text-secondary-alt',
+    // 44px touch target on coarse pointers; mouse keeps the compact row.
+    '[@media(pointer:coarse)]:p-2.5',
     'hover:text-text-primary hover:bg-surface-hover',
     'group-hover:visible group-focus-visible:visible group-has-[:focus-visible:not(:is(input,textarea,[contenteditable]))]:visible group-[.final-completion]:visible',
     !isLast && revealOnRowHoverClasses,

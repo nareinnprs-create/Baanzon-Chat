@@ -16,6 +16,7 @@ import { useChatContext, useAgentsMapContext, useAssistantsMapContext } from '~/
 import { useGetEndpointsQuery, useGetStartupConfig } from '~/data-provider';
 import { useLocalize, useAuthContext, useGreeting } from '~/hooks';
 import AgentContact from '~/components/Agents/AgentContact';
+import CapabilityCards from '~/components/Chat/CapabilityCards';
 import ConvoIcon from '~/components/Endpoints/ConvoIcon';
 import temporaryStore from '~/store/temporary';
 
@@ -242,6 +243,7 @@ export default function Landing({
             className="animate-fadeIn mt-2 max-w-md justify-center text-center text-sm"
           />
         )}
+        {!isTemporary && !isAgent && !isAssistant && <CapabilityCards />}
       </div>
     </div>
   );

@@ -290,9 +290,14 @@ describe('ChatForm attachments', () => {
 
   test('does not raise the keyboard when a quote removal collapses the popup on touch', async () => {
     const matchMedia = window.matchMedia;
-    window.matchMedia = jest
-      .fn()
-      .mockReturnValue({ matches: true }) as unknown as typeof matchMedia;
+    window.matchMedia = jest.fn().mockReturnValue({
+      matches: true,
+      media: '',
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+    }) as unknown as typeof matchMedia;
     try {
       renderComposer({ quotes: ['alpha', 'beta'] });
       const textarea = await screen.findByTestId('text-input');

@@ -2,8 +2,14 @@ import { memo, useRef, useMemo, useEffect, useState, useCallback } from 'react';
 import { useAtom } from 'jotai';
 import { useWatch } from 'react-hook-form';
 import { useRecoilState, useRecoilValue, useRecoilCallback } from 'recoil';
+import { Plus } from 'lucide-react';
 import { Constants, isAssistantsEndpoint, isAgentsEndpoint } from 'librechat-data-provider';
-import { composerSurfaceClasses, composerSurfaceShadow, TextareaAutosize } from '@librechat/client';
+import {
+  composerSurfaceClasses,
+  composerSurfaceShadow,
+  TextareaAutosize,
+  useMediaQuery,
+} from '@librechat/client';
 import type { TChatProject, TMessage, TConversation } from 'librechat-data-provider';
 import type { SetterOrUpdater } from 'recoil';
 import type { ExtendedFile, FileSetter, ConvoGenerator } from '~/common';
@@ -64,6 +70,7 @@ import PromptLab from './PromptLab/PromptLab';
 import SkillsCommand from './SkillsCommand';
 import AutoPlayAudio from './AutoPlayAudio';
 import CollapseChat from './CollapseChat';
+import ComposerToolsSheet from './ComposerToolsSheet';
 import QuoteButton from './QuoteButton';
 import TokenUsage from './TokenUsage';
 import StopButton from './StopButton';
@@ -131,6 +138,9 @@ const ChatForm = memo(function ChatForm({
   const [visualRowCount, setVisualRowCount] = useState(1);
   const [isTextAreaFocused, setIsTextAreaFocused] = useState(false);
   const [backupBadges, setBackupBadges] = useState<Pick<BadgeItem, 'id'>[]>([]);
+  /** Phones park the secondary tools in a sheet; wide screens keep them inline. */
+  const isWide = useMediaQuery('(min-width: 768px)');
+  const [toolsOpen, setToolsOpen] = useState(false);
 
   const SpeechToText = useRecoilValue(store.speechToText);
   const TextToSpeech = useRecoilValue(store.textToSpeech);
@@ -543,6 +553,32 @@ const ChatForm = memo(function ChatForm({
 
   const isMoreThanThreeRows = visualRowCount > 3;
 
+  /** Secondary composer tools: inline on wide screens, in the sheet on phones. */
+  const secondaryTools = (
+    <>
+      <CodeApprovalMenu
+        conversation={conversation}
+        addedConversation={addedConvo}
+        setConversation={setConversation}
+        disabled={disableInputs || isSubmitting}
+      />
+      <CodeWorkspaceMenu
+        conversation={conversation}
+        setConversation={setConversation}
+        workspace={codeWorkspace}
+        disabled={disableInputs || isSubmitting}
+      />
+      {index === 0 && conversationId != null && (
+        <PendingToolApprovalButton conversationId={conversationId} />
+      )}
+      {(textValue?.trim() ?? '') !== '' && (
+        <div className={`${isRTL ? 'mr-2' : 'ml-2'}`}>
+          <PromptLab conversation={conversation} getText={() => methods.getValues('text')} />
+        </div>
+      )}
+    </>
+  );
+
   /** One button slot while a run is generating: with composer text the send
    *  button takes over (Enter steers/queues; hover reveals all actions);
    *  clearing the text restores Stop. */
@@ -802,33 +838,36 @@ const ChatForm = memo(function ChatForm({
                     Array.isArray(conversation?.messages) && conversation.messages.length >= 1
                   }
                 />
-                <CodeApprovalMenu
-                  conversation={conversation}
-                  addedConversation={addedConvo}
-                  setConversation={setConversation}
-                  disabled={disableInputs || isSubmitting}
-                />
-                <CodeWorkspaceMenu
-                  conversation={conversation}
-                  setConversation={setConversation}
-                  workspace={codeWorkspace}
-                  disabled={disableInputs || isSubmitting}
-                />
-                {index === 0 && conversationId != null && (
-                  <PendingToolApprovalButton conversationId={conversationId} />
-                )}
-                {(textValue?.trim() ?? '') !== '' && (
-                  <div className={`${isRTL ? 'mr-2' : 'ml-2'}`}>
-                    <PromptLab
-                      conversation={conversation}
-                      getText={() => methods.getValues('text')}
-                    />
-                  </div>
+                {isWide ? (
+                  secondaryTools
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setToolsOpen(true)}
+                      disabled={disableInputs || isNotAppendable}
+                      aria-label={localize('com_ui_composer_tools')}
+                      aria-expanded={toolsOpen}
+                      data-testid="composer-tools-button"
+                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-border-light text-text-primary transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-primary disabled:opacity-50"
+                    >
+                      <Plus className="size-4" aria-hidden="true" />
+                    </button>
+                    <ComposerToolsSheet open={toolsOpen} onClose={() => setToolsOpen(false)}>
+                      {secondaryTools}
+                    </ComposerToolsSheet>
+                  </>
                 )}
                 <VoiceControls index={index} textAreaRef={textAreaRef} />
                 {index === 0 && <VoiceRealtimeOverlay />}
                 <div className="mx-auto flex" />
-                <TokenUsage index={index} conversation={conversation} isSubmitting={isSubmitting} />
+                {isWide && (
+                  <TokenUsage
+                    index={index}
+                    conversation={conversation}
+                    isSubmitting={isSubmitting}
+                  />
+                )}
                 {steering.duringRunActive &&
                   steering.canControlGeneration &&
                   (textValue?.trim() ?? '') !== '' && (

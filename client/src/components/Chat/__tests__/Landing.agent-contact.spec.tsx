@@ -1,5 +1,6 @@
 import React from 'react';
 import { RecoilRoot } from 'recoil';
+import { MemoryRouter } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import temporaryStore from '~/store/temporary';
@@ -89,9 +90,11 @@ jest.mock('~/components/Endpoints/ConvoIcon', () => () => <span data-testid="con
 
 function renderLanding({ isTemporary = false }: { isTemporary?: boolean } = {}) {
   return render(
-    <RecoilRoot initializeState={({ set }) => set(temporaryStore.isTemporary, isTemporary)}>
-      <Landing centerFormOnLanding={false} />
-    </RecoilRoot>,
+    <MemoryRouter>
+      <RecoilRoot initializeState={({ set }) => set(temporaryStore.isTemporary, isTemporary)}>
+        <Landing centerFormOnLanding={false} />
+      </RecoilRoot>
+    </MemoryRouter>,
   );
 }
 

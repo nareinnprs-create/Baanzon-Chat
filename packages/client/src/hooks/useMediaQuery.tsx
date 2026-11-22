@@ -25,8 +25,13 @@ export default function useMediaQuery(query: string): boolean {
       setMatches(media.matches);
     }
     const listener = () => setMatches(media.matches);
-    media.addEventListener('change', listener);
-    return () => media.removeEventListener('change', listener);
+    // Older Safari and minimal test doubles only expose the legacy listener API.
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', listener);
+      return () => media.removeEventListener('change', listener);
+    }
+    media.addListener?.(listener);
+    return () => media.removeListener?.(listener);
   }, [matches, query]);
 
   return matches;
