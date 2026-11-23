@@ -50,6 +50,7 @@ export default function ComposerToolsSheet({ open, onClose, children }: Composer
 
   return (
     <div
+      id="composer-tools-sheet"
       className="fixed inset-0 z-[60] flex items-end md:hidden"
       role="dialog"
       aria-modal="true"

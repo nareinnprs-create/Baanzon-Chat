@@ -141,6 +141,14 @@ const ChatForm = memo(function ChatForm({
   const isWide = useMediaQuery('(min-width: 768px)');
   const [toolsOpen, setToolsOpen] = useState(false);
 
+  // A rotate to a wide viewport renders the tools inline; drop the sheet state
+  // so rotating back does not reopen a sheet the user already left.
+  useEffect(() => {
+    if (isWide && toolsOpen) {
+      setToolsOpen(false);
+    }
+  }, [isWide, toolsOpen]);
+
   const TextToSpeech = useRecoilValue(store.textToSpeech);
   const chatDirection = useRecoilValue(store.chatDirection);
   const automaticPlayback = useRecoilValue(store.automaticPlayback);
@@ -846,6 +854,7 @@ const ChatForm = memo(function ChatForm({
                       disabled={disableInputs || isNotAppendable}
                       aria-label={localize('com_ui_composer_tools')}
                       aria-expanded={toolsOpen}
+                      aria-controls="composer-tools-sheet"
                       data-testid="composer-tools-button"
                       className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-border-light text-text-primary transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-primary disabled:opacity-50"
                     >
