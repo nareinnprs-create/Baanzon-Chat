@@ -184,9 +184,7 @@ test('shows validation error messages', async () => {
   expect(alerts[3]).toHaveTextContent(/You must enter a valid email address/i);
   expect(alerts[4]).toHaveTextContent(/Password must be at least 8 characters/i);
   expect(alerts[5]).toHaveTextContent(/Passwords do not match/i);
-}, // Typing five fields through userEvent is slow when the suite runs in a
-// loaded worker; the default 5s timeout flakes there.
-30000);
+}, 30000); // loaded worker; the default 5s timeout flakes there. // Typing five fields through userEvent is slow when the suite runs in a
 
 test('composes the E.164 phone number from the country code on submit', async () => {
   const mutate = jest.fn();

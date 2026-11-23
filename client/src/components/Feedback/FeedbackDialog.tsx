@@ -14,9 +14,9 @@ import {
   useToastContext,
 } from '@librechat/client';
 import type { TCreateFeedbackReport, TFeedbackReportType } from 'librechat-data-provider';
+import type { TranslationKeys } from '~/hooks';
 import { useCreateFeedbackReportMutation } from '~/data-provider';
 import { useLocalize } from '~/hooks';
-import type { TranslationKeys } from '~/hooks';
 
 const TYPE_KEYS: { value: TFeedbackReportType; labelKey: TranslationKeys }[] = [
   { value: 'bug', labelKey: 'com_ui_feedback_type_bug' },
