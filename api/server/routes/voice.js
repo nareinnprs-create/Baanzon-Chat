@@ -142,6 +142,7 @@ async function synthesize(text, lang) {
     try {
       const audio = await attempt();
       if (audio.buffer.length > 0) {
+        logger.debug(`[voice] tts ok lang=${lang} engine=${name} bytes=${audio.buffer.length}`);
         return { ...audio, engine: name };
       }
     } catch (error) {
@@ -149,6 +150,21 @@ async function synthesize(text, lang) {
       logger.warn(`[voice] tts ${name} failed: ${error.message}`);
     }
   }
+
+  // Last resort: a language the sidecar has no voice for (e.g. an unsupported
+  // script code) must still say something rather than leave the user in silence.
+  if (lang !== 'en') {
+    try {
+      const audio = await sidecarTts(text, 'en');
+      if (audio.buffer.length > 0) {
+        logger.warn(`[voice] tts fell back to en for lang=${lang}`);
+        return { ...audio, engine: 'sidecar:en-fallback' };
+      }
+    } catch (error) {
+      errors.push(`sidecar:en-fallback: ${error.message}`);
+    }
+  }
+
   const error = new Error('no TTS provider could synthesize this language');
   error.details = errors.join('; ');
   throw error;

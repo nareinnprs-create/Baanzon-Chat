@@ -50,6 +50,11 @@ export function createWebAudioVadSampler(stream: MediaStream): WebAudioVadHandle
   analyser.fftSize = 2048;
   const buffer = new Float32Array(analyser.fftSize);
 
+  // iOS suspends a context created outside a gesture (and Android does after a
+  // background switch). Without this the analyser returns zeros forever and the
+  // VAD never fires, so nothing is ever recorded.
+  void context.resume?.().catch(() => undefined);
+
   let source: MediaStreamAudioSourceNode;
   try {
     source = context.createMediaStreamSource(stream);

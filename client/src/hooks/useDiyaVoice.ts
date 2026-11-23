@@ -63,6 +63,44 @@ const HISTORY_TURNS = 12;
 const MAX_UTTERANCE_MS = 20000;
 /** Recordings shorter than this are noise, not speech. */
 const MIN_UTTERANCE_MS = 350;
+/** Rejects clicks and single-sample spikes before a recording starts. */
+const MIN_SPEECH_MS = 250;
+/** Level that counts as the user talking over Diya. */
+const BARGE_IN_LEVEL = 0.25;
+/** Sustained ticks needed to interrupt; ~300ms at the 100ms tick. */
+const BARGE_IN_TICKS = 3;
+
+/** 100ms of silence, built once, used to unlock the shared player. */
+let silentWavUrl: string | null = null;
+function getSilentWavUrl(): string {
+  if (silentWavUrl != null) {
+    return silentWavUrl;
+  }
+  const sampleRate = 8000;
+  const samples = 800;
+  const buffer = new ArrayBuffer(44 + samples * 2);
+  const view = new DataView(buffer);
+  const write = (offset: number, text: string) => {
+    for (let index = 0; index < text.length; index += 1) {
+      view.setUint8(offset + index, text.charCodeAt(index));
+    }
+  };
+  write(0, 'RIFF');
+  view.setUint32(4, 36 + samples * 2, true);
+  write(8, 'WAVE');
+  write(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  write(36, 'data');
+  view.setUint32(40, samples * 2, true);
+  silentWavUrl = URL.createObjectURL(new Blob([buffer], { type: 'audio/wav' }));
+  return silentWavUrl;
+}
 
 function isActive(status: VoiceStatus): boolean {
   return ACTIVE_STATUSES.includes(status);
@@ -154,6 +192,13 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
   const speakingRef = useRef(false);
   /** Incremented on every cancel so a stale sentence loop stops. */
   const speakTokenRef = useRef(0);
+  /** One element for the whole session: unlocking it once inside the tap keeps
+   *  every later play() allowed on iOS and Android PWAs. */
+  const playerRef = useRef<HTMLAudioElement | null>(null);
+  /** Resolves the sentence currently waiting on playback (cancel path). */
+  const releasePlaybackRef = useRef<(() => void) | null>(null);
+  /** Consecutive loud samples while Diya speaks; her own voice must not count. */
+  const bargeStreakRef = useRef(0);
   const stoppedRef = useRef(false);
   const mutedRef = useRef(muted);
   const statusRef = useRef<VoiceStatus>(status);
@@ -195,11 +240,54 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
     }
   }, []);
 
+  /**
+   * Unlocks media output inside the tap gesture. iOS Safari and installed
+   * Android PWAs reject `play()` that runs after an await; playing a silent
+   * buffer on the element that will later carry the reply unlocks it for the
+   * whole session.
+   */
+  const primePlayer = useCallback(() => {
+    if (playerRef.current != null) {
+      return playerRef.current;
+    }
+    const audio = new Audio();
+    audio.preload = 'auto';
+    playerRef.current = audio;
+    try {
+      audio.muted = true;
+      audio.src = getSilentWavUrl();
+      void audio
+        .play()
+        .then(() => {
+          audio.pause();
+          audio.removeAttribute('src');
+          audio.muted = false;
+        })
+        .catch(() => {
+          audio.muted = false;
+        });
+    } catch {
+      audio.muted = false;
+    }
+    return audio;
+  }, []);
+
+  /** Returns the orb to listening; every exit path of a reply goes through it. */
+  const finishSpeaking = useCallback(() => {
+    speakingRef.current = false;
+    releasePlaybackRef.current = null;
+    if (!stoppedRef.current && !mutedRef.current) {
+      setBargeIn(false);
+      setStatus('listening');
+    }
+  }, [setBargeIn, setStatus]);
+
   /** Stops audio playback and aborts any in-flight turn. */
   const cancelPlayback = useCallback(() => {
     turnControllerRef.current?.abort();
     turnControllerRef.current = null;
     speakingRef.current = false;
+    bargeStreakRef.current = 0;
     // Bumping the token stops a sentence loop that is between chunks, so the
     // rest of the reply cannot play over the user who just interrupted.
     speakTokenRef.current += 1;
@@ -207,12 +295,16 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
     if (audio) {
       try {
         audio.pause();
-        audio.src = '';
+        audio.removeAttribute('src');
+        audio.load();
       } catch {
         /* already released */
       }
       audioRef.current = null;
     }
+    // Resolve the awaited playback promise; pause alone no longer does it.
+    releasePlaybackRef.current?.();
+    releasePlaybackRef.current = null;
   }, []);
 
   const teardownCapture = useCallback(() => {
@@ -239,6 +331,16 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
   const teardown = useCallback(() => {
     stoppedRef.current = true;
     cancelPlayback();
+    // Keep the element (its unlock survives), just release the source.
+    const player = playerRef.current;
+    if (player != null) {
+      try {
+        player.pause();
+        player.removeAttribute('src');
+      } catch {
+        /* already released */
+      }
+    }
     teardownCapture();
   }, [cancelPlayback, teardownCapture]);
 
@@ -403,48 +505,66 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       const token = speakTokenRef.current;
       const cancelled = () =>
         stoppedRef.current || mutedRef.current || speakTokenRef.current !== token;
+      const player = primePlayer();
+      let failed = false;
       setStatus('speaking');
       for (const piece of pieces) {
         if (cancelled()) {
+          finishSpeaking();
           return;
         }
         let blob: Blob;
         try {
           blob = await synthesizeSpeech(piece, lang, tokenRef.current);
         } catch {
-          continue;
+          // A dead provider must not be retried sentence by sentence, and it
+          // must not look like success: surface it instead of staying silent.
+          failed = true;
+          break;
         }
         if (cancelled()) {
+          finishSpeaking();
           return;
         }
         const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        audioRef.current = audio;
+        audioRef.current = player;
         speakingRef.current = true;
         await new Promise<void>((resolve) => {
           const release = () => {
+            if (releasePlaybackRef.current === release) {
+              releasePlaybackRef.current = null;
+            }
             URL.revokeObjectURL(url);
             resolve();
           };
-          audio.onended = release;
-          audio.onerror = release;
-          audio.onpause = release;
-          void audio.play().catch(release);
+          releasePlaybackRef.current = release;
+          player.onended = release;
+          player.onerror = release;
+          player.muted = false;
+          player.src = url;
+          void player.play().catch(() => {
+            // Autoplay refusal (or a codec problem) is a real failure.
+            failed = true;
+            release();
+          });
         });
-        if (audioRef.current === audio) {
+        if (audioRef.current === player) {
           audioRef.current = null;
         }
         if (cancelled()) {
+          finishSpeaking();
           return;
         }
+        if (failed) {
+          break;
+        }
       }
-      speakingRef.current = false;
-      if (!stoppedRef.current && !mutedRef.current) {
-        setBargeIn(false);
-        setStatus('listening');
+      if (failed) {
+        setError(VOICE_LABELS.speakFailed);
       }
+      finishSpeaking();
     },
-    [setBargeIn, setStatus],
+    [finishSpeaking, primePlayer, setError],
   );
 
   const speakRef = useRef(speak);
@@ -476,7 +596,10 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       return 'ok';
     }
     samplerRef.current = handle.sampler;
-    detectorRef.current = createVoiceActivityDetector(vadRef.current);
+    detectorRef.current = createVoiceActivityDetector({
+      minSpeechMs: MIN_SPEECH_MS,
+      ...vadRef.current,
+    });
     timerRef.current = setInterval(() => {
       const sampler = samplerRef.current;
       const detector = detectorRef.current;
@@ -490,14 +613,24 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       const level = sampler.sample();
       setMicLevel(level);
       const transition = detector.push(level);
-      if (transition === 'speech-start') {
-        // The user's voice while Diya speaks, or before her reply lands,
-        // cancels the turn (barge-in) so only one reply can ever play.
-        if (speakingRef.current || turnControllerRef.current !== null) {
+
+      // While Diya holds the floor, only sustained loud input interrupts. A
+      // single 100ms window (speaker bleed of her own voice, a click, a cough)
+      // must not cut her off, and no recording starts until she is done.
+      if (speakingRef.current || turnControllerRef.current !== null) {
+        bargeStreakRef.current = level > BARGE_IN_LEVEL ? bargeStreakRef.current + 1 : 0;
+        if (bargeStreakRef.current >= BARGE_IN_TICKS) {
+          bargeStreakRef.current = 0;
           cancelPlayback();
           setBargeIn(true);
           setStatus('listening');
+          startRecordingRef.current();
         }
+        return;
+      }
+
+      bargeStreakRef.current = 0;
+      if (transition === 'speech-start') {
         startRecordingRef.current();
       } else if (transition === 'speech-end') {
         setBargeIn(false);
@@ -520,6 +653,10 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
     setError(null);
     setBargeIn(false);
     stoppedRef.current = false;
+    bargeStreakRef.current = 0;
+    // Must happen inside the tap, before the first await, or mobile browsers
+    // refuse every later play() for this session.
+    primePlayer();
 
     const capture = await startCapture();
     if (capture === 'denied' || capture === 'failed') {
@@ -531,7 +668,7 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       return;
     }
     setStatus(mutedRef.current ? 'muted' : 'listening');
-  }, [setBargeIn, setError, setStatus, startCapture, teardownCapture]);
+  }, [primePlayer, setBargeIn, setError, setStatus, startCapture, teardownCapture]);
 
   startRef.current = start;
 

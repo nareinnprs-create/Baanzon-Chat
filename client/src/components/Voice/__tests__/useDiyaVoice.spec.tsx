@@ -58,24 +58,29 @@ class FakeRecorder {
   }
 }
 
-const audioState = { instances: [] as FakeAudio[] };
+const audioState = { instances: [] as FakeAudio[], played: 0 };
 
 class FakeAudio {
   onended: (() => void) | null = null;
   onerror: (() => void) | null = null;
-  onpause: (() => void) | null = null;
   src = '';
-  constructor(_src: string) {
+  muted = false;
+  constructor(_src?: string) {
     audioState.instances.push(this);
   }
 
   play(): Promise<void> {
+    audioState.played += 1;
     return Promise.resolve();
   }
 
-  pause(): void {
-    this.onpause?.();
+  pause(): void {}
+
+  removeAttribute(): void {
+    this.src = '';
   }
+
+  load(): void {}
 }
 
 function installBrowserFakes(): void {
@@ -160,15 +165,73 @@ describe('useDiyaVoice (server audio)', () => {
     mockVadState.level = 0;
 
     // First sentence is playing; interrupt before the second is synthesized.
-    await waitFor(() => expect(audioState.instances.length).toBe(1), { timeout: 4000 });
+    const ttsCalls = () =>
+      fetchMock.mock.calls.filter(([url]) => String(url) === '/api/voice/tts').length;
+    await waitFor(() => expect(ttsCalls()).toBe(1), { timeout: 4000 });
+    await waitFor(() => expect(result.current.status).toBe('speaking'), { timeout: 2000 });
+
     mockVadState.level = 0.9;
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 450));
+    });
     await waitFor(() => expect(result.current.status).toBe('listening'), { timeout: 2000 });
 
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 150));
     });
-    const ttsCalls = fetchMock.mock.calls.filter(([url]) => String(url) === '/api/voice/tts');
-    expect(ttsCalls.length).toBe(1);
+    expect(ttsCalls()).toBe(1);
+  });
+
+  it('ignores a single noise spike while she speaks (no self barge-in)', async () => {
+    const { result } = renderVoice({
+      turn: jest.fn(() => Promise.resolve('A longer answer that keeps playing.')),
+    });
+    await act(async () => {
+      await result.current.start();
+    });
+
+    mockVadState.level = 0.9;
+    await waitFor(() => expect(FakeRecorder.instances.length).toBe(1), { timeout: 2000 });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    });
+    mockVadState.level = 0;
+
+    await waitFor(() => expect(result.current.status).toBe('speaking'), { timeout: 4000 });
+
+    // One 100ms window above the threshold must not cut her off.
+    mockVadState.level = 0.9;
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+    mockVadState.level = 0;
+    expect(result.current.status).toBe('speaking');
+  });
+
+  it('surfaces an error instead of staying silent when synthesis fails', async () => {
+    const { result } = renderVoice();
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes('/api/voice/stt')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ text: 'hello', language: 'en' }),
+        });
+      }
+      return Promise.resolve({ ok: false, status: 502, json: () => Promise.resolve({}) });
+    });
+
+    await act(async () => {
+      await result.current.start();
+    });
+    mockVadState.level = 0.9;
+    await waitFor(() => expect(FakeRecorder.instances.length).toBe(1), { timeout: 2000 });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    });
+    mockVadState.level = 0;
+
+    await waitFor(() => expect(result.current.error).not.toBeNull(), { timeout: 4000 });
+    expect(result.current.status).toBe('listening');
   });
 
   it('stops the session and releases the microphone', async () => {

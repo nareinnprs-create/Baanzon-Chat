@@ -858,6 +858,7 @@
   "com_ui_voice_mic_permission_denied": "Microphone access was denied. Allow microphone access in your browser settings and try again.",
   "com_ui_voice_mic_unavailable": "No microphone was found. Connect one and try again.",
   "com_ui_voice_retry": "Try again",
+  "com_ui_voice_speak_failed": "Diya could not speak that reply. Tap the orb to try again.",
   "com_ui_voice_announce_connecting": "Connecting the voice session.",
   "com_ui_voice_announce_listening": "Listening. Speak when ready.",
   "com_ui_voice_announce_speaking": "Diya is speaking.",
