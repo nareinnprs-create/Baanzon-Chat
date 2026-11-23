@@ -1,17 +1,17 @@
 import type { AxiosResponse } from 'axios';
 import type {
-  TAdminUsersListParams,
-  TAdminUsersResponse,
-  TAdminUsersSearchParams,
-  TAdminUsersSearchResponse,
-} from './types/admin-users';
-import type {
   TCreateFeedbackReport,
   TFeedbackReport,
   TFeedbackReportListParams,
   TFeedbackReportsResponse,
   TUpdateFeedbackReport,
 } from './types/feedback-reports';
+import type {
+  TAdminUsersListParams,
+  TAdminUsersResponse,
+  TAdminUsersSearchParams,
+  TAdminUsersSearchResponse,
+} from './types/admin-users';
 import type { TInsightsAccessResponse, TInsightsParams, TInsightsResponse } from './types/insights';
 import type { TUsageSummary } from './types/usage-summary';
 import type { TFileConfig } from './file-config';
