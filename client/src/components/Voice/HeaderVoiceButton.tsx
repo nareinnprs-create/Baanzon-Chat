@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
-import { AudioLines } from 'lucide-react';
 import { Provider } from 'jotai';
+import { AudioLines } from 'lucide-react';
 import { TooltipAnchor, Button } from '@librechat/client';
 import type { TMessage } from 'librechat-data-provider';
-import VoicePanel from '~/components/Voice/VoicePanel';
 import { VOICE_LABELS as L } from '~/components/Voice/labels';
+import VoicePanel from '~/components/Voice/VoicePanel';
 import { useChatContext } from '~/Providers';
 import { cn } from '~/utils';
 
