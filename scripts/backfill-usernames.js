@@ -12,7 +12,6 @@
  * script; it sleeps 6s after the last write instead. Upgrade to calling
  * invalidateCachedAuthUserDoc if the TTL ever grows.
  */
-const path = require('path');
 const mongoose = require('mongoose');
 const { User } = require('@librechat/data-schemas').createModels(mongoose);
 
