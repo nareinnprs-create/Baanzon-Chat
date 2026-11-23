@@ -39,8 +39,7 @@ function Footer({ className, startupConfig }: FooterProps) {
   const mainContentParts = (
     typeof config?.customFooter === 'string'
       ? config.customFooter
-      : '[Baanzon Chat](https://baanzon.chat) - ' +
-        localize('com_ui_latest_footer')
+      : '[Baanzon Chat](https://baanzon.chat) - ' + localize('com_ui_latest_footer')
   ).split('|');
 
   useEffect(() => {

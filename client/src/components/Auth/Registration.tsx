@@ -37,7 +37,9 @@ const Registration: React.FC = () => {
 
   const region = navigator.language.split('-')[1];
   const [country, setCountry] = useState<CountryCode>(
-    region && getCountries().includes(region as CountryCode) ? (region as CountryCode) : DEFAULT_COUNTRY,
+    region && getCountries().includes(region as CountryCode)
+      ? (region as CountryCode)
+      : DEFAULT_COUNTRY,
   );
   // Ref keeps the live country reachable from callbacks RHF may have captured earlier.
   const countryRef = useRef(country);

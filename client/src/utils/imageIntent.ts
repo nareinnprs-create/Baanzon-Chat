@@ -11,13 +11,12 @@ import type { TConversation, TFile } from 'librechat-data-provider';
 const IMAGE_NOUNS =
   'image|images|picture|pictures|photos?|photographs?|art|artwork|drawing|drawings|painting|paintings|sketch|sketches|illustration|illustrations|wallpapers?|logo|logos|icon|icons|poster|posters|banner|banners|avatar|avatars|mockups?|backgrounds?|tattoo|portrait';
 
-const IMAGE_CORE_RE =
-  new RegExp(
-    '^(?:generate|create|make|draw|paint|render|produce|design|sketch|doodle)\\s+(?:me\\s+)?(?:an?\\s+|some\\s+|the\\s+)?\\b(?:' +
-      IMAGE_NOUNS +
-      ')\\b(?:$|\\s+(?:of|about|with|showing|featuring|depicting|from|for|in|on)\\b|\\s*:|,)',
-    'i',
-  );
+const IMAGE_CORE_RE = new RegExp(
+  '^(?:generate|create|make|draw|paint|render|produce|design|sketch|doodle)\\s+(?:me\\s+)?(?:an?\\s+|some\\s+|the\\s+)?\\b(?:' +
+    IMAGE_NOUNS +
+    ')\\b(?:$|\\s+(?:of|about|with|showing|featuring|depicting|from|for|in|on)\\b|\\s*:|,)',
+  'i',
+);
 
 const IMAGE_PREFIX_RE =
   /^(?:(?:hey|hi|hello)[,!.]?\s*)?(?:(?:please|pls)[,.!]?\s*)?(?:(?:can|could|would|will)\s+you\s+(?:please\s+)?)?(?:i\s+(?:want|need|would\s+like)\s+(?:you\s+)?(?:to\s+)?)?/i;

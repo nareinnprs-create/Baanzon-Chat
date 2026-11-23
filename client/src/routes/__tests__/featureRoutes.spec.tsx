@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { RecoilRoot } from 'recoil';
+import { render as rtlRender, screen } from '@testing-library/react';
 import type { TOptions } from 'i18next';
 import type { ReactNode } from 'react';
 import { DEEP_RESEARCH_LABELS } from '~/components/DeepResearch/labels';
@@ -173,6 +174,11 @@ describe('feature route table wiring', () => {
     }
   });
 });
+
+/** The route shells mount chrome that reads Recoil state (OpenSidebar shortcuts). */
+function render(ui: React.ReactElement) {
+  return rtlRender(<RecoilRoot>{ui}</RecoilRoot>);
+}
 
 describe('feature route shells mount', () => {
   it('mounts /canvas with its heading, landmark and the sample document', () => {

@@ -25,6 +25,14 @@ const MANUAL_TENANT_SCOPING = new Set<string>([
   'SkillSyncStatus',
   'AuditLog',
   'RefreshTokenBridge',
+  /**
+   * BillingPayment rows are keyed by a globally-unique `userId` and the payment
+   * verification view (`GET /api/billing/admin/recent-dodo`) is deliberately
+   * platform-wide, while the webhook that writes them has no request tenant
+   * context at all. Ambient ALS scoping would hide rows from that admin view
+   * and fight the webhook, so the per-user reads filter on `userId` explicitly.
+   */
+  'BillingPayment',
 ]);
 
 function isPluginApplied(schema: mongoose.Schema): boolean {

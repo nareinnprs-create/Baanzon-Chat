@@ -103,17 +103,17 @@ export default function useSubmitMessage() {
           },
           {
             addedConvo: addedConvo ?? undefined,
-            overrideModel:
-              modelSpecsList
-                ? (pickSmartModel(
-                    submission.text,
-                    modelSpecsList,
-                    conversation?.endpoint,
-                    conversation?.model,
-                  ) ?? undefined)
-                : undefined,
+            overrideModel: modelSpecsList
+              ? (pickSmartModel(
+                  submission.text,
+                  modelSpecsList,
+                  conversation?.endpoint,
+                  conversation?.model,
+                ) ?? undefined)
+              : undefined,
             overrideLane:
-              submission.overrideLane ?? pickLane(submission.text, overrideHasImage || composerHasImage),
+              submission.overrideLane ??
+              pickLane(submission.text, overrideHasImage || composerHasImage),
             // Queued during-run messages carry their own consumed attachments,
             // quote chips, and manual skill picks (undefined = drain composer).
             overrideFiles: submission.overrideFiles,

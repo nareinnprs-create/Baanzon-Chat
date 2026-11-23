@@ -15,6 +15,7 @@ API:  GET  /health                -> {"ok": true, "engines": [...]}
       POST /tts {"text", "lang"}  -> audio/wav (mono, 22.05k/16k)
 """
 import argparse
+import collections
 import io
 import json
 import os
@@ -91,6 +92,9 @@ _lock = threading.Lock()
 _kokoro = None
 _kokoro_voices = None
 _mms_cache = {}
+# Ordered so the oldest synthesis is evicted first; ~64 short clips of audio.
+_cache = collections.OrderedDict()
+_CACHE_MAX = 64
 
 
 def log(message):
@@ -169,12 +173,24 @@ def to_wav(samples, sample_rate):
 
 def synthesize(text, lang):
     lang = (lang or "en").lower()[:2]
+    key = (lang, text)
     with _lock:
+        cached = _cache.get(key)
+        if cached is not None:
+            _cache.move_to_end(key)
+            return cached
         if lang in KOKORO_VOICES:
-            return kokoro_wav(text, lang), "kokoro"
-        if lang in MMS_LANGS:
-            return mms_wav(text, lang), "mms"
-    raise ValueError(f"unsupported language: {lang}")
+            result = (kokoro_wav(text, lang), "kokoro")
+        elif lang in MMS_LANGS:
+            result = (mms_wav(text, lang), "mms")
+        else:
+            raise ValueError(f"unsupported language: {lang}")
+        # Sentence-level cache: the greeting and the common replies repeat across
+        # turns and users, and synthesis is the slow part on this pod.
+        _cache[key] = result
+        while len(_cache) > _CACHE_MAX:
+            _cache.popitem(last=False)
+        return result
 
 
 class Handler(BaseHTTPRequestHandler):

@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { CountryCode, getCountries, getCountryCallingCode, isValidPhoneNumber } from 'libphonenumber-js';
+import {
+  CountryCode,
+  getCountries,
+  getCountryCallingCode,
+  isValidPhoneNumber,
+} from 'libphonenumber-js';
 import { Button, Input } from '@librechat/client';
 import { useLocalize } from '~/hooks';
 
@@ -65,7 +70,9 @@ export default function PhoneRequired({
         <h1 className="text-2xl font-semibold text-text-primary">
           {localize('com_auth_phone_required_title')}
         </h1>
-        <p className="mt-2 text-sm text-text-secondary">{localize('com_auth_phone_required_hint')}</p>
+        <p className="mt-2 text-sm text-text-secondary">
+          {localize('com_auth_phone_required_hint')}
+        </p>
         {error && (
           <p role="alert" className="mt-3 text-sm text-text-destructive">
             {error}

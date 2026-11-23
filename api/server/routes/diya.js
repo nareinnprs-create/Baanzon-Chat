@@ -1,7 +1,7 @@
 const express = require('express');
 const { logger } = require('@librechat/data-schemas');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
-const { projectsLimiter } = require('~/server/middleware/limiters');
+const { voiceLimiter } = require('~/server/middleware/limiters');
 const { resolveModelChain } = require('~/server/services/billing/modelRouter');
 
 const router = express.Router();
@@ -76,6 +76,22 @@ function ackLanguage(greeting) {
   if (/^(salut|bonjour)/i.test(greeting)) {
     return 'fr';
   }
+  // Romanized greetings: Latin letters, but the ack should still be in the
+  // language the speaker used rather than English.
+  const romanized = [
+    [/^(namaste|namaskar|namaskaar)\b/i, 'hi'],
+    [/^(vanakkam|vanakam)\b/i, 'ta'],
+    [/^(namaskaram)\b/i, 'te'],
+    [/^(nomoshkar|nomoskar)\b/i, 'bn'],
+    [/^(sat sri akal|sat sri akaal)\b/i, 'pa'],
+    [/^(kem cho|kemcho)\b/i, 'gu'],
+    [/^(namaskara)\b/i, 'kn'],
+  ];
+  for (const [pattern, code] of romanized) {
+    if (pattern.test(greeting)) {
+      return code;
+    }
+  }
   return 'en';
 }
 
@@ -88,7 +104,7 @@ function ackLanguage(greeting) {
  * backing fails over automatically; the model identity never reaches the
  * response.
  */
-router.post('/turn', requireJwtAuth, projectsLimiter, async (req, res) => {
+router.post('/turn', requireJwtAuth, voiceLimiter, async (req, res) => {
   const settings = req.config?.config?.diya;
   if (settings && settings.enabled === false) {
     return res.status(503).json({ error: UNAVAILABLE });

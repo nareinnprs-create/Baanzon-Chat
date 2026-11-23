@@ -9,10 +9,7 @@ import {
   Label,
   Spinner,
 } from '@librechat/client';
-import type {
-  TFeedbackReport,
-  TFeedbackReportStatus,
-} from 'librechat-data-provider';
+import type { TFeedbackReport, TFeedbackReportStatus } from 'librechat-data-provider';
 import type { TranslationKeys } from '~/hooks';
 import { useAllFeedbackReportsQuery, useUpdateFeedbackStatusMutation } from '~/data-provider';
 import { useLocalize } from '~/hooks';
@@ -25,12 +22,7 @@ const STATUS_FILTERS: (TFeedbackReportStatus | 'all')[] = [
   'all',
 ];
 
-const STATUS_VALUES: TFeedbackReportStatus[] = [
-  'open',
-  'in_progress',
-  'resolved',
-  'closed',
-];
+const STATUS_VALUES: TFeedbackReportStatus[] = ['open', 'in_progress', 'resolved', 'closed'];
 
 function statusFilterKey(filter: TFeedbackReportStatus | 'all'): TranslationKeys {
   return (
@@ -57,9 +49,7 @@ function FeedbackRow({ report }: { report: TFeedbackReport }) {
           <span className="rounded-md border border-border-light px-1.5 py-0.5 text-xs text-text-secondary">
             {localize(`com_ui_feedback_type_${report.type}` as TranslationKeys)}
           </span>
-          <span className="truncate text-sm font-medium text-text-primary">
-            {report.subject}
-          </span>
+          <span className="truncate text-sm font-medium text-text-primary">{report.subject}</span>
         </div>
         <Select
           value={report.status}

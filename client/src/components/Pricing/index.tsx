@@ -6,9 +6,10 @@ import type { TCheckoutRequest, TPlanProduct, TPackProduct } from 'librechat-dat
 import type { TranslationKeys } from '~/hooks';
 import { useBillingProducts, useBillingSubscription, useCreateCheckout } from '~/data-provider';
 import { useDocumentTitle, useLocalize } from '~/hooks';
-import { cn } from '~/utils';
+import { redirectTo } from '~/utils/fullPageRedirect';
 import { isAndroidApp } from '~/utils/androidApp';
 import PlayBilling from './PlayBilling';
+import { cn } from '~/utils';
 
 type Cycle = 'monthly' | 'yearly';
 
@@ -158,7 +159,7 @@ export function PricingView() {
   const buy = (payload: TCheckoutRequest) => {
     setError('');
     checkout.mutate(payload, {
-      onSuccess: (data) => window.location.assign(data.url),
+      onSuccess: (data) => redirectTo(data.url),
       onError: () => setError(localize('com_ui_checkout_error')),
     });
   };

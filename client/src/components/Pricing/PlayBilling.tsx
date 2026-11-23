@@ -4,17 +4,16 @@ import { Button, Spinner } from '@librechat/client';
 import { AlertCircle, Sparkles } from 'lucide-react';
 import type { TPlayProduct } from 'librechat-data-provider';
 import { QueryKeys } from 'librechat-data-provider';
-import {
-  useBillingPlayProducts,
-  useVerifyBillingPlayPurchase,
-} from '~/data-provider';
+import { useBillingPlayProducts, useVerifyBillingPlayPurchase } from '~/data-provider';
 import { useLocalize } from '~/hooks';
 
 /** The Play Billing service origin for the Digital Goods API inside a TWA. */
 const PLAY_SERVICE = 'https://play.google.com/billing';
 
 type DigitalGoodsService = {
-  getDetails(skus: string[]): Promise<Array<{ itemId: string; title: string; prices: { price: string }[] }>>;
+  getDetails(
+    skus: string[],
+  ): Promise<Array<{ itemId: string; title: string; prices: { price: string }[] }>>;
   purchase(sku: string): Promise<{ purchaseToken: string; signature?: string }>;
 };
 
@@ -23,9 +22,11 @@ async function getPlayService(): Promise<DigitalGoodsService | null> {
     return null;
   }
   try {
-    return (await (window as unknown as {
-      getDigitalGoodsService: (origin: string) => Promise<DigitalGoodsService>;
-    }).getDigitalGoodsService(PLAY_SERVICE)) as DigitalGoodsService;
+    return (await (
+      window as unknown as {
+        getDigitalGoodsService: (origin: string) => Promise<DigitalGoodsService>;
+      }
+    ).getDigitalGoodsService(PLAY_SERVICE)) as DigitalGoodsService;
   } catch {
     return null;
   }
@@ -144,7 +145,9 @@ export default function PlayBilling() {
             className="flex items-center justify-between gap-3 rounded-lg border border-border-light bg-surface-primary p-4"
           >
             <div className="min-w-0">
-              <p className="truncate text-sm text-text-primary">{priceFor(product.sku) || product.sku}</p>
+              <p className="truncate text-sm text-text-primary">
+                {priceFor(product.sku) || product.sku}
+              </p>
             </div>
             <Button
               variant="outline"

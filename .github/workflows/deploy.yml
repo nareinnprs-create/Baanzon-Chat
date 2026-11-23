@@ -82,6 +82,10 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    # A stuck apply must fail in minutes, not burn the 360-minute default. The
+    # remote script is also bounded, so a timeout aborts it instead of letting
+    # it flip the slot after the job is already dead.
+    timeout-minutes: 45
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -120,5 +124,5 @@ jobs:
           SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30 -o ServerAliveCountMax=20 -o ConnectTimeout=30)
           ssh -i pod_key -p "${{ secrets.POD_SSH_PORT }}" "${SSH_OPTS[@]}" \
             "root@${{ secrets.POD_SSH_HOST }}" \
-            "chmod +x /workspace/_release/pod-apply-release.sh && /workspace/_release/pod-apply-release.sh"
+            "chmod +x /workspace/_release/pod-apply-release.sh && timeout 2400 /workspace/_release/pod-apply-release.sh"
           rm -f pod_key

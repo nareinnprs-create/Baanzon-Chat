@@ -7,6 +7,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
+const { imagesLimiter } = require('~/server/middleware/limiters');
 const { pickImageChain, IMAGE_MODELS } = require('@librechat/api');
 
 /** Optional sharp import: the text overlay degrades to the plain image when
@@ -147,7 +148,7 @@ async function userTier(userId) {
   return String(tier?.subscriptionTier || 'free').toLowerCase();
 }
 
-router.post('/', requireJwtAuth, async (req, res) => {
+router.post('/', requireJwtAuth, imagesLimiter, async (req, res) => {
   const prompt = String(req.body?.prompt || '')
     .slice(0, 2000)
     .trim();

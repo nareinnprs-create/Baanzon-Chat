@@ -341,7 +341,10 @@ export function useVoiceRealtime(onEnd: () => void): VoiceRealtimeHandle {
                   send({ type: 'tts-done' });
                 }
               };
-              if (typeof SpeechSynthesisUtterance !== 'undefined' && typeof speechSynthesis !== 'undefined') {
+              if (
+                typeof SpeechSynthesisUtterance !== 'undefined' &&
+                typeof speechSynthesis !== 'undefined'
+              ) {
                 const utterance = new SpeechSynthesisUtterance(msg.text);
                 utterance.lang = local.lang;
                 utterance.onend = done;

@@ -49,7 +49,7 @@ describe('SpecIcon', () => {
     expect(screen.getByTestId('url-icon')).toHaveAttribute('data-provider', ProviderId.anthropic);
   });
 
-  it('falls back to the generic icon when runtime spec data has no icon or preset', () => {
+  it('falls back to the Baanzon emblem when runtime spec data has no icon or preset', () => {
     const currentSpec = {
       name: 'gemini-test',
       label: 'Gemini Test',
@@ -57,7 +57,11 @@ describe('SpecIcon', () => {
 
     render(<SpecIcon currentSpec={currentSpec} endpointsConfig={endpointsConfig} />);
 
-    expect(screen.getByRole('img', { name: 'Custom' })).toBeInTheDocument();
+    // The generic provider icon was replaced by the brand mark, which is
+    // decorative (aria-hidden) because the spec label beside it carries the name.
+    const mark = document.querySelector('svg.baanzon-mark');
+    expect(mark).not.toBeNull();
+    expect(mark).toHaveAttribute('aria-hidden');
   });
 
   it("renders the agent's avatar when the spec defines no icon of its own", () => {

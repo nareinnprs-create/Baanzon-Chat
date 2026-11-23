@@ -58,7 +58,7 @@ function verifyWebhookSignature(req) {
       return a.length === b.length && crypto.timingSafeEqual(a, b);
     });
   }
-  return !DODO_WEBHOOK_SECRET || req.headers['webhook-secret'] === DODO_WEBHOOK_SECRET;
+  return req.headers['webhook-secret'] === DODO_WEBHOOK_SECRET;
 }
 
 /* products (public) */
@@ -137,7 +137,12 @@ router.post('/checkout', authed, async (req, res) => {
 /* webhook (Dodo -> us) */
 router.post('/webhook', express.raw({ type: '*/*', limit: '256kb' }), async (req, res) => {
   try {
-    if (DODO_WEBHOOK_SECRET && !verifyWebhookSignature(req)) {
+    // Fail closed: an unset secret must never mean "accept anything". This route
+    // grants plans and credits, so a missing secret is a configuration outage.
+    if (!DODO_WEBHOOK_SECRET) {
+      return res.status(503).json({ message: 'billing webhook is not configured' });
+    }
+    if (!verifyWebhookSignature(req)) {
       return res.status(401).json({ message: 'invalid webhook signature' });
     }
     const event = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;

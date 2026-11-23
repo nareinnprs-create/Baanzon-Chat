@@ -44,7 +44,12 @@ export default function HeaderVoiceButton({ className }: { className?: string })
             : 'Sorry, that did not go through. Please try again.';
         }
         const reply = fresh.filter((message) => message.isCreatedByUser !== true).pop();
-        if (reply && reply.unfinished !== true && typeof reply.text === 'string' && reply.text.trim()) {
+        if (
+          reply &&
+          reply.unfinished !== true &&
+          typeof reply.text === 'string' &&
+          reply.text.trim()
+        ) {
           return reply.text;
         }
       }

@@ -71,6 +71,14 @@ async function probeImage(account, token, model) {
   return response.status;
 }
 
+/**
+ * Diya's cloud speech models. They live in api/server/routes/voice.js rather
+ * than a router table, so they are listed here: a retired Whisper or Aura model
+ * breaks voice exactly the way a retired chat model breaks chat, and nothing
+ * else in the pipeline would notice.
+ */
+const VOICE_MODELS = ['@cf/openai/whisper-large-v3-turbo', '@cf/deepgram/aura-1'];
+
 (async () => {
   const env = loadEnv();
   const base = env.OPRAIZ_BASEURL || process.env.OPRAIZ_BASEURL;
@@ -100,14 +108,18 @@ async function probeImage(account, token, model) {
   }
 
   if (account && token) {
-    for (const model of imageModels()) {
+    const cloudflareModels = [
+      ...imageModels().map((model) => ['image', model]),
+      ...VOICE_MODELS.map((model) => ['voice', model]),
+    ];
+    for (const [kind, model] of cloudflareModels) {
       try {
         const status = await probeImage(account, token, model);
         if (status === 404 || status === 410) {
-          dead.push(`image ${model} -> ${status}`);
+          dead.push(`${kind} ${model} -> ${status}`);
         }
       } catch (error) {
-        console.log(`[model-health] image ${model} probe error: ${error.message}`);
+        console.log(`[model-health] ${kind} ${model} probe error: ${error.message}`);
       }
     }
   }
@@ -118,5 +130,5 @@ async function probeImage(account, token, model) {
     }
     process.exit(1);
   }
-  console.log(`[model-health] ok: ${chatModels.length} chat + image models live`);
+  console.log(`[model-health] ok: ${chatModels.length} chat + image/voice models live`);
 })();

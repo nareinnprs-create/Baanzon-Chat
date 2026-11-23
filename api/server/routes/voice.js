@@ -17,7 +17,7 @@ const mongoose = require('mongoose');
 const { logger } = require('@librechat/data-schemas');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
 const configMiddleware = require('~/server/middleware/config/app');
-const { projectsLimiter } = require('~/server/middleware/limiters');
+const { voiceLimiter } = require('~/server/middleware/limiters');
 const {
   buildVoiceConfig,
   voiceClientConfig,
@@ -28,7 +28,10 @@ const {
 const router = express.Router();
 
 const SIDECAR_URL = process.env.VOICE_TTS_URL || 'http://127.0.0.1:8471';
-const MAX_AUDIO_BYTES = 8 * 1024 * 1024;
+// The global JSON parser stops at 3MB and base64 costs 4/3, so a 2MB clip is the
+// most this route can actually receive. Keeping the check aligned means an
+// oversized clip gets our JSON error instead of a body-parser 413.
+const MAX_AUDIO_BYTES = 2 * 1024 * 1024;
 
 const SCRIPT_LANG = [
   [/[\u0900-\u097F]/, 'hi'],
@@ -171,7 +174,7 @@ async function synthesize(text, lang) {
 }
 
 /** Speech in: base64 audio -> text (+ language when the engine reports it). */
-router.post('/stt', requireJwtAuth, projectsLimiter, async (req, res) => {
+router.post('/stt', requireJwtAuth, voiceLimiter, async (req, res) => {
   const { audio } = req.body ?? {};
   if (typeof audio !== 'string' || audio.length === 0) {
     return res.status(400).json({ error: 'audio is required (base64)' });
@@ -203,7 +206,7 @@ router.post('/stt', requireJwtAuth, projectsLimiter, async (req, res) => {
 });
 
 /** Speech out: text -> audio (one fixed female voice per language). */
-router.post('/tts', requireJwtAuth, projectsLimiter, async (req, res) => {
+router.post('/tts', requireJwtAuth, voiceLimiter, async (req, res) => {
   const text = String(req.body?.text || '')
     .slice(0, 1200)
     .trim();

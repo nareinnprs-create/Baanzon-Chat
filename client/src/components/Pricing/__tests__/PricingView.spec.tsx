@@ -4,6 +4,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { TBillingProductsResponse } from 'librechat-data-provider';
 import { PricingView } from '../index';
 
+jest.mock('~/utils/fullPageRedirect', () => ({ redirectTo: jest.fn() }));
+
 jest.mock('~/hooks', () => ({
   useLocalize: () => (key: string) => key,
   useDocumentTitle: jest.fn(),
@@ -14,6 +16,8 @@ jest.mock('~/data-provider', () => {
   return {
     useBillingProducts: jest.fn(),
     useBillingSubscription: jest.fn(),
+    useBillingPlayProducts: () => ({ data: undefined, isLoading: false }),
+    useVerifyBillingPlayPurchase: () => ({ mutate: jest.fn(), isPending: false }),
     useCreateCheckout: () => checkoutApi,
   };
 });
@@ -106,12 +110,15 @@ describe('PricingView', () => {
     );
   });
 
-  it('renders no purchase surface inside the Android app', () => {
+  it('renders no web purchase surface inside the Android app', () => {
     localStorage.setItem('baanzon_android_app', '1');
     renderView();
 
-    expect(screen.getByText('com_ui_pricing_on_web')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'com_ui_pricing_subscribe' })).not.toBeInTheDocument();
+    /* The TWA branch returns PlayBilling before the web catalog, so the web
+     * subscribe/top-up buttons and the checkout mutation must be absent. */
+    expect(
+      screen.queryByRole('button', { name: 'com_ui_pricing_subscribe' }),
+    ).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'com_ui_pricing_topup' })).not.toBeInTheDocument();
     expect(checkoutApi.mutate).not.toHaveBeenCalled();
   });

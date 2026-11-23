@@ -68,11 +68,7 @@ export default function FeedbackDialog() {
       <div className="flex items-center justify-between">
         <Label id="feedback-label">{localize('com_ui_feedback_entry')}</Label>
         <OGDialogTrigger asChild>
-          <Button
-            aria-labelledby="feedback-label"
-            variant="outline"
-            onClick={() => setOpen(true)}
-          >
+          <Button aria-labelledby="feedback-label" variant="outline" onClick={() => setOpen(true)}>
             <MessageSquarePlus className="size-4" aria-hidden="true" />
             {localize('com_ui_feedback_title')}
           </Button>

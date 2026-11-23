@@ -97,7 +97,9 @@ function resolvePlayProduct(playProductId) {
 }
 
 function isMock() {
-  return (process.env.DODO_MODE || 'mock').toLowerCase() === 'mock';
+  // Live by default: a deploy that forgets DODO_MODE must not silently enable
+  // the mock purchase route that grants plans to any signed-in user.
+  return (process.env.DODO_MODE || 'live').toLowerCase() === 'mock';
 }
 
 module.exports = { TIER_LIMITS, PACKS, PRODUCTS, PLAY_PRODUCTS, resolveProductId, resolvePlayProduct, isMock };
