@@ -13,6 +13,11 @@ jest.mock('~/server/controllers/UserController', () => ({
   updateUserPluginsController: jest.fn((req, res) => res.status(204).end()),
   resendVerificationController: jest.fn((req, res) => res.status(204).end()),
   exportUserDataController: jest.fn((req, res) => res.status(204).end()),
+  // Routes added after this test was written; without them the mocked router
+  // receives `undefined` handlers and throws on registration.
+  getTrainingConsentController: jest.fn((req, res) => res.status(204).end()),
+  updateTrainingConsentController: jest.fn((req, res) => res.status(204).end()),
+  updatePhoneController: jest.fn((req, res) => res.status(204).end()),
 }));
 
 jest.mock('~/server/middleware', () => {
