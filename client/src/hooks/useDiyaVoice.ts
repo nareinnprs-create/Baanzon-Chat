@@ -564,7 +564,7 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       }
       finishSpeaking();
     },
-    [finishSpeaking, primePlayer, setError],
+    [finishSpeaking, primePlayer, setError, setStatus],
   );
 
   const speakRef = useRef(speak);
