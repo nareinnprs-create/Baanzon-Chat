@@ -18,11 +18,8 @@ const crypto = require('crypto');
 const { logger } = require('@librechat/data-schemas');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
 const usage = require('~/server/services/billing/usage');
-const {
-  PLAY_PRODUCTS,
-  resolvePlayProduct,
-} = require('~/server/services/billing/catalog');
-const BillingPayment = require('@librechat/data-schemas').createBillingPaymentModel;
+const { PLAY_PRODUCTS, resolvePlayProduct } = require('~/server/services/billing/catalog');
+const { BillingPayment } = require('~/db/models');
 
 require('~/models');
 
@@ -103,7 +100,10 @@ async function accessToken() {
     throw new Error(`Google auth failed (${res.status})`);
   }
   const body = await res.json();
-  cachedAccessToken = { token: body.access_token, expiresAt: now + (body.expires_in ?? 3600) * 1000 };
+  cachedAccessToken = {
+    token: body.access_token,
+    expiresAt: now + (body.expires_in ?? 3600) * 1000,
+  };
   return cachedAccessToken.token;
 }
 
@@ -152,7 +152,10 @@ router.post('/verify', authed, async (req, res) => {
         state === 'SUBSCRIPTION_STATE_ACTIVE' || state === 'SUBSCRIPTION_STATE_IN_GRACE_PERIOD';
       const line = (body?.lineItems || []).find((li) => li.productId === productId);
       orderId = body?.orderId || line?.orderId || '';
-      if (verified && (line?.acknowledgementState ?? body?.acknowledgementState) !== 'ACKNOWLEDGED') {
+      if (
+        verified &&
+        (line?.acknowledgementState ?? body?.acknowledgementState) !== 'ACKNOWLEDGED'
+      ) {
         const ack = await publisher(
           `/applications/${PACKAGE_NAME}/purchases/subscriptionsv2/tokens/${encodeURIComponent(purchaseToken)}:acknowledge`,
           'POST',

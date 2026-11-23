@@ -6,6 +6,7 @@ const express = require('express');
 const crypto = require('crypto');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
 const usage = require('~/server/services/billing/usage');
+const { BillingPayment } = require('~/db/models');
 const { PRODUCTS, PACKS, resolveProductId, isMock } = require('~/server/services/billing/catalog');
 
 const router = express.Router();

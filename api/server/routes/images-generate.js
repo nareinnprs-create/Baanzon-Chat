@@ -66,7 +66,8 @@ function sendImage(res, buffer) {
 const QUOTED_RE = /["“«']([^"”»']{1,60})["”»']/g;
 const COMPOSITE_TRIGGER_RE =
   /\b(add|with|saying|write|text|caption|include|put|तस्वीर|लिखो|लिखें|दिखाओ|text|எழுத|రాయండి|লেখো)\b/i;
-const INDIC_RE = /[\u0900-\u097F\u0980-\u09FF\u0A00-\u0A7F\u0A80-\u0AFF\u0B00-\u0B7F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F]/;
+const INDIC_RE =
+  /[\u0900-\u097F\u0980-\u09FF\u0A00-\u0A7F\u0A80-\u0AFF\u0B00-\u0B7F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F]/;
 
 /** Extracts the overlay texts from a prompt: quoted fragments only - never
  *  the whole prompt (that would caption the image with instructions). */
@@ -213,9 +214,7 @@ router.post('/', requireJwtAuth, imagesLimiter, async (req, res) => {
       }
       if (!r.ok) {
         lastDetail = (await r.text()).slice(0, 300);
-        console.warn(
-          `[images] ${model} failed (${r.status}), trying next in chain`,
-        );
+        console.warn(`[images] ${model} failed (${r.status}), trying next in chain`);
         continue;
       }
       const contentType = r.headers.get('content-type') || '';

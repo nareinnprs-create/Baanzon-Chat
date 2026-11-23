@@ -85,10 +85,20 @@ for (const key of Object.keys(PACKS)) {
 for (const tier of Object.keys(PRODUCTS)) {
   const p = PRODUCTS[tier];
   if (p.playProductId) {
-    PLAY_PRODUCTS[p.playProductId] = { kind: 'subscription', tier, cycle: 'monthly', amountInr: p.inr };
+    PLAY_PRODUCTS[p.playProductId] = {
+      kind: 'subscription',
+      tier,
+      cycle: 'monthly',
+      amountInr: p.inr,
+    };
   }
   if (p.playProductIdYearly) {
-    PLAY_PRODUCTS[p.playProductIdYearly] = { kind: 'subscription', tier, cycle: 'yearly', amountInr: p.yearlyInr };
+    PLAY_PRODUCTS[p.playProductIdYearly] = {
+      kind: 'subscription',
+      tier,
+      cycle: 'yearly',
+      amountInr: p.yearlyInr,
+    };
   }
 }
 
@@ -102,4 +112,12 @@ function isMock() {
   return (process.env.DODO_MODE || 'live').toLowerCase() === 'mock';
 }
 
-module.exports = { TIER_LIMITS, PACKS, PRODUCTS, PLAY_PRODUCTS, resolveProductId, resolvePlayProduct, isMock };
+module.exports = {
+  TIER_LIMITS,
+  PACKS,
+  PRODUCTS,
+  PLAY_PRODUCTS,
+  resolveProductId,
+  resolvePlayProduct,
+  isMock,
+};
