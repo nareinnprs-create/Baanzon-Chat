@@ -66,7 +66,11 @@ describe('checkSignupIdentity', () => {
       { findUser },
     );
 
-    expect(result).toEqual({ ok: false, status: 409, message: 'This phone number is already in use.' });
+    expect(result).toEqual({
+      ok: false,
+      status: 409,
+      message: 'This phone number is already in use.',
+    });
   });
 
   it('looks up username and phone for a fully fresh signup', async () => {

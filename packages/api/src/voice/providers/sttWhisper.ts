@@ -33,8 +33,9 @@ export interface WhisperSttResult {
 
 /** Pure response parser, exported for specs. */
 export function parseWhisperResponse(payload: unknown): WhisperSttResult | null {
-  const result = (payload as { result?: { text?: unknown; transcription_info?: { language?: unknown } } })
-    ?.result;
+  const result = (
+    payload as { result?: { text?: unknown; transcription_info?: { language?: unknown } } }
+  )?.result;
   const text = typeof result?.text === 'string' ? result.text.trim() : '';
   if (!text) {
     return null;

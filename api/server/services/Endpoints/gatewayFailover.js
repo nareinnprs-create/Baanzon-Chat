@@ -197,9 +197,7 @@ function wrapGatewayFetch(inner, gatewayBase, getCfg) {
     // chat: primary -> chain (model rewritten per attempt);
     // anything else: two attempts with the same body.
     const candidates =
-      chat && resolvedModel.startsWith('@cf/')
-        ? chatChain(resolvedModel, cfg)
-        : [null, null];
+      chat && resolvedModel.startsWith('@cf/') ? chatChain(resolvedModel, cfg) : [null, null];
     // Skip benched models, but a fully benched chain still runs (last resort).
     const healthy = candidates.filter((m) => !m || !isBenched(m));
     const chain = healthy.length ? healthy : candidates;
@@ -282,7 +280,9 @@ function installGatewayFailover() {
         .getAppConfig({ baseOnly: true })
         .then((config) => config?.failover)
         .catch((e) => {
-          logger.warn(`[gatewayFailover] failed to load failover config, using defaults: ${e.message}`);
+          logger.warn(
+            `[gatewayFailover] failed to load failover config, using defaults: ${e.message}`,
+          );
           return undefined;
         });
     }

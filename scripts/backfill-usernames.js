@@ -77,7 +77,9 @@ function candidateFromEmail(email) {
     }
   }
 
-  console.log(`${dryRun ? '[dry-run] would update' : 'Updated'} ${dryRun ? users.length : updated} users`);
+  console.log(
+    `${dryRun ? '[dry-run] would update' : 'Updated'} ${dryRun ? users.length : updated} users`,
+  );
   if (!dryRun && updated > 0) {
     await new Promise((resolve) => setTimeout(resolve, 6000));
   }

@@ -417,10 +417,7 @@ export function createUserMethods(
    * phone). Rejects a number another user already holds. Returns 'taken' on
    * collision so the caller can surface a 409 without a second lookup.
    */
-  async function setPhone(
-    userId: string,
-    phone: string,
-  ): Promise<IUser | 'taken' | null> {
+  async function setPhone(userId: string, phone: string): Promise<IUser | 'taken' | null> {
     const User = mongoose.models.User;
     const clash = await User.exists({ phone, _id: { $ne: userId } });
     if (clash) {

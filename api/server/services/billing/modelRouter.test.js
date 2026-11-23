@@ -90,7 +90,9 @@ describe('capability lanes select their public model server-side', () => {
   });
 
   it('balanced keeps the requested slug', () => {
-    expect(routeModel('pro', 'baanzon-reasoning', 'balanced').model).toBe('@cf/openai/gpt-oss-120b');
+    expect(routeModel('pro', 'baanzon-reasoning', 'balanced').model).toBe(
+      '@cf/openai/gpt-oss-120b',
+    );
   });
 
   it('does not reinterpret pipeline-only lanes as chat models', () => {

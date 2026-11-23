@@ -219,7 +219,9 @@ const updatePhoneController = async (req, res) => {
   try {
     const phone = (req.body?.phone || '').trim();
     if (!/^\+[1-9]\d{6,14}$/.test(phone)) {
-      return res.status(400).json({ message: 'Invalid phone number. Use +<country code><number>.' });
+      return res
+        .status(400)
+        .json({ message: 'Invalid phone number. Use +<country code><number>.' });
     }
     const result = await db.setPhone(req.user.id, phone);
     if (result === 'taken') {

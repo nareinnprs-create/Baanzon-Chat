@@ -24,9 +24,7 @@ export interface SignupIdentityDeps {
   reservedUsernames?: string[];
 }
 
-export type SignupIdentityResult =
-  | { ok: true }
-  | { ok: false; status: number; message: string };
+export type SignupIdentityResult = { ok: true } | { ok: false; status: number; message: string };
 
 /**
  * Signup collision checks shared by every registration path: reserved or taken

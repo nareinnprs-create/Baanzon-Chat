@@ -225,12 +225,16 @@ describe('voice session', () => {
     // flux's English-guessed transcript is replaced by the whisper text.
     expect(msgs.some((m) => m.type === 'user-transcript' && m.text === 'તમે કેમ છો?')).toBe(true);
     // Playback is delegated to the client; aura never speaks.
-    expect(msgs.some((m) => m.type === 'tts-mode' && m.engine === 'client' && m.lang === 'gu')).toBe(true);
+    expect(
+      msgs.some((m) => m.type === 'tts-mode' && m.engine === 'client' && m.lang === 'gu'),
+    ).toBe(true);
     expect(spoken).toEqual([]);
     expect(whisperCalls.length).toBe(1);
     expect(saveTurns.map((t) => t.text)).toEqual(['તમે કેમ છો?', 'Hello there. Second sentence.']);
     expect(
-      msgs.some((m) => m.type === 'assistant-transcript' && m.text === 'Hello there. Second sentence.'),
+      msgs.some(
+        (m) => m.type === 'assistant-transcript' && m.text === 'Hello there. Second sentence.',
+      ),
     ).toBe(true);
   });
 
@@ -254,20 +258,20 @@ describe('voice session', () => {
     // listening frame predates the turn and doesn't count).
     const modeIdx = msgs.findIndex((m) => m.type === 'tts-mode');
     expect(modeIdx).toBeGreaterThan(-1);
-    expect(
-      msgs.slice(modeIdx).some((m) => m.type === 'state' && m.state === 'speaking'),
-    ).toBe(true);
-    expect(
-      msgs.slice(modeIdx).some((m) => m.type === 'state' && m.state === 'listening'),
-    ).toBe(false);
+    expect(msgs.slice(modeIdx).some((m) => m.type === 'state' && m.state === 'speaking')).toBe(
+      true,
+    );
+    expect(msgs.slice(modeIdx).some((m) => m.type === 'state' && m.state === 'listening')).toBe(
+      false,
+    );
 
     client.emitMessage(JSON.stringify({ type: 'tts-done' }));
     await new Promise((r) => setTimeout(r, 5));
     const after = client.json();
     const doneIdx = after.map((m) => m.type).lastIndexOf('tts-mode');
-    expect(
-      after.slice(doneIdx).some((m) => m.type === 'state' && m.state === 'listening'),
-    ).toBe(true);
+    expect(after.slice(doneIdx).some((m) => m.type === 'state' && m.state === 'listening')).toBe(
+      true,
+    );
   });
 
   it('caps out users with no remaining seconds', async () => {

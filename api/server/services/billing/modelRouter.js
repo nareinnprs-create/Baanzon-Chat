@@ -183,6 +183,8 @@ const LANE_SLUGS = {
 /** Indic scripts (scheduled languages): Devanagari, Bengali-Assamese,
  *  Gurmukhi, Gujarati, Oriya, Tamil, Telugu, Kannada, Malayalam, Sinhala. */
 const INDIC_SCRIPT_RE =
+  // Script blocks, not combining sequences: the rule cannot tell them apart.
+  // eslint-disable-next-line no-misleading-character-class
   /[\u0900-\u097F\u0980-\u09FF\u0A00-\u0A7F\u0A80-\u0AFF\u0B00-\u0B7F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F\u0D80-\u0DFF]/;
 
 /** Indic strength ranking (lower = stronger) used to reorder a chain when the
@@ -264,7 +266,10 @@ function routeModel(tier, requested, lane, text) {
 
   const t = String(tier || 'free').toLowerCase();
   const laneSlug = LANE_SLUGS[String(lane || '').toLowerCase()];
-  const slug = laneSlug ?? ALIASES[requestedStr] ?? (PUBLIC_MODELS.includes(requestedStr) ? requestedStr : null);
+  const slug =
+    laneSlug ??
+    ALIASES[requestedStr] ??
+    (PUBLIC_MODELS.includes(requestedStr) ? requestedStr : null);
 
   if (!slug) {
     return null;

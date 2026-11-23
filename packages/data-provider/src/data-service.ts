@@ -1678,9 +1678,10 @@ export function getBillingPlayProducts(): Promise<{ items: t.TPlayProduct[] }> {
   return request.get(endpoints.billingPlayProducts());
 }
 
-export function verifyBillingPlayPurchase(
-  payload: { purchaseToken: string; productId: string },
-): Promise<t.TPlayVerifyResponse> {
+export function verifyBillingPlayPurchase(payload: {
+  purchaseToken: string;
+  productId: string;
+}): Promise<t.TPlayVerifyResponse> {
   return request.post(endpoints.billingPlayVerify(), payload);
 }
 

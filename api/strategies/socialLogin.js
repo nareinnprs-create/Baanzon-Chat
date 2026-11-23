@@ -101,8 +101,7 @@ const socialLogin =
          *  email (Google only returns verified addresses). Unverified local
          *  accounts stay protected — claiming those would let anyone who
          *  typed an address take over the account. */
-        const bothVerified =
-          existingUser.emailVerified === true && emailVerified === true;
+        const bothVerified = existingUser.emailVerified === true && emailVerified === true;
         if (bothVerified && (provider === 'google' || provider === 'openid')) {
           await updateUser(existingUser._id, { [providerKey]: id });
           existingUser[providerKey] = id;

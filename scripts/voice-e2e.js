@@ -85,7 +85,9 @@ async function main() {
       body: JSON.stringify({ text, history: [] }),
     });
     const data = await turn.json();
-    console.log(`turn ${label}: ${turn.status} ${JSON.stringify((data.reply || data.error || '').slice(0, 90))}`);
+    console.log(
+      `turn ${label}: ${turn.status} ${JSON.stringify((data.reply || data.error || '').slice(0, 90))}`,
+    );
   }
 }
 

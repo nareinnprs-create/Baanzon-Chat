@@ -15,7 +15,10 @@ describe('sttWhisper helpers', () => {
   it('parseWhisperResponse extracts text and language', () => {
     expect(
       parseWhisperResponse({
-        result: { text: '  નમસ્તે  ', transcription_info: { language: 'gu', language_probability: 0.9 } },
+        result: {
+          text: '  નમસ્તે  ',
+          transcription_info: { language: 'gu', language_probability: 0.9 },
+        },
       }),
     ).toEqual({ text: 'નમસ્તે', language: 'gu' });
   });
@@ -27,7 +30,10 @@ describe('sttWhisper helpers', () => {
   });
 
   it('parseWhisperResponse defaults the language to en', () => {
-    expect(parseWhisperResponse({ result: { text: 'hello' } })).toEqual({ text: 'hello', language: 'en' });
+    expect(parseWhisperResponse({ result: { text: 'hello' } })).toEqual({
+      text: 'hello',
+      language: 'en',
+    });
   });
 
   it.each([
