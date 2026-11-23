@@ -119,9 +119,9 @@ export default function PhoneRequired({
             variant="ghost"
             onClick={onSignOut}
             className="mt-3 w-full text-text-secondary"
-            aria-label="Sign out"
+            aria-label={localize('com_nav_log_out')}
           >
-            Sign out
+            {localize('com_nav_log_out')}
           </Button>
         </div>
       </div>

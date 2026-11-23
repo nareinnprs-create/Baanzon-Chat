@@ -59,8 +59,8 @@ export default function PlayBilling() {
     };
   }, []);
 
-  const skus = (productsQuery.data?.items ?? []).map((p: TPlayProduct) => p.sku);
   useEffect(() => {
+    const skus = (productsQuery.data?.items ?? []).map((p: TPlayProduct) => p.sku);
     if (!service || skus.length === 0) {
       return;
     }
@@ -83,7 +83,7 @@ export default function PlayBilling() {
     return () => {
       cancelled = true;
     };
-  }, [service, skus.join(',')]);
+  }, [service, productsQuery.data]);
 
   const priceFor = (sku: string): string => details.find((d) => d.itemId === sku)?.price ?? '';
 
