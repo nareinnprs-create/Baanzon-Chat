@@ -1,4 +1,4 @@
-import type { TScheduleCadence } from './types/schedules';
+import type { ScheduleStructuredFrequency, TScheduleCadence } from './types/schedules';
 import {
   cadenceIntervalMinutes,
   cadenceToCron,
@@ -12,7 +12,14 @@ import {
  * times the schedule does not keep or accepts a cadence the server rejects.
  */
 
-const at = (overrides: Partial<Extract<TScheduleCadence, { frequency: 'daily' }>>) =>
+type StructuredCadence = {
+  frequency: ScheduleStructuredFrequency;
+  hour: number;
+  minute: number;
+  daysOfWeek?: number[];
+};
+
+const at = (overrides: Partial<StructuredCadence> = {}): TScheduleCadence =>
   ({ frequency: 'daily', hour: 9, minute: 30, ...overrides }) as TScheduleCadence;
 
 describe('cadenceToCron', () => {
