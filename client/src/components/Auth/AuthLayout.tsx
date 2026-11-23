@@ -12,7 +12,6 @@ function AuthLayout({
   isFetching,
   startupConfig,
   startupConfigError,
-  pathname,
   error,
 }: {
   children: React.ReactNode;

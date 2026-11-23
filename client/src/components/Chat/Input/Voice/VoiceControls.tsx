@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useAtom } from 'jotai';
+import { Mic } from 'lucide-react';
 import * as Ariakit from '@ariakit/react';
-import { Mic, Volume2, VolumeX } from 'lucide-react';
 import type { RefObject } from 'react';
 import useSpeechRecognition, { isSpeechRecognitionSupported } from './useSpeechRecognition';
-import { useLatestMessage } from '~/hooks/Messages/useLatestMessage';
 import { applyTranscript, type InsertionSlot } from './speech';
-import useSpeechSynthesis from './useSpeechSynthesis';
 import { useChatFormContext } from '~/Providers';
-import { getLatestText, cn } from '~/utils';
 import { voiceActivityAtom } from './atoms';
 import { useLocalize } from '~/hooks';
+import { cn } from '~/utils';
 
 const controlClasses = cn(
   'flex size-theme-control items-center justify-center rounded-theme-control-round border border-border-light',
@@ -164,74 +162,9 @@ function VoiceMic({ textAreaRef }: { textAreaRef: RefObject<HTMLTextAreaElement>
   );
 }
 
-/**
- * Read-aloud: speaks the latest assistant message of the active branch via
- * speech synthesis; a second click stops mid-utterance.
- */
-function ReadAloud({ index }: { index: number }) {
-  const localize = useLocalize();
-  const latestMessage = useLatestMessage(index);
-  const [activity, setActivity] = useAtom(voiceActivityAtom);
-  const speaking = activity === 'speaking';
-
-  const text =
-    latestMessage && latestMessage.isCreatedByUser !== true ? getLatestText(latestMessage) : '';
-
-  const handleEnd = useCallback(
-    (stillSpeaking: boolean) => {
-      if (!stillSpeaking) {
-        setActivity((prev) => (prev === 'speaking' ? 'idle' : prev));
-      }
-    },
-    [setActivity],
-  );
-  const { speak, cancel } = useSpeechSynthesis(handleEnd);
-
-  const toggle = useCallback(() => {
-    if (speaking) {
-      cancel();
-      return;
-    }
-    setActivity('speaking');
-    if (!speak(text)) {
-      setActivity('idle');
-    }
-  }, [cancel, speak, speaking, setActivity, text]);
-
-  // Yield to the mic: dictation must not transcribe the loudspeaker.
-  useEffect(() => {
-    if (activity === 'listening') {
-      cancel();
-    }
-  }, [activity, cancel]);
-
-  return (
-    <TooltipButton
-      label={speaking ? localize('com_ui_voice_stop') : localize('com_ui_voice_read')}
-      testId="voice-read-button"
-      onClick={toggle}
-      disabled={!text && !speaking}
-      pressed={speaking}
-    >
-      {speaking ? (
-        <VolumeX className="size-4" aria-hidden="true" />
-      ) : (
-        <Volume2 className="size-4" aria-hidden="true" />
-      )}
-    </TooltipButton>
-  );
-}
-
-/** Voice in/out for the composer: dictation mic + read-aloud of the latest reply. */
-function VoiceControls({
-  index,
-  textAreaRef,
-}: {
-  index: number;
-  textAreaRef: RefObject<HTMLTextAreaElement>;
-}) {
-  /** Composer carries ONE voice control: the dictation mic. Read-aloud lives
-   *  on each assistant message (message-level actions), matching ChatGPT. */
+/** Voice in for the composer: the dictation mic. Read-aloud lives on each
+ *  assistant message (message-level actions), matching ChatGPT. */
+function VoiceControls({ textAreaRef }: { textAreaRef: RefObject<HTMLTextAreaElement> }) {
   return <VoiceMic textAreaRef={textAreaRef} />;
 }
 
