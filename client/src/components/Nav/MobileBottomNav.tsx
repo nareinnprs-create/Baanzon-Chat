@@ -1,11 +1,11 @@
 import { memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Folder, LibraryBig, MessagesSquare } from 'lucide-react';
-import type { ComponentType } from 'react';
-import BaanzonMark from '~/components/ui/BaanzonMark';
 import type { LucideIcon } from 'lucide-react';
+import type { ComponentType } from 'react';
 import type { TranslationKeys } from '~/hooks';
 import useSidebarState from '~/hooks/Nav/useSidebarState';
+import BaanzonMark from '~/components/ui/BaanzonMark';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 

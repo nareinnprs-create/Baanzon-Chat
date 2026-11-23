@@ -1,7 +1,7 @@
 import React, { memo, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { ProviderIcon, getProviderIconDef } from '@librechat/client';
 import { resolveProviderId } from 'librechat-data-provider';
+import { ProviderIcon, getProviderIconDef } from '@librechat/client';
 import { EntityEndpointMark, isEntityEndpoint } from '~/components/Endpoints/EntityEndpointMark';
 import BaanzonMark from '~/components/ui/BaanzonMark';
 import CustomIcon from '~/components/ui/CustomIcon';

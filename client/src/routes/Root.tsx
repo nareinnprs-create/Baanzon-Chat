@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback, startTransition } from 'react
 import { useRecoilValue } from 'recoil';
 import { Outlet } from 'react-router-dom';
 import { useMediaQuery } from '@librechat/client';
-import PhoneRequired from '~/components/Auth/PhoneRequired';
 import {
   UnifiedSidebar,
   SIDEBAR_TRANSITION,
@@ -35,6 +34,7 @@ import { InConversationFind } from '~/components/InConversationFind';
 import useKeyboardShortcuts from '~/hooks/useKeyboardShortcuts';
 import { NotificationsBell } from '~/components/Notifications';
 import { CommandPalette } from '~/components/CommandPalette';
+import PhoneRequired from '~/components/Auth/PhoneRequired';
 import useDrawerDismiss from '~/hooks/Nav/useDrawerDismiss';
 import useSidebarToggle from '~/hooks/Nav/useSidebarToggle';
 import useSidebarState from '~/hooks/Nav/useSidebarState';

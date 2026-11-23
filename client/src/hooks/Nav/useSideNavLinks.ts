@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { MCPIcon, AttachmentIcon, OpenAIMinimalIcon } from '@librechat/client';
-import BaanzonMark from '~/components/ui/BaanzonMark';
 import {
   Brain,
   Bookmark,
@@ -35,6 +34,7 @@ import Parameters from '~/components/SidePanel/Parameters/Panel';
 import { MemoryPanel } from '~/components/SidePanel/Memories';
 import FilesPanel from '~/components/SidePanel/Files/Panel';
 import { PromptsAccordion } from '~/components/Prompts';
+import BaanzonMark from '~/components/ui/BaanzonMark';
 import { SkillsAccordion } from '~/components/Skills';
 
 export default function useSideNavLinks({

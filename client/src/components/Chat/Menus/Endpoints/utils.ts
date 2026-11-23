@@ -1,5 +1,4 @@
 import React from 'react';
-import BaanzonMark from '~/components/ui/BaanzonMark';
 import { isAgentsEndpoint, isAssistantsEndpoint } from 'librechat-data-provider';
 import type {
   TModelSpec,
@@ -9,6 +8,7 @@ import type {
 } from 'librechat-data-provider';
 import type { useLocalize } from '~/hooks';
 import SpecIcon from '~/components/Chat/Menus/Endpoints/components/SpecIcon';
+import BaanzonMark from '~/components/ui/BaanzonMark';
 import { Endpoint, SelectedValues } from '~/common';
 import { getSpecAgentAvatarURL } from '~/utils';
 

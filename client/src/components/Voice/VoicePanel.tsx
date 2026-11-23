@@ -3,11 +3,11 @@ import { CircleSlash2, Waves, X } from 'lucide-react';
 import { Alert, Button, EmptyState, Spinner, TooltipAnchor } from '@librechat/client';
 import type { ReactNode } from 'react';
 import type { VoiceHistoryTurn, VoiceOptions, VoiceStatus, VoiceTranscriptRole } from './types';
+import OpenSidebar from '~/components/Chat/Menus/OpenSidebar';
 import { useAuthToken } from '~/hooks/AuthContext';
 import useDiyaVoice from '~/hooks/useDiyaVoice';
 import { VOICE_LABELS as L } from './labels';
 import { requestDiyaTurn } from './api';
-import OpenSidebar from '~/components/Chat/Menus/OpenSidebar';
 import { cn } from '~/utils';
 import Orb from './Orb';
 

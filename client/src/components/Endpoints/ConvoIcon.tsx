@@ -4,8 +4,8 @@ import { ProviderId } from 'librechat-data-provider';
 import { Sparkles, AssistantIcon, ProviderIcon, getProviderIconDef } from '@librechat/client';
 import type * as t from 'librechat-data-provider';
 import ConvoIconURL from '~/components/Endpoints/ConvoIconURL';
-import BaanzonMark from '~/components/ui/BaanzonMark';
 import { cn, getEntity, getIconEndpoint } from '~/utils';
+import BaanzonMark from '~/components/ui/BaanzonMark';
 import { useProviderIcon } from '~/hooks/Endpoint';
 import { isImageURL } from '~/utils/icons';
 

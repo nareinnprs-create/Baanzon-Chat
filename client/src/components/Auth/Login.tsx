@@ -8,9 +8,9 @@ import { getLoginError, persistRedirectToSession } from '~/utils';
 import { ErrorMessage } from '~/components/Auth/ErrorMessage';
 import SocialButton from '~/components/Auth/SocialButton';
 import { useAuthContext } from '~/hooks/AuthContext';
+import SocialLoginRender from './SocialLoginRender';
 import { useLocalize } from '~/hooks';
 import LoginForm from './LoginForm';
-import SocialLoginRender from './SocialLoginRender';
 
 interface LoginLocationState {
   redirect_to?: string;

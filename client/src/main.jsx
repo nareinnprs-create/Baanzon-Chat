@@ -1,8 +1,8 @@
 import './polyfills/regeneratorRuntime';
 import { createRoot } from 'react-dom/client';
+import { detectAndroidApp } from './utils/androidApp';
 import { initializeI18n } from './locales/i18n';
 import App from './App';
-import { detectAndroidApp } from './utils/androidApp';
 import '@librechat/client/style.css';
 import './style.css';
 import './mobile.css';

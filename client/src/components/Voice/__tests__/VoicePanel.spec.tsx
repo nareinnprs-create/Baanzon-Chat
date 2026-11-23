@@ -1,5 +1,5 @@
-import { Provider as JotaiProvider, createStore } from 'jotai';
 import { RecoilRoot } from 'recoil';
+import { Provider as JotaiProvider, createStore } from 'jotai';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import type { VoicePanelProps } from '../VoicePanel';
