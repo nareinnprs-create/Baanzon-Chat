@@ -30,10 +30,10 @@ function makeInner(responses) {
       return new Response(okBody(JSON.parse(init?.body || '{}').model || ''), { status: 200 });
     }
     if (next && next.empty) {
-      return new Response(
-        JSON.stringify({ id: 'x', choices: [{ message: { content: '' } }] }),
-        { status: 200, headers: { 'content-type': 'application/json' } },
-      );
+      return new Response(JSON.stringify({ id: 'x', choices: [{ message: { content: '' } }] }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      });
     }
     if (typeof next === 'number') {
       return new Response('boom', { status: next });
@@ -62,6 +62,7 @@ describe('gateway failover', () => {
       '@cf/zai-org/glm-4.7-flash',
       '@cf/openai/gpt-oss-20b',
       '@cf/zai-org/glm-5.3',
+      '@cf/meta/llama-3.2-3b-instruct',
       '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
     ]);
   });
@@ -309,9 +310,7 @@ describe('gateway failover', () => {
     });
     expect(res.status).toBe(200);
     expect(inner.calls).toHaveLength(3);
-    expect(JSON.parse(inner.calls[2].body).model).toBe(
-      '@cf/deepseek-ai/deepseek-v4.1-flash-1017',
-    );
+    expect(JSON.parse(inner.calls[2].body).model).toBe('@cf/deepseek-ai/deepseek-v4.1-flash-1017');
   });
 
   it('returns the last response when the whole chain fails', async () => {
@@ -403,13 +402,11 @@ describe('gateway failover', () => {
 
     it('accepts content, tool calls and reasoning as usable output', () => {
       expect(isEmptyChat200({ choices: [{ message: { content: 'ok' } }] })).toBe(false);
-      expect(
-        isEmptyChat200({ choices: [{ message: { tool_calls: [{ id: 't' }] } }] }),
-      ).toBe(false);
+      expect(isEmptyChat200({ choices: [{ message: { tool_calls: [{ id: 't' }] } }] })).toBe(false);
       expect(isEmptyChat200({ choices: [{ message: { reasoning: 'thinking' } }] })).toBe(false);
-      expect(
-        isEmptyChat200({ choices: [{ message: { reasoning_content: 'thinking' } }] }),
-      ).toBe(false);
+      expect(isEmptyChat200({ choices: [{ message: { reasoning_content: 'thinking' } }] })).toBe(
+        false,
+      );
     });
   });
 });
