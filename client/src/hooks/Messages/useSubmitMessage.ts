@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { useAtomValue } from 'jotai';
 import { useToastContext } from '@librechat/client';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { replaceSpecialVars } from 'librechat-data-provider';
@@ -189,6 +188,7 @@ export default function useSubmitMessage() {
       showToast,
       localize,
       isTemporary,
+      token,
     ],
   );
 
