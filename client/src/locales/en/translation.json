@@ -1433,6 +1433,7 @@
   "com_ui_canvas_version_current": "Current",
   "com_ui_canvas_version_diff_summary": "+{{added}} blocks, -{{removed}} blocks, ~{{changed}} changed",
   "com_ui_canvas_version_diff_unchanged": "No changes since this version.",
+  "com_ui_canvas_version_label": "Save version {{number}}",
   "com_ui_canvas_version_restored": "Version restored.",
   "com_ui_canvas_versions_empty_description": "Save a version to capture the document as it is now.",
   "com_ui_canvas_versions_empty_title": "No versions yet",

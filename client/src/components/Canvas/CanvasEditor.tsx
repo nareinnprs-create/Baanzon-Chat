@@ -60,14 +60,31 @@ export default function CanvasEditor({
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
+  const aiPanelRef = useRef<HTMLDivElement>(null);
+
+  const activeSelection = selection != null && selection.text.trim().length > 0 ? selection : null;
+  const selectedBlockId = activeSelection?.blockId ?? null;
+
+  /**
+   * On a phone the AI-edit panel renders below the block, which is exactly
+   * where the on-screen keyboard sits. Bring it into view when it opens.
+   */
+  useEffect(() => {
+    const node = aiPanelRef.current;
+    if (selectedBlockId == null || node == null || typeof node.scrollIntoView !== 'function') {
+      return;
+    }
+    const reducedMotion =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    node.scrollIntoView({ block: 'nearest', behavior: reducedMotion ? 'auto' : 'smooth' });
+  }, [selectedBlockId]);
 
   useEffect(() => {
     return () => {
       controllerRef.current?.abort();
     };
   }, []);
-
-  const activeSelection = selection != null && selection.text.trim().length > 0 ? selection : null;
 
   const handleSelect = useCallback(
     (block: CanvasBlock) => (event: SyntheticEvent<HTMLTextAreaElement>) => {
@@ -175,6 +192,7 @@ export default function CanvasEditor({
                     type="button"
                     variant="ghost"
                     size="icon-sm"
+                    className="max-md:min-h-11 max-md:min-w-11"
                     aria-label={localize(L.moveBlockUp, { index: index + 1 })}
                     disabled={busy || index === 0 || onMoveBlock == null}
                     onClick={() => onMoveBlock?.(block.id, 'up')}
@@ -185,6 +203,7 @@ export default function CanvasEditor({
                     type="button"
                     variant="ghost"
                     size="icon-sm"
+                    className="max-md:min-h-11 max-md:min-w-11"
                     aria-label={localize(L.moveBlockDown, { index: index + 1 })}
                     disabled={busy || index === document.blocks.length - 1 || onMoveBlock == null}
                     onClick={() => onMoveBlock?.(block.id, 'down')}
@@ -195,6 +214,7 @@ export default function CanvasEditor({
                     type="button"
                     variant="ghost"
                     size="icon-sm"
+                    className="max-md:min-h-11 max-md:min-w-11"
                     aria-label={localize(L.removeBlock, { index: index + 1 })}
                     disabled={busy || onRemoveBlock == null}
                     onClick={() => onRemoveBlock?.(block.id)}
@@ -206,6 +226,7 @@ export default function CanvasEditor({
 
               {blockSelection ? (
                 <div
+                  ref={aiPanelRef}
                   role="group"
                   aria-label={localize(L.aiEdit)}
                   className="flex flex-col gap-2 rounded-xl border border-border-light bg-surface-secondary p-3"

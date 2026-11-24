@@ -37,6 +37,7 @@ export const CANVAS_LABELS = {
   undo: 'com_ui_canvas_undo',
   redo: 'com_ui_canvas_redo',
   createVersion: 'com_ui_canvas_create_version',
+  versionLabel: 'com_ui_canvas_version_label',
   previewTab: 'com_ui_canvas_preview_tab',
   commentsTab: 'com_ui_canvas_comments_tab',
   versionsTab: 'com_ui_canvas_versions_tab',

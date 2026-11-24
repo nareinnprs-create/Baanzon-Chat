@@ -101,6 +101,7 @@ export default function VersionHistory({
                       type="button"
                       variant="ghost"
                       size="icon-sm"
+                      className="max-md:min-h-11 max-md:min-w-11"
                       aria-label={localize(L.deleteVersion)}
                       onClick={() => onDelete(version.id)}
                     >

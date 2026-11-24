@@ -1,4 +1,4 @@
-import { useCallback, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { KeyboardEvent, PointerEvent, ReactNode } from 'react';
 import { CANVAS_LABELS as L } from './labels';
 import { clamp } from '~/utils/canvas';
@@ -24,12 +24,20 @@ export type SplitViewProps = {
 };
 
 /**
+ * Width below which the panes stack. A 60/40 split at phone width leaves the
+ * side panel ~137px wide, which clipped its tabs and made both panes unusable,
+ * so narrow containers get a vertical split instead.
+ */
+const STACK_BELOW_PX = 768;
+
+/**
  * A resizable two-pane layout with a draggable, keyboard-operable divider.
  *
- * The divider is a focusable `separator` range widget: left/right arrows move
- * it by `stepPercent`, Home/End jump to the bounds, and `aria-valuenow` reports
- * the leading pane's width. The pane split is genuine layout, so it is
- * expressed with an inline percentage width; no custom CSS is introduced.
+ * Wide containers split left/right; narrow ones (phones, narrow PWA windows)
+ * stack the panes top/bottom. The divider is a focusable `separator` range
+ * widget: arrows move it by `stepPercent`, Home/End jump to the bounds, and
+ * `aria-valuenow` reports the leading pane's size. The split is genuine layout,
+ * so it is expressed with an inline percentage; no custom CSS is introduced.
  */
 export default function SplitView({
   left,
@@ -49,17 +57,35 @@ export default function SplitView({
   const [leftPercent, setLeftPercent] = useState(() =>
     clamp(initialLeftPercent, minLeftPercent, maxLeftPercent),
   );
+  const [stacked, setStacked] = useState(false);
 
-  const setFromClientX = useCallback(
-    (clientX: number) => {
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element || typeof ResizeObserver === 'undefined') {
+      return undefined;
+    }
+    const measure = () =>
+      setStacked(element.clientWidth > 0 && element.clientWidth < STACK_BELOW_PX);
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    measure();
+    return () => observer.disconnect();
+  }, []);
+
+  const setFromPointer = useCallback(
+    (clientX: number, clientY: number) => {
       const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect || rect.width === 0) {
+      if (!rect) {
         return;
       }
-      const percent = ((clientX - rect.left) / rect.width) * 100;
-      setLeftPercent(clamp(percent, minLeftPercent, maxLeftPercent));
+      const size = stacked ? rect.height : rect.width;
+      if (size === 0) {
+        return;
+      }
+      const offset = stacked ? clientY - rect.top : clientX - rect.left;
+      setLeftPercent(clamp((offset / size) * 100, minLeftPercent, maxLeftPercent));
     },
-    [maxLeftPercent, minLeftPercent],
+    [maxLeftPercent, minLeftPercent, stacked],
   );
 
   const handlePointerDown = useCallback(
@@ -69,9 +95,9 @@ export default function SplitView({
       if (typeof target.setPointerCapture === 'function') {
         target.setPointerCapture(event.pointerId);
       }
-      setFromClientX(event.clientX);
+      setFromPointer(event.clientX, event.clientY);
     },
-    [setFromClientX],
+    [setFromPointer],
   );
 
   const handlePointerMove = useCallback(
@@ -79,12 +105,12 @@ export default function SplitView({
       if (!draggingRef.current) {
         return;
       }
-      setFromClientX(event.clientX);
+      setFromPointer(event.clientX, event.clientY);
     },
-    [setFromClientX],
+    [setFromPointer],
   );
 
-  const handlePointerUp = useCallback((event: PointerEvent<HTMLDivElement>) => {
+  const endDrag = useCallback((event: PointerEvent<HTMLDivElement>) => {
     draggingRef.current = false;
     const target = event.currentTarget;
     if (
@@ -99,9 +125,9 @@ export default function SplitView({
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       let next: number | null = null;
-      if (event.key === 'ArrowLeft') {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
         next = leftPercent - stepPercent;
-      } else if (event.key === 'ArrowRight') {
+      } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
         next = leftPercent + stepPercent;
       } else if (event.key === 'Home') {
         next = minLeftPercent;
@@ -118,19 +144,22 @@ export default function SplitView({
   );
 
   return (
-    <div ref={containerRef} className={cn('flex h-full min-h-0 w-full overflow-hidden', className)}>
+    <div
+      ref={containerRef}
+      className={cn('flex h-full min-h-0 w-full overflow-hidden', stacked && 'flex-col', className)}
+    >
       <section
         id={`${baseId}-left`}
         aria-label={leftLabel}
-        className="flex min-w-0 flex-col overflow-hidden"
-        style={{ width: `${leftPercent}%` }}
+        className="flex min-h-0 min-w-0 flex-col overflow-hidden"
+        style={stacked ? { height: `${leftPercent}%` } : { width: `${leftPercent}%` }}
       >
         {left}
       </section>
 
       <div
         role="separator"
-        aria-orientation="vertical"
+        aria-orientation={stacked ? 'horizontal' : 'vertical'}
         aria-label={localize(L.splitResize)}
         aria-valuenow={Math.round(leftPercent)}
         aria-valuemin={minLeftPercent}
@@ -139,15 +168,25 @@ export default function SplitView({
         tabIndex={0}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onLostPointerCapture={() => {
+          draggingRef.current = false;
+        }}
         onKeyDown={handleKeyDown}
-        className="w-1.5 shrink-0 cursor-col-resize touch-none bg-border-light transition-colors hover:bg-surface-active-alt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-primary"
+        className={cn(
+          'relative shrink-0 touch-none bg-border-light transition-colors hover:bg-surface-active-alt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-primary',
+          // A 6px bar is unhittable on a phone: the pseudo-element widens the
+          // pointer target to 22px without changing the visual thickness.
+          "before:absolute before:-inset-2 before:content-['']",
+          stacked ? 'h-1.5 w-full cursor-row-resize' : 'w-1.5 cursor-col-resize',
+        )}
       />
 
       <section
         id={`${baseId}-right`}
         aria-label={rightLabel}
-        className="flex min-w-0 flex-1 flex-col overflow-hidden"
+        className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
       >
         {right}
       </section>

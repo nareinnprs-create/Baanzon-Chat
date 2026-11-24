@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Check, MessageSquare, RotateCcw, Trash2 } from 'lucide-react';
 import { Button, EmptyState, Label, Textarea } from '@librechat/client';
 import type { CanvasComment, CanvasSelection } from './types';
@@ -36,7 +36,7 @@ export default function CommentsPanel({
 }: CommentsPanelProps) {
   const localize = useLocalize();
   const [body, setBody] = useState('');
-  const composerId = 'canvas-comment-composer';
+  const composerId = useId();
   const trimmed = body.trim();
 
   const handleAdd = () => {
@@ -155,6 +155,7 @@ export default function CommentsPanel({
                   type="button"
                   variant="ghost"
                   size="icon-sm"
+                  className="max-md:min-h-11 max-md:min-w-11"
                   aria-label={localize(L.deleteComment)}
                   onClick={() => onDelete(comment.id)}
                 >

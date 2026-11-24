@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { Button, EmptyState, Spinner } from '@librechat/client';
 import { Layers, Plus, Redo2, TriangleAlert, Undo2 } from 'lucide-react';
+import type { KeyboardEvent } from 'react';
 import type {
   CanvasComment,
   CanvasDocument,
@@ -24,6 +25,7 @@ import {
   canvasVersionsAtom,
   dispatchCanvasAtom,
 } from './atoms';
+import { saveCanvasSnapshot } from './storage';
 import VersionHistory from './VersionHistory';
 import { CANVAS_LABELS as L } from './labels';
 import CommentsPanel from './CommentsPanel';
@@ -50,6 +52,12 @@ export type CanvasWorkspaceProps = {
   initialComments?: CanvasComment[];
   title?: string;
   className?: string;
+  /**
+   * When set, the document, comments and versions are written to
+   * `localStorage` under this key (debounced), so a reload or PWA restart does
+   * not throw the work away. Load the same key into the initial props.
+   */
+  persistKey?: string;
 };
 
 const RIGHT_TABS: ReadonlyArray<{ id: RightTab; labelKey: CanvasLabelKey }> = [
@@ -73,6 +81,7 @@ export default function CanvasWorkspace({
   initialComments,
   title,
   className,
+  persistKey,
 }: CanvasWorkspaceProps) {
   const localize = useLocalize();
   const state = useAtomValue(canvasStateAtom);
@@ -90,6 +99,30 @@ export default function CanvasWorkspace({
   const [tab, setTab] = useState<RightTab>('preview');
   const [reloadKey, setReloadKey] = useState(0);
   const [announcement, setAnnouncement] = useState('');
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  /**
+   * Roving-tabindex tablist: inactive tabs are `tabIndex={-1}`, so without
+   * arrow-key handling a keyboard user could never reach Comments or Versions.
+   */
+  const handleTabKeyDown = useCallback((event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    let nextIndex: number | null = null;
+    if (event.key === 'ArrowRight') {
+      nextIndex = (index + 1) % RIGHT_TABS.length;
+    } else if (event.key === 'ArrowLeft') {
+      nextIndex = (index - 1 + RIGHT_TABS.length) % RIGHT_TABS.length;
+    } else if (event.key === 'Home') {
+      nextIndex = 0;
+    } else if (event.key === 'End') {
+      nextIndex = RIGHT_TABS.length - 1;
+    }
+    if (nextIndex == null) {
+      return;
+    }
+    event.preventDefault();
+    setTab(RIGHT_TABS[nextIndex].id);
+    tabRefs.current[nextIndex]?.focus();
+  }, []);
 
   const loadRef = useRef(loadDocument);
   useEffect(() => {
@@ -174,11 +207,13 @@ export default function CanvasWorkspace({
   const handleCreateVersion = useCallback(() => {
     dispatch({
       type: 'create_version',
-      label: localize(L.createVersion),
+      // Numbered so snapshots are distinguishable at a glance; every version
+      // used to be labelled "Save version".
+      label: localize(L.versionLabel, { number: versions.length + 1 }),
       at: new Date().toISOString(),
     });
     setAnnouncement(localize(L.versionCreated));
-  }, [dispatch, localize]);
+  }, [dispatch, localize, versions.length]);
 
   const handleRestoreVersion = useCallback(
     (versionId: string) => {
@@ -193,6 +228,18 @@ export default function CanvasWorkspace({
       dispatch({ type: 'move_block', blockId, direction }),
     [dispatch],
   );
+
+  useEffect(() => {
+    if (!persistKey || !document) {
+      return undefined;
+    }
+    // Debounced: a keystroke in a block should not serialize the whole
+    // document on every character.
+    const timer = window.setTimeout(() => {
+      saveCanvasSnapshot(persistKey, { document, comments, versions });
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [persistKey, document, comments, versions]);
 
   const handleRemoveBlock = useCallback(
     (blockId: string) => {
@@ -276,12 +323,15 @@ export default function CanvasWorkspace({
             <div
               role="tablist"
               aria-label={localize(L.sidePanelLabel)}
-              className="flex shrink-0 items-center gap-1 border-b border-border-light p-2"
+              className="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-border-light p-2"
             >
-              {RIGHT_TABS.map((entry) => (
+              {RIGHT_TABS.map((entry, index) => (
                 <Button
                   key={entry.id}
                   id={`${baseId}-tab-${entry.id}`}
+                  ref={(node) => {
+                    tabRefs.current[index] = node;
+                  }}
                   role="tab"
                   aria-selected={tab === entry.id}
                   aria-controls={`${baseId}-panel-${entry.id}`}
@@ -289,8 +339,12 @@ export default function CanvasWorkspace({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className={cn(tab === entry.id && 'bg-surface-active-alt')}
+                  className={cn(
+                    'shrink-0 max-md:min-h-11',
+                    tab === entry.id && 'bg-surface-active-alt',
+                  )}
                   onClick={() => setTab(entry.id)}
+                  onKeyDown={(event) => handleTabKeyDown(event, index)}
                 >
                   {localize(entry.labelKey)}
                 </Button>
@@ -314,13 +368,16 @@ export default function CanvasWorkspace({
                       <p
                         key={block.id}
                         className={cn(
-                          'whitespace-pre-wrap break-words text-text-primary',
+                          'text-text-primary',
+                          block.kind !== 'code' && 'whitespace-pre-wrap break-words',
                           block.kind === 'heading' && 'text-base font-semibold',
                           block.kind === 'paragraph' && 'text-sm',
                           block.kind === 'quote' &&
                             'border-l-2 border-border-medium pl-3 text-sm italic',
+                          // Code must scroll, not wrap: wrapping mangles the
+                          // indentation on a narrow screen.
                           block.kind === 'code' &&
-                            'rounded-lg bg-surface-secondary p-2 font-mono text-xs',
+                            'overflow-x-auto whitespace-pre rounded-lg bg-surface-secondary p-2 font-mono text-xs',
                         )}
                       >
                         {block.text}
@@ -375,6 +432,7 @@ export default function CanvasWorkspace({
               type="button"
               variant="ghost"
               size="icon-sm"
+              className="max-md:min-h-11 max-md:min-w-11"
               aria-label={localize(L.undo)}
               disabled={!canUndo}
               onClick={() => dispatch({ type: 'undo' })}
@@ -385,6 +443,7 @@ export default function CanvasWorkspace({
               type="button"
               variant="ghost"
               size="icon-sm"
+              className="max-md:min-h-11 max-md:min-w-11"
               aria-label={localize(L.redo)}
               disabled={!canRedo}
               onClick={() => dispatch({ type: 'redo' })}
@@ -395,12 +454,19 @@ export default function CanvasWorkspace({
               type="button"
               variant="outline"
               size="sm"
+              className="max-md:min-h-11"
               onClick={() => dispatch({ type: 'insert_block' })}
             >
               <Plus className="size-4" aria-hidden="true" />
               {localize(L.addBlock)}
             </Button>
-            <Button type="button" variant="default" size="sm" onClick={handleCreateVersion}>
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              className="max-md:min-h-11"
+              onClick={handleCreateVersion}
+            >
               {localize(L.createVersion)}
             </Button>
           </div>

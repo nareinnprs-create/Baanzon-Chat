@@ -117,4 +117,38 @@ describe('CanvasWorkspace', () => {
     fireEvent.click(screen.getByRole('tab', { name: L.commentsTab }));
     expect(screen.getByLabelText(L.commentComposerLabel)).toBeInTheDocument();
   });
+
+  it('reaches every tab with the arrow keys', () => {
+    renderWorkspace({ document: makeDocument([makeBlock('block-1', 'Hello')]) });
+    const preview = screen.getByRole('tab', { name: L.previewTab });
+    const comments = screen.getByRole('tab', { name: L.commentsTab });
+
+    // Inactive tabs are tabIndex={-1}; without arrow handling they were
+    // unreachable by keyboard.
+    expect(comments).toHaveAttribute('tabindex', '-1');
+    preview.focus();
+    fireEvent.keyDown(preview, { key: 'ArrowRight' });
+    expect(comments).toHaveFocus();
+    expect(comments).toHaveAttribute('aria-selected', 'true');
+
+    fireEvent.keyDown(comments, { key: 'End' });
+    expect(screen.getByRole('tab', { name: L.versionsTab })).toHaveFocus();
+    fireEvent.keyDown(screen.getByRole('tab', { name: L.versionsTab }), { key: 'Home' });
+    expect(preview).toHaveFocus();
+  });
+
+  it('persists the document, comments and versions under persistKey', () => {
+    jest.useFakeTimers();
+    localStorage.clear();
+    renderWorkspace({
+      document: makeDocument([makeBlock('block-1', 'Kept')]),
+      persistKey: 'canvas-persist-test',
+    });
+    jest.advanceTimersByTime(300);
+
+    const stored = JSON.parse(localStorage.getItem('canvas-persist-test') ?? '{}');
+    expect(stored.version).toBe(1);
+    expect(stored.document.blocks[0].text).toBe('Kept');
+    jest.useRealTimers();
+  });
 });

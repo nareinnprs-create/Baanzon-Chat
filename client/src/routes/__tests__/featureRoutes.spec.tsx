@@ -39,6 +39,7 @@ jest.mock('~/components/OAuth', () => ({
 }));
 jest.mock('~/hooks/AuthContext', () => ({
   AuthContextProvider: ({ children }: { children: ReactNode }) => children,
+  useAuthContext: () => ({ user: { id: 'test-user' }, isAuthenticated: true }),
   useAuthToken: () => 'test-token',
 }));
 
