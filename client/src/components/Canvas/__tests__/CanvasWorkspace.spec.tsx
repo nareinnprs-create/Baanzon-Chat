@@ -151,4 +151,18 @@ describe('CanvasWorkspace', () => {
     expect(stored.document.blocks[0].text).toBe('Kept');
     jest.useRealTimers();
   });
+
+  it('flushes the latest document when the workspace unmounts', () => {
+    localStorage.clear();
+    const { unmount } = renderWorkspace({
+      document: makeDocument([makeBlock('block-1', 'Bye')]),
+      persistKey: 'canvas-unmount-test',
+    });
+
+    // Navigation within the debounce window must not lose the last edit.
+    unmount();
+
+    const stored = JSON.parse(localStorage.getItem('canvas-unmount-test') ?? '{}');
+    expect(stored.document.blocks[0].text).toBe('Bye');
+  });
 });

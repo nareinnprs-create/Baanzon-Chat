@@ -241,6 +241,26 @@ export default function CanvasWorkspace({
     return () => window.clearTimeout(timer);
   }, [persistKey, document, comments, versions]);
 
+  /** The debounce above is cleared on unmount, so a navigation within 250ms of
+   *  the last keystroke would lose it. Flush the latest state on the way out. */
+  const latestSnapshotRef = useRef({ document, comments, versions });
+  latestSnapshotRef.current = { document, comments, versions };
+  useEffect(() => {
+    if (!persistKey) {
+      return undefined;
+    }
+    return () => {
+      const latest = latestSnapshotRef.current;
+      if (latest.document) {
+        saveCanvasSnapshot(persistKey, {
+          document: latest.document,
+          comments: latest.comments,
+          versions: latest.versions,
+        });
+      }
+    };
+  }, [persistKey]);
+
   const handleRemoveBlock = useCallback(
     (blockId: string) => {
       dispatch({ type: 'remove_block', blockId });
