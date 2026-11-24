@@ -8,9 +8,16 @@ import { logger } from '@librechat/data-schemas';
  * native `/ai/run/{model}` endpoint accepts the same OpenAI message shape
  * (system + multi-turn + image_url parts, streaming included) and reads images
  * correctly. When an outgoing request carries an image part and targets a
- * `@cf/` model, rewrite the URL to `/ai/run/{model}` and translate the run
- * response shape back to OpenAI chat completions (streaming and not). All other
- * requests pass through untouched.
+ * vision-capable `@cf/` model, rewrite the URL to `/ai/run/{model}` and
+ * translate the run response shape back to OpenAI chat completions (streaming
+ * and not). All other requests pass through untouched.
+ *
+ * A conversation keeps its images in the history, so a later turn can target a
+ * text-only model (a chain fallback, or the user switching to
+ * `baanzon-intelligence`). Sending an image to `/ai/run/{text-model}` is a hard
+ * 400 with no body, which is what users saw as "An error occurred while
+ * processing the request: 400 status code (no body)" on every follow-up. Those
+ * requests now drop the image parts and go through the normal endpoint.
  */
 export function attachCloudflareVisionRunFetch<T extends object>(
   configOptions: T | undefined | null,
@@ -26,16 +33,40 @@ export function attachCloudflareVisionRunFetch<T extends object>(
   opts.fetch = cloudflareVisionRunFetch as unknown as typeof opts.fetch;
 }
 
-/** Extracts the `@cf/` model id only when the body actually carries an image part. */
-function extractVisionModel(requestBody: string): string | null {
-  let parsed: { model?: unknown; messages?: unknown };
+/**
+ * Models that actually read images. Everything else in the routing chains is
+ * text-only, so an image part has to be removed before the request goes out.
+ */
+const VISION_MODELS = new Set([
+  '@cf/meta/llama-3.2-11b-vision-instruct',
+  '@cf/meta/llama-4-scout-17b-16e-instruct',
+  '@cf/mistralai/mistral-small-3.1-24b-instruct',
+]);
+
+const IMAGE_PART_TYPES = new Set(['image_url', 'input_image', 'image']);
+
+type ChatBody = { model?: unknown; messages?: unknown } & Record<string, unknown>;
+
+function parseBody(requestBody: string): ChatBody | null {
   try {
-    parsed = JSON.parse(requestBody);
+    const parsed = JSON.parse(requestBody) as unknown;
+    if (typeof parsed !== 'object' || parsed === null) {
+      return null;
+    }
+    return parsed as ChatBody;
   } catch {
     return null;
   }
-  const model = typeof parsed?.model === 'string' ? parsed.model : '';
-  if (!model.startsWith('@cf/') || !Array.isArray(parsed?.messages)) {
+}
+
+/** Extracts the `@cf/` model id only when the body actually carries an image part. */
+function extractVisionModel(requestBody: string): string | null {
+  const parsed = parseBody(requestBody);
+  if (!parsed) {
+    return null;
+  }
+  const model = typeof parsed.model === 'string' ? parsed.model : '';
+  if (!model.startsWith('@cf/') || !Array.isArray(parsed.messages)) {
     return null;
   }
   const hasImage = parsed.messages.some(
@@ -48,6 +79,41 @@ function extractVisionModel(requestBody: string): string | null {
   return hasImage ? model : null;
 }
 
+/**
+ * Removes image parts from every message, replacing a message that held only an
+ * image with a short text note. Returns `null` when there was nothing to strip,
+ * so the caller can pass the original request through untouched.
+ */
+function stripImageParts(requestBody: string): string | null {
+  const parsed = parseBody(requestBody);
+  if (!parsed || !Array.isArray(parsed.messages)) {
+    return null;
+  }
+  let removed = false;
+  const messages = parsed.messages.map((message) => {
+    const record = message as { content?: unknown };
+    if (!Array.isArray(record?.content)) {
+      return message;
+    }
+    const content = (record.content as unknown[]).filter((part) => {
+      const type = (part as { type?: unknown })?.type;
+      if (typeof type === 'string' && IMAGE_PART_TYPES.has(type)) {
+        removed = true;
+        return false;
+      }
+      return true;
+    });
+    if (content.length === 0) {
+      return {
+        ...(message as Record<string, unknown>),
+        content: [{ type: 'text', text: '(image omitted: this model cannot read images)' }],
+      };
+    }
+    return { ...(message as Record<string, unknown>), content };
+  });
+  return removed ? JSON.stringify({ ...parsed, messages }) : null;
+}
+
 const cloudflareVisionRunFetch = async (
   input: RequestInfo | URL,
   init?: RequestInit,
@@ -56,6 +122,14 @@ const cloudflareVisionRunFetch = async (
   const model = requestBody ? extractVisionModel(requestBody) : null;
   if (!model) {
     return fetch(input, init);
+  }
+  if (!VISION_MODELS.has(model)) {
+    const textOnlyBody = stripImageParts(requestBody);
+    if (textOnlyBody == null) {
+      return fetch(input, init);
+    }
+    logger.info(`[cloudflareVision] ${model} cannot read images; sending the request without them`);
+    return fetch(input, { ...init, body: textOnlyBody });
   }
   const url = String(input instanceof Request ? input.url : input);
   // model ids are path-safe by construction (^@cf/ + [a-z0-9./-]); do not

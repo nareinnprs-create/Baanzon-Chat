@@ -145,4 +145,49 @@ describe('attachCloudflareVisionRunFetch', () => {
     const body = await res.json();
     expect(body.errors[0].message).toBe('boom');
   });
+
+  it('drops image parts when the routed model is text-only', async () => {
+    // Regression: a conversation keeps its images in the history, so a
+    // follow-up routed to a text model was rewritten to
+    // /ai/run/{text-model} and the provider answered 400 with no body.
+    const passthrough = jest.fn().mockResolvedValue(jsonResponse({ ok: true }));
+    jest.spyOn(global, 'fetch').mockImplementation(passthrough);
+    const configOptions: Record<string, unknown> = { baseURL: UNIVERSAL_BASE };
+    attachCloudflareVisionRunFetch(configOptions);
+    const fetchFn = configOptions.fetch as typeof fetch;
+    const body = imageBody('@cf/zai-org/glm-5.3');
+
+    await fetchFn(`${UNIVERSAL_BASE}/chat/completions`, { method: 'POST', body });
+
+    const [url, init] = passthrough.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe(`${UNIVERSAL_BASE}/chat/completions`);
+    const sent = JSON.parse(String(init.body));
+    expect(sent.model).toBe('@cf/zai-org/glm-5.3');
+    expect(JSON.stringify(sent.messages)).not.toContain('image_url');
+    expect(sent.messages[1].content).toEqual([{ type: 'text', text: 'What color?' }]);
+  });
+
+  it('replaces an image-only message with a text note', async () => {
+    const passthrough = jest.fn().mockResolvedValue(jsonResponse({ ok: true }));
+    jest.spyOn(global, 'fetch').mockImplementation(passthrough);
+    const configOptions: Record<string, unknown> = { baseURL: UNIVERSAL_BASE };
+    attachCloudflareVisionRunFetch(configOptions);
+    const fetchFn = configOptions.fetch as typeof fetch;
+    const body = JSON.stringify({
+      model: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+      messages: [
+        {
+          role: 'user',
+          content: [{ type: 'image_url', image_url: { url: RED_PNG_DATA_URI } }],
+        },
+      ],
+    });
+
+    await fetchFn(`${UNIVERSAL_BASE}/chat/completions`, { method: 'POST', body });
+
+    const sent = JSON.parse(String((passthrough.mock.calls[0] as [string, RequestInit])[1].body));
+    expect(sent.messages[0].content).toEqual([
+      { type: 'text', text: '(image omitted: this model cannot read images)' },
+    ]);
+  });
 });

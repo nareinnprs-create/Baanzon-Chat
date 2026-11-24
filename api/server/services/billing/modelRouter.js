@@ -155,6 +155,10 @@ const CHAINS = {
  *  that validate user-sent keys. */
 const PUBLIC_MODELS = Object.keys(CHAINS);
 
+/** Every concrete id the platform actually serves: the chain members. An id
+ *  outside this set cannot answer, so `routeModel` never sends it raw. */
+const KNOWN_MODELS = new Set(Object.values(CHAINS).flatMap((tiers) => Object.values(tiers).flat()));
+
 /** Legacy keys (v1 brand keys + retired spec slugs) -> current slug. Stored
  *  conversations and old clients keep working; never surfaces in the UI. */
 const ALIASES = {
@@ -260,11 +264,26 @@ const FALLBACK = {
  */
 function routeModel(tier, requested, lane, text) {
   const requestedStr = String(requested || '');
+  const t = String(tier || 'free').toLowerCase();
   if (requestedStr.startsWith('@cf/')) {
-    return { model: requestedStr };
+    if (KNOWN_MODELS.has(requestedStr)) {
+      return { model: requestedStr };
+    }
+    /**
+     * A saved agent or preset can pin a raw id the gateway does not serve
+     * (retired, mistyped, or never deployed). Sending it straight through
+     * produced `illegal_model_request` on every turn with no failover, so an
+     * unknown concrete id resolves to the default chain instead.
+     */
+    const fallbackChain = CHAINS['baanzon-intelligence'][t] || CHAINS['baanzon-intelligence'].free;
+    return {
+      model: fallbackChain[0],
+      ...(TIER_BUDGETS[t] || TIER_BUDGETS.free),
+      ...(MODEL_BUDGET_OVERRIDES['baanzon-intelligence']?.[t] || {}),
+      chain: fallbackChain,
+    };
   }
 
-  const t = String(tier || 'free').toLowerCase();
   const laneSlug = LANE_SLUGS[String(lane || '').toLowerCase()];
   const slug =
     laneSlug ??

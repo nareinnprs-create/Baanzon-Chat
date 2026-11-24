@@ -116,8 +116,18 @@ describe('legacy keys keep working', () => {
     expect(routeModel('pro', 'baanzon-intelligence').model).toBe('@cf/zai-org/glm-5.3');
   });
 
-  it('passes concrete ids through untouched', () => {
-    expect(routeModel('pro', '@cf/example/model')).toEqual({ model: '@cf/example/model' });
+  it('passes a served concrete id through untouched', () => {
+    expect(routeModel('pro', '@cf/meta/llama-3.3-70b-instruct-fp8-fast')).toEqual({
+      model: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+    });
+  });
+
+  it('rescues a concrete id the gateway does not serve', () => {
+    // Sending an unserved id straight through produced illegal_model_request
+    // with no failover on every turn of a saved agent.
+    expect(routeModel('pro', '@cf/example/model').model).toBe(
+      CHAINS['baanzon-intelligence'].pro[0],
+    );
   });
 
   it('falls back when nothing matches', () => {
@@ -159,6 +169,27 @@ describe('raw failover map covers every chain member', () => {
 
   it('keeps the hard fallback live', () => {
     expect(FALLBACK.model).toBe('@cf/zai-org/glm-4.7-flash');
+  });
+});
+
+describe('unknown concrete model ids', () => {
+  it('passes a chain member through untouched', () => {
+    const routed = routeModel('pro', '@cf/zai-org/glm-5.3');
+    expect(routed).toEqual({ model: '@cf/zai-org/glm-5.3' });
+  });
+
+  it('routes a retired or mistyped id to the default chain instead of sending it', () => {
+    // A saved agent pinned to a model the gateway does not serve used to fail
+    // every turn with `illegal_model_request` and no failover.
+    const routed = routeModel('free', '@cf/qwen/qwen3-30b-a3b-fp8');
+    expect(routed.model).toBe(CHAINS['baanzon-intelligence'].free[0]);
+    expect(routed.chain).toEqual(CHAINS['baanzon-intelligence'].free);
+    expect(routed.maxContextTokens).toBeGreaterThan(0);
+  });
+
+  it('uses the requested tier for the fallback chain', () => {
+    const routed = routeModel('pro', '@cf/meta/llama-3.1-8b-instruct-fp8');
+    expect(routed.model).toBe(CHAINS['baanzon-intelligence'].pro[0]);
   });
 });
 
