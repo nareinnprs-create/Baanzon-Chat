@@ -1,5 +1,5 @@
-import { rmsToLevel } from '../webAudioVad';
 import { createVoiceActivityDetector } from '../vad';
+import { rmsToLevel } from '../webAudioVad';
 
 /**
  * Regression for the orb never recording: the detector's speaking threshold is
