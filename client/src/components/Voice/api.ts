@@ -4,6 +4,7 @@
  * Failures are mapped to a small code vocabulary so the hook can surface a
  * human label without exposing any transport or model detail.
  */
+import { voiceFetch } from '~/components/Voice/authFetch';
 
 export type DiyaTurnErrorCode = 'unavailable' | 'denied' | 'invalid' | 'upstream';
 
@@ -48,7 +49,7 @@ export async function requestDiyaTurn(
 ): Promise<string> {
   let response: Response;
   try {
-    response = await fetch('/api/diya/turn', {
+    response = await voiceFetch('/api/diya/turn', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

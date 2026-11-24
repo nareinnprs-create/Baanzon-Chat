@@ -7,6 +7,8 @@
  * spoken regardless of browser settings.
  */
 
+import { voiceFetch } from '~/components/Voice/authFetch';
+
 const SCRIPT_LANG: Array<[RegExp, string]> = [
   [/[\u0900-\u097F]/, 'hi'],
   [/[\u0980-\u09FF]/, 'bn'],
@@ -54,7 +56,7 @@ export async function transcribeAudio(
   token?: string | null,
 ): Promise<TranscriptionResult> {
   const audio = await blobToBase64(blob);
-  const response = await fetch('/api/voice/stt', {
+  const response = await voiceFetch('/api/voice/stt', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders(token) },
     body: JSON.stringify({ audio }),
@@ -75,7 +77,7 @@ export async function synthesizeSpeech(
   lang: string,
   token?: string | null,
 ): Promise<Blob> {
-  const response = await fetch('/api/voice/tts', {
+  const response = await voiceFetch('/api/voice/tts', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders(token) },
     body: JSON.stringify({ text, lang }),
