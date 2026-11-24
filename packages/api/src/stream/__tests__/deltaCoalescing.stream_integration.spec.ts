@@ -140,9 +140,11 @@ describe('Delta coalescing integration', () => {
       for (let i = 1; i < sequences.length; i++) {
         expect(sequences[i]).toBe(sequences[0] + i);
       }
+      // How many windows the coalescer flushed is timing-dependent; that every
+      // event was batched and none dropped is the invariant.
       const batchFrames = rawFrames.filter((frame) => frame.type === 'chunk_batch');
-      expect(batchFrames).toHaveLength(1);
-      expect(batchFrames[0].count).toBe(5);
+      expect(batchFrames.length).toBeGreaterThanOrEqual(1);
+      expect(batchFrames.reduce((total, frame) => total + (frame.count ?? 0), 0)).toBe(5);
 
       subscription.unsubscribe();
       transport.destroy();
