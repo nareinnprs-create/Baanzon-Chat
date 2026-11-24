@@ -7,6 +7,7 @@ import type {
   VoiceTurnFn,
 } from '~/components/Voice/types';
 import type { AudioLevelSampler, VoiceActivityDetector } from '~/utils/voice';
+import type { PlayingBuffer } from '~/utils/voice/output';
 import {
   appendVoiceTranscriptAtom,
   resetVoiceSessionAtom,
@@ -23,8 +24,12 @@ import {
   createWebAudioVadSampler,
   isDiyaVoiceSupported,
 } from '~/utils/voice';
-import { getFallbackPlayer, getPlaybackContext, playBuffer, primeOutput } from '~/utils/voice/output';
-import type { PlayingBuffer } from '~/utils/voice/output';
+import {
+  getFallbackPlayer,
+  getPlaybackContext,
+  playBuffer,
+  primeOutput,
+} from '~/utils/voice/output';
 import { chunkForSpeech as chunkTextForSpeech } from '~/components/Chat/Input/Voice/speech';
 import { detectLang, synthesizeSpeech, transcribeAudio } from '~/components/Voice/audio';
 import { VOICE_LABELS } from '~/components/Voice/labels';

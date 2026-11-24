@@ -175,11 +175,12 @@ function VoiceMic({
     );
   }
 
-  const label = busy
-    ? localize('com_ui_voice_transcribing')
-    : recording
-      ? localize('com_ui_voice_listening')
-      : localize('com_ui_voice_input');
+  let label = localize('com_ui_voice_input');
+  if (busy) {
+    label = localize('com_ui_voice_transcribing');
+  } else if (recording) {
+    label = localize('com_ui_voice_listening');
+  }
 
   return (
     <TooltipButton
