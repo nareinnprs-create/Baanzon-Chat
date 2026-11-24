@@ -43,6 +43,7 @@ const KEYS = {
   turnInvalid: 'com_ui_voice_turn_invalid',
   turnUpstream: 'com_ui_voice_turn_upstream',
   speakFailed: 'com_ui_voice_speak_failed',
+  turnTimeout: 'com_ui_voice_turn_timeout',
   retry: 'com_ui_voice_retry',
   announceConnecting: 'com_ui_voice_announce_connecting',
   announceListening: 'com_ui_voice_announce_listening',

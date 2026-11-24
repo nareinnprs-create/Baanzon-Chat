@@ -220,7 +220,7 @@ export default function VoicePanel({
     <section
       aria-label={title ?? L.title}
       className={cn(
-        'flex h-full min-h-0 flex-col gap-4 overflow-auto p-4',
+        'flex h-full min-h-0 flex-col gap-4 overflow-auto px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[calc(1rem+env(safe-area-inset-top))]',
         overlay &&
           'relative overflow-hidden bg-gradient-to-b from-surface-primary to-surface-secondary',
         className,

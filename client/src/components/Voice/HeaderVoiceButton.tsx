@@ -1,15 +1,13 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { Provider } from 'jotai';
 import { AudioLines } from 'lucide-react';
 import { TooltipAnchor, Button } from '@librechat/client';
-import type { TMessage } from 'librechat-data-provider';
 import { VOICE_LABELS as L } from '~/components/Voice/labels';
 import VoicePanel from '~/components/Voice/VoicePanel';
-import { useChatContext } from '~/Providers';
+import useDiyaChatTurn from '~/components/Voice/useDiyaChatTurn';
+import { announceDiyaOpen } from '~/components/Voice/events';
+import { primeOutput } from '~/utils/voice/output';
 import { cn } from '~/utils';
-
-const REPLY_TIMEOUT_MS = 180000;
-const POLL_MS = 500;
 
 /**
  * ChatGPT-style voice entry: a header button that opens the Diya session as a
@@ -23,40 +21,7 @@ const POLL_MS = 500;
  */
 export default function HeaderVoiceButton({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
-  const { ask, getMessages } = useChatContext();
-
-  const chatTurn = useCallback(
-    async (text: string): Promise<string> => {
-      const before = getMessages()?.length ?? 0;
-      const accepted = ask({ text });
-      if (accepted === false) {
-        return 'Sorry, that message could not be sent.';
-      }
-      const deadline = Date.now() + REPLY_TIMEOUT_MS;
-      while (Date.now() < deadline) {
-        await new Promise((resolve) => setTimeout(resolve, POLL_MS));
-        const messages: TMessage[] = getMessages() ?? [];
-        const fresh = messages.slice(before);
-        const failed = fresh.find((message) => message.error === true);
-        if (failed) {
-          return typeof failed.text === 'string' && failed.text
-            ? failed.text
-            : 'Sorry, that did not go through. Please try again.';
-        }
-        const reply = fresh.filter((message) => message.isCreatedByUser !== true).pop();
-        if (
-          reply &&
-          reply.unfinished !== true &&
-          typeof reply.text === 'string' &&
-          reply.text.trim()
-        ) {
-          return reply.text;
-        }
-      }
-      return 'Sorry, that took too long. Please try again.';
-    },
-    [ask, getMessages],
-  );
+  const chatTurn = useDiyaChatTurn();
 
   return (
     <>
@@ -69,7 +34,13 @@ export default function HeaderVoiceButton({ className }: { className?: string })
             aria-label={L.title}
             aria-pressed={open}
             data-testid="header-voice-button"
-            onClick={() => setOpen((value) => !value)}
+            onClick={() => {
+              // Unlock audio inside the tap: the panel auto-starts from an
+              // effect, where the gesture has already expired on iOS.
+              primeOutput();
+              announceDiyaOpen();
+              setOpen((value) => !value);
+            }}
             className={cn(
               'size-9 flex-shrink-0 rounded-xl bg-presentation hover:bg-surface-active-alt',
               className,
@@ -85,7 +56,7 @@ export default function HeaderVoiceButton({ className }: { className?: string })
           aria-modal="true"
           aria-label={L.title}
           data-testid="voice-overlay"
-          className="fixed inset-0 z-50 flex flex-col bg-surface-primary"
+          className="fixed inset-0 z-[70] flex flex-col bg-surface-primary"
         >
           <Provider>
             <VoicePanel

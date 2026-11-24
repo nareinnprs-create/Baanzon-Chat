@@ -24,6 +24,10 @@
 
     <!-- Play Billing: Digital Goods API in-app purchases. Re-add after bubblewrap update. -->
     <uses-permission android:name="com.android.vending.BILLING"/>
+    <!-- Diya Orb and dictation record through the browser, but the host app must
+         also hold the mic permission for the WebView fallback path; Chrome grants
+         it per-origin inside a Custom Tab. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
     
         <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>

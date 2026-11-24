@@ -23,6 +23,8 @@ import {
   createWebAudioVadSampler,
   isDiyaVoiceSupported,
 } from '~/utils/voice';
+import { getFallbackPlayer, getPlaybackContext, playBuffer, primeOutput } from '~/utils/voice/output';
+import type { PlayingBuffer } from '~/utils/voice/output';
 import { chunkForSpeech as chunkTextForSpeech } from '~/components/Chat/Input/Voice/speech';
 import { detectLang, synthesizeSpeech, transcribeAudio } from '~/components/Voice/audio';
 import { VOICE_LABELS } from '~/components/Voice/labels';
@@ -60,7 +62,9 @@ const ACTIVE_STATUSES: readonly VoiceStatus[] = [
 /** How many settled turns are echoed back for context. */
 const HISTORY_TURNS = 12;
 /** Guard against one endless recording (e.g. a stuck VAD). */
-const MAX_UTTERANCE_MS = 20000;
+const MAX_UTTERANCE_MS = 45000;
+/** A turn that never answers must not leave the orb thinking forever. */
+const TURN_TIMEOUT_MS = 45000;
 /** Recordings shorter than this are noise, not speech. */
 const MIN_UTTERANCE_MS = 350;
 /** Rejects clicks and single-sample spikes before a recording starts. */
@@ -69,38 +73,6 @@ const MIN_SPEECH_MS = 250;
 const BARGE_IN_LEVEL = 0.25;
 /** Sustained ticks needed to interrupt; ~300ms at the 100ms tick. */
 const BARGE_IN_TICKS = 3;
-
-/** 100ms of silence, built once, used to unlock the shared player. */
-let silentWavUrl: string | null = null;
-function getSilentWavUrl(): string {
-  if (silentWavUrl != null) {
-    return silentWavUrl;
-  }
-  const sampleRate = 8000;
-  const samples = 800;
-  const buffer = new ArrayBuffer(44 + samples * 2);
-  const view = new DataView(buffer);
-  const write = (offset: number, text: string) => {
-    for (let index = 0; index < text.length; index += 1) {
-      view.setUint8(offset + index, text.charCodeAt(index));
-    }
-  };
-  write(0, 'RIFF');
-  view.setUint32(4, 36 + samples * 2, true);
-  write(8, 'WAVE');
-  write(12, 'fmt ');
-  view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true);
-  view.setUint16(22, 1, true);
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * 2, true);
-  view.setUint16(32, 2, true);
-  view.setUint16(34, 16, true);
-  write(36, 'data');
-  view.setUint32(40, samples * 2, true);
-  silentWavUrl = URL.createObjectURL(new Blob([buffer], { type: 'audio/wav' }));
-  return silentWavUrl;
-}
 
 function isActive(status: VoiceStatus): boolean {
   return ACTIVE_STATUSES.includes(status);
@@ -197,6 +169,8 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
   const playerRef = useRef<HTMLAudioElement | null>(null);
   /** Resolves the sentence currently waiting on playback (cancel path). */
   const releasePlaybackRef = useRef<(() => void) | null>(null);
+  /** The Web Audio source currently playing, when that path is in use. */
+  const playingRef = useRef<PlayingBuffer | null>(null);
   /** Consecutive loud samples while Diya speaks; her own voice must not count. */
   const bargeStreakRef = useRef(0);
   const stoppedRef = useRef(false);
@@ -241,35 +215,17 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
   }, []);
 
   /**
-   * Unlocks media output inside the tap gesture. iOS Safari and installed
-   * Android PWAs reject `play()` that runs after an await; playing a silent
-   * buffer on the element that will later carry the reply unlocks it for the
-   * whole session.
+   * Unlocks media output inside the tap gesture: resumes the shared Web Audio
+   * context (the path that survives the iOS ringer switch) and unlocks the
+   * element fallback. Safe to call more than once.
    */
   const primePlayer = useCallback(() => {
-    if (playerRef.current != null) {
-      return playerRef.current;
+    primeOutput();
+    const fallback = getFallbackPlayer();
+    if (fallback != null) {
+      playerRef.current = fallback;
     }
-    const audio = new Audio();
-    audio.preload = 'auto';
-    playerRef.current = audio;
-    try {
-      audio.muted = true;
-      audio.src = getSilentWavUrl();
-      void audio
-        .play()
-        .then(() => {
-          audio.pause();
-          audio.removeAttribute('src');
-          audio.muted = false;
-        })
-        .catch(() => {
-          audio.muted = false;
-        });
-    } catch {
-      audio.muted = false;
-    }
-    return audio;
+    return playerRef.current;
   }, []);
 
   /** Returns the orb to listening; every exit path of a reply goes through it. */
@@ -305,6 +261,9 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
     // Resolve the awaited playback promise; pause alone no longer does it.
     releasePlaybackRef.current?.();
     releasePlaybackRef.current = null;
+    // Web Audio path: stop the source and settle its promise.
+    playingRef.current?.stop();
+    playingRef.current = null;
   }, []);
 
   const teardownCapture = useCallback(() => {
@@ -349,6 +308,12 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       const turnFn = turnRef.current;
       const controller = new AbortController();
       turnControllerRef.current = controller;
+      // A turn that never answers must not leave the orb thinking forever.
+      let timedOut = false;
+      const timeout = setTimeout(() => {
+        timedOut = true;
+        controller.abort();
+      }, TURN_TIMEOUT_MS);
       // Mic off while Diya thinks and speaks; the VAD stays on for barge-in.
       stopRecordingRef.current();
       if (!mutedRef.current) {
@@ -365,7 +330,14 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
               controller.signal,
             )
           : await Promise.reject(new DiyaTurnError('unavailable'));
+        clearTimeout(timeout);
         if (controller.signal.aborted || stoppedRef.current) {
+          if (timedOut) {
+            setError(VOICE_LABELS.turnTimeout);
+            if (!mutedRef.current) {
+              setStatus('listening');
+            }
+          }
           return;
         }
         turnControllerRef.current = null;
@@ -381,7 +353,14 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
         setError(null);
         speakRef.current(reply);
       } catch (caught) {
+        clearTimeout(timeout);
         if (controller.signal.aborted || stoppedRef.current) {
+          if (timedOut && !stoppedRef.current) {
+            setError(VOICE_LABELS.turnTimeout);
+            if (!mutedRef.current) {
+              setStatus('listening');
+            }
+          }
           return;
         }
         turnControllerRef.current = null;
@@ -525,6 +504,43 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
         if (cancelled()) {
           finishSpeaking();
           return;
+        }
+        // Web Audio first: it survives the iOS ringer switch and gives this
+        // sentence its own source, so a later reply cannot steal it.
+        const ctx = getPlaybackContext();
+        if (ctx != null) {
+          try {
+            const decoded = await ctx.decodeAudioData(await blob.arrayBuffer());
+            if (cancelled()) {
+              finishSpeaking();
+              return;
+            }
+            const playing = playBuffer(decoded);
+            if (playing != null) {
+              playingRef.current = playing;
+              speakingRef.current = true;
+              await playing.done;
+              if (playingRef.current === playing) {
+                playingRef.current = null;
+              }
+              if (cancelled()) {
+                finishSpeaking();
+                return;
+              }
+              continue;
+            }
+          } catch {
+            /* undecodable in this browser - fall through to the element */
+          }
+        }
+        if (cancelled()) {
+          finishSpeaking();
+          return;
+        }
+        if (player == null) {
+          // No Web Audio and no element: nothing can play this reply.
+          failed = true;
+          break;
         }
         const url = URL.createObjectURL(blob);
         audioRef.current = player;
@@ -724,6 +740,24 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       void startRef.current();
     }
   }, [supported, setStatus]);
+
+  // Backgrounding the PWA must release the microphone: Android keeps the mic
+  // indicator lit and iOS returns to a dead AudioContext, so the session is
+  // ended and the user restarts it with a tap.
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden' && isActive(statusRef.current)) {
+        teardown();
+        setBargeIn(false);
+        setStatus('idle');
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [setBargeIn, setStatus, teardown]);
 
   useEffect(() => {
     return () => {

@@ -6,6 +6,8 @@
 
 export { createVoiceActivityDetector } from './vad';
 export { createWebAudioVadSampler } from './webAudioVad';
+export { getFallbackPlayer, getPlaybackContext, playBuffer, primeOutput } from './output';
+export type { PlayingBuffer } from './output';
 export {
   createRecognizer,
   isDiyaVoiceSupported,

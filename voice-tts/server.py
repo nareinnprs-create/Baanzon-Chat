@@ -236,12 +236,34 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(500, {"error": str(error)})
 
 
+def warmup():
+    """Load the engines before the first caller arrives.
+
+    A cold Kokoro or MMS load takes tens of seconds on this pod; doing it on the
+    first request made that user wait (and could exceed the API's 60s budget).
+    Runs off the request path and never crashes the server.
+    """
+    try:
+        load_kokoro()
+        log("warmup: kokoro ready")
+    except Exception as error:  # noqa: BLE001 - a missing model degrades, never crashes
+        log(f"warmup: kokoro unavailable ({error})")
+    # The Indic languages Kokoro lacks; the three most common first.
+    for lang in ("ta", "te", "bn", "ml", "kn"):
+        try:
+            synthesize("warmup", lang)
+            log(f"warmup: mms {lang} ready")
+        except Exception as error:  # noqa: BLE001
+            log(f"warmup: mms {lang} unavailable ({error})")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8471)
     args = parser.parse_args()
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     log(f"listening on 127.0.0.1:{args.port} models={MODELS}")
+    threading.Thread(target=warmup, name="warmup", daemon=True).start()
     server.serve_forever()
 
 

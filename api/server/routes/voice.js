@@ -17,7 +17,7 @@ const mongoose = require('mongoose');
 const { logger } = require('@librechat/data-schemas');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
 const configMiddleware = require('~/server/middleware/config/app');
-const { voiceLimiter } = require('~/server/middleware/limiters');
+const { voiceLimiter, ttsLimiter } = require('~/server/middleware/limiters');
 const {
   buildVoiceConfig,
   voiceClientConfig,
@@ -63,6 +63,54 @@ async function userTier(userId) {
       { projection: { subscriptionTier: 1 } },
     );
   return String(user?.subscriptionTier || 'free').toLowerCase();
+}
+
+/** The same Asia/Kolkata day bucket the WebSocket gateway meters against. */
+function voiceDay() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+}
+
+function voiceCounters() {
+  return mongoose.connection.db.collection('usage_counters');
+}
+
+/**
+ * Seconds left on the caller's tier today.
+ *
+ * The orb used to be unmetered: `addSeconds` existed only in the WebSocket
+ * gateway, which the orb never touches, so `/config` reported a number that
+ * never moved. Both audio routes charge here now.
+ */
+async function voiceRemaining(userId) {
+  const config = buildVoiceConfig(null);
+  const tier = normalizeTier(await userTier(userId));
+  const counter = await voiceCounters().findOne({ key: `voice:${userId}:${voiceDay()}` });
+  return remainingSeconds(tier, counter?.count || 0, config.tierMinutes);
+}
+
+/** Wall-clock-ish charge; a failure must never break the reply. */
+function chargeVoice(userId, seconds) {
+  if (!Number.isFinite(seconds) || seconds <= 0) {
+    return;
+  }
+  voiceCounters()
+    .updateOne(
+      { key: `voice:${userId}:${voiceDay()}` },
+      {
+        $setOnInsert: { userId, date: voiceDay(), kind: 'voice' },
+        $inc: { count: Math.round(seconds) },
+      },
+      { upsert: true },
+    )
+    .catch((error) => logger.warn(`[voice] metering write failed: ${error.message}`));
+}
+
+/** Rough speech duration of an opus clip (~32kbps) and of spoken text. */
+function audioSeconds(bytes) {
+  return Math.min(bytes / 4000, 300);
+}
+function speechSeconds(text) {
+  return Math.min(text.length / 15, 120);
 }
 
 router.get('/config', requireJwtAuth, configMiddleware, async (req, res) => {
@@ -189,6 +237,15 @@ router.post('/stt', requireJwtAuth, voiceLimiter, async (req, res) => {
     return res.status(413).json({ error: 'audio size out of range' });
   }
   try {
+    const remaining = await voiceRemaining(req.user.id);
+    if (remaining <= 0) {
+      return res.status(429).json({ error: 'voice_quota_exhausted' });
+    }
+  } catch {
+    // A broken counter must not block speech in; metering still applies.
+  }
+  const startedAt = Date.now();
+  try {
     // Whisper takes the container bytes as base64 and detects the format itself;
     // an array of ints is only for raw PCM and is rejected for compressed audio.
     const response = await cfRun('@cf/openai/whisper-large-v3-turbo', { audio });
@@ -198,6 +255,10 @@ router.post('/stt', requireJwtAuth, voiceLimiter, async (req, res) => {
       return res.status(422).json({ error: 'no speech detected' });
     }
     const language = data?.result?.transcription_info?.language ?? data?.result?.language;
+    chargeVoice(req.user.id, audioSeconds(bytes.length));
+    logger.debug(
+      `[voice] stt ok lang=${language || '?'} bytes=${bytes.length} ms=${Date.now() - startedAt}`,
+    );
     return res.json({ text, language: typeof language === 'string' ? language : null });
   } catch (error) {
     logger.warn(`[voice] stt failed: ${error.message}`);
@@ -206,7 +267,7 @@ router.post('/stt', requireJwtAuth, voiceLimiter, async (req, res) => {
 });
 
 /** Speech out: text -> audio (one fixed female voice per language). */
-router.post('/tts', requireJwtAuth, voiceLimiter, async (req, res) => {
+router.post('/tts', requireJwtAuth, ttsLimiter, async (req, res) => {
   const text = String(req.body?.text || '')
     .slice(0, 1200)
     .trim();
@@ -218,7 +279,16 @@ router.post('/tts', requireJwtAuth, voiceLimiter, async (req, res) => {
       .toLowerCase()
       .slice(0, 2) || detectLang(text);
   try {
+    const remaining = await voiceRemaining(req.user.id);
+    if (remaining <= 0) {
+      return res.status(429).json({ error: 'voice_quota_exhausted' });
+    }
+  } catch {
+    // Fail open on a counter read error; the reply still gets spoken.
+  }
+  try {
     const audio = await synthesize(text, lang);
+    chargeVoice(req.user.id, speechSeconds(text));
     res.setHeader('Content-Type', audio.mime);
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('X-Voice-Engine', audio.engine);

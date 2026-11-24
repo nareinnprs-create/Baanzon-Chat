@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { useAtom } from 'jotai';
+import { useToastContext } from '@librechat/client';
 import { Mic } from 'lucide-react';
 import * as Ariakit from '@ariakit/react';
 import type { RefObject } from 'react';
-import useSpeechRecognition, { isSpeechRecognitionSupported } from './useSpeechRecognition';
+import useScribeRecording from './useScribeRecording';
+import { DIYA_OPEN_EVENT } from '~/components/Voice/events';
 import { applyTranscript, type InsertionSlot } from './speech';
 import { useChatFormContext } from '~/Providers';
-import { voiceActivityAtom } from './atoms';
+import { useAuthToken } from '~/hooks/AuthContext';
 import { useLocalize } from '~/hooks';
+import type { TranslationKeys } from '~/hooks';
 import { cn } from '~/utils';
 
 const controlClasses = cn(
@@ -74,22 +76,29 @@ function TooltipButton({
 }
 
 /**
- * Dictation mic: Web Speech recognition transcribed straight into the
- * composer. Every recognition event rewrites the range this session owns
- * (see `applyTranscript`), so interim results replace themselves and finals
- * land in one growing block, at the caret where dictation started.
+ * Dictation mic: records on the device and transcribes on our server, the same
+ * path Diya uses. Works wherever capture works (Chromium, Firefox, iOS PWA),
+ * detects the spoken language, and reports failures instead of going silent.
+ * Text lands at the caret where dictation started.
  */
-function VoiceMic({ textAreaRef }: { textAreaRef: RefObject<HTMLTextAreaElement> }) {
+function VoiceMic({
+  textAreaRef,
+  isSubmitting,
+  conversationId,
+}: {
+  textAreaRef: RefObject<HTMLTextAreaElement>;
+  isSubmitting?: boolean;
+  conversationId?: string | null;
+}) {
   const localize = useLocalize();
   const methods = useChatFormContext();
-  const [activity, setActivity] = useAtom(voiceActivityAtom);
+  const token = useAuthToken();
+  const { showToast } = useToastContext();
   const slotRef = useRef<InsertionSlot | null>(null);
-  const listening = activity === 'listening';
-  const supported = isSpeechRecognitionSupported();
 
-  const onResult = useCallback(
-    (final: string, interim: string) => {
-      const dictation = interim ? (final ? `${final} ` : '') + interim : final;
+  const onText = useCallback(
+    (text: string) => {
+      const dictation = text.trim();
       if (!dictation) {
         return;
       }
@@ -107,29 +116,53 @@ function VoiceMic({ textAreaRef }: { textAreaRef: RefObject<HTMLTextAreaElement>
     [methods, textAreaRef],
   );
 
-  const { start, stop } = useSpeechRecognition(onResult);
+  const onError = useCallback(
+    (key: TranslationKeys) => {
+      showToast({ message: localize(key), status: 'error' });
+    },
+    [localize, showToast],
+  );
+
+  const scribe = useScribeRecording({ token, onText, onError });
+  const recording = scribe.state === 'recording';
+  const busy = scribe.state === 'transcribing';
 
   const toggle = useCallback(() => {
-    if (listening) {
-      stop();
-      // Only clear our own state; the read-aloud may have claimed the slot.
-      setActivity((prev) => (prev === 'listening' ? 'idle' : prev));
-    } else {
-      slotRef.current = null;
-      setActivity('listening');
-      start();
+    if (recording) {
+      scribe.toggle();
+      return;
     }
-  }, [listening, setActivity, start, stop]);
+    // A new take starts a new insertion slot at the current caret.
+    slotRef.current = null;
+    scribe.toggle();
+  }, [recording, scribe]);
 
-  // The mic yields to read-aloud: stop the engine without touching the atom,
-  // which now belongs to the speaker.
+  // Sending the message ends dictation: the take is dropped, not appended to
+  // the next message.
   useEffect(() => {
-    if (activity === 'speaking') {
-      stop();
+    if (isSubmitting) {
+      scribe.cancel();
     }
-  }, [activity, stop]);
+  }, [isSubmitting, scribe]);
 
-  if (!supported) {
+  // Diya is taking the microphone; drop the take rather than fight for it.
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const handle = () => scribe.cancel();
+    window.addEventListener(DIYA_OPEN_EVENT, handle);
+    return () => window.removeEventListener(DIYA_OPEN_EVENT, handle);
+  }, [scribe]);
+
+  // Switching conversations must not carry dictation into the new thread.
+  useEffect(() => {
+    scribe.cancel();
+    slotRef.current = null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on thread change
+  }, [conversationId]);
+
+  if (!scribe.supported) {
     return (
       <TooltipButton
         label={localize('com_ui_voice_unsupported')}
@@ -142,17 +175,24 @@ function VoiceMic({ textAreaRef }: { textAreaRef: RefObject<HTMLTextAreaElement>
     );
   }
 
+  const label = busy
+    ? localize('com_ui_voice_transcribing')
+    : recording
+      ? localize('com_ui_voice_listening')
+      : localize('com_ui_voice_input');
+
   return (
     <TooltipButton
-      label={listening ? localize('com_ui_voice_listening') : localize('com_ui_voice_input')}
+      label={label}
       testId="voice-mic-button"
       onClick={toggle}
-      pressed={listening}
-      ring={listening}
+      disabled={busy}
+      pressed={recording}
+      ring={recording}
       status={
-        listening ? (
+        recording || busy ? (
           <span role="status" aria-live="polite" className="sr-only">
-            {localize('com_ui_voice_listening')}
+            {label}
           </span>
         ) : null
       }
@@ -164,8 +204,22 @@ function VoiceMic({ textAreaRef }: { textAreaRef: RefObject<HTMLTextAreaElement>
 
 /** Voice in for the composer: the dictation mic. Read-aloud lives on each
  *  assistant message (message-level actions), matching ChatGPT. */
-function VoiceControls({ textAreaRef }: { textAreaRef: RefObject<HTMLTextAreaElement> }) {
-  return <VoiceMic textAreaRef={textAreaRef} />;
+function VoiceControls({
+  textAreaRef,
+  isSubmitting,
+  conversationId,
+}: {
+  textAreaRef: RefObject<HTMLTextAreaElement>;
+  isSubmitting?: boolean;
+  conversationId?: string | null;
+}) {
+  return (
+    <VoiceMic
+      textAreaRef={textAreaRef}
+      isSubmitting={isSubmitting}
+      conversationId={conversationId}
+    />
+  );
 }
 
 export default VoiceControls;

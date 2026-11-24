@@ -865,7 +865,11 @@ const ChatForm = memo(function ChatForm({
                     </ComposerToolsSheet>
                   </>
                 )}
-                <VoiceControls textAreaRef={textAreaRef} />
+                <VoiceControls
+                  textAreaRef={textAreaRef}
+                  isSubmitting={isSubmitting}
+                  conversationId={conversationId}
+                />
                 {index === 0 && <VoiceRealtimeOverlay />}
                 <div className="mx-auto flex" />
                 {isWide && (

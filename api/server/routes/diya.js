@@ -154,6 +154,7 @@ router.post('/turn', requireJwtAuth, voiceLimiter, async (req, res) => {
   // Walk the ranked chain: one dead model must not end the conversation.
   for (const model of models) {
     try {
+      const startedAt = Date.now();
       const upstream = await fetch(`${base}/chat/completions`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
@@ -166,6 +167,7 @@ router.post('/turn', requireJwtAuth, voiceLimiter, async (req, res) => {
       const data = await upstream.json();
       const reply = data?.choices?.[0]?.message?.content?.trim();
       if (reply) {
+        logger.debug(`[diya] turn ok ms=${Date.now() - startedAt} chars=${reply.length}`);
         return res.json({ reply });
       }
     } catch (err) {

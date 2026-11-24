@@ -10,7 +10,7 @@ const { limiterCache } = require('@librechat/api');
  * happened when both shared `projectsLimiter`.
  */
 const VOICE_WINDOW_MS = parseInt(process.env.VOICE_WINDOW_MS) || 60 * 1000;
-const VOICE_MAX = parseInt(process.env.VOICE_MAX) || 240;
+const VOICE_MAX = parseInt(process.env.VOICE_MAX) || 120;
 
 const voiceLimiter = rateLimit({
   windowMs: VOICE_WINDOW_MS,
