@@ -79,4 +79,54 @@ describe('SplitView', () => {
     pointer('pointermove', 100);
     expect(separator).toHaveAttribute('aria-valuenow', '80');
   });
+
+  describe('narrow containers', () => {
+    class FakeResizeObserver {
+      constructor(private readonly callback: ResizeObserverCallback) {}
+      observe(): void {
+        this.callback([], this as unknown as ResizeObserver);
+      }
+      unobserve(): void {}
+      disconnect(): void {}
+    }
+
+    beforeEach(() => {
+      (globalThis as { ResizeObserver?: unknown }).ResizeObserver = FakeResizeObserver;
+    });
+
+    afterEach(() => {
+      delete (globalThis as { ResizeObserver?: unknown }).ResizeObserver;
+      jest.restoreAllMocks();
+    });
+
+    it('stacks the panes and reports a horizontal separator on a phone', () => {
+      // A 60/40 split at phone width left the side panel ~137px wide, where its
+      // tabs were clipped; narrow containers now split top/bottom.
+      jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(390);
+      const separator = renderSplit();
+
+      expect(separator).toHaveAttribute('aria-orientation', 'horizontal');
+      const left = screen.getByRole('region', { name: L.leftPane });
+      expect(left).toHaveStyle({ height: '60%' });
+      expect(left.style.width).toBe('');
+    });
+
+    it('keeps the side-by-side split on a wide container', () => {
+      jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(1280);
+      const separator = renderSplit();
+
+      expect(separator).toHaveAttribute('aria-orientation', 'vertical');
+      expect(screen.getByRole('region', { name: L.leftPane })).toHaveStyle({ width: '60%' });
+    });
+
+    it('accepts the up/down arrows when stacked', () => {
+      jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(390);
+      const separator = renderSplit();
+
+      fireEvent.keyDown(separator, { key: 'ArrowDown' });
+      expect(separator).toHaveAttribute('aria-valuenow', '65');
+      fireEvent.keyDown(separator, { key: 'ArrowUp' });
+      expect(separator).toHaveAttribute('aria-valuenow', '60');
+    });
+  });
 });
