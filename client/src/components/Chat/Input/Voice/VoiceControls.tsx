@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { useToastContext } from '@librechat/client';
 import { Mic } from 'lucide-react';
 import * as Ariakit from '@ariakit/react';
+import { useToastContext } from '@librechat/client';
 import type { RefObject } from 'react';
-import useScribeRecording from './useScribeRecording';
-import { DIYA_OPEN_EVENT } from '~/components/Voice/events';
-import { applyTranscript, type InsertionSlot } from './speech';
-import { useChatFormContext } from '~/Providers';
-import { useAuthToken } from '~/hooks/AuthContext';
-import { useLocalize } from '~/hooks';
 import type { TranslationKeys } from '~/hooks';
+import { applyTranscript, type InsertionSlot } from './speech';
+import { DIYA_OPEN_EVENT } from '~/components/Voice/events';
+import useScribeRecording from './useScribeRecording';
+import { useAuthToken } from '~/hooks/AuthContext';
+import { useChatFormContext } from '~/Providers';
+import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
 const controlClasses = cn(

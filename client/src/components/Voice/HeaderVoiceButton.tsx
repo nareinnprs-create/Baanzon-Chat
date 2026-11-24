@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Provider } from 'jotai';
 import { AudioLines } from 'lucide-react';
 import { TooltipAnchor, Button } from '@librechat/client';
-import { VOICE_LABELS as L } from '~/components/Voice/labels';
-import VoicePanel from '~/components/Voice/VoicePanel';
 import useDiyaChatTurn from '~/components/Voice/useDiyaChatTurn';
+import { VOICE_LABELS as L } from '~/components/Voice/labels';
 import { announceDiyaOpen } from '~/components/Voice/events';
+import VoicePanel from '~/components/Voice/VoicePanel';
 import { primeOutput } from '~/utils/voice/output';
 import { cn } from '~/utils';
 
