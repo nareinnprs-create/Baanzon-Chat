@@ -71,7 +71,11 @@ if [ -f "$ACTIVE_DIR/.env" ]; then cp "$ACTIVE_DIR/.env" "$STAGE_DIR/.env"; fi
 if [ ! -f "$STAGE_DIR/baanzon.yaml" ] && [ -f "$ACTIVE_DIR/baanzon.yaml" ]; then
   cp "$ACTIVE_DIR/baanzon.yaml" "$STAGE_DIR/baanzon.yaml"
 fi
-for d in images uploads; do
+# runtime data the tarball cannot carry: uploaded/generated images live under
+# client/public/images (LibreChat's default IMAGE_OUTPUT_DIR), not <slot>/images,
+# so a flip used to delete every user's pictures and old conversations threw
+# ENOENT when reopened.
+for d in images uploads client/public/images; do
   mkdir -p "$STAGE_DIR/$d"
   if [ -d "$ACTIVE_DIR/$d" ]; then cp -a "$ACTIVE_DIR/$d/." "$STAGE_DIR/$d/" 2>/dev/null || true; fi
 done
