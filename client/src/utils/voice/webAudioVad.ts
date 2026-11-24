@@ -12,6 +12,21 @@ import type { AudioLevelSampler } from './vad';
 
 type AudioContextConstructor = new () => AudioContext;
 
+/**
+ * Raw RMS of ordinary speech sits around 0.01-0.15 (-40 to -16 dBFS), far below
+ * the detector's 0.2 speaking threshold, so an unscaled RMS left the VAD stuck
+ * in silence: the orb listened forever and never recorded a single word. Scale
+ * the level into the 0..1 range the detector expects.
+ */
+const LEVEL_GAIN = 8;
+
+export function rmsToLevel(rms: number): number {
+  if (!Number.isFinite(rms) || rms <= 0) {
+    return 0;
+  }
+  return Math.min(1, rms * LEVEL_GAIN);
+}
+
 /** `webkitAudioContext` is still the only spelling on some Safari builds. */
 function getAudioContextConstructor(): AudioContextConstructor | null {
   if (typeof AudioContext !== 'undefined') {
@@ -71,7 +86,7 @@ export function createWebAudioVadSampler(stream: MediaStream): WebAudioVadHandle
       for (let index = 0; index < buffer.length; index += 1) {
         sum += buffer[index] * buffer[index];
       }
-      return Math.sqrt(sum / buffer.length);
+      return rmsToLevel(Math.sqrt(sum / buffer.length));
     },
     dispose(): void {
       try {

@@ -71,11 +71,11 @@ const MAX_UTTERANCE_MS = 45000;
 /** A turn that never answers must not leave the orb thinking forever. */
 const TURN_TIMEOUT_MS = 45000;
 /** Recordings shorter than this are noise, not speech. */
-const MIN_UTTERANCE_MS = 350;
+const MIN_UTTERANCE_MS = 250;
 /** Rejects clicks and single-sample spikes before a recording starts. */
 const MIN_SPEECH_MS = 250;
 /** Level that counts as the user talking over Diya. */
-const BARGE_IN_LEVEL = 0.25;
+const BARGE_IN_LEVEL = 0.4;
 /** Sustained ticks needed to interrupt; ~300ms at the 100ms tick. */
 const BARGE_IN_TICKS = 3;
 
@@ -385,7 +385,7 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       if (stoppedRef.current || mutedRef.current) {
         return;
       }
-      if (durationMs < MIN_UTTERANCE_MS || blob.size < 1200) {
+      if (durationMs < MIN_UTTERANCE_MS || blob.size < 800) {
         return;
       }
       try {
@@ -614,7 +614,9 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
     streamRef.current = stream;
     const handle = createWebAudioVadSampler(stream);
     if (handle == null) {
-      return 'ok';
+      // No analyser means no way to know when the user speaks, so the session
+      // would sit "listening" forever. Fail loudly instead of pretending.
+      return 'failed';
     }
     samplerRef.current = handle.sampler;
     detectorRef.current = createVoiceActivityDetector({

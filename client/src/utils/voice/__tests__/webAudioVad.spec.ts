@@ -102,7 +102,8 @@ describe('createWebAudioVadSampler', () => {
 
     const handle = requireHandle(createWebAudioVadSampler(fakeStream()));
 
-    expect(handle.sampler.sample()).toBeCloseTo(0.5);
+    // The adapter scales raw RMS into the detector's 0..1 range (x8, clamped).
+    expect(handle.sampler.sample()).toBeCloseTo(1);
     handle.close();
   });
 
@@ -111,7 +112,8 @@ describe('createWebAudioVadSampler', () => {
 
     const handle = requireHandle(createWebAudioVadSampler(fakeStream()));
 
-    expect(handle.sampler.sample()).toBeCloseTo(0.5);
+    // The adapter scales raw RMS into the detector's 0..1 range (x8, clamped).
+    expect(handle.sampler.sample()).toBeCloseTo(1);
   });
 
   it('releases the audio graph on dispose and is safe to dispose twice', () => {
