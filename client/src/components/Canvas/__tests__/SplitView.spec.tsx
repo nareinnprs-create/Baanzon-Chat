@@ -86,6 +86,7 @@ describe('SplitView', () => {
       observe(): void {
         this.callback([], this as unknown as ResizeObserver);
       }
+
       unobserve(): void {}
       disconnect(): void {}
     }
