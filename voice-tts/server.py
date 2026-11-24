@@ -248,10 +248,12 @@ def warmup():
         log("warmup: kokoro ready")
     except Exception as error:  # noqa: BLE001 - a missing model degrades, never crashes
         log(f"warmup: kokoro unavailable ({error})")
-    # The Indic languages Kokoro lacks; the three most common first.
+    # The Indic languages Kokoro lacks; the three most common first. Load the
+    # models only: synthesizing a Latin word makes some MMS tokenizers produce
+    # an empty sequence, which is a tokenizer quirk, not a failed load.
     for lang in ("ta", "te", "bn", "ml", "kn"):
         try:
-            synthesize("warmup", lang)
+            load_mms(MMS_LANGS[lang])
             log(f"warmup: mms {lang} ready")
         except Exception as error:  # noqa: BLE001
             log(f"warmup: mms {lang} unavailable ({error})")
