@@ -132,6 +132,7 @@ function pickRecorderMime(): string | undefined {
 export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
   const {
     turn: injectedTurn,
+    language: pinnedLanguage,
     vad,
     tickMs = DEFAULT_TICK_MS,
     autoStart = false,
@@ -191,7 +192,9 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
   const transcriptsRef = useRef<VoiceTranscript[]>(transcripts);
   const startRef = useRef<() => Promise<void>>(async () => undefined);
   /** Language detected by the last transcription; used when the reply text is Latin. */
-  const sessionLangRef = useRef('en');
+  const sessionLangRef = useRef(pinnedLanguage || 'en');
+  const pinnedLanguageRef = useRef(pinnedLanguage);
+  pinnedLanguageRef.current = pinnedLanguage;
 
   statusRef.current = status;
   mutedRef.current = muted;
@@ -390,11 +393,19 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
         return;
       }
       try {
-        const { text, language } = await transcribeAudio(blob, tokenRef.current);
+        const { text, language } = await transcribeAudio(
+          blob,
+          tokenRef.current,
+          pinnedLanguageRef.current || undefined,
+        );
         if (!text || stoppedRef.current) {
           return;
         }
-        if (language && isSupportedVoiceLang(language)) {
+        if (pinnedLanguageRef.current) {
+          // A pinned language is the user's answer to Whisper's confusion;
+          // never let a detection override it.
+          sessionLangRef.current = pinnedLanguageRef.current;
+        } else if (language && isSupportedVoiceLang(language)) {
           // A code we cannot speak (Whisper sometimes reports Russian for
           // Indic speech) must not become the session's language.
           sessionLangRef.current = language.slice(0, 2).toLowerCase();
@@ -491,7 +502,7 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       // The server resolves the final voice from the text's script, so the
       // session language is a better hint than a client-side script guess that
       // cannot tell Marathi from Hindi.
-      const lang = sessionLangRef.current;
+      const lang = pinnedLanguageRef.current || sessionLangRef.current;
       const token = speakTokenRef.current;
       const cancelled = () =>
         stoppedRef.current || mutedRef.current || speakTokenRef.current !== token;

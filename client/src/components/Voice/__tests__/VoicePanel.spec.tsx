@@ -165,6 +165,16 @@ describe('VoicePanel', () => {
     expect(screen.queryByTestId('diya-orb')).not.toBeInTheDocument();
   });
 
+  it('lets the user pin the spoken language and remembers it', () => {
+    installStreamFake();
+    renderPanel();
+
+    const select = screen.getByTestId('voice-language');
+    expect(select).toHaveValue('');
+    fireEvent.change(select, { target: { value: 'te' } });
+    expect(localStorage.getItem('baanzon-voice-language')).toBe('te');
+  });
+
   it('renders the idle state with the orb and an empty transcript', () => {
     installStreamFake();
     renderPanel();

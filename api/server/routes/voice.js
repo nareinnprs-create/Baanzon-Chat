@@ -24,6 +24,7 @@ const {
   remainingSeconds,
   normalizeTier,
   isLikelyHallucination,
+  normalizeVoiceLang,
   resolveVoiceLang,
 } = require('@librechat/api');
 
@@ -214,10 +215,14 @@ async function synthesize(text, lang) {
 
 /** Speech in: base64 audio -> text (+ language when the engine reports it). */
 router.post('/stt', requireJwtAuth, voiceLimiter, async (req, res) => {
-  const { audio } = req.body ?? {};
+  const { audio, language: requestedLanguage } = req.body ?? {};
   if (typeof audio !== 'string' || audio.length === 0) {
     return res.status(400).json({ error: 'audio is required (base64)' });
   }
+  // A user-pinned language is the reliable answer to Whisper's auto-detect,
+  // which confuses Indic languages on short clips. Only languages the voice
+  // stack speaks are accepted as a hint.
+  const hint = normalizeVoiceLang(requestedLanguage);
   let bytes;
   try {
     bytes = Buffer.from(audio, 'base64');
@@ -239,7 +244,10 @@ router.post('/stt', requireJwtAuth, voiceLimiter, async (req, res) => {
   try {
     // Whisper takes the container bytes as base64 and detects the format itself;
     // an array of ints is only for raw PCM and is rejected for compressed audio.
-    const response = await cfRun('@cf/openai/whisper-large-v3-turbo', { audio });
+    const response = await cfRun('@cf/openai/whisper-large-v3-turbo', {
+      audio,
+      ...(hint ? { language: hint } : {}),
+    });
     const data = await response.json();
     const text = typeof data?.result?.text === 'string' ? data.result.text.trim() : '';
     if (!text) {

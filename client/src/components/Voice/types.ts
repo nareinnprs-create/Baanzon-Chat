@@ -56,6 +56,12 @@ export type VoiceTurnFn = (
 export interface VoiceOptions {
   /** The conversation seam; the panel supplies the authenticated default. */
   turn?: VoiceTurnFn;
+  /**
+   * A language the user pinned for this session. Empty/undefined means
+   * automatic detection; when set it is the STT hint and the seed for the
+   * reply voice.
+   */
+  language?: string;
   /** VAD tuning; see {@link VadOptions}. */
   vad?: VadOptions;
   /** Level-sampling interval for the meter and VAD, in milliseconds. Default `100`. */

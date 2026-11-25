@@ -1,8 +1,9 @@
-import { useCallback } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { CircleSlash2, Waves, X } from 'lucide-react';
 import { Alert, Button, EmptyState, Spinner, TooltipAnchor } from '@librechat/client';
 import type { ReactNode } from 'react';
 import type { VoiceHistoryTurn, VoiceOptions, VoiceStatus, VoiceTranscriptRole } from './types';
+import { VOICE_LANGUAGES, readVoiceLanguage, writeVoiceLanguage } from './languages';
 import OpenSidebar from '~/components/Chat/Menus/OpenSidebar';
 import { useAuthToken } from '~/hooks/AuthContext';
 import useDiyaVoice from '~/hooks/useDiyaVoice';
@@ -76,14 +77,17 @@ export default function VoicePanel({
   onClose,
 }: VoicePanelProps) {
   const token = useAuthToken();
+  const languageSelectId = useId();
+  const [language, setLanguage] = useState(readVoiceLanguage);
   const defaultTurn = useCallback(
-    (text: string, history: VoiceHistoryTurn[], signal: AbortSignal, language?: string) =>
-      requestDiyaTurn(text, history, signal, token ?? undefined, language),
+    (text: string, history: VoiceHistoryTurn[], signal: AbortSignal, languageHint?: string) =>
+      requestDiyaTurn(text, history, signal, token ?? undefined, languageHint),
     [token],
   );
 
   const voice = useDiyaVoice({
     turn: turn ?? defaultTurn,
+    language,
     vad,
     tickMs,
     autoStart,
@@ -132,6 +136,32 @@ export default function VoicePanel({
           {STATUS_LABELS[status]}
           <span className="sr-only">{statusAnnouncement(status, voice.bargeIn)}</span>
         </p>
+
+        <div
+          className={cn('flex items-center justify-center gap-2 text-sm', overlay && 'flex-col')}
+        >
+          <label htmlFor={languageSelectId} className="text-text-secondary">
+            {L.language}
+          </label>
+          <select
+            id={languageSelectId}
+            data-testid="voice-language"
+            value={language}
+            disabled={status === 'connecting'}
+            onChange={(event) => {
+              setLanguage(event.target.value);
+              writeVoiceLanguage(event.target.value);
+            }}
+            className="max-w-[11rem] rounded-lg border border-border-light bg-surface-primary px-2 py-1 text-sm text-text-primary"
+          >
+            <option value="">{L.languageAuto}</option>
+            {VOICE_LANGUAGES.map((entry) => (
+              <option key={entry.code} value={entry.code}>
+                {entry.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {voice.error != null ? (
           <Alert variant="error" data-testid="voice-error">

@@ -31,6 +31,8 @@ const KEYS = {
   bargeIn: 'com_ui_voice_barge_in',
   bargeInActive: 'com_ui_voice_barge_in_active',
   transcriptHeading: 'com_ui_voice_transcript_heading',
+  language: 'com_ui_voice_language',
+  languageAuto: 'com_ui_voice_language_auto',
   transcriptEmpty: 'com_ui_voice_transcript_empty',
   speakerYou: 'com_ui_voice_speaker_you',
   speakerAssistant: 'com_ui_voice_speaker_assistant',

@@ -84,12 +84,13 @@ export interface TranscriptionResult {
 export async function transcribeAudio(
   blob: Blob,
   token?: string | null,
+  language?: string,
 ): Promise<TranscriptionResult> {
   const audio = await blobToBase64(blob);
   const response = await voiceFetch('/api/voice/stt', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders(token) },
-    body: JSON.stringify({ audio }),
+    body: JSON.stringify({ audio, ...(language ? { language } : {}) }),
   });
   if (response.status === 422) {
     // The server refused the clip: no speech, a known Whisper artifact, or a

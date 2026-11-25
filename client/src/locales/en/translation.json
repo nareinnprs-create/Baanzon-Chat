@@ -846,6 +846,8 @@
   "com_ui_voice_barge_in": "Interrupt",
   "com_ui_voice_barge_in_active": "Interrupted - go ahead",
   "com_ui_voice_transcript_heading": "Transcript",
+  "com_ui_voice_language": "Language",
+  "com_ui_voice_language_auto": "Auto-detect",
   "com_ui_voice_transcript_empty": "The transcript will appear here as you speak.",
   "com_ui_voice_speaker_you": "You",
   "com_ui_voice_speaker_assistant": "Diya",
