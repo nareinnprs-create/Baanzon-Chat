@@ -20,6 +20,8 @@ export const VOICE_LANGUAGES: ReadonlyArray<{ code: string; label: string }> = [
   { code: 'kn', label: 'ಕನ್ನಡ' },
   { code: 'ml', label: 'മലയാളം' },
   { code: 'mr', label: 'मराठी' },
+  { code: 'ur', label: 'اردو' },
+  { code: 'mai', label: 'मैथिली' },
   { code: 'pa', label: 'ਪੰਜਾਬੀ' },
   { code: 'or', label: 'ଓଡ଼ିଆ' },
   { code: 'as', label: 'অসমীয়া' },

@@ -6,5 +6,6 @@ export * from './transcript';
 export * from './providers/sentences';
 export * from './providers/sttFlux';
 export * from './providers/sttNova';
+export * from './providers/bhashini';
 export * from './providers/ttsAura';
 export * from './providers/llmOpraiz';

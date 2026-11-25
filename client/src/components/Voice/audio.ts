@@ -45,10 +45,25 @@ export const SUPPORTED_VOICE_LANGS: ReadonlySet<string> = new Set([
   'or',
   'as',
   'mr',
+  'ur',
+  'mai',
 ]);
 
+/** Normalizes a language tag to a supported voice code (`mai`, `ta`, `ur`). */
+export function normalizeVoiceLang(code: string | null | undefined): string | null {
+  const base = String(code ?? '')
+    .toLowerCase()
+    .trim()
+    .split(/[-_]/)[0];
+  if (SUPPORTED_VOICE_LANGS.has(base)) {
+    return base;
+  }
+  const short = base.slice(0, 2);
+  return SUPPORTED_VOICE_LANGS.has(short) ? short : null;
+}
+
 export function isSupportedVoiceLang(code: string | null | undefined): boolean {
-  return typeof code === 'string' && SUPPORTED_VOICE_LANGS.has(code.toLowerCase().slice(0, 2));
+  return normalizeVoiceLang(code) != null;
 }
 
 /** Language of a text by its script; Latin text stays English. */

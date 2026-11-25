@@ -30,7 +30,7 @@ import {
   playBuffer,
   primeOutput,
 } from '~/utils/voice/output';
-import { isSupportedVoiceLang, synthesizeSpeech, transcribeAudio } from '~/components/Voice/audio';
+import { normalizeVoiceLang, synthesizeSpeech, transcribeAudio } from '~/components/Voice/audio';
 import { chunkForSpeech as chunkTextForSpeech } from '~/components/Chat/Input/Voice/speech';
 import { VOICE_LABELS } from '~/components/Voice/labels';
 import { DiyaTurnError } from '~/components/Voice/api';
@@ -405,10 +405,13 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
           // A pinned language is the user's answer to Whisper's confusion;
           // never let a detection override it.
           sessionLangRef.current = pinnedLanguageRef.current;
-        } else if (language && isSupportedVoiceLang(language)) {
+        } else if (language) {
           // A code we cannot speak (Whisper sometimes reports Russian for
           // Indic speech) must not become the session's language.
-          sessionLangRef.current = language.slice(0, 2).toLowerCase();
+          const detected = normalizeVoiceLang(language);
+          if (detected) {
+            sessionLangRef.current = detected;
+          }
         }
         const transcript: VoiceTranscript = {
           id: `u-${Date.now()}`,

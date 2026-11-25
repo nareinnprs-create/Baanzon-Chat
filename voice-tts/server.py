@@ -86,6 +86,9 @@ MMS_LANGS = {
     "or": "ory",
     "as": "asm",
     "mr": "mar",
+    # Meta publishes Urdu per script; Arabic is the written form users expect.
+    "ur": "urd-script_arabic",
+    "mai": "mai",
 }
 
 _lock = threading.Lock()
@@ -171,8 +174,17 @@ def to_wav(samples, sample_rate):
     return buffer.getvalue()
 
 
+def _normalize_lang(lang):
+    """`mai` and `urd-script_arabic` are valid codes; do not blind-truncate."""
+    code = (lang or "en").lower().strip()
+    base = code.replace("_", "-").split("-")[0]
+    if base in KOKORO_VOICES or base in MMS_LANGS:
+        return base
+    return base[:2]
+
+
 def synthesize(text, lang):
-    lang = (lang or "en").lower()[:2]
+    lang = _normalize_lang(lang)
     key = (lang, text)
     with _lock:
         cached = _cache.get(key)

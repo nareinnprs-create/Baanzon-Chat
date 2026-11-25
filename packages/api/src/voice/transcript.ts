@@ -34,6 +34,8 @@ export const VOICE_LANGS: ReadonlySet<string> = new Set([
   'or',
   'as',
   'mr',
+  'ur',
+  'mai',
 ]);
 
 /** Indic scripts, most specific first (Devanagari is also Marathi/Nepali). */
@@ -53,6 +55,7 @@ const SCRIPT_LANG: ReadonlyArray<readonly [RegExp, string]> = [
 const SCRIPT_FAMILY: Readonly<Record<string, string>> = {
   hi: 'devanagari',
   mr: 'devanagari',
+  mai: 'devanagari',
   bn: 'bengali',
   as: 'bengali',
   pa: 'gurmukhi',
@@ -69,6 +72,7 @@ const SCRIPT_FAMILY: Readonly<Record<string, string>> = {
   pt: 'latin',
   ja: 'japanese',
   zh: 'han',
+  ur: 'arabic',
 };
 
 /**
@@ -121,17 +125,25 @@ export function scriptLang(text: string): string | null {
   return /[A-Za-z]/.test(text) ? 'en' : null;
 }
 
-/** Two-letter code when it is a language the voice stack can speak. */
+/** Two- or three-letter code when it is a language the voice stack can speak. */
 export function normalizeVoiceLang(value: unknown): string | null {
-  const code = String(value ?? '')
+  const base = String(value ?? '')
     .toLowerCase()
-    .slice(0, 2);
-  return VOICE_LANGS.has(code) ? code : null;
+    .trim()
+    .split(/[-_]/)[0];
+  if (VOICE_LANGS.has(base)) {
+    return base;
+  }
+  const short = base.slice(0, 2);
+  return VOICE_LANGS.has(short) ? short : null;
 }
 
 /** Scripts we have no voice for; text in them must not be read by another voice. */
 const UNSUPPORTED_SCRIPT_RE =
   /[\u0370-\u03FF\u0400-\u04FF\u0590-\u05FF\u0600-\u06FF\u0750-\u077F\u0E00-\u0E7F\u10A0-\u10FF\uAC00-\uD7AF]/;
+
+/** Perso-Arabic: Urdu is the only language we can voice in it. */
+const ARABIC_SCRIPT_RE = /[\u0600-\u06FF\u0750-\u077F]/;
 
 /**
  * The language to speak a text in.
@@ -143,10 +155,14 @@ const UNSUPPORTED_SCRIPT_RE =
  * Hindi. Returns `null` when nothing we can speak matches.
  */
 export function resolveVoiceLang(reported: unknown, text: string): string | null {
+  const direct = normalizeVoiceLang(reported);
+  if (ARABIC_SCRIPT_RE.test(text)) {
+    // Sindhi and Kashmiri share the script; only a pinned Urdu may use it.
+    return direct === 'ur' ? 'ur' : null;
+  }
   if (UNSUPPORTED_SCRIPT_RE.test(text)) {
     return null;
   }
-  const direct = normalizeVoiceLang(reported);
   const fromText = scriptLang(text);
   if (fromText == null) {
     return direct;

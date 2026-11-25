@@ -51,6 +51,8 @@ describe('normalizeVoiceLang', () => {
   it('accepts supported codes and rejects the rest', () => {
     expect(normalizeVoiceLang('ta')).toBe('ta');
     expect(normalizeVoiceLang('TA-IN')).toBe('ta');
+    expect(normalizeVoiceLang('mai')).toBe('mai');
+    expect(normalizeVoiceLang('mai-IN')).toBe('mai');
     expect(normalizeVoiceLang('ru')).toBeNull();
     expect(normalizeVoiceLang(null)).toBeNull();
   });
@@ -73,11 +75,23 @@ describe('resolveVoiceLang', () => {
 
   it('refuses a script it cannot voice', () => {
     expect(resolveVoiceLang('ru', 'Продолжение следует')).toBeNull();
-    expect(resolveVoiceLang('ur', 'مرحبا')).toBeNull();
+    expect(resolveVoiceLang('ur', 'مرحبا')).toBe('ur');
+    // Sindhi/Kashmiri share the script and have no voice yet.
+    expect(resolveVoiceLang('sd', 'سلام')).toBeNull();
     // A Russian reply in an English session must not be read by the English
     // voice either.
     expect(resolveVoiceLang('en', 'Продолжение следует')).toBeNull();
     expect(resolveVoiceLang('en', 'Продолжение follows')).toBeNull();
+  });
+
+  it('speaks Urdu only when it is pinned', () => {
+    expect(resolveVoiceLang('ur', 'سلام، میں دیا ہوں')).toBe('ur');
+    expect(resolveVoiceLang(undefined, 'سلام، میں دیا ہوں')).toBeNull();
+    expect(resolveVoiceLang('ur', 'hello')).toBe('en');
+  });
+
+  it('keeps Maithili inside Devanagari', () => {
+    expect(resolveVoiceLang('mai', 'नमस्कार, हम दिया छी')).toBe('mai');
   });
 
   it('falls back to the report for text without a script', () => {
