@@ -9,11 +9,13 @@ import {
   type VoiceTier,
 } from './types';
 import { streamChat, type VoiceChatMessage } from './providers/llmOpraiz';
+import { openNovaStt, type NovaSttOptions } from './providers/sttNova';
 import { detectLanguage, sttWhisper } from './providers/sttWhisper';
 import { openFluxStt, type FluxStt } from './providers/sttFlux';
 import { openAuraTts, type AuraTts } from './providers/ttsAura';
 import { createSentenceSplitter } from './providers/sentences';
 import { normalizeTier, remainingSeconds } from './caps';
+import { resolveVoiceLang } from './transcript';
 
 /**
  * Voice turn orchestrator: one pod-side state machine per connected client.
@@ -65,7 +67,7 @@ export interface VoiceGatewayDeps {
     }): Promise<string | null>;
   };
   /** Test seams. */
-  createStt?: typeof openFluxStt;
+  createStt?: (opts: NovaSttOptions) => FluxStt;
   createTts?: typeof openAuraTts;
   chat?: typeof streamChat;
   whisper?: typeof sttWhisper;
@@ -86,7 +88,17 @@ export interface VoiceGateway {
 }
 
 export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
-  const createStt = deps.createStt ?? openFluxStt;
+  /**
+   * Nova-3 streams English well (punctuation + native end-of-turn) but its
+   * `language=multi` transliterates Indic speech into Devanagari instead of
+   * transcribing it, and per-language codes are rejected by the Cloudflare
+   * proxy. It is therefore only safe when the operator has pinned a single
+   * language; `auto` keeps flux plus the Whisper re-decode, which is the only
+   * path that transcribes Indic correctly.
+   */
+  const novaRequested = /nova/i.test(String(deps.config.sttModel || ''));
+  const novaSafe = novaRequested && deps.config.sttLanguage !== 'auto';
+  const createStt = deps.createStt ?? (novaSafe ? openNovaStt : openFluxStt);
   const createTts = deps.createTts ?? openAuraTts;
   const chat = deps.chat ?? streamChat;
   const whisper = deps.whisper ?? sttWhisper;
@@ -337,6 +349,8 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
       return createStt({
         accountId: deps.cf.accountId,
         token: deps.cf.token,
+        model: deps.config.sttModel,
+        language: deps.config.sttLanguage,
         sampleRate: CLIENT_SAMPLE_RATE,
         eotThreshold: deps.config.eotThreshold,
         eotTimeoutMs: deps.config.eotTimeoutMs,
@@ -382,13 +396,12 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
       box.value = 'thinking';
       send(ws, { type: 'state', state: 'thinking' });
 
-      // Language: whisper-large-v3-turbo decodes every buffered turn — flux
-      // only streams English, and its guess for foreign audio arrives as
-      // Latin-script garbage no script heuristic can catch. flux remains the
-      // live caption feed; whisper's text is authoritative and carries the
-      // detected language. Operators serving English-only traffic set
-      // `sttLanguage: 'en'` to skip the ~1s decode entirely.
-      const skipDecode = deps.config.sttLanguage === 'en';
+      // Language: Nova-3 streams every supported language, so its transcript
+      // is authoritative and the ~1s Whisper re-decode is skipped. Flux only
+      // streams English and its guess for foreign audio arrives as Latin-script
+      // garbage no heuristic can catch, so it keeps the re-decode. Operators
+      // serving English-only traffic set `sttLanguage: 'en'` to skip it too.
+      const skipDecode = deps.config.sttLanguage === 'en' || (novaSafe && text.trim().length > 0);
       if (pcm.length > 0 && !skipDecode) {
         const decoded = await whisper({
           accountId: deps.cf.accountId,
@@ -400,10 +413,14 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
           text = decoded.text;
           turnLang = decoded.language;
         } else {
-          // Whisper failed: keep the flux text, but attribute the language so
-          // a non-Latin transcript still reaches the client-TTS path.
+          // Whisper failed: keep the streamed text, but attribute the language
+          // so a non-Latin transcript still reaches the client-TTS path.
           turnLang = detectLanguage(text);
         }
+      } else if (skipDecode) {
+        // The script of the transcript is the best signal available; a pinned
+        // language survives inside its own script family.
+        turnLang = resolveVoiceLang(deps.config.sttLanguage, text) ?? detectLanguage(text);
       }
       send(ws, { type: 'user-transcript', text, final: true });
       currentUserText = text;

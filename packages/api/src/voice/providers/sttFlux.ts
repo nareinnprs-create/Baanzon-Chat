@@ -37,7 +37,7 @@ export function parseFluxMessage(data: string): FluxEvent | null {
   }
 }
 
-export function openFluxStt(opts: {
+export interface FluxSttOptions {
   accountId: string;
   token: string;
   model?: string;
@@ -47,7 +47,9 @@ export function openFluxStt(opts: {
   /** Eager end-of-turn confidence; omitted = eager triggering off (v1 default). */
   eagerEotThreshold?: number;
   onEvent: (event: FluxEvent) => void;
-}): FluxStt {
+}
+
+export function openFluxStt(opts: FluxSttOptions): FluxStt {
   const model = opts.model || '@cf/deepgram/flux';
   const url =
     `wss://api.cloudflare.com/client/v4/accounts/${opts.accountId}/ai/run/${model}` +
