@@ -30,8 +30,8 @@ import {
   playBuffer,
   primeOutput,
 } from '~/utils/voice/output';
+import { isSupportedVoiceLang, synthesizeSpeech, transcribeAudio } from '~/components/Voice/audio';
 import { chunkForSpeech as chunkTextForSpeech } from '~/components/Chat/Input/Voice/speech';
-import { detectLang, synthesizeSpeech, transcribeAudio } from '~/components/Voice/audio';
 import { VOICE_LABELS } from '~/components/Voice/labels';
 import { DiyaTurnError } from '~/components/Voice/api';
 
@@ -75,9 +75,9 @@ const MIN_UTTERANCE_MS = 250;
 /** Rejects clicks and single-sample spikes before a recording starts. */
 const MIN_SPEECH_MS = 250;
 /** Level that counts as the user talking over Diya. */
-const BARGE_IN_LEVEL = 0.4;
-/** Sustained ticks needed to interrupt; ~300ms at the 100ms tick. */
-const BARGE_IN_TICKS = 3;
+const BARGE_IN_LEVEL = 0.7;
+/** Sustained ticks needed to interrupt; ~500ms at the 100ms tick. */
+const BARGE_IN_TICKS = 5;
 
 function isActive(status: VoiceStatus): boolean {
   return ACTIVE_STATUSES.includes(status);
@@ -333,6 +333,7 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
                 .slice(-HISTORY_TURNS)
                 .map((line) => ({ role: line.role, content: line.text })),
               controller.signal,
+              sessionLangRef.current,
             )
           : await Promise.reject(new DiyaTurnError('unavailable'));
         clearTimeout(timeout);
@@ -393,7 +394,9 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
         if (!text || stoppedRef.current) {
           return;
         }
-        if (language) {
+        if (language && isSupportedVoiceLang(language)) {
+          // A code we cannot speak (Whisper sometimes reports Russian for
+          // Indic speech) must not become the session's language.
           sessionLangRef.current = language.slice(0, 2).toLowerCase();
         }
         const transcript: VoiceTranscript = {
@@ -485,7 +488,10 @@ export function useDiyaVoice(options: VoiceOptions = {}): UseDiyaVoiceResult {
       }
       const chunks = chunkTextForSpeech(text);
       const pieces = chunks.length > 0 ? chunks : [text];
-      const lang = detectLang(text, sessionLangRef.current || 'en');
+      // The server resolves the final voice from the text's script, so the
+      // session language is a better hint than a client-side script guess that
+      // cannot tell Marathi from Hindi.
+      const lang = sessionLangRef.current;
       const token = speakTokenRef.current;
       const cancelled = () =>
         stoppedRef.current || mutedRef.current || speakTokenRef.current !== token;

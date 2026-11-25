@@ -1,5 +1,6 @@
 const express = require('express');
 const { logger } = require('@librechat/data-schemas');
+const { normalizeVoiceLang } = require('@librechat/api');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
 const { voiceLimiter } = require('~/server/middleware/limiters');
 const { resolveModelChain } = require('~/server/services/billing/modelRouter');
@@ -29,6 +30,28 @@ const SYSTEM_PROMPT = [
   'for Bengali, and so on). Never romanize an Indian language - the reply is spoken',
   'by a native-script voice and Latin letters would be read with English sounds.',
 ].join(' ');
+
+/** Spoken language names for the hint appended to the system prompt. */
+const LANGUAGE_NAMES = {
+  en: 'English',
+  hi: 'Hindi',
+  ta: 'Tamil',
+  te: 'Telugu',
+  bn: 'Bengali',
+  gu: 'Gujarati',
+  kn: 'Kannada',
+  ml: 'Malayalam',
+  mr: 'Marathi',
+  pa: 'Punjabi',
+  or: 'Odia',
+  as: 'Assamese',
+  es: 'Spanish',
+  fr: 'French',
+  it: 'Italian',
+  pt: 'Portuguese',
+  ja: 'Japanese',
+  zh: 'Chinese',
+};
 
 /** Greeting fast-path: greetings answer instantly without the model round
  *  trip, so "hey Diya" acks in well under a second. Localized for the most
@@ -109,7 +132,7 @@ router.post('/turn', requireJwtAuth, voiceLimiter, async (req, res) => {
   if (settings && settings.enabled === false) {
     return res.status(503).json({ error: UNAVAILABLE });
   }
-  const { text, history } = req.body ?? {};
+  const { text, history, language } = req.body ?? {};
   if (typeof text !== 'string' || text.trim() === '' || text.length > 4000) {
     return res.status(400).json({ error: 'text is required (1..4000 chars)' });
   }
@@ -128,6 +151,7 @@ router.post('/turn', requireJwtAuth, voiceLimiter, async (req, res) => {
   }
 
   const trimmed = text.trim();
+  const spokenLanguage = normalizeVoiceLang(language);
 
   // Greeting fast-path: acknowledge identity instantly, no model round trip.
   if (GREETING_RE.test(trimmed)) {
@@ -146,7 +170,13 @@ router.post('/turn', requireJwtAuth, voiceLimiter, async (req, res) => {
   ).slice(0, 3);
 
   const messages = [
-    { role: 'system', content: SYSTEM_PROMPT },
+    {
+      role: 'system',
+      content:
+        spokenLanguage == null || spokenLanguage === 'en'
+          ? SYSTEM_PROMPT
+          : `${SYSTEM_PROMPT} The user is speaking ${LANGUAGE_NAMES[spokenLanguage] ?? spokenLanguage}; write the reply in that language and its own script.`,
+    },
     ...(history ?? []).slice(-12).map((turn) => ({ role: turn.role, content: turn.content })),
     { role: 'user', content: trimmed },
   ];

@@ -46,6 +46,7 @@ export async function requestDiyaTurn(
   history: DiyaHistoryTurn[],
   signal: AbortSignal,
   token?: string,
+  language?: string,
 ): Promise<string> {
   let response: Response;
   try {
@@ -55,7 +56,7 @@ export async function requestDiyaTurn(
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ text, history }),
+      body: JSON.stringify({ text, history, ...(language ? { language } : {}) }),
       signal,
     });
   } catch (caught) {

@@ -48,6 +48,8 @@ export type VoiceTurnFn = (
   text: string,
   history: VoiceHistoryTurn[],
   signal: AbortSignal,
+  /** Language of the utterance, when the STT leg detected a supported one. */
+  language?: string,
 ) => Promise<string>;
 
 /** Options accepted by {@link useDiyaVoice} and `VoicePanel`. */

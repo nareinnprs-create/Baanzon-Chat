@@ -77,8 +77,8 @@ export default function VoicePanel({
 }: VoicePanelProps) {
   const token = useAuthToken();
   const defaultTurn = useCallback(
-    (text: string, history: VoiceHistoryTurn[], signal: AbortSignal) =>
-      requestDiyaTurn(text, history, signal, token ?? undefined),
+    (text: string, history: VoiceHistoryTurn[], signal: AbortSignal, language?: string) =>
+      requestDiyaTurn(text, history, signal, token ?? undefined, language),
     [token],
   );
 

@@ -172,7 +172,7 @@ describe('useDiyaVoice (server audio)', () => {
 
     mockVadState.level = 0.9;
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 450));
+      await new Promise((resolve) => setTimeout(resolve, 650));
     });
     await waitFor(() => expect(result.current.status).toBe('listening'), { timeout: 2000 });
 

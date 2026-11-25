@@ -21,6 +21,36 @@ const SCRIPT_LANG: Array<[RegExp, string]> = [
   [/[\u0D00-\u0D7F]/, 'ml'],
 ];
 
+/**
+ * Languages the server can speak. A detected code outside this set is either
+ * a Whisper mistake or a language the product does not voice, so it must never
+ * become the session language.
+ */
+export const SUPPORTED_VOICE_LANGS: ReadonlySet<string> = new Set([
+  'en',
+  'hi',
+  'es',
+  'fr',
+  'it',
+  'pt',
+  'ja',
+  'zh',
+  'ta',
+  'te',
+  'bn',
+  'gu',
+  'kn',
+  'ml',
+  'pa',
+  'or',
+  'as',
+  'mr',
+]);
+
+export function isSupportedVoiceLang(code: string | null | undefined): boolean {
+  return typeof code === 'string' && SUPPORTED_VOICE_LANGS.has(code.toLowerCase().slice(0, 2));
+}
+
 /** Language of a text by its script; Latin text stays English. */
 export function detectLang(text: string, fallback = 'en'): string {
   for (const [pattern, lang] of SCRIPT_LANG) {
@@ -61,6 +91,11 @@ export async function transcribeAudio(
     headers: { 'Content-Type': 'application/json', ...authHeaders(token) },
     body: JSON.stringify({ audio }),
   });
+  if (response.status === 422) {
+    // The server refused the clip: no speech, a known Whisper artifact, or a
+    // language it cannot speak. Silence is the right outcome, not an error.
+    return { text: '', language: null };
+  }
   if (!response.ok) {
     throw new Error(`transcription failed (${response.status})`);
   }

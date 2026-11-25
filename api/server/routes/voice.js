@@ -23,6 +23,8 @@ const {
   voiceClientConfig,
   remainingSeconds,
   normalizeTier,
+  isLikelyHallucination,
+  resolveVoiceLang,
 } = require('@librechat/api');
 
 const router = express.Router();
@@ -202,20 +204,9 @@ async function synthesize(text, lang) {
     }
   }
 
-  // Last resort: a language the sidecar has no voice for (e.g. an unsupported
-  // script code) must still say something rather than leave the user in silence.
-  if (lang !== 'en') {
-    try {
-      const audio = await sidecarTts(text, 'en');
-      if (audio.buffer.length > 0) {
-        logger.warn(`[voice] tts fell back to en for lang=${lang}`);
-        return { ...audio, engine: 'sidecar:en-fallback' };
-      }
-    } catch (error) {
-      errors.push(`sidecar:en-fallback: ${error.message}`);
-    }
-  }
-
+  // Last resort is gone on purpose: an English voice reading Tamil, Marathi or
+  // Cyrillic text is not "something rather than silence", it is the wrong
+  // language, which is exactly what users reported. A failure is surfaced.
   const error = new Error('no TTS provider could synthesize this language');
   error.details = errors.join('; ');
   throw error;
@@ -254,12 +245,29 @@ router.post('/stt', requireJwtAuth, voiceLimiter, async (req, res) => {
     if (!text) {
       return res.status(422).json({ error: 'no speech detected' });
     }
-    const language = data?.result?.transcription_info?.language ?? data?.result?.language;
+    // Whisper emits canned phrases for silence and noise ("Продолжение
+    // следует..." and friends). They used to become real user messages and
+    // Russian replies, so they are dropped as if nothing was said.
+    if (isLikelyHallucination(text)) {
+      logger.warn('[voice] stt dropped a known Whisper hallucination');
+      return res.status(422).json({ error: 'no speech detected' });
+    }
+    const reported = data?.result?.transcription_info?.language ?? data?.result?.language;
+    // Never hand the client a language the voice stack cannot speak: a wrong
+    // code made the reply come back in that language and the TTS fall back to
+    // an English voice reading it.
+    const language = resolveVoiceLang(reported, text);
+    if (language == null) {
+      logger.warn(`[voice] stt dropped an unsupported language: ${String(reported).slice(0, 12)}`);
+      return res.status(422).json({ error: 'unsupported language' });
+    }
     chargeVoice(req.user.id, audioSeconds(bytes.length));
     logger.debug(
-      `[voice] stt ok lang=${language || '?'} bytes=${bytes.length} ms=${Date.now() - startedAt}`,
+      `[voice] stt ok lang=${language} reported=${reported || '?'} bytes=${bytes.length} ms=${
+        Date.now() - startedAt
+      }`,
     );
-    return res.json({ text, language: typeof language === 'string' ? language : null });
+    return res.json({ text, language });
   } catch (error) {
     logger.warn(`[voice] stt failed: ${error.message}`);
     return res.status(502).json({ error: 'transcription failed' });
@@ -274,10 +282,16 @@ router.post('/tts', requireJwtAuth, ttsLimiter, async (req, res) => {
   if (!text) {
     return res.status(400).json({ error: 'text is required' });
   }
-  const lang =
-    String(req.body?.lang || '')
-      .toLowerCase()
-      .slice(0, 2) || detectLang(text);
+  // The reply text is the final authority on what voice to use: a Tamil reply
+  // in an English session must not be read by the English voice, and text in a
+  // script we cannot voice is refused rather than spoken as gibberish.
+  const lang = resolveVoiceLang(req.body?.lang, text);
+  if (lang == null) {
+    logger.warn(
+      `[voice] tts refused an unsupported language: ${String(req.body?.lang).slice(0, 12)}`,
+    );
+    return res.status(422).json({ error: 'unsupported language' });
+  }
   try {
     const remaining = await voiceRemaining(req.user.id);
     if (remaining <= 0) {

@@ -30,9 +30,10 @@ export default function useDiyaChatTurn() {
       text: string,
       history: { role: 'user' | 'assistant'; content: string }[],
       signal: AbortSignal,
+      language?: string,
     ) => {
       if (!ask || !getMessages) {
-        return requestDiyaTurn(text, history, signal, token ?? undefined);
+        return requestDiyaTurn(text, history, signal, token ?? undefined, language);
       }
       const before = getMessages()?.length ?? 0;
       const accepted = ask({ text });
