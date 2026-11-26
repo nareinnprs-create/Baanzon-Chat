@@ -1,8 +1,10 @@
 # Baanzon Chat — Android (TWA) release playbook
 
-Decisions locked 2026-11-18: no Play Billing integration (1b — purchase UI hidden in
-the app), no phone OTP (phone collected at signup, email verification suffices),
-offline fallback page, app shortcuts, CI build lane, staged rollout.
+Decisions (updated 2026-11-26): Play Billing ships in v1.0.1 through the Digital
+Goods API with server-side verification, and the web checkout stays hidden inside
+the TWA. Phone is collected at signup (no OTP; email verification suffices).
+Offline fallback page, app shortcuts, a manual CI build lane and a staged rollout
+complete the set.
 
 ## Locked facts
 
@@ -13,7 +15,7 @@ offline fallback page, app shortcuts, CI build lane, staged rollout.
 | Signing | upload key `C:\Users\manag\.bubblewrap\baanzon-upload.jks`, alias `baanzon-upload` |
 | assetlinks.json | live; upload-key SHA-256 `E8:16:…:E0:13` verified matching |
 | Notifications | delegated (`POST_NOTIFICATIONS` permission, TrustedWebActivityService) |
-| Purchase gate | `client/src/utils/androidApp.ts` + `PricingView` gate (no purchase surface in-app) |
+| Purchase gate | `PlayBilling.tsx` (Digital Goods API) inside the TWA, verified by `/api/billing-play`; the web checkout is hidden there |
 | Offline fallback | `client/public/sw.js` serves cached `/offline.html` for failed navigations (covers TWA, PWA, mobile web); before SW activation Chrome's own offline page shows |
 
 ## 1. Store listing (Play Console → Main store listing)
@@ -81,18 +83,39 @@ Collected (all transmitted securely, deletion supported):
 
 ## 5. CI lane (workflow_dispatch, release-privileged)
 
-`.github/workflows/android-release.yml` (to add): manual dispatch only;
-setup-node + JDK 17; secrets `ANDROID_KEYSTORE_B64` (base64 of the .jks),
-`ANDROID_KEYSTORE_PASS`, `ANDROID_KEY_ALIAS`; install `@bubblewrap/cli`; run
-`bubblewrap build --skipPwaValidation`; upload the signed `.aab` as a workflow
-artifact. Never run on push — the keystore secret is release authority.
+`.github/workflows/android-release.yml` — manual dispatch only, never on push.
+It sets up JDK 17 and the Android SDK, decodes the keystore from
+`ANDROID_KEYSTORE_B64`, runs `gradlew bundleRelease` (and `assembleRelease` when
+the APK input is on), prints the signing certificate SHA-256, and uploads both
+artifacts for 14 days.
+
+Secrets required:
+
+| Secret | Value |
+| --- | --- |
+| `ANDROID_KEYSTORE_B64` | base64 of `C:\Users\manag\.bubblewrap\baanzon-upload.jks` |
+| `ANDROID_KEYSTORE_PASS` | keystore password |
+| `ANDROID_KEY_ALIAS` | `baanzon-upload` |
+| `ANDROID_KEY_PASS` | key password (falls back to the keystore password) |
+
+Local equivalent:
+
+```powershell
+$env:ANDROID_KEYSTORE_PATH = "$env:USERPROFILE\.bubblewrap\baanzon-upload.jks"
+$env:ANDROID_KEYSTORE_PASS = "<password>"
+$env:ANDROID_KEY_ALIAS     = "baanzon-upload"
+cd android-twa; .\gradlew bundleRelease
+```
+
+Bump `versionCode` in `android-twa/app/build.gradle` (and `twa-manifest.json`)
+before every upload.
 
 ## 6. Version policy
 
-- `versionCode`: +1 on every uploaded build (simple, monotonic).
-- `versionName`: mirror the web app semver at release time (start 1.0.0).
-- `twa-manifest.json` stays the source of truth; `bubblewrap update` regenerates
-  Gradle files; commit both.
+- `versionCode`: +1 on every uploaded build (simple, monotonic). Currently **3**.
+- `versionName`: mirror the web app semver at release time. Currently **1.0.1**.
+- `app/build.gradle` is what the build uses; `twa-manifest.json` carries the same
+  values for `bubblewrap update`. Change both together and commit them.
 
 ## 7. Rollout tracks
 
