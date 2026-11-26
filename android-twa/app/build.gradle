@@ -57,7 +57,7 @@ android {
         applicationId "com.opraiz.baanzonchat"
         minSdkVersion 24
         targetSdkVersion 36
-        versionCode 4
+        versionCode 5
         versionName "1.0.1"
 
         // The name for the application
@@ -168,6 +168,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (System.getenv('ANDROID_KEYSTORE_PATH')) {
                 signingConfig signingConfigs.release
             }
@@ -228,8 +229,9 @@ dependencies {
 
         implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.7.4'
 
-        // No Play Billing Library on purpose. The in-app purchase flow uses the
-        // Digital Goods API, which Chrome implements inside a TWA; the app never
-        // talks to BillingClient. Bundling billing-ktx 7.1.1 only tripped Play's
-        // "must update to 8.0.0" policy check, so it is not a dependency.
+        // The in-app purchase flow uses the Digital Goods API (Chrome implements
+        // it), but Play's scanner treats the BILLING permission without a
+        // supported library as the legacy "AIDL" implementation and blocks the
+        // release. Shipping 8.0.0 satisfies the policy; the app never calls it.
+        implementation 'com.android.billingclient:billing:8.0.0'
 }
