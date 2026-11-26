@@ -57,7 +57,7 @@ android {
         applicationId "com.opraiz.baanzonchat"
         minSdkVersion 24
         targetSdkVersion 36
-        versionCode 3
+        versionCode 4
         versionName "1.0.1"
 
         // The name for the application
@@ -225,11 +225,11 @@ repositories {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    
+
         implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.7.4'
-    
-        // Play Billing: required for the Digital Goods API inside the TWA.
-        // NOTE: bubblewrap update regenerates this block — re-add after updates.
-        implementation 'com.android.billingclient:billing-ktx:7.1.1'
-    
+
+        // No Play Billing Library on purpose. The in-app purchase flow uses the
+        // Digital Goods API, which Chrome implements inside a TWA; the app never
+        // talks to BillingClient. Bundling billing-ktx 7.1.1 only tripped Play's
+        // "must update to 8.0.0" policy check, so it is not a dependency.
 }

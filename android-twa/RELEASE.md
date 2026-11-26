@@ -112,7 +112,7 @@ before every upload.
 
 ## 6. Version policy
 
-- `versionCode`: +1 on every uploaded build (simple, monotonic). Currently **3**.
+- `versionCode`: +1 on every uploaded build (simple, monotonic). Currently **4**.
 - `versionName`: mirror the web app semver at release time. Currently **1.0.1**.
 - `app/build.gradle` is what the build uses; `twa-manifest.json` carries the same
   values for `bubblewrap update`. Change both together and commit them.
