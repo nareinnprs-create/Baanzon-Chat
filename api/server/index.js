@@ -339,6 +339,12 @@ const startServer = async () => {
           namespace: 'android_app',
           package_name: 'com.opraiz.baanzonchat',
           sha256_cert_fingerprints: [
+            /* Current upload key (baanzon-upload-2, generated 2026-11-27): only
+               matters for sideloaded APKs. Play-distributed installs verify
+               against the Play app signing certificate, added after the first
+               upload. */
+            'EA:98:46:0E:FE:CD:7F:FD:2D:AA:7F:C4:F9:6E:9A:69:B1:B9:99:0E:A4:03:23:1E:AC:4B:D0:80:C5:42:E5:AB',
+            /* Previous upload key, kept for phones with an older sideloaded APK. */
             'E8:16:29:02:FD:28:DF:EB:A3:C3:47:1D:B5:DB:61:CE:4A:4E:47:B3:08:40:68:37:30:13:0C:3F:7B:EC:E0:13',
           ],
         },

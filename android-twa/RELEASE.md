@@ -12,7 +12,7 @@ complete the set.
 | --- | --- |
 | Package | `com.opraiz.baanzonchat` |
 | min / target / compile SDK | 24 (Android 7.0) / 36 (Android 16) / 36 |
-| Signing | upload key `C:\Users\manag\.bubblewrap\baanzon-upload.jks`, alias `baanzon-upload` |
+| Signing | upload key `C:\Users\manag\.bubblewrap\baanzon-upload-2.jks` (generated 2026-11-27), alias `baanzon-upload`; password in `~/.bubblewrap/baanzon-upload-2-password.txt` |
 | assetlinks.json | live; upload-key SHA-256 `E8:16:…:E0:13` verified matching |
 | Notifications | delegated (`POST_NOTIFICATIONS` permission, TrustedWebActivityService) |
 | Purchase gate | `PlayBilling.tsx` (Digital Goods API) inside the TWA, verified by `/api/billing-play`; the web checkout is hidden there |
@@ -93,7 +93,7 @@ Secrets required:
 
 | Secret | Value |
 | --- | --- |
-| `ANDROID_KEYSTORE_B64` | base64 of `C:\Users\manag\.bubblewrap\baanzon-upload.jks` |
+| `ANDROID_KEYSTORE_B64` | base64 of `C:\Users\manag\.bubblewrap\baanzon-upload-2.jks` |
 | `ANDROID_KEYSTORE_PASS` | keystore password |
 | `ANDROID_KEY_ALIAS` | `baanzon-upload` |
 | `ANDROID_KEY_PASS` | key password (falls back to the keystore password) |
@@ -101,7 +101,7 @@ Secrets required:
 Local equivalent:
 
 ```powershell
-$env:ANDROID_KEYSTORE_PATH = "$env:USERPROFILE\.bubblewrap\baanzon-upload.jks"
+$env:ANDROID_KEYSTORE_PATH = "$env:USERPROFILE\.bubblewrap\baanzon-upload-2.jks"
 $env:ANDROID_KEYSTORE_PASS = "<password>"
 $env:ANDROID_KEY_ALIAS     = "baanzon-upload"
 cd android-twa; .\gradlew bundleRelease

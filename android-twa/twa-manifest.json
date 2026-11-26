@@ -17,7 +17,7 @@
   "maskableIconUrl": "https://baanzonchat.opraiz.com/assets/maskable-icon.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "C:\\Users\\manag\\.bubblewrap\\baanzon-upload.jks",
+    "path": "C:\\Users\\manag\\.bubblewrap\\baanzon-upload-2.jks",
     "alias": "baanzon-upload"
   },
   "appVersionName": "1.0.1",
