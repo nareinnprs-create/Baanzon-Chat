@@ -447,6 +447,8 @@ const startServer = async () => {
   /* API Endpoints */
   app.use('/api/auth', preAuthTenantMiddleware, routes.auth);
   app.use('/api/insights', routes.insights);
+  /* Key-auth ops summary: mounted before the session/capability admin chain. */
+  app.use('/api/admin/ops-summary', routes.opsSummary);
   app.use('/api/admin', routes.adminAuth);
   app.use('/api/admin/config', routes.adminConfig);
   app.use('/api/admin/code-environments', routes.adminCodeEnvironments);

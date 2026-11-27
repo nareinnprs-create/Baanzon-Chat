@@ -129,6 +129,17 @@ export interface PrometheusMetrics {
   metricsRouter: Router;
 }
 
+/**
+ * The registry created by {@link createMetrics}, or null when metrics are
+ * disabled. The ops-summary endpoint reads it in-process instead of scraping
+ * /metrics over HTTP.
+ */
+let activeMetricsRegistry: Registry | null = null;
+
+export function getMetricsRegistry(): Registry | null {
+  return activeMetricsRegistry;
+}
+
 export interface AgentEventActorStorageMetricsSnapshot {
   retainedByResolution: Record<
     'checkpoint_verified' | 'action_compensated' | 'history_repaired',
@@ -528,6 +539,7 @@ export function createMetrics(options: MetricsOptions = {}): PrometheusMetrics {
   }
 
   const registry = new Registry();
+  activeMetricsRegistry = registry;
   collectDefaultMetrics({ register: registry });
 
   const httpRequests = new Counter({
