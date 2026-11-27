@@ -65,10 +65,12 @@ const mcp = require('./mcp');
 const rum = require('./rum');
 const insights = require('./insights');
 const opsSummary = require('./opsSummary');
+const opsAction = require('./opsAction');
 
 module.exports = {
   insights,
   opsSummary,
+  opsAction,
   rum,
   mcp,
   auth,

@@ -449,6 +449,7 @@ const startServer = async () => {
   app.use('/api/insights', routes.insights);
   /* Key-auth ops summary: mounted before the session/capability admin chain. */
   app.use('/api/admin/ops-summary', routes.opsSummary);
+  app.use('/api/admin/ops-action', routes.opsAction);
   app.use('/api/admin', routes.adminAuth);
   app.use('/api/admin/config', routes.adminConfig);
   app.use('/api/admin/code-environments', routes.adminCodeEnvironments);

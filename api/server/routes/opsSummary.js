@@ -32,6 +32,39 @@ const MIN_KEY_LENGTH = 16;
 const MAX_LIST = 200;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * Shared key auth for the ops routes. `requireActor` is used by the write
+ * endpoint: an action without a named human behind it is rejected.
+ */
+function authorizeOpsRequest(req, { requireActor = false } = {}) {
+  const expected = process.env.OPS_SUMMARY_KEY;
+  if (!expected || expected.length < MIN_KEY_LENGTH) {
+    return { ok: false, status: 401, error: 'unauthorized' };
+  }
+  const match = /^Bearer\s+(.+)$/i.exec(req.get('authorization') ?? '');
+  if (!match) {
+    return { ok: false, status: 401, error: 'unauthorized' };
+  }
+  const provided = match[1].trim();
+  if (provided.length !== expected.length) {
+    return { ok: false, status: 401, error: 'unauthorized' };
+  }
+  let valid = false;
+  try {
+    valid = crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
+  } catch {
+    valid = false;
+  }
+  if (!valid) {
+    return { ok: false, status: 401, error: 'unauthorized' };
+  }
+  const actor = String(req.get('x-ops-actor') ?? '').trim();
+  if (requireActor && actor.length === 0) {
+    return { ok: false, status: 400, error: 'x-ops-actor is required' };
+  }
+  return { ok: true, actor };
+}
+
 /** Sections returned by `?section=all`; feedback is explicit-only (T2). */
 const ALL_SECTIONS = [
   'health',
@@ -368,23 +401,7 @@ function createOpsSummaryRouter(overrides = {}) {
   const router = express.Router();
 
   function authorized(req) {
-    const expected = process.env.OPS_SUMMARY_KEY;
-    if (!expected || expected.length < MIN_KEY_LENGTH) {
-      return false;
-    }
-    const match = /^Bearer\s+(.+)$/i.exec(req.get('authorization') ?? '');
-    if (!match) {
-      return false;
-    }
-    const provided = match[1].trim();
-    if (provided.length !== expected.length) {
-      return false;
-    }
-    try {
-      return crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
-    } catch {
-      return false;
-    }
+    return authorizeOpsRequest(req).ok;
   }
 
   function context(req) {
@@ -1072,3 +1089,4 @@ function createOpsSummaryRouter(overrides = {}) {
 
 module.exports = createOpsSummaryRouter();
 module.exports.createOpsSummaryRouter = createOpsSummaryRouter;
+module.exports.authorizeOpsRequest = authorizeOpsRequest;
