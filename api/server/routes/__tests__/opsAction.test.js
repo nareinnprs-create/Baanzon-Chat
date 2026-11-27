@@ -90,9 +90,15 @@ function makeCollection(rows) {
       return { matchedCount: 1, modifiedCount: 1 };
     },
     async insertOne(doc) {
-      const row = { _id: new mongoose.Types.ObjectId(), ...doc };
+      const id = doc._id ?? new mongoose.Types.ObjectId();
+      if (rows.some((row) => same(row._id, id))) {
+        const error = new Error('duplicate key');
+        error.code = 11000;
+        throw error;
+      }
+      const row = { ...doc, _id: id };
       rows.push(row);
-      return { insertedId: row._id };
+      return { insertedId: id };
     },
     async insertMany(docs) {
       for (const doc of docs) {

@@ -146,7 +146,6 @@ function createOpsActionRouter(overrides = {}) {
   const router = express.Router();
 
   const rateBuckets = new Map();
-  let auditIndexReady = false;
 
   function db(ctx) {
     return ctx.db;
@@ -156,18 +155,10 @@ function createOpsActionRouter(overrides = {}) {
     return db(ctx) ? db(ctx).collection(name) : null;
   }
 
-  async function audits(ctx) {
+  function auditStore(ctx) {
     const coll = collection(ctx, 'ops_audit');
     if (!coll) {
       throw new ActionError(503, 'storage_unavailable', 'mongodb is not connected');
-    }
-    if (!auditIndexReady) {
-      try {
-        await coll.createIndex({ idempotencyKey: 1 }, { unique: true, sparse: true });
-      } catch {
-        /* an existing index or a standalone engine; uniqueness is checked in code */
-      }
-      auditIndexReady = true;
     }
     return coll;
   }
@@ -676,20 +667,9 @@ function createOpsActionRouter(overrides = {}) {
 
     let auditColl;
     try {
-      auditColl = await audits(ctx);
+      auditColl = auditStore(ctx);
     } catch (error) {
       return res.status(error.status ?? 503).json({ error: error.code ?? 'storage_unavailable' });
-    }
-
-    const existing = await auditColl.findOne({ idempotencyKey });
-    if (existing) {
-      if (existing.bodyHash !== bodyHash) {
-        return res.status(409).json({ error: 'idempotency_conflict' });
-      }
-      if (existing.status === 'applied' && existing.result) {
-        return res.json(existing.result);
-      }
-      return res.status(409).json({ error: 'idempotency_in_progress' });
     }
 
     let plan;
@@ -719,9 +699,14 @@ function createOpsActionRouter(overrides = {}) {
       });
     }
 
-    let auditId;
+    /**
+     * The audit `_id` is the idempotency key, so the insert is the atomic
+     * uniqueness gate — no runtime index build, and two concurrent retries can
+     * never both apply.
+     */
     try {
-      const inserted = await auditColl.insertOne({
+      await auditColl.insertOne({
+        _id: idempotencyKey,
         at: ctx.now,
         actor: auth.actor,
         action,
@@ -735,8 +720,17 @@ function createOpsActionRouter(overrides = {}) {
         status: 'pending',
         result: null,
       });
-      auditId = String(inserted.insertedId);
     } catch (error) {
+      if (error?.code === 11000) {
+        const existing = await auditColl.findOne({ _id: idempotencyKey });
+        if (!existing || existing.bodyHash !== bodyHash) {
+          return res.status(409).json({ error: 'idempotency_conflict' });
+        }
+        if (existing.status === 'applied' && existing.result) {
+          return res.json(existing.result);
+        }
+        return res.status(409).json({ error: 'idempotency_in_progress' });
+      }
       logger.error('[ops-action] audit write failed; nothing applied', error);
       return res.status(503).json({ error: 'audit_write_failed' });
     }
@@ -744,9 +738,7 @@ function createOpsActionRouter(overrides = {}) {
     try {
       await plan.apply();
     } catch (error) {
-      await auditColl
-        .deleteOne({ _id: new mongoose.Types.ObjectId(auditId) })
-        .catch(() => undefined);
+      await auditColl.deleteOne({ _id: idempotencyKey }).catch(() => undefined);
       logger.error(`[ops-action] ${action} apply failed`, error);
       const status = error instanceof ActionError ? error.status : 500;
       return res
@@ -754,12 +746,16 @@ function createOpsActionRouter(overrides = {}) {
         .json({ error: error instanceof ActionError ? error.code : 'action_failed' });
     }
 
-    const result = { ok: true, action, target, changed: plan.changed, auditId, appliedAt };
+    const result = {
+      ok: true,
+      action,
+      target,
+      changed: plan.changed,
+      auditId: idempotencyKey,
+      appliedAt,
+    };
     await auditColl
-      .updateOne(
-        { _id: new mongoose.Types.ObjectId(auditId) },
-        { $set: { status: 'applied', result } },
-      )
+      .updateOne({ _id: idempotencyKey }, { $set: { status: 'applied', result } })
       .catch((error) => logger.error('[ops-action] audit finalize failed', error));
 
     return res.json(result);
