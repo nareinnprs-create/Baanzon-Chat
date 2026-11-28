@@ -144,7 +144,7 @@ export default function MCPConfigDialog({
   return (
     <OGDialog open={isOpen} onOpenChange={onOpenChange}>
       <OGDialogContent
-        className="flex max-h-screen w-11/12 max-w-lg flex-col space-y-2"
+        className="flex max-h-[100dvh] w-11/12 max-w-lg flex-col space-y-2"
         title={fullTitle}
       >
         <OGDialogHeader>

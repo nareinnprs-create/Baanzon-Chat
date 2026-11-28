@@ -121,7 +121,7 @@ function RequestPasswordReset() {
   );
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-surface-primary pt-6 sm:pt-0">
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-surface-primary pt-6 sm:pt-0">
       <div className="absolute bottom-0 left-0 m-4">
         <ThemeSelector />
       </div>

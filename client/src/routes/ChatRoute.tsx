@@ -321,7 +321,7 @@ export default function ChatRoute() {
 
   if (endpointsQuery.isLoading || modelsQuery.isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center" aria-live="polite" role="status">
+      <div className="flex h-[100dvh] items-center justify-center" aria-live="polite" role="status">
         <Spinner className="text-text-primary" />
       </div>
     );

@@ -60,7 +60,7 @@ export default function SettingsDialog({ open, onOpenChange }: TDialogProps) {
           leaveFrom="opacity-100 scale-100"
           leaveTo="opacity-0 scale-95"
         >
-          <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
+          <div className="fixed inset-0 flex w-full items-center justify-center p-4">
             <DialogPanel
               className={cn(
                 /** Headless UI panel, so it bypasses the shared dialog primitives

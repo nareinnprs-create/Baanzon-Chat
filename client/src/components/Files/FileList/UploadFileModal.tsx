@@ -25,7 +25,7 @@ const UploadFileModal = ({ open, onOpenChange }) => {
             </div>
             <div className="flex w-full flex-col text-center sm:w-4/5 sm:text-left">
               <div className="italic">{localize('com_files_upload_modal_hint')}</div>
-              <div className="mt-4 flex w-full flex-row items-center bg-[#f9f9f9] p-2">
+              <div className="mt-4 flex w-full flex-row items-center bg-surface-secondary p-2">
                 <div className="w-1/2 sm:w-1/3">
                   <Button>{localize('com_files_choose_file')}</Button>
                 </div>
@@ -35,7 +35,7 @@ const UploadFileModal = ({ open, onOpenChange }) => {
           </div>
           <div className="mt-3 flex w-full flex-col">
             <label htmlFor="name">{localize('com_ui_name')}</label>
-            <label className="hidden text-[#808080] sm:block">
+            <label className="hidden text-text-secondary sm:block">
               {localize('com_files_name_description')}
             </label>
             <Input type="text" id="name" name="name" placeholder={localize('com_ui_name')} />
@@ -43,7 +43,7 @@ const UploadFileModal = ({ open, onOpenChange }) => {
 
           <div className="mt-3 flex w-full flex-col">
             <label htmlFor="purpose">{localize('com_files_purpose')}</label>
-            <label className="hidden text-[#808080] sm:block">
+            <label className="hidden text-text-secondary sm:block">
               {localize('com_files_purpose_description')}
             </label>
             <Input

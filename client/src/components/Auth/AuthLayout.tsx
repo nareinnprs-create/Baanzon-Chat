@@ -60,7 +60,7 @@ function AuthLayout({
   const appTitle = startupConfig?.appTitle ?? 'Baanzon Chat';
 
   return (
-    <div className="auth-brand-shell relative flex min-h-screen flex-col bg-surface-primary">
+    <div className="auth-brand-shell relative flex min-h-[100dvh] flex-col bg-surface-primary">
       <Banner />
       <div className="flex flex-1 lg:grid lg:grid-cols-[1.05fr_1fr]">
         {/* Brand panel - desktop only. Typographic wordmark until the official

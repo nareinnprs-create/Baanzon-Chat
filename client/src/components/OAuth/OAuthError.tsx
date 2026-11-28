@@ -36,7 +36,7 @@ export default function OAuthError() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface-secondary p-8">
+    <div className="flex min-h-[100dvh] items-center justify-center bg-surface-secondary p-8">
       <div className="w-full max-w-md rounded-lg bg-surface-primary p-8 text-center shadow-lg">
         <div className="mb-4 flex justify-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-status-error-subtle">

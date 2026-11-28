@@ -11,20 +11,21 @@ import {
   MOBILE_PANE_SHIFT,
 } from '~/components/UnifiedSidebar';
 import {
-  PromptGroupsProvider,
-  AssistantsMapContext,
-  AgentsMapContext,
-  SetConvoProvider,
-  FileMapContext,
-} from '~/Providers';
-import {
   useSearchEnabled,
   useAssistantsMap,
   useAuthContext,
   useCatalogWarmup,
   useAgentsMap,
   useFileMap,
+  useLocalize,
 } from '~/hooks';
+import {
+  PromptGroupsProvider,
+  AssistantsMapContext,
+  AgentsMapContext,
+  SetConvoProvider,
+  FileMapContext,
+} from '~/Providers';
 import MobileBottomNav, { MOBILE_BOTTOM_NAV_RESERVATION } from '~/components/Nav/MobileBottomNav';
 import KeyboardShortcutsDialog from '~/components/Nav/KeyboardShortcutsDialog';
 import KeyboardDeleteDialog from '~/components/Nav/KeyboardDeleteDialog';
@@ -98,6 +99,7 @@ export default function Root() {
     [setSidebarExpanded],
   );
   const { isAuthenticated, logout, user } = useAuthContext();
+  const localize = useLocalize();
   /** Releases feature-catalog queries after first paint on browser idle. */
   useCatalogWarmup(isAuthenticated);
 
@@ -165,6 +167,12 @@ export default function Root() {
 
   return (
     <SetConvoProvider>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[2000] focus:rounded-lg focus:bg-surface-primary focus:px-4 focus:py-2 focus:text-text-primary focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-text-primary"
+      >
+        {localize('com_ui_skip_to_content')}
+      </a>
       <FileMapContext.Provider value={fileMap}>
         <AssistantsMapContext.Provider value={assistantsMap}>
           <AgentsMapContext.Provider value={agentsMap}>
@@ -187,6 +195,7 @@ export default function Root() {
                     <UnifiedSidebar />
                     <div
                       ref={paneRef}
+                      id="main-content"
                       /** Focus target of last resort when the drawer closes on a
                        *  route that renders no opener. Not in the tab order. */
                       tabIndex={-1}

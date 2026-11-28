@@ -2607,6 +2607,7 @@
   "com_ui_running_n_agents": "Running {{0}} agents",
   "com_ui_sandbox_starting": "Starting sandbox environment",
   "com_ui_save": "Save",
+  "com_ui_skip_to_content": "Skip to content",
   "com_ui_save_badge_changes": "Save badge changes?",
   "com_ui_save_before_rerun": "Rerunning applies one edited section at a time. Save to keep all of these changes.",
   "com_ui_save_key_error": "Failed to save API key. Please try again.",

@@ -39,7 +39,7 @@ export default function FileListItem2({
               return (
                 <span
                   key={index}
-                  className="ml-2 mt-1 flex flex-row items-center rounded-full bg-[#f5f5f5] px-2 text-xs"
+                  className="ml-2 mt-1 flex flex-row items-center rounded-full bg-surface-tertiary px-2 text-xs"
                 >
                   <PlusIcon className="h-3 w-3" />
                   &nbsp;
@@ -53,7 +53,7 @@ export default function FileListItem2({
             return (
               <span
                 key={index}
-                className="ml-2 mt-1 content-center rounded-full bg-[#f2f8ec] px-2 text-xs text-[#91c561]"
+                className="ml-2 mt-1 content-center rounded-full bg-surface-tertiary px-2 text-xs text-text-secondary"
               >
                 {vectorStore.name}
               </span>
@@ -66,7 +66,7 @@ export default function FileListItem2({
           <DotsIcon className="text-text-tertiary" />
         </Button>
         <Button
-          className="w-min bg-transparent text-[#666666] hover:bg-slate-200"
+          className="w-min bg-transparent text-text-secondary hover:bg-slate-200"
           onClick={() => deleteFile(file._id)}
         >
           <TrashIcon className="" />

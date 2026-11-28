@@ -253,9 +253,9 @@ export default defineConfig(({ command }) => ({
                     return 'rum';
                   }
 
-                  // IMPORTANT: mermaid and ALL its dependencies must be in the same chunk
-                  // to avoid initialization order issues. This includes chevrotain, langium,
-                  // dagre-d3-es, and their nested lodash-es dependencies.
+                  // Mermaid and its dependencies must share one chunk to keep
+                  // initialization order. lodash-es is excluded below so the
+                  // static helpers do not pull this chunk.
                   if (
                     normalizedId.includes('mermaid') ||
                     normalizedId.includes('dagre-d3-es') ||
@@ -265,11 +265,6 @@ export default defineConfig(({ command }) => ({
                     return 'mermaid';
                   }
 
-                  /**
-                   * lodash-es must NOT share the mermaid chunk: every module that
-                   * imports a lodash helper would then statically pull the whole
-                   * 3 MB mermaid bundle, defeating the lazy import in useMermaid.
-                   */
                   if (normalizedId.includes('lodash-es')) {
                     return 'utils';
                   }
