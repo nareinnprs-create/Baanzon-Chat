@@ -9,6 +9,8 @@ import { atomWithLocalStorage } from '~/store/utils';
 import { STTEndpoints } from '~/common';
 
 const VALID_SPEECH_ENGINES = new Set<string>(Object.values(STTEndpoints));
+/** Server voice is a TTS-only engine; STT has no equivalent. */
+const VALID_TTS_ENGINES = new Set<string>([...Object.values(STTEndpoints), 'server']);
 const LEGACY_EXTERNAL_STT_ENGINES = new Set<string>(['openai', 'azureOpenAI']);
 const LEGACY_EXTERNAL_TTS_ENGINES = new Set<string>([
   'openai',
@@ -20,8 +22,9 @@ const LEGACY_EXTERNAL_TTS_ENGINES = new Set<string>([
 const normalizeSavedSpeechEngine = (
   engine: string,
   legacyExternalEngines: ReadonlySet<string>,
+  validEngines: ReadonlySet<string> = VALID_SPEECH_ENGINES,
 ): string => {
-  if (VALID_SPEECH_ENGINES.has(engine)) return engine;
+  if (validEngines.has(engine)) return engine;
   return legacyExternalEngines.has(engine) ? STTEndpoints.external : STTEndpoints.browser;
 };
 
@@ -139,8 +142,8 @@ const localStorageAtoms = {
   autoSendText: atomWithLocalStorage('autoSendText', -1),
 
   textToSpeech: atomWithLocalStorage('textToSpeech', true),
-  engineTTS: atomWithLocalStorage('engineTTS', 'browser', (engine) =>
-    normalizeSavedSpeechEngine(engine, LEGACY_EXTERNAL_TTS_ENGINES),
+  engineTTS: atomWithLocalStorage('engineTTS', 'server', (engine) =>
+    normalizeSavedSpeechEngine(engine, LEGACY_EXTERNAL_TTS_ENGINES, VALID_TTS_ENGINES),
   ),
   voice: atomWithLocalStorage<string | undefined>('voice', undefined),
   cloudBrowserVoices: atomWithLocalStorage('cloudBrowserVoices', false),

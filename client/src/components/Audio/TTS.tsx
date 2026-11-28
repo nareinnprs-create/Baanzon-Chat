@@ -1,9 +1,11 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import { useEffect } from 'react';
-import { useRecoilValue } from 'recoil';
+import { parseTextParts } from 'librechat-data-provider';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { VolumeIcon, VolumeMuteIcon, Spinner } from '@librechat/client';
 import type { TMessageAudio } from '~/common';
 import { useLocalize, useTTSBrowser, useTTSExternal } from '~/hooks';
+import useTTSServer from '~/hooks/Audio/useTTSServer';
 import { logger } from '~/utils';
 import store from '~/store';
 
@@ -96,6 +98,44 @@ export function BrowserTTS({
         id={`audio-${messageId}`}
         autoPlay
       />
+    </>
+  );
+}
+
+export function ServerTTS({ index = 0, content, className, renderButton }: TMessageAudio) {
+  const localize = useLocalize();
+  const setIsSpeaking = useSetRecoilState(store.globalAudioPlayingFamily(index));
+  const { toggleSpeech, isSpeaking, isLoading } = useTTSServer({ setIsSpeaking });
+  const text = typeof content === 'string' ? content : parseTextParts(content ?? []);
+
+  const renderIcon = () => {
+    if (isLoading === true) {
+      return <Spinner className="icon-md-heavy h-[18px] w-[18px]" />;
+    }
+    if (isSpeaking === true) {
+      return <VolumeMuteIcon className="icon-md-heavy h-[18px] w-[18px]" />;
+    }
+    return <VolumeIcon className="icon-md-heavy h-[18px] w-[18px]" />;
+  };
+
+  const handleClick = () => toggleSpeech(text);
+  const title = isSpeaking === true ? localize('com_ui_stop') : localize('com_ui_read_aloud');
+
+  return (
+    <>
+      {renderButton ? (
+        renderButton({
+          onClick: handleClick,
+          title,
+          icon: renderIcon(),
+          isActive: isSpeaking,
+          className,
+        })
+      ) : (
+        <button className={className} onClickCapture={handleClick} type="button" title={title}>
+          {renderIcon()}
+        </button>
+      )}
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { useRecoilValue } from 'recoil';
 import type { TMessageAudio } from '~/common';
-import { BrowserTTS, ExternalTTS } from '~/components/Audio/TTS';
+import { BrowserTTS, ExternalTTS, ServerTTS } from '~/components/Audio/TTS';
 import { TTSEndpoints } from '~/common';
 import store from '~/store';
 
@@ -14,6 +14,7 @@ function MessageAudio(props: TMessageAudio) {
   }
 
   const TTSComponents = {
+    [TTSEndpoints.server]: ServerTTS,
     [TTSEndpoints.browser]: BrowserTTS,
     [TTSEndpoints.external]: ExternalTTS,
   };

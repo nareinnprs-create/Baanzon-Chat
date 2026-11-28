@@ -7,13 +7,14 @@ import store from '~/store';
 jest.mock('~/components/Audio/TTS', () => ({
   BrowserTTS: () => <div data-testid="browser-tts" />,
   ExternalTTS: () => <div data-testid="external-tts" />,
+  ServerTTS: () => <div data-testid="server-tts" />,
 }));
 
 const renderMessageAudio = ({
   engineTTS,
   initialized,
 }: {
-  engineTTS: 'browser' | 'external';
+  engineTTS: 'browser' | 'external' | 'server';
   initialized: boolean;
 }) =>
   render(
@@ -40,5 +41,13 @@ describe('MessageAudio speech settings initialization', () => {
 
     expect(screen.getByTestId('external-tts')).toBeInTheDocument();
     expect(screen.queryByTestId('browser-tts')).not.toBeInTheDocument();
+  });
+
+  it('mounts the server voice when it is selected', () => {
+    renderMessageAudio({ engineTTS: 'server', initialized: true });
+
+    expect(screen.getByTestId('server-tts')).toBeInTheDocument();
+    expect(screen.queryByTestId('browser-tts')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('external-tts')).not.toBeInTheDocument();
   });
 });

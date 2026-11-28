@@ -13,12 +13,11 @@ const EngineTTSDropdown: React.FC<EngineTTSDropdownProps> = ({ external }) => {
   const [engineTTS, setEngineTTS] = useRecoilState<string>(store.engineTTS);
   const textToSpeech = useRecoilValue(store.textToSpeech);
 
-  const endpointOptions = external
-    ? [
-        { value: 'browser', label: localize('com_nav_browser') },
-        { value: 'external', label: localize('com_nav_external') },
-      ]
-    : [{ value: 'browser', label: localize('com_nav_browser') }];
+  const endpointOptions = [
+    { value: 'server', label: localize('com_nav_server_voice') },
+    { value: 'browser', label: localize('com_nav_browser') },
+    ...(external ? [{ value: 'external', label: localize('com_nav_external') }] : []),
+  ];
 
   const handleSelect = (value: string) => {
     setEngineTTS(value);

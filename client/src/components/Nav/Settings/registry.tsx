@@ -641,6 +641,8 @@ export const registry: SettingEntry[] = [
     tab: SPEECH,
     section: 'tts',
     labelKey: 'com_ui_settings_label_voice',
+    /** The server voice is fixed per language; the device voice list is irrelevant. */
+    show: (ctx) => ctx.engineTTS !== TTSEndpoints.server,
     Component: VoiceDropdown,
   },
   {

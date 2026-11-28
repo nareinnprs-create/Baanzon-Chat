@@ -130,7 +130,7 @@ export interface PlayingBuffer {
 }
 
 /** Plays a decoded buffer; null when Web Audio is unavailable. */
-export function playBuffer(buffer: AudioBuffer): PlayingBuffer | null {
+export function playBuffer(buffer: AudioBuffer, playbackRate = 1): PlayingBuffer | null {
   const ctx = getPlaybackContext();
   if (ctx == null) {
     return null;
@@ -141,6 +141,9 @@ export function playBuffer(buffer: AudioBuffer): PlayingBuffer | null {
   });
   const source = ctx.createBufferSource();
   source.buffer = buffer;
+  if (playbackRate > 0 && playbackRate !== 1) {
+    source.playbackRate.value = playbackRate;
+  }
   source.connect(ctx.destination);
   const finish = () => {
     if (settle != null) {

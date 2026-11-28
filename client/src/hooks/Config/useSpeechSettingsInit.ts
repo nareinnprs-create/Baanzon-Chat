@@ -5,7 +5,11 @@ import { STTEndpoints, TTSEndpoints } from '~/common';
 import { logger } from '~/utils';
 import store from '~/store';
 
-const VALID_TTS_ENGINES: string[] = [TTSEndpoints.browser, TTSEndpoints.external];
+const VALID_TTS_ENGINES: string[] = [
+  TTSEndpoints.server,
+  TTSEndpoints.browser,
+  TTSEndpoints.external,
+];
 
 /**
  * Initializes speech-related Recoil values from the server-side custom

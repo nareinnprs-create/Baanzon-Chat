@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { useRecoilValue } from 'recoil';
 import BrowserAudio from './BrowserAudio';
+import ServerAudio from './ServerAudio';
 import StreamAudio from './StreamAudio';
 import { TTSEndpoints } from '~/common';
 import store from '~/store';
@@ -19,6 +20,7 @@ function AutoPlayAudio({ index = 0 }) {
   }
 
   const AutoPlayComponents = {
+    [TTSEndpoints.server]: ServerAudio,
     [TTSEndpoints.browser]: BrowserAudio,
     [TTSEndpoints.external]: StreamAudio,
   };

@@ -184,7 +184,7 @@ describe('useSpeechSettingsInit', () => {
     expect(localStorage.getItem('engineTTS')).toBe(JSON.stringify('external'));
   });
 
-  it('does not write browser defaults before a server default is provided', () => {
+  it('uses the server voice default without writing it to storage', () => {
     mockUseGetCustomConfigSpeechQuery.mockReturnValue({
       data: { sttExternal: false, ttsExternal: false },
       isFetched: true,
@@ -194,7 +194,7 @@ describe('useSpeechSettingsInit', () => {
 
     expect(result.current).toEqual({
       engineSTT: 'browser',
-      engineTTS: 'browser',
+      engineTTS: 'server',
       speechSettingsInitialized: true,
     });
     expect(localStorage.getItem('engineSTT')).toBeNull();

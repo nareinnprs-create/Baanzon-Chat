@@ -42,6 +42,7 @@ export enum STTEndpoints {
 export enum TTSEndpoints {
   browser = 'browser',
   external = 'external',
+  server = 'server',
 }
 
 export type AudioChunk = {
