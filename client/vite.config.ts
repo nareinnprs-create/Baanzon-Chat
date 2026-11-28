@@ -231,7 +231,13 @@ export default defineConfig(({ command }) => ({
     outDir: './dist',
     minify: 'oxc',
     rolldownOptions: {
-      preserveEntrySignatures: 'strict',
+      /**
+       * An app has no library exports to preserve. `strict` made Rolldown emit
+       * every shared chunk as its own entry, and the HTML plugin then injected
+       * all of them as `<script type="module">` tags — 44 entry scripts on every
+       * load. `false` keeps one entry per HTML script and real dynamic imports.
+       */
+      preserveEntrySignatures: false,
       output: {
         codeSplitting: {
           groups: [
@@ -254,10 +260,18 @@ export default defineConfig(({ command }) => ({
                     normalizedId.includes('mermaid') ||
                     normalizedId.includes('dagre-d3-es') ||
                     normalizedId.includes('chevrotain') ||
-                    normalizedId.includes('langium') ||
-                    normalizedId.includes('lodash-es')
+                    normalizedId.includes('langium')
                   ) {
                     return 'mermaid';
+                  }
+
+                  /**
+                   * lodash-es must NOT share the mermaid chunk: every module that
+                   * imports a lodash helper would then statically pull the whole
+                   * 3 MB mermaid bundle, defeating the lazy import in useMermaid.
+                   */
+                  if (normalizedId.includes('lodash-es')) {
+                    return 'utils';
                   }
 
                   if (normalizedId.includes('@codesandbox/sandpack')) {
