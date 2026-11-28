@@ -172,9 +172,7 @@ export function useVoiceRealtime(onEnd: () => void): VoiceRealtimeHandle {
     unbound: Array<() => void>;
     /** Reply audio that arrived before the player existed; flushed on mount. */
     pendingAudio: ArrayBuffer[];
-    /** Non-null while the client is voicing a non-English reply locally. */
-    localTts: { lang: string } | null;
-  }>({ ended: true, unbound: [], pendingAudio: [], localTts: null });
+  }>({ ended: true, unbound: [], pendingAudio: [] });
 
   const teardown = useCallback(() => {
     const r = refs.current;
@@ -285,14 +283,6 @@ export function useVoiceRealtime(onEnd: () => void): VoiceRealtimeHandle {
           case 'state': {
             if (msg.state === 'listening') {
               setBargeIn(false);
-              // Server reopened the mic while a local reply was queued or
-              // speaking (barge-in, interrupt): stop the local voice too.
-              if (refs.current.localTts) {
-                refs.current.localTts = null;
-                if (typeof speechSynthesis !== 'undefined') {
-                  speechSynthesis.cancel();
-                }
-              }
             }
             // The playback drain flips speaking → listening itself; a server
             // 'listening' while audio is still queued is only advisory.
@@ -330,37 +320,12 @@ export function useVoiceRealtime(onEnd: () => void): VoiceRealtimeHandle {
               final: true,
               at: Date.now(),
             });
-            // Client-TTS turn: voice the transcript locally, then hand the
-            // mic back. `interrupted` during local playback falls through to
-            // the cancel in the listening-state handler.
-            const local = refs.current.localTts;
-            if (local && msg.type === 'assistant-transcript') {
-              const done = () => {
-                if (refs.current.localTts) {
-                  refs.current.localTts = null;
-                  send({ type: 'tts-done' });
-                }
-              };
-              if (
-                typeof SpeechSynthesisUtterance !== 'undefined' &&
-                typeof speechSynthesis !== 'undefined'
-              ) {
-                const utterance = new SpeechSynthesisUtterance(msg.text);
-                utterance.lang = local.lang;
-                utterance.onend = done;
-                utterance.onerror = done;
-                speechSynthesis.speak(utterance);
-              } else {
-                done();
-              }
-            }
+            // Server-side TTS: the reply audio follows on the binary channel,
+            // so there is nothing to voice locally here.
             return;
           }
           case 'tts-mode': {
-            // Non-English replies arrive as transcript only: the client voices
-            // them via speechSynthesis (on-device per-language voices), then
-            // reports `tts-done` so the server reopens the mic.
-            refs.current.localTts = msg.engine === 'client' ? { lang: msg.lang } : null;
+            // Informational only: the server now synthesizes every language.
             return;
           }
           case 'error': {
@@ -490,11 +455,6 @@ export function useVoiceRealtime(onEnd: () => void): VoiceRealtimeHandle {
               if (event === 'speech-start') {
                 send({ type: 'barge-in' });
                 refs.current.playbackNode?.port.postMessage({ clear: true });
-                if (refs.current.localTts && typeof speechSynthesis !== 'undefined') {
-                  speechSynthesis.cancel();
-                  refs.current.localTts = null;
-                  send({ type: 'tts-done' });
-                }
                 setBargeIn(true);
               }
             }

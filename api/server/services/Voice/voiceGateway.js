@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
 const { WebSocketServer } = require('ws');
 const { logger } = require('@librechat/data-schemas');
 const { createVoiceGateway, buildVoiceConfig } = require('@librechat/api');
+const { synthesize } = require('~/server/services/Voice/ttsLadder');
 const loadCustomConfig = require('~/server/services/Config/loadCustomConfig');
 const { saveMessage, getMessages, saveConvo, getConvo } = require('~/models');
 
@@ -170,6 +171,7 @@ async function attachVoiceGateway(server) {
     tierOf,
     usedSeconds,
     addSeconds: (userId, tier, seconds) => addSeconds(userId, tier, seconds),
+    synthesize,
     store: {
       loadContext: (userId, cid) =>
         loadContext(userId, cid).catch((err) => {

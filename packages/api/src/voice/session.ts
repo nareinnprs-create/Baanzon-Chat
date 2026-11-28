@@ -1,6 +1,7 @@
 import type WebSocketType from 'ws';
 import {
   CLIENT_SAMPLE_RATE,
+  PLAYBACK_SAMPLE_RATE,
   type ServerVoiceMessage,
   type VoiceCatalogEntry,
   type VoiceConfig,
@@ -69,6 +70,12 @@ export interface VoiceGatewayDeps {
   /** Test seams. */
   createStt?: (opts: NovaSttOptions) => FluxStt;
   createTts?: typeof openAuraTts;
+  /**
+   * Non-English speech out (aura is English-only). The same provider ladder as
+   * read-aloud; WAV bytes are converted to playback PCM here, so no device
+   * voice is ever involved.
+   */
+  synthesize?: (text: string, lang: string) => Promise<{ buffer: Buffer; mime: string }>;
   chat?: typeof streamChat;
   whisper?: typeof sttWhisper;
   now?: () => number;
@@ -85,6 +92,53 @@ const SILENCE_INTERVAL_MS = 2000;
 
 export interface VoiceGateway {
   handleConnection(ws: VoiceSocket, auth: { token?: string; cid?: string }): Promise<void>;
+}
+
+/**
+ * WAV -> 24 kHz mono PCM16 for the client's playback worklet.
+ *
+ * The sidecar emits mono 16-bit WAV at the model's rate (Kokoro 24 kHz, MMS
+ * 16 kHz), so only MMS needs the linear resample. Returns null when the bytes
+ * are not mono 16-bit PCM.
+ */
+export function toPlaybackPcm(wav: Buffer): Buffer | null {
+  let offset = 12;
+  let sampleRate = 0;
+  let channels = 0;
+  let bits = 0;
+  while (offset + 8 <= wav.length) {
+    const id = wav.toString('ascii', offset, offset + 4);
+    const size = wav.readUInt32LE(offset + 4);
+    const body = offset + 8;
+    if (id === 'fmt ') {
+      channels = wav.readUInt16LE(body + 2);
+      sampleRate = wav.readUInt32LE(body + 4);
+      bits = wav.readUInt16LE(body + 14);
+    } else if (id === 'data') {
+      if (bits !== 16 || channels !== 1 || sampleRate === 0) {
+        return null;
+      }
+      const pcm = wav.subarray(body, Math.min(body + size, wav.length));
+      if (sampleRate === PLAYBACK_SAMPLE_RATE) {
+        return Buffer.from(pcm);
+      }
+      const ratio = PLAYBACK_SAMPLE_RATE / sampleRate;
+      const inCount = Math.floor(pcm.length / 2);
+      const outCount = Math.floor(inCount * ratio);
+      const out = Buffer.alloc(outCount * 2);
+      for (let i = 0; i < outCount; i += 1) {
+        const src = i / ratio;
+        const i0 = Math.floor(src);
+        const i1 = Math.min(i0 + 1, inCount - 1);
+        const a = pcm.readInt16LE(i0 * 2);
+        const b = pcm.readInt16LE(i1 * 2);
+        out.writeInt16LE(Math.round(a + (b - a) * (src - i0)), i * 2);
+      }
+      return out;
+    }
+    offset = body + size + (size % 2);
+  }
+  return null;
 }
 
 export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
@@ -147,9 +201,8 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
     let turnPcm: Buffer[] = [];
     let turnPcmBytes = 0;
     let turnLang = 'en';
-    /** Client speaks this turn locally; the server waits for `tts-done`. */
-    let clientTtsTurn = false;
-    let clientTtsTurnAt = 0;
+    /** Serialises non-English synthesis so sentences stay in order. */
+    let speechQueue: Promise<void> = Promise.resolve();
 
     const previous = sessions.get(uid);
     if (previous) {
@@ -226,18 +279,11 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
         stt.sendAudio(SILENCE_FRAME);
       }
       // TTS drain: once the LLM stream is finished, return to listening only
-      // after aura has stopped streaming, so late PCM bytes are never dropped.
-      // With no audio yet (aura connect ~1s + synth latency), wait longer —
-      // flipping early would drop the whole reply's audio. Client-TTS turns
-      // hold `speaking` until the client reports `tts-done` (its local
-      // speechSynthesis can outlast any aura drain), with a 45s safety cap so
-      // a dropped client message can never wedge the mic off.
-      if (clientTtsTurn && now() - clientTtsTurnAt > 45_000) {
-        clientTtsTurn = false;
-      }
+      // after the last audio frame, so late PCM bytes are never dropped.
+      // With no audio yet (aura connect ~1s + synth latency), wait longer -
+      // flipping early would drop the whole reply's audio.
       if (
         llmDoneAt &&
-        !clientTtsTurn &&
         (state() === 'speaking' || state() === 'thinking') &&
         (lastTtsAudio > 0 ? now() - lastTtsAudio > 2000 : now() - llmDoneAt > 8000)
       ) {
@@ -302,11 +348,8 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
           muted = msg.muted === true;
           break;
         case 'tts-done':
-          // Client finished local playback of a non-English reply.
-          clientTtsTurn = false;
-          if (state() === 'speaking' || state() === 'thinking') {
-            backToListening();
-          }
+          // Legacy clients report local playback completion; playback is
+          // server-side now, so the drain detector owns the handoff.
           break;
         case 'barge-in':
           interrupt();
@@ -451,31 +494,41 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
         { role: 'user', content: text },
       ];
 
-      // aura is English-only: non-English turns hand playback to the client's
-      // speechSynthesis (per-language on-device voices), speaking the
-      // assistant transcript after it arrives. Captions still stream.
-      const clientTts = turnLang !== 'en';
-      if (clientTts) {
-        send(ws, { type: 'tts-mode', engine: 'client', lang: turnLang });
-      }
+      // aura is English-only: non-English turns are synthesized through the
+      // same provider ladder as read-aloud and pushed as playback PCM, so the
+      // reply sounds the same on every device. Captions still stream.
       const speakSentence = (sentence: string) => {
         spokenSentences += (spokenSentences ? ' ' : '') + sentence;
-        if (clientTts) {
-          // Playback happens client-side; nothing to push to aura here.
-          if (state() === 'thinking') {
-            box.value = 'speaking';
-            send(ws, { type: 'state', state: 'speaking' });
-          }
-          return;
-        }
-        if (!tts?.usable) {
-          tts = openTts(voice?.id);
-        }
-        tts.speak(sentence);
         if (state() === 'thinking') {
           box.value = 'speaking';
           send(ws, { type: 'state', state: 'speaking' });
         }
+        if (turnLang === 'en') {
+          if (!tts?.usable) {
+            tts = openTts(voice?.id);
+          }
+          tts.speak(sentence);
+          return;
+        }
+        speechQueue = speechQueue.then(async () => {
+          if (closed || turnInterrupted || !deps.synthesize) {
+            return;
+          }
+          try {
+            const audio = await deps.synthesize(sentence, turnLang);
+            const pcm = toPlaybackPcm(audio.buffer);
+            if (pcm && !closed && !turnInterrupted && state() === 'speaking') {
+              lastTtsAudio = now();
+              ws.send(pcm);
+            }
+          } catch (err) {
+            log('warn', 'voice tts failed', {
+              userId: uid,
+              lang: turnLang,
+              error: (err as Error).message,
+            });
+          }
+        });
       };
 
       abort = new AbortController();
@@ -508,14 +561,12 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
           speakSentence(tail);
         }
         await finishTurn(full.trim() || spokenSentences.trim());
+        // Non-English audio is synthesized asynchronously; let it drain before
+        // the detector starts its post-speech countdown.
+        await speechQueue;
         // The drain detector (silence interval) flips back to listening once
-        // aura has stopped streaming, so late TTS bytes are never dropped.
-        // Client-TTS turns hold `speaking` until the client's `tts-done`.
+        // the last audio frame has been consumed.
         llmDoneAt = now();
-        if (clientTts) {
-          clientTtsTurn = true;
-          clientTtsTurnAt = now();
-        }
       } catch (err) {
         if (closed || turnInterrupted) {
           return;
@@ -598,7 +649,6 @@ export function createVoiceGateway(deps: VoiceGatewayDeps): VoiceGateway {
     }
 
     function backToListening() {
-      clientTtsTurn = false;
       box.value = 'listening';
       send(ws, { type: 'state', state: 'listening' });
     }
