@@ -21,6 +21,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const MODEL = process.env.I18N_MODEL || '@cf/zai-org/glm-5.3';
+/** Keys per request. Smaller batches survive gateway timeouts and truncated JSON. */
+const BATCH = Math.max(10, Number(process.env.I18N_BATCH || 60));
 const FALLBACK_MODEL =
   process.env.I18N_FALLBACK_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 const GATEWAY = (process.env.OPRAIZ_BASEURL || '').replace(/\/+$/, '');
@@ -39,8 +41,10 @@ const LANG_NAMES = {
   fa: 'Persian',
   fi: 'Finnish',
   fr: 'French',
+  bn: 'Bengali',
   gu: 'Gujarati',
   he: 'Hebrew',
+  hi: 'Hindi',
   hu: 'Hungarian',
   hy: 'Armenian',
   id: 'Indonesian',
@@ -53,10 +57,12 @@ const LANG_NAMES = {
   lt: 'Lithuanian',
   lv: 'Latvian',
   ml: 'Malayalam',
+  mr: 'Marathi',
   nb: 'Norwegian Bokmål',
   ne: 'Nepali',
   nl: 'Dutch',
   nn: 'Norwegian Nynorsk',
+  pa: 'Punjabi',
   pl: 'Polish',
   'pt-BR': 'Brazilian Portuguese',
   'pt-PT': 'European Portuguese',
@@ -66,10 +72,12 @@ const LANG_NAMES = {
   sl: 'Slovenian',
   sv: 'Swedish',
   ta: 'Tamil',
+  te: 'Telugu',
   th: 'Thai',
   tr: 'Turkish',
   ug: 'Uyghur',
   uk: 'Ukrainian',
+  ur: 'Urdu',
   vi: 'Vietnamese',
   'zh-Hans': 'Simplified Chinese',
   'zh-Hant': 'Traditional Chinese',
@@ -120,6 +128,9 @@ async function translateBatch(source, targetName, targetCode, pairs, model = MOD
     body: JSON.stringify({
       model,
       temperature: 0,
+      // Indic scripts cost ~3x the tokens of English; without this the reply
+      // is cut mid-JSON and the whole batch is lost.
+      max_tokens: 4096,
       messages: [
         { role: 'system', content: 'You are a precise localization engine. Reply with JSON only.' },
         { role: 'user', content: prompt },
@@ -148,7 +159,10 @@ async function modeTranslate(args) {
   if (pairs.length !== keys.length) {
     console.log(`[i18n] WARNING: ${keys.length - pairs.length} promoted keys absent from en`);
   }
-  const result = {};
+  /** Resume: chunks already written by a previous run are kept, so a long
+   *  full-locale translation survives a failed chunk or a restarted process. */
+  const result = fs.existsSync(args.out) ? JSON.parse(fs.readFileSync(args.out, 'utf8')) : {};
+  const persist = () => fs.writeFileSync(args.out, JSON.stringify(result));
   let okLocales = 0;
   let failLocales = 0;
   for (const dir of localeDirs(localesRoot)) {
@@ -158,26 +172,28 @@ async function modeTranslate(args) {
       continue;
     }
     const loc = JSON.parse(fs.readFileSync(locPath, 'utf8'));
-    const missing = pairs.filter((k) => !(k in loc) || !String(loc[k]).trim());
+    const done_ = result[dir] ?? {};
+    const missing = pairs.filter(
+      (k) => (!(k in loc) || !String(loc[k]).trim()) && !String(done_[k] ?? '').trim(),
+    );
     if (missing.length === 0) {
       console.log(`[i18n] ${dir}: already complete`);
       continue;
     }
+    result[dir] = { ...done_ };
     let done = false;
     for (let attempt = 1; attempt <= 2 && !done; attempt += 1) {
       try {
-        const pieces = [];
-        for (const part of chunk(missing, 60)) {
-          pieces.push(
-            await translateBatch(
-              en,
-              LANG_NAMES[dir] || dir,
-              dir,
-              part.map((key) => ({ key, value: en[key] })),
-            ),
+        for (const part of chunk(missing, BATCH)) {
+          const piece = await translateBatch(
+            en,
+            LANG_NAMES[dir] || dir,
+            dir,
+            part.map((key) => ({ key, value: en[key] })),
           );
+          result[dir] = { ...result[dir], ...piece };
+          persist();
         }
-        result[dir] = Object.assign({}, ...pieces);
         done = true;
       } catch (err) {
         console.log(
@@ -188,20 +204,19 @@ async function modeTranslate(args) {
     if (!done) {
       /** One last shot on the fallback model - persistent 408s on the primary
        * (e.g. Tibetan on glm-5.3) usually clear on the smaller model. */
+      const remaining = missing.filter((k) => !String(result[dir][k] ?? '').trim());
       try {
-        const pieces = [];
-        for (const part of chunk(missing, 60)) {
-          pieces.push(
-            await translateBatch(
-              en,
-              LANG_NAMES[dir] || dir,
-              dir,
-              part.map((key) => ({ key, value: en[key] })),
-              FALLBACK_MODEL,
-            ),
+        for (const part of chunk(remaining, BATCH)) {
+          const piece = await translateBatch(
+            en,
+            LANG_NAMES[dir] || dir,
+            dir,
+            part.map((key) => ({ key, value: en[key] })),
+            FALLBACK_MODEL,
           );
+          result[dir] = { ...result[dir], ...piece };
+          persist();
         }
-        result[dir] = Object.assign({}, ...pieces);
         done = true;
         console.log(`[i18n] ${dir}: filled on fallback model`);
       } catch (err) {
@@ -214,8 +229,9 @@ async function modeTranslate(args) {
     } else {
       failLocales += 1;
     }
+    persist();
   }
-  fs.writeFileSync(args.out, JSON.stringify(result));
+  persist();
   console.log(
     `[i18n] done: locales=${okLocales} failed=${failLocales} keys=${pairs.length} -> ${args.out}`,
   );
